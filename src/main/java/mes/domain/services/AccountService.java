@@ -56,7 +56,7 @@ public class AccountService {
 		paramMap.addValue("UserId", user.getId());
 		
 		String sql = """
-				insert into login_log("Type", "IPAddress", _created, "User_id")
+				insert into login_log(Type, IPAddress, _created, User_id)
                 VALUES (:type, :IPAddress ::inet, now(),:UserId)
 				""";
 		

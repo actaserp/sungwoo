@@ -52,31 +52,22 @@ public class HomeController {
         User user = (User)auth.getPrincipal();
 		String userid = user.getUsername();
         String username = user.getUserProfile().getName();;
-		List<Map<String, Object>> sandanList = userService.getUserSandanList(userid);
+
 
         SystemOption sysOpt= this.systemOptionRepository.getByCode("LOGO_TITLE");
         String logoTitle = sysOpt.getValue();
         
         //q = this.systemOptionRepository.getByCode("main_menu");        
 
-		// 세션에 데이터 저장
-		session.setAttribute("sandanList", sandanList);
 
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("userid", userid);
 		mv.addObject("username", username);
 		mv.addObject("userinfo", user);
 		mv.addObject("system_title", logoTitle);
-		mv.addObject("sandanList", sandanList);
 //		mv.addObject("default_menu_code", "wm_dashboard_summary");
 
-		
-		String mqtt_host = settings.getProperty("mqtt_host");
-		String mqtt_web_port = settings.getProperty("mqtt_web_port");
-		String hmi_topic = settings.getProperty("hmi_topic");
-		mv.addObject("mqtt_host", mqtt_host);
-		mv.addObject("mqtt_web_port", mqtt_web_port);
-		mv.addObject("hmi_topic", hmi_topic);
+
 
 		mv.setViewName("index");
 		return mv;

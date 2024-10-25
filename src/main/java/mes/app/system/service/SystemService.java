@@ -27,100 +27,103 @@ public class SystemService {
     public List<Map<String, Object>> getWebMenuList(User user) {
 
         String sql = """
-        with recursive tree(id, menu_code, pid, name, depth, path, cycle, folder_order, _order, css, data_div, folder_id, FrontFolder_id) as (
-        select 
-            a.id,
-            null as menu_code,
-            a."Parent_id" as pid,
-            a."FolderName" as name, 
-            1 as depth,
-            array[a.id] as path,
-            false as cycle,
-            a._order as folder_order,
-            a._order,
-            a."IconCSS"::text as css,
-            'folder' as data_div,
-            a.id as folder_id,
-            a."FrontFolder_id"
-        from 
-            menu_folder a 
-        where 
-            a."Parent_id" is null
-        
-        union all 
-        
-        select  
-            null as id,
-            mi."MenuCode"::text as menu_code,
-            mi."MenuFolder_id" as pid,
-            mi."MenuName" as name,
-            tree.depth + 1,
-            array_append(tree.path, mi."MenuFolder_id") as path,
-            mi."MenuFolder_id" = any(tree.path) as cycle,
-            tree.folder_order,
-            mi._order,
-            null as css,
-            'menu' as data_div,
-            mi."MenuFolder_id" as folder_id,
-            tree.FrontFolder_id
-        from 
-            menu_item mi 
-        inner join 
-            tree on mi."MenuFolder_id" = tree.id 
-        where 
-            (:super_user = true)
-            or (exists (
-                select 1 
-                from user_group_menu gm 
-                where gm."MenuCode" = mi."MenuCode" 
-                and gm."UserGroup_id" = :group_id
-                and (gm."AuthCode" like '%R%' OR gm."AuthCode" LIKE '%W%')
-            ))
-        and 
-            not cycle
-        ), M as (
-            select 
-                tree.id,
-                tree.menu_code,
-                tree.pid,
-                tree.name,
-                tree.depth,
-                tree.folder_order,
-                tree._order,
-                coalesce(tree.css,'') as css,
-                (bk."MenuCode" is not null) as isbookmark,
-                tree.data_div,
-                count(*) over (partition by tree.folder_id) as sub_count,
-                tree.path,
-                tree.FrontFolder_id
-            from 
-                tree 
-            left join 
-                bookmark bk on bk."MenuCode" = tree.menu_code 
-            and 
-                bk."User_id" = :user_id 
-            where 
-                1 = 1
-        )
-        select 
-            id, 
-            menu_code, 
-            pid, 
-            name, 
-            depth, 
-            folder_order, 
-            _order, 
-            css, 
-            isbookmark,
-            case when depth = 1 then FrontFolder_id else null end as FrontFolder_id
-        from 
-            M
-        where 
-            sub_count > 1
-        and 
-            FrontFolder_id is not null
-        order by 
-            depth, _order;
+                WITH recursive_tree AS (
+                    -- 초기 CTE 레벨
+                    SELECT
+                        a.id,
+                        CAST(NULL AS NVARCHAR(MAX)) AS menu_code,  -- NULL을 NVARCHAR(MAX)로 캐스트
+                        a.Parent_id AS pid,
+                        a.FolderName AS name,
+                        1 AS depth,
+                        CAST('/' + CAST(a.id AS NVARCHAR(MAX)) AS NVARCHAR(MAX)) AS path, -- 배열 대신 경로를 문자열로 처리
+                        0 AS cycle,
+                        a._order AS folder_order,
+                        a._order AS _order,
+                        a.IconCSS AS css, -- ::text 대신 캐스트 생략
+                        CAST('folder' AS NVARCHAR(10)) AS data_div,  -- data_div 타입 일관성 유지
+                        a.id AS folder_id,
+                        a.FrontFolder_id
+                    FROM
+                        menu_folder a
+                    WHERE
+                        a.Parent_id IS NULL
+                        
+                    UNION ALL
+                        
+                    -- 재귀 CTE 레벨
+                    SELECT
+                         NULL AS id,
+                         CAST(mi.MenuCode AS NVARCHAR(MAX)) AS menu_code,\s
+                         mi.MenuFolder_id AS pid,
+                         mi.MenuName AS name,
+                         recursive_tree.depth + 1 AS depth,
+                         recursive_tree.path + '/' + CAST(mi.MenuFolder_id AS NVARCHAR(MAX)) AS path, -- array_append 대신 문자열 경로 사용
+                         CASE WHEN mi.MenuFolder_id IN (SELECT splitdata FROM dbo.SplitStrings(recursive_tree.path, '/')) THEN 1 ELSE 0 END AS cycle, -- 배열 대신 경로 문자열에서 찾기
+                         recursive_tree.folder_order AS folder_order,
+                         mi._order AS _order,
+                         NULL AS css,
+                         CAST('menu' AS NVARCHAR(10)) AS data_div,  -- 'menu'를 NVARCHAR로 캐스트
+                         mi.MenuFolder_id AS folder_id,
+                         recursive_tree.FrontFolder_id
+                    FROM
+                        menu_item mi
+                    INNER JOIN
+                        recursive_tree ON mi.MenuFolder_id = recursive_tree.id
+                    WHERE
+                        (:super_user = 1)
+                        OR EXISTS (
+                            SELECT 1
+                            FROM user_group_menu gm
+                            WHERE gm.MenuCode = mi.MenuCode
+                            AND gm.UserGroup_id = :group_id
+                            AND (gm.AuthCode LIKE '%R%' OR gm.AuthCode LIKE '%W%')
+                        )
+                        AND cycle = 0
+                ),
+                M AS (
+                    SELECT
+                         recursive_tree.id,
+                         recursive_tree.menu_code,
+                         recursive_tree.pid,
+                         recursive_tree.name,
+                         recursive_tree.depth,
+                         recursive_tree.folder_order,
+                         recursive_tree._order,
+                         ISNULL(recursive_tree.css, '') AS css,
+                         CASE WHEN bk.MenuCode IS NOT NULL THEN 1 ELSE 0 END AS isbookmark,
+                         recursive_tree.data_div,
+                         COUNT(*) OVER (PARTITION BY recursive_tree.folder_id) AS sub_count,
+                         recursive_tree.path,
+                         recursive_tree.FrontFolder_id
+                    FROM
+                        recursive_tree
+                    LEFT JOIN
+                        bookmark bk ON bk.MenuCode = recursive_tree.menu_code
+                        AND bk.User_id = :user_id
+                    WHERE
+                        1 = 1
+                )
+                SELECT
+                    id,
+                    menu_code,
+                    pid,
+                    name,
+                    depth,
+                    folder_order,
+                    _order,
+                    css,
+                    isbookmark,
+                    CASE WHEN depth = 1 THEN FrontFolder_id ELSE NULL END AS FrontFolder_id
+                FROM
+                    M
+                WHERE
+                    sub_count > 1
+                AND
+                    FrontFolder_id IS NOT NULL
+                ORDER BY
+                    depth, _order;
+                        
+         
         """;
 
 
@@ -153,20 +156,20 @@ public class SystemService {
         String sql = """
                 with recursive tree as (  
                         select a.id
-                            , a."Parent_id" as pid
+                            , a.Parent_id as pid
                             , '' as menu_code
-                            , a."FolderName" as gpname
-                            , a."FolderName" as name
+                            , a.FolderName as gpname
+                            , a.FolderName as name
                             , 1 as depth
                             , array[a.id] as path
                             , false as cycle
-                            , a."_order" as ord
+                            , a._order as ord
                             ,'folder' as data_div
                             , a.id as folder_id
                             , true as is_folder
                             from menu_folder a   
-                            where a."Parent_id" is null
-                             and a."FrontFolder_id" is not null
+                            where a.Parent_id is null
+                             and a.FrontFolder_id is not null
                 """;
         if (folderId != null) {
             sql += " and a.id = :folder_id";
@@ -175,20 +178,20 @@ public class SystemService {
         sql += """
                       union all
                               select null as id
-                                    , mi."MenuFolder_id" as pid
-                                    , mi."MenuCode"::text as menu_code
-                                    , tree."gpname" as gpname
-                                    , mi."MenuName"  as name
+                                    , mi.MenuFolder_id as pid
+                                    , mi.MenuCode::text as menu_code
+                                    , tree.gpname as gpname
+                                    , mi.MenuName  as name
                                     , tree.depth+1
-                                    , array_append(tree.path, mi."MenuFolder_id") as path
-                                    , mi."MenuFolder_id" = any(tree.path) as cycle
+                                    , array_append(tree.path, mi.MenuFolder_id) as path
+                                    , mi.MenuFolder_id = any(tree.path) as cycle
                                     , mi._order as ord
                                     ,'menu' as data_div
-                                    , mi."MenuFolder_id" as folder_id
+                                    , mi.MenuFolder_id as folder_id
                                     , false as is_folder
                               from menu_item mi
-                              inner join tree on mi."MenuFolder_id" = tree.id
-                              where mi."MenuCode" not in ('wm_user_group', 'wm_user', 'wm_user_group_menu')
+                              inner join tree on mi.MenuFolder_id = tree.id
+                              where mi.MenuCode not in ('wm_user_group', 'wm_user', 'wm_user_group_menu')
                         )
                         select tree.pid
                             , tree.id
@@ -197,16 +200,16 @@ public class SystemService {
                             , tree.name
                             , tree.depth
                             , tree.ord
-                            , ugm."UserGroup_id"
-                            , ugm."AuthCode"
-                            , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%R%%', false) end  as r
-                            , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%W%%', false) end  as w
-                            , case when tree.is_folder then null else coalesce(ugm."AuthCode" like '%%X%%', false) end  as x
+                            , ugm.UserGroup_id
+                            , ugm.AuthCode
+                            , case when tree.is_folder then null else coalesce(ugm.AuthCode like '%%R%%', false) end  as r
+                            , case when tree.is_folder then null else coalesce(ugm.AuthCode like '%%W%%', false) end  as w
+                            , case when tree.is_folder then null else coalesce(ugm.AuthCode like '%%X%%', false) end  as x
                             , tree.is_folder
                             , ugm.id as ugm_id
                         from tree 
-                        left join user_group_menu ugm on ugm."MenuCode" = tree.menu_code 
-                        and ugm."UserGroup_id" = :group_id
+                        left join user_group_menu ugm on ugm.MenuCode = tree.menu_code 
+                        and ugm.UserGroup_id = :group_id
                         order by path, tree.ord						
                 """;
 
@@ -219,15 +222,15 @@ public class SystemService {
     public List<Map<String, Object>> getBookmarkList(int userId) {
 
         String sql = """
-                      select mi."MenuName" as name 
-                      , mi."MenuCode" as code 
-                      , mi."Url" as url
+                      select mi.MenuName as name 
+                      , mi.MenuCode as code 
+                      , mi.Url as url
                       --, false as ismanual
                       -- , 0 as ismanual
-                      , bm."_created" as created
+                      , bm._created as created
                       from bookmark bm 
-                      inner join menu_item mi on bm."MenuCode" = mi."MenuCode" 
-                      where bm."User_id" = :user_id
+                      inner join menu_item mi on bm.MenuCode = mi.MenuCode 
+                      where bm.User_id = :user_id
                       order by created
                 """;
 
@@ -266,22 +269,22 @@ public class SystemService {
 
         String sql = """
                 select
-                lc."ModuleName" as gui_code
-                , lc."TemplateKey" as template_key
-                , lc."LabelCode" as label_code
-                , lc."Description" as descr
-                , lcl."DispText" as text
+                lc.ModuleName as gui_code
+                , lc.TemplateKey as template_key
+                , lc.LabelCode as label_code
+                , lc.Description as descr
+                , lcl.DispText as text
                 from label_code lc 
-                left join label_code_lang lcl on lc.id = lcl."LabelCode_id" 
-                where lcl."LangCode" = :lang_code 
+                left join label_code_lang lcl on lc.id = lcl.LabelCode_id 
+                where lcl.LangCode = :lang_code 
                 """;
         if (StringUtils.hasText(gui_code)) {
             sql += """	            		
-                    and lc."ModuleName" = :gui_code and lc."TemplateKey"=:template_key 
+                    and lc.ModuleName = :gui_code and lc.TemplateKey=:template_key 
                     """;
         }
         sql += """ 
-                        order by lc."ModuleName", lc."TemplateKey" 
+                        order by lc.ModuleName, lc.TemplateKey 
                 """;
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
@@ -297,19 +300,19 @@ public class SystemService {
     public List<Map<String, Object>> getGridColumnList(String moduleName, String templateName, String gridName, String langCode) {
 
         String sql = """
-                          select gc."Index" as index2, gc."Key" as "key"
-                          , gc."Label" as src_label
-                          , gc."Width" as width
-                          , case when gc."Hidden" = 'Y' then 'true' else 'false' end as hidden
-                       , coalesce(cl."DispText", gc."Label") as label
-                       , cl."DispText" as text
+                          select gc.Index as index2, gc.Key as key
+                          , gc.Label as src_label
+                          , gc.Width as width
+                          , case when gc.Hidden = 'Y' then 'true' else 'false' end as hidden
+                       , coalesce(cl.DispText, gc.Label) as label
+                       , cl.DispText as text
                        from grid_col gc 
-                       left join grid_col_lang cl on cl."GridColumn_id" = gc.id
-                       and cl."LangCode" = :lang_code
-                       where gc."ModuleName" = :module_name
-                       and gc."TemplateKey" = :template_name
-                       and gc."GridName" = :grid_name
-                       order by gc."Index"
+                       left join grid_col_lang cl on cl.GridColumn_id = gc.id
+                       and cl.LangCode = :lang_code
+                       where gc.ModuleName = :module_name
+                       and gc.TemplateKey = :template_name
+                       and gc.GridName = :grid_name
+                       order by gc.Index
                 """;
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
@@ -327,23 +330,23 @@ public class SystemService {
                    select 
                        ROW_NUMBER() OVER (ORDER BY _created DESC) as row_num,
                        id,
-                       "Type" as type,
-                       "Source" as source,
-                       "Message" as message,
-                       to_char("_created", 'yyyy-mm-dd hh24:mi:ss') as created
+                       Type as type,
+                       Source as source,
+                       Message as message,
+                       to_char(_created, 'yyyy-mm-dd hh24:mi:ss') as created
                    from sys_log sl
                    where _created between :start and :end
             """;
 
         if (StringUtils.hasText(type)) {
             sql += """
-                and "Type" ilike concat('%',:type,'%')
+                and Type ilike concat('%',:type,'%')
                 """;
         }
 
         if (StringUtils.hasText(source)) {
             sql += """
-                and "Source" ilike concat('%', :source, '%')		
+                and Source ilike concat('%', :source, '%')		
                 """;
         }
         sql += """
@@ -368,8 +371,8 @@ public class SystemService {
 
     public Map<String, Object> getSystemLogDetail(Long id) {
         String sql = """
-                       select id, "Type" as type, "Source" as source,"Message" as message
-                       , to_char("_created" ,'yyyy-mm-dd hh24:mi:ss') as created
+                       select id, Type as type, Source as source,Message as message
+                       , to_char(_created ,'yyyy-mm-dd hh24:mi:ss') as created
                        from sys_log sl
                        where id = :log_id    			
                 """;
@@ -379,22 +382,22 @@ public class SystemService {
         return this.jdbcTemplate.queryForMap(sql, namedParameters);
     }
 
-//    @Cacheable(value="grid_column",key="{#moduleName, #templateName, #gridName, #key}")    
+//    @Cacheable(value="grid_column",key="{#moduleName, #templateName, #gridName, #key}")
 //    public Map<String, Object> getGridColums(String moduleName, String templateName, String gridName, String key){
-//    	
-//    	String sql = """    			
+//
+//    	String sql = """
 //        select  id, "ModuleName", "TemplateKey", "GridName", "Key", "Index", "Label", "Width", "Hidden"
 //        , _status, _created, _modified, _creater_id, _modifier_id
 //        from public.grid_col
 //    	where  "ModuleName" = :moduleName and "TemplateKey" = :templateName and "GridName" = :gridName and "Key" = :key
 //    	""";
-//    	
+//
 //    	MapSqlParameterSource namedParameters = new MapSqlParameterSource();
 //    	namedParameters.addValue("moduleName", moduleName);
 //    	namedParameters.addValue("templateName", templateName);
 //    	namedParameters.addValue("gridName", gridName);
 //    	namedParameters.addValue("key", key);
-//    	
+//
 //    	Map<String, Object> items = this.sqlRunner.getRow(sql, namedParameters);
 //    	//return this.jdbcTemplate.queryForObject(sql, namedParameters, GridColumn.class);
 //    	return items;
@@ -402,7 +405,7 @@ public class SystemService {
 
 //    @CachePut(value = "grid_column",key="{#gridColumn.moduleName, #gridColumn.templateName, #gridColumn.gridName, #key}")
 //    public GridColumn saveGridColumn(GridColumn gridColumn) {
-//    	
+//
 //    	MapSqlParameterSource namedParameters = new MapSqlParameterSource();
 //    	namedParameters.addValue("id", gridColumn.getId());
 //		namedParameters.addValue("ModuleName", gridColumn.getModuleName());
@@ -413,15 +416,15 @@ public class SystemService {
 //		namedParameters.addValue("Label", gridColumn.getLabel());
 //		namedParameters.addValue("Width", gridColumn.getWidth());
 //		namedParameters.addValue(":Hidden", gridColumn.getHidden());
-//		
+//
 //		namedParameters.addValue(":_status", gridColumn.get_status());
 //		namedParameters.addValue(":_created", gridColumn.get_created());
 //		namedParameters.addValue(":_modified", gridColumn.get_modified());
 //		namedParameters.addValue(":_creater_id", gridColumn.get_creater_id());
-//		namedParameters.addValue(":_modifier_id", gridColumn.get_modifier_id());		
-//    	
+//		namedParameters.addValue(":_modifier_id", gridColumn.get_modifier_id());
+//
 //    	if(gridColumn.getId()==null) {
-//    		
+//
 //    		String sql = """
 //            INSERT INTO grid_col("ModuleName", "TemplateKey", "GridName", "Key", "Index", "Label", "Width", "Hidden", "_status", "_created", "_modified", "_creater_id", "_modifier_id",)
 //            VALUES(
@@ -440,12 +443,12 @@ public class SystemService {
 //            , :_modifier_id
 //            )
 //            """;
-//    		
+//
 //    		KeyHolder keyHolder = new GeneratedKeyHolder();
-//        	this.jdbcTemplate.update(sql, namedParameters, keyHolder, new String[] {"id"});    	
+//        	this.jdbcTemplate.update(sql, namedParameters, keyHolder, new String[] {"id"});
 //        	Integer id = keyHolder.getKey().intValue();
 //        	gridColumn.setId(id);
-//    		
+//
 //    	}else {
 //    		String sql = """
 //            UPDATE grid_col SET
@@ -462,28 +465,28 @@ public class SystemService {
 //            , "Label"=:Label
 //            , "Width"=:Width
 //            , "Hidden"=:Hidden
-//            WHERE id=:id 			
+//            WHERE id=:id
 //    		""";
-//    		
+//
 //    		this.jdbcTemplate.update(sql, namedParameters);
-//    	}    	
+//    	}
 //    	return gridColumn;
 //    }
 
 //    @CacheEvict(value = "grid_column", key="{#moduleName, #templateName, #gridName}")
 //    public int deleteGridColumns(String moduleName, String templateName, String gridName) {
 //    	int iRowEffected = 0;
-//    	
+//
 //    	String sql = """
 //    	delete from grid_col where "ModuleName"=:ModuleName and "TemplateKey"=:TemplateKey and "GridName"=:GridName
 //    	""";
-//    	
-//    	MapSqlParameterSource namedParameters = new MapSqlParameterSource();    	
+//
+//    	MapSqlParameterSource namedParameters = new MapSqlParameterSource();
 //    	namedParameters.addValue("ModuleName", moduleName);
 //    	namedParameters.addValue("TemplateKey", templateName);
 //    	namedParameters.addValue("GridName", gridName);
-//    	
-//    	iRowEffected = this.jdbcTemplate.update(sql, namedParameters);    	
+//
+//    	iRowEffected = this.jdbcTemplate.update(sql, namedParameters);
 //    	return iRowEffected;
 //    }
 
@@ -499,20 +502,20 @@ public class SystemService {
         String sql = """
                 select lc.id as lable_code_id
                             , lcl.id as label_lang_id
-                            , lc."ModuleName"
-                            , coalesce ((select "MenuName" from menu_item where "MenuCode"=lc."ModuleName" limit 1), 'Common') as menu_name
-                            , lc."TemplateKey"
-                            , lc."LabelCode"
-                            , lc."Description"
-                            , lcl."LangCode"
-                            , lcl."DispText"
-                            , to_char(lcl."_created" ,'yyyy-mm-dd hh24:mi:ss') as disp_created
+                            , lc.ModuleName
+                            , coalesce ((select MenuName from menu_item where MenuCode=lc.ModuleName limit 1), 'Common') as menu_name
+                            , lc.TemplateKey
+                            , lc.LabelCode
+                            , lc.Description
+                            , lcl.LangCode
+                            , lcl.DispText
+                            , to_char(lcl._created ,'yyyy-mm-dd hh24:mi:ss') as disp_created
                             from label_code_lang lcl
-                            inner join label_code lc on lcl."LabelCode_id" = lc.id
-                            where lcl."LangCode" = :langCode
-                            and lc."ModuleName" = :guiCode
-                            and lc."TemplateKey" = :templateKey
-                            and lc."LabelCode" = :labelCode
+                            inner join label_code lc on lcl.LabelCode_id = lc.id
+                            where lcl.LangCode = :langCode
+                            and lc.ModuleName = :guiCode
+                            and lc.TemplateKey = :templateKey
+                            and lc.LabelCode = :labelCode
                 """;
 
         Map<String, Object> item = this.sqlRunner.getRow(sql, paramMap);
@@ -522,21 +525,21 @@ public class SystemService {
     public List<Map<String, Object>> storyBoard() {
         String sql = """
                 select si.id
-                        , case when si."BoardType" ='menu' 
-                            then concat(mi."MenuName",'(', mf."FolderName",')')
-                           else df."FormName" end as name
-                          , si."BoardType"
-                          , fn_code_name('story_board_type', si."BoardType" ) as "BoardTypeName"
-                          , si."Duration"
-                          , si."Url"
-                          , up."Name" as writer
-                          , to_char(si."_created" ,'yyyy-mm-dd hh24:mi:ss') as created
-                          , si."ParameterData"
+                        , case when si.BoardType ='menu' 
+                            then concat(mi.MenuName,'(', mf.FolderName,')')
+                           else df.FormName end as name
+                          , si.BoardType
+                          , fn_code_name('story_board_type', si.BoardType ) as BoardTypeName
+                          , si.Duration
+                          , si.Url
+                          , up.Name as writer
+                          , to_char(si._created ,'yyyy-mm-dd hh24:mi:ss') as created
+                          , si.ParameterData
                          from storyboard_item si 
-                         left join menu_item mi on mi."MenuCode" = si."MenuCode" 
-                         left join menu_folder mf on mf.id = mi."MenuFolder_id" 
-                         left join doc_form df on df.id = si."ParameterData"::int
-                         left join user_profile up on up."User_id" = si."_creater_id"   
+                         left join menu_item mi on mi.MenuCode = si.MenuCode 
+                         left join menu_folder mf on mf.id = mi.MenuFolder_id 
+                         left join doc_form df on df.id = si.ParameterData::int
+                         left join user_profile up on up.User_id = si._creater_id   
                          order by id  
                 """;
 
