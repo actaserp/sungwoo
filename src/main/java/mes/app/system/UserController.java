@@ -12,13 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import mes.app.UtilClass;
-import mes.app.account.service.TB_RP945_Service;
 import mes.domain.DTO.TB_RP945Dto;
 import mes.domain.entity.TB_RP945;
 import mes.domain.entity.UserCode;
 import mes.domain.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -58,8 +56,6 @@ public class UserController {
 	@Autowired
 	private TB_RP945Repository tB_RP945Repository;
 
-	@Autowired
-	TB_RP945_Service tbRp945Service;
 	@Autowired
 	private UserCodeRepository userCodeRepository;
 
@@ -237,33 +233,6 @@ public class UserController {
 		Map<Integer, UserCode> spplanCodes = userCodeRepository.findAllById(spplanidList)
 				.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
 
-
-		for(int i=0; i<spworkidList.size(); i++){
-
-			String askseq = String.format("%03d", AskSeqInt);
-
-			UserCode spworkid = spworkCodes.get(spworkidList.get(i));
-			UserCode spcompid = spcompCodes.get(spcompidList.get(i));
-			UserCode spplanid = spplanCodes.get(spplanidList.get(i));
-
-
-			TB_RP945Dto rp945dto = TB_RP945Dto.builder()
-					.userid(login_id)
-					.askseq(askseq)
-					.spworkcd(spworkid.getCode())
-					.spcompcd(spcompid.getCode())
-					.spplancd(spplanid.getCode())
-					.spworknm(spworknmList.get(i))
-					.spcompnm(spcompnmList.get(i))
-					.spplannm(spplannmList.get(i))
-					.spworkid(spworkid.getId())
-					.spcompid(spcompid.getId())
-					.spplanid(spplanid.getId())
-					.build();
-			tbRp945Service.save(rp945dto);
-
-			AskSeqInt++;
-		}
 		result.success = true;
 		result.message = "저장되었습니다.";
 

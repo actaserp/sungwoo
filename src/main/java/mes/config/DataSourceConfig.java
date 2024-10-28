@@ -2,6 +2,7 @@ package mes.config;
 
 import java.util.HashMap;
 
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -76,7 +77,8 @@ public class DataSourceConfig {
 		properties.put("hibernate.ddl-auto", "validate");
 		properties.put("hibernate.format_sql",true);
 		properties.put("hibernate.show-sql",true);
-		properties.put("hibernate.dialect","org.hibernate.dialect.PostgreSQLDialect");
+		properties.put("hibernate.dialect", "org.hibernate.dialect.SQLServer2012Dialect");
+//		properties.put("hibernate.dialect","org.hibernate.dialect.PostgreSQLDialect");
 		//properties.put("hibernate.storage_engine", property.getStorage_engine());
 		emf.setJpaPropertyMap(properties);	
 		return emf;
@@ -101,7 +103,6 @@ public class DataSourceConfig {
 		transactionManager.setEntityManagerFactory(this.entityManagerFactory().getObject()); 
 		return transactionManager;	
 	}
-	
 	@Bean  
 	TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager) {  
 	    return new TransactionTemplate(transactionManager);  

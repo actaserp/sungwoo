@@ -17,10 +17,6 @@ import javax.transaction.Transactional;
 
 import mes.app.MailService;
 import mes.app.UtilClass;
-import mes.app.account.service.TB_RP940_Service;
-import mes.app.account.service.TB_RP945_Service;
-import mes.domain.DTO.TB_RP940Dto;
-import mes.domain.DTO.TB_RP945Dto;
 import mes.domain.DTO.UserCodeDto;
 import mes.domain.entity.UserCode;
 import mes.domain.entity.UserGroup;
@@ -29,7 +25,6 @@ import org.apache.fop.layoutmgr.BorderOrPaddingElement;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import mes.domain.entity.TB_RP940;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -69,19 +64,6 @@ public class AccountController {
 	SqlRunner sqlRunner;
 
 	@Autowired
-	TB_RP940_Service tbRp940Service;
-
-	@Autowired
-	TB_RP945_Service tbRp945Service;
-
-
-	@Autowired
-	TB_RP940Repository tb_rp940Repository;
-
-	@Autowired
-	TB_RP945Repository tb_rp945Repository;
-
-	@Autowired
 	MailService emailService;
 
 
@@ -100,7 +82,6 @@ public class AccountController {
 			HttpServletRequest request,
 			HttpServletResponse response,
 			HttpSession session, Authentication auth) {
-
 		ModelAndView mv = new ModelAndView("login");
 
 		Map<String, Object> userInfo = new HashMap<String, Object>();
@@ -138,7 +119,6 @@ public class AccountController {
 			final HttpServletRequest request) throws UnknownHostException {
 		// 여기로 들어오지 않음.
 
-		//List<TB_RP940> list = tb_rp940Repository.findAll();
 
 		//System.out.print(list);
 
@@ -247,17 +227,9 @@ public class AccountController {
 		AjaxResult result = new AjaxResult();
 
 
-		Optional<TB_RP940> rp940 =  tb_rp940Repository.findByUserid(userid);
 		Optional<User> user = userRepository.findByUsername(userid);
 
 
-
-		if(rp940.isPresent()){
-			result.success = false;
-			result.message = "이미 신청 완료하였습니다.";
-			return result;
-
-		}
 		if(!user.isPresent()){
 
 			result.success = true;
@@ -318,32 +290,6 @@ public class AccountController {
 				List<String> thirdTextList = Arrays.asList(thirdText.split(","));
 
 
-				TB_RP940Dto dto = TB_RP940Dto.builder()
-						.agency(agency)
-						.agencynm(agencynm)
-						.agencyDepartment(agencyDepartment)
-						.authType(authType)
-						.authgrpnm(authTypeText)
-						.appflag("N")
-						.email(email)
-						.id(id)
-						.level(level)
-						.tel(tel.replaceAll("-",""))
-						.name(name)
-						.password(Pbkdf2Sha256.encode(password))
-						.reason(reason)
-						.build();
-
-				tbRp940Service.save(dto);
-
-				//신청순번의 최대값을 구한후 +1을 하고 문자열로 바꿔줌
-				//이거 반복문 안에 넣으면 db호출이 너무 많다.
-				String RawAskSeq = tb_rp945Repository.findMaxAskSeq();
-				RawAskSeq = (RawAskSeq != null) ? RawAskSeq : "0";
-
-				int AskSeqInt = Integer.parseInt(RawAskSeq) + 1;
-
-
 				// 필요한 모든 UserCode를 한 번에 조회
 				Map<Integer, UserCode> spworkCodes = userCodeRepository.findAllById(spworkidList)
 						.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
@@ -351,35 +297,6 @@ public class AccountController {
 						.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
 				Map<Integer, UserCode> spplanCodes = userCodeRepository.findAllById(spplanidList)
 						.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
-
-				for(int i=0; i<spworkidList.size(); i++){
-
-
-					String askseq = String.format("%03d", AskSeqInt);
-
-					UserCode spworkid = spworkCodes.get(spworkidList.get(i));
-					UserCode spcompid = spcompCodes.get(spcompidList.get(i));
-					UserCode spplanid = spplanCodes.get(spplanidList.get(i));
-
-
-					TB_RP945Dto dto2 = TB_RP945Dto.builder()
-							.userid(id)
-							.askseq(askseq)
-							.spworkcd(spworkid.getCode())
-							.spcompcd(spcompid.getCode())
-							.spplancd(spplanid.getCode())
-							.spworknm(firstTextList.get(i))
-							.spcompnm(secondTextList.get(i))
-							.spplannm(thirdTextList.get(i))
-							.spworkid(spworkid.getId())
-							.spcompid(spcompid.getId())
-							.spplanid(spplanid.getId())
-							.build();
-
-					tbRp945Service.save(dto2);
-
-					AskSeqInt++;
-				}
 
 				result.success = true;
 				result.message = "신청이 완료되었습니다.";
