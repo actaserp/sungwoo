@@ -1,6 +1,6 @@
 
 {
-  "order_requesr":       { "name": "주문의뢰",        "templates": { "default": "request/request/order_request.html" }},
+  "order_request":       { "name": "주문의뢰",        "templates": { "default": "request/request/order_request.html" }},
 
   "wm_dashboard_plc":       { "name": "계통도",        "templates": { "default": "dashboard/dashboard_plc_main.html" }},
   "wm_dashboard_ems":       { "name": "EMS 모니터링",   "templates": { "default": "dashboard/dashboard_ems_main.html" }},
