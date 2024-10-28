@@ -166,13 +166,14 @@
     <div class="dashboard-login-wrap">
         <div class="login-wrap">
             <div class="left">
-                <img src="/images/icon/login-img2.svg" alt="로그인 이미지">
+                <img src="/images/sample/login_img.png" alt="로그인 이미지">
             </div>
             <div class="right">
                 <form method="post" class="form" role="form" id="loginFrm" action="/postLogin">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="login-logo">
-                        <img src="/images/logo/login-logo.png" alt="로고">
+                        <!--<img src="/images/logo/login-logo.png" alt="로고">-->
+                        ACTASERP
                     </div>
                     <div class="login-form">
                         <dl>
@@ -199,7 +200,7 @@
                         <button type="submit" class="btn-login" id="login">로그인</button>
                         <ul class="btn-login-etc">
                             <li>
-                                <a class="btn btn-popup-open" data-popup="popup1" title="사용자신청" onclick="RegisterUser()">사용자신청</a>
+                                <a class="btn btn-popup-open" data-popup="popup1" title="사용자신청" onclick="RegisterUser()">사용자등록</a>
                             </li>
                             <li>
                                 <a href="#" class="btn btn-popup-open" data-popup="popup2" title="아이디 찾기" onclick="openModal()">아이디 찾기</a>
@@ -212,14 +213,14 @@
                 </form>
             </div>
         </div>
-        <p class="copyright">ⓒ Kt Corp. All rights reserved.</p>
+        <p class="copyright">COPYRIGHT © ACTAS ALL RIGHTS RESERVED.</p>
     </div>
     <!-- [사용자권한] 팝업  -->
     <div class="dashboard-layout-popup">
         <div class="popup-overlay"  id="popup1"></div>
         <div class="popup-wrapper" id="wrapper1" style="width: 1000px">
             <div class="popup-title">
-                <h3>사용자권한신청</h3>
+                <h3>사용자신청</h3>
                 <a onclick="RegisterUserClose()" title="팝업닫기" class="btn-popup-close">
                     <img src="/images/icon/btn-popup-close.svg" alt="닫기">
                 </a>
@@ -240,14 +241,12 @@
                             <tr>
                                 <th>
                                     <label for="">
-                                        소속사
+                                        업체명
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <select class="mg-r5" id="agency" name="agency" style="width: 100%">
-                                            <option></option>
-                                        </select>
+                                        <input type="text" id="compnm">
                                     </div>
                                 </td>
                                 <th>
@@ -289,7 +288,17 @@
                                         핸드폰
                                     </label>
                                 </th>
-                                <td colspan="3">
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="phone" name="tel">
+                                    </div>
+                                </td>
+                                <th>
+                                    <label for="">
+                                        전화번호
+                                    </label>
+                                </th>
+                                <td>
                                     <div class="input-clear">
                                         <input type="text" id="tel" name="tel">
                                     </div>
@@ -348,49 +357,34 @@
                             <tr>
                                 <th>
                                     <label for="">
-                                        권한그룹
+                                        사업자번호
                                     </label>
                                 </th>
-                                <td colspan="3">
+                                <td>
                                     <div class="input-clear">
-                                        <select class="wp25 mg-r5" id="authType" name="authType" >
-                                            <option></option>
-                                        </select>
+                                        <input type="text" id="saupnum">
                                     </div>
+                                </td>
+                                <th>
+                                    <label for="postno">
+                                        주소
+                                    </label>
+                                </th>
+                                <td>
+                                    <!--                                    <input type="text" id="postno" name="postno" placeholder="00000" style="width: 117px">-->
+                                    <!--                                    <input type="text" id="address1" name="address1" placeholder="대구" style="width: 117px">-->
+                                    <!--                                    <input type="text" id="address2" name="address2" placeholder="성서" style="width: 116px">-->
+                                    <input type="text" id="postno" placeholder="우편번호"
+                                           onclick="sample4_execDaumPostcode()"
+                                           style="width: 85px; margin-bottom: 3px;">
+                                    <input type="text" id="address1" placeholder="도로명주소" style="width: 270px" disabled>
+                                    <input type="hidden" id="placeAddress" placeholder="지번주소">
+                                    <span id="guide" style="color:#999;display:none"></span>
+                                    <input type="text" id="address2" placeholder="상세주소" style="width: 360px">
                                 </td>
                             </tr>
                             <tr>
-                                <th>
-                                    <label>
-                                        발전시설
-                                    </label>
-                                </th>
-                                <td colspan="3">
-                                    <div class="fl-ac">
-                                        <select class="wp25 mg-r5" id="firstSelect" name="spworkcd" onchange="updateNextSelect(this)">
-                                            <option></option>
-                                        </select>
-                                        <select class="wp25 mg-r5" id="secondSelect" name="spcompcd" onchange="updateNextSelect(this)">
-                                            <option></option>
-                                        </select>
-                                        <select class="wp25 mg-r5" id="thirdSelect" name="spplancd">
-                                            <option></option>
-                                        </select>
-                                        <button type="button" onclick="addselectField(this)" class="btn" id="z" style="width: 145px">발전시설 추가</button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="">
-                                        신청사유
-                                    </label>
-                                </th>
-                                <td colspan="3">
-                                    <div class="input-clear">
-                                        <input type="text" id="reason" name="reason" class="wp100">
-                                    </div>
-                                </td>
+
                             </tr>
                             </tbody>
                         </table>
@@ -400,7 +394,7 @@
             </div>
             <div class="popup-button">
                 <button class="btn-popup-close" onclick="RegisterUserClose()">취소</button>
-                <button class="btn-navy" id="btnSaveAuth">권한신청</button>
+                <button class="btn-navy" id="btnSaveAuth">신청</button>
             </div>
         </div>
     </div> <!-- //dashboard-layout-popup end -->
@@ -496,7 +490,57 @@
 
 
 <script type="text/javascript" src="/js/ax5commUtil.js?v=1050"></script>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    //본 예제에서는 도로명 주소 표기 방식에 대한 법령에 따라, 내려오는 데이터를 조합하여 올바른 주소를 구성하는 방법을 설명합니다.
+    function sample4_execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function (data) {
+                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
 
+                // 도로명 주소의 노출 규칙에 따라 주소를 표시한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var roadAddr = data.roadAddress; // 도로명 주소 변수
+                var extraRoadAddr = ''; // 참고 항목 변수
+
+                // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                    extraRoadAddr += data.bname;
+                }
+                // 건물명이 있고, 공동주택일 경우 추가한다.
+                if (data.buildingName !== '' && data.apartment === 'Y') {
+                    extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                }
+                // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                if (extraRoadAddr !== '') {
+                    extraRoadAddr = ' (' + extraRoadAddr + ')';
+                }
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('postno').value = data.zonecode;
+                document.getElementById("address1").value = roadAddr;
+                document.getElementById("placeAddress").value = data.jibunAddress;
+
+                var guideTextBox = document.getElementById("guide");
+                // 사용자가 '선택 안함'을 클릭한 경우, 예상 주소라는 표시를 해준다.
+                if (data.autoRoadAddress) {
+                    var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
+                    guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
+                    guideTextBox.style.display = 'block';
+
+                } else if (data.autoJibunAddress) {
+                    var expJibunAddr = data.autoJibunAddress;
+                    guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
+                    guideTextBox.style.display = 'block';
+                } else {
+                    guideTextBox.innerHTML = '';
+                    guideTextBox.style.display = 'none';
+                }
+            }
+        }).open();
+    }
+</script>
 
 
 
