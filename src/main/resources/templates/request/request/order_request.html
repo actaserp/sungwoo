@@ -61,106 +61,133 @@
         <!-- Section -->
         <section class="tab-item" id="tab1">
           <div class="section-top">
-            <div class="search-wrap">
-              <dl>
-                <dt>
-                  발생일자<span class="eq">*</span>
-                </dt>
-                <dd>
-                  <ul class="date-box">
-                    <li>
-                      <input type="date" id="startDate" name="startDate">
-                      <label for="startDate" class="hide">시작일</label>
-                    </li>
-                    <li>
-                      <input type="date" id="endDate" name="endDate">
-                      <label for="endDate" class="hide">종료일</label>
-                    </li>
-                  </ul>
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  <label for="ticketstate">
-                    티켓 상태<span class="eq">*</span>
-                  </label>
-                </dt>
-                <dd>
-                  <ul class="date-box">
-                    <li>
-                      <select id="ticketstate" name="ticketcategory">
-                        <option value="전체">전체</option>
-                      </select>
-                    </li>
-                  </ul>
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  <label for="searchtketnm">
-                    티켓 명<span class="eq">*</span>
-                  </label>
-                </dt>
-                <dd>
-                  <div class="srch-box">
-                    <input type="text" id="searchtketnm" name="searchtketnm" class="input-srch"
-                           placeholder="Ticket명 검색" style="border-radius: 5px;">
-                    <!--                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>-->
-                  </div>
-                </dd>
-              </dl>
-              <dl>
-                <dt>&nbsp;</dt>
-                <dd>
-                  <li>
-                    <a class="btn btn-delete" title="검색" id="searchButton1" onclick="">
-                      <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                      <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                      검색
-                    </a>
-                  </li>
-                </dd>
-              </dl>
+            <div class="title-wrap">
+              <h3>주문의뢰</h3>
             </div>
             <div class="button-wrap">
               <ul>
-                <li class="confirm-item" style="display: none;">
-                  <a class="btn btn-edit" title="승인">
-                    <img src="/images/icon/ico-save.svg" alt="엑셀 아이콘">
-                    승인
+                <li>
+                  <a class="btn btn-excell" title="신규등록">
+                    <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                    신규등록
                   </a>
                 </li>
-                <li class="confirm-item" style="display: none;">
-                  <a class="btn btn-edit" title="완료">
-                    <img src="/images/icon/ico-save.svg" alt="엑셀 아이콘">
-                    완료
+                <li>
+                  <a class="btn btn-file" title="파일 첨부" data-popup="popup1"
+                     onclick="showPopup(this)">
+                    파일 첨부<span>(0)</span>
                   </a>
                 </li>
                 <li>
                   <a class="btn btn-delete" title="삭제">
-                    <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
+                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
                     삭제
                   </a>
                 </li>
                 <li>
-                  <a class="btn btn-edit" title="수정">
-                    <img src="/images/icon/ico-edit.svg" alt="엑셀 아이콘">
-                    수정
+                  <a class="btn btn-edit" id="btnSave" title="저장">
+                    <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                    저장
                   </a>
                 </li>
               </ul>
             </div>
-          </div> <!--//section-top end -->
-          <div class="container-fluid">
-            <p id="selectedItem"></p>
-            <div id="theGrid" style="max-height: 714px"></div>
+          </div>
+          <div class="table-wrap">
+            <table class="write-table">
+              <caption>티켓 테이블</caption>
+              <tbody>
+              <tr>
+                <th>
+                  <label for="requester">
+                    주문일자
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="order_date" name="requester" disabled>
+                </td>
+                <th>
+                  <label for="tketcrdtm">
+                    사업자번호
+                  </label>
+                </th>
+                <td>
+                  <input type="date" id="saupnum" name="tketcrdtm">
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <label for="tkettypenm">
+                    담당자
+                  </label>
+                </th>
+                <td>
+                  <select id="tkettypenm"></select>
+                </td>
+                <th>
+                  <label for="tketnm">
+                    연락처
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="tketnm" name="tketnm" style="width: 100%">
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <label for="requesterhp">
+                    주소
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="requesterhp" name="requesterhp">
+                </td>
+                <th>
+                  <label for="tketrcpnm">
+                    납품희망일
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="tketrcpnm" name="tketrcpnm">
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <label for="priority">
+                    제목
+                  </label>
+                </th>
+                <td>
+                  <select id="priority" name="priority">
+                  </select>
+                </td>
+
+              </tr>
+              <tr>
+
+              </tr>
+              <tr>
+                <th>
+                  <label for="tketrem">
+                    내용
+                  </label>
+                </th>
+                <td colspan="3">
+                  <div class="textarea-box">
+                    <textarea id="mytextarea"></textarea>
+                    <!--<p class="text-count" id="text-count">0/100</p>-->
+                  </div>
+                </td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </section>
         <!-- Section -->
         <section class="tab-item" id="tab2" style="height: 832px;">
           <div class="section-top">
             <div class="title-wrap">
-              <h3>티켓 등록</h3>
+              <h3>주문의뢰현황</h3>
             </div>
             <div class="button-wrap">
               <ul>
@@ -299,177 +326,7 @@
             </table>
           </div>
         </section>
-        <section class="tab-item" id="tab3">
-          <div class="section-top">
-            <div class="search-wrap">
-              <dl>
-                <dt>
-                  발생일자<span class="eq">*</span>
-                </dt>
-                <dd>
-                  <ul class="date-box">
-                    <li>
-                      <input type="date" id="startDate2" name="startDate2">
-                      <label for="startDate" class="hide">시작일</label>
-                    </li>
-                    <li>
-                      <input type="date" id="endDate2" name="endDate2">
-                      <label for="endDate" class="hide">종료일</label>
-                    </li>
-                  </ul>
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  <label for="searchtitle2">
-                    티켓 명<span class="eq">*</span>
-                  </label>
-                </dt>
-                <dd>
-                  <div class="srch-box">
-                    <input type="text" id="searchtitle2" name="searchtitle2" class="input-srch" style="border-radius: 5px;">
-                  </div>
-                </dd>
-              </dl>
-              <dl>
-                <dt>&nbsp;</dt>
-                <dd>
-                  <li>
-                    <a class="btn btn-delete" title="검색" onclick="fetchListData_doc()">
-                      <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                      <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                      검색
-                    </a>
-                  </li>
-                </dd>
-              </dl>
-            </div>
-            <div class="button-wrap">
-              <ul>
-                <li th:if="${write_flag}">
-                  <a class="btn btn-delete" title="취소" onclick="">
-                    <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
-                    취소
-                  </a>
-                </li>
-                <li th:if="${write_flag}">
-                  <a class="btn btn-edit" title="수정" onclick="">
-                    <img src="/images/icon/ico-edit.svg" alt="엑셀 아이콘">
-                    수정
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div> <!--//section-top end -->
-          <div style="margin-bottom: 40px" class="container-fluid">
-            <p id="selectedItem2"></p>
-            <div id="theGrid2" style="height: 252px"></div>
-          </div>
-          <div class="section-top">
-            <div class="title-wrap">
-              <h3>조치 등록</h3>
-            </div>
-            <div class="button-wrap">
-              <ul>
-                <!--                                <li>-->
-                <!--                                    <a class="btn btn-excell" title="엑셀다운로드" onclick="">-->
-                <!--                                        <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">-->
-                <!--                                        신규등록-->
-                <!--                                    </a>-->
-                <!--                                </li>-->
-                <li>
-                  <a class="btn btn-file2" title="파일 첨부" data-popup="popup2"
-                     onclick="showPopup(this)">
-                    파일 첨부<span>(0)</span>
-                  </a>
-                </li>
-                <!--                                <li>-->
-                <!--                                    <a class="btn btn-delete" title="삭제" onclick="deleteForm_doc()">-->
-                <!--                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">-->
-                <!--                                        삭제-->
-                <!--                                    </a>-->
-                <!--                                </li>-->
-                <li th:if="${write_flag}">
-                  <a class="btn btn-edit" id="btnSave2" title="저장" onclick="">
-                    <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                    저장
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table class="write-table">
-              <caption>문서등록 테이블</caption>
-              <colgroup>
-                <col class="wp12">
-                <col class="wp40">
-                <col class="wp12">
-                <col class="wp40">
-              </colgroup>
-              <tbody>
-              <tr>
-                <th>
-                  <label for="actiondt">
-                    작업일시
-                  </label>
-                </th>
-                <td>
-                  <input type="datetime-local" id="actiondt" name="actiondt">
-                </td>
-                <th>
-                  <label for="tcknm2">
-                    티켓 명
-                  </label>
-                </th>
-                <td>
-                  <input type="text" id="tcknm2" name="tcknm2" disabled>
-                </td>
-              </tr>
-              <tr>
-                <th>
-                  <label for="actiontaker">
-                    조치자
-                  </label>
-                </th>
-                <td>
-                  <input type="text" id=actiontaker name="actiontaker" disabled>
-                </td>
-                <th>
-                  <label for="recipient">
-                    수신담당자
-                  </label>
-                </th>
-                <td>
-                  <input type="text" id="recipient" disabled>
-                </td>
-              </tr>
-              <tr>
-                <th>
-                  조치
-                </th>
-                <td colspan="3">
-                  <div class="textarea-box">
-                    <textarea id="actioncontent" name="actioncontent" maxlength="200" disabled></textarea>
-                    <p class="text-count" id="text-count3">0/200</p>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th>
-                  담당 요청사항
-                </th>
-                <td colspan="3">
-                  <div class="textarea-box">
-                    <textarea id="recipcontent" name="recipcontent" maxlength="200" disabled></textarea>
-                    <p class="text-count" id="text-count4">0/200</p>
-                  </div>
-                </td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+
       </div> <!--//tab-contens end-->
     </div> <!--//tab-wrap end-->
   </div> <!--//layout-contents end -->
@@ -584,7 +441,30 @@
 
 <th:block layout:fragment="scripts">
   <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+  <script src="https://cdn.tiny.cloud/1/vz0rv2lnngp83gy5arhr4hzhqyr3z08rnj8zq7mx8c0otwi7/tinymce/5/tinymce.min.js" referrerpolicy="origin">
+    tinymce.init({
+      language: "ko_KR", //한글판으로 변경
+      selector: "#mytextarea", // TinyMCE를 적용할 textarea 요소의 선택자를 지정
+      plugins: "paste image imagetools", // 'paste', 'image', 'imagetools' 플러그인 추가
+      height: 500,
+      width: 900,
+      toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image", // 'image' 버튼 툴바에 추가
+      paste_data_images: true, // 이미지 붙여넣기 설정 활성화
+      file_picker_types: 'image', // TinyMCE에서 이미지를 선택할 때, 이미지 파일만 선택 (옵션 : media, file 등)
+      images_upload_handler(blobInfo, success) { // 이미지를 업로드하는 핸들러 함수
+        // blobInfo : TinyMCE에서 이미지 업로드 시 사용되는 정보를 담고 있는 객체
+        const file = new File([blobInfo.blob()], blobInfo.filename());
+        const fileName = blobInfo.filename();
 
+        if (fileName.includes("blobid")) {
+          success(URL.createObjectURL(file));
+        } else {
+          imageFiles.push(file);
+          success(URL.createObjectURL(file)); // Blob 객체의 임시 URL을 생성해 이미지 미리보기 적용
+        }
+      }
+    });
+  </script>
   <script type="text/javascript">
 
     var theGrid;
