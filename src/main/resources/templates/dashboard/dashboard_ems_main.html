@@ -11,7 +11,7 @@
         <!-- Page Title -->
         <div class="page-title-wrap">
             <div class="left">
-                <h2>>EMS 모니터링</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png"
+                <h2>Order Management Dashboard</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png"
                                                                                         alt="알람 아이콘"></a>
 <!--                <a title="북마크" class="bookmark toggle">-->
 <!--                    내 메뉴-->
@@ -74,7 +74,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>Elec. OUTPUT</h3>
+                                <h3>수주액</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -94,7 +94,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>Heat OUTPUT</h3>
+                                <h3>견적진행</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -114,7 +114,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>F/C Efficiency</h3>
+                                <h3>견적요청</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -134,7 +134,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>INCOME</h3>
+                                <h3>제작진행</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -154,7 +154,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>INPUT</h3>
+                                <h3>매축액</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -174,7 +174,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>Elec. OUTPUT</h3>
+                                <h3>수주액</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -194,7 +194,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>Heat OUTPUT</h3>
+                                <h3>견적진행</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -214,7 +214,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>F/C Efficiency</h3>
+                                <h3>견적요청</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -234,7 +234,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>INCOME</h3>
+                                <h3>제작진행</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -255,7 +255,7 @@
             </div> <!--//main-card-wrap end -->
         </div>
         <div class="row row-2">
-            <section class="wp50" style="height: 690px">
+            <!--<section class="wp50" style="height: 690px">
                 <div class="title-wrap">
                     <h3>연료전지 실시간 운전현황</h3>
                 </div>
@@ -399,54 +399,69 @@
                         </div>
                     </div>
                 </div>
-            </section>
-            <div class="col wp50">
+            </section>-->
+            <div class="col wp100">
                 <section>
                     <div class="title-wrap">
-                        <h3>시간대별 현황</h3>
+                        <!--<h3>시간대별 현황</h3>-->
                         <ul class="tab-links-sub">
                             <li>
-                                <a href="#tab1" title="전력생산량">전력생산량</a>
+                                <a href="#tab1" title="매출액"></a>
                             </li>
                             <li>
-                                <a href="#tab2" title="LNG 사용량">LNG 사용량</a>
+                                <a href="#tab2" title="수주액"></a>
                             </li>
                             <li>
-                                <a href="#tab3" title="열생산량">열생산량</a>
+                                <a href="#tab3" title="견적진행"></a>
                             </li>
                             <li>
-                                <a href="#tab4" title="전기효율">전기효율</a>
+                                <a href="#tab4" title="견적요청"></a>
                             </li>
                         </ul>
                     </div>
-                    <div class="tab-contents">
-                        <!-- tab1 -->
-                        <div class="tab-item-sub h280" id="tab1">
-                            <div class="chart-wrap">
-                                <img src="/images/sample/sample-chart.svg" alt="">
-                            </div>
-                        </div>
-                        <!-- tab1 -->
-                        <div class="tab-item-sub h280" id="tab2">
-                            <div class="chart-wrap">
 
-                            </div>
+                    <div class="tab-contents" style="display: flex; flex-wrap: wrap;">
+                        <div class="tab-row" style="display: flex; width: 100%;">
+                            <section style="width: 50%; box-sizing: border-box;">
+                                <!--tab1-->
+                                <div class="tab-item-sub h280" id="tab1">
+                                    <h3>매출액</h3>
+                                    <div class="chart-wrap">
+                                        <img src="/images/sample/sample-chart.svg" alt="">
+                                    </div>
+                                </div>
+                            </section>
+                            <section style="width: 50%; box-sizing: border-box;">
+                                <!--tab2-->
+                                <div class="tab-item-sub h280" id="tab2">
+                                    <h3>수주액</h3>
+                                    <div class="chart-wrap">
+                                    </div>
+                                </div>
+                            </section>
                         </div>
-                        <!-- tab1 -->
-                        <div class="tab-item-sub h280" id="tab3">
-                            <div class="chart-wrap">
-
-                            </div>
-                        </div>
-                        <!-- tab1 -->
-                        <div class="tab-item-sub h280" id="tab4">
-                            <div class="chart-wrap">
-
-                            </div>
+                        <div class="tab-row" style="display: flex; width: 100%;">
+                            <section style="width: 50%; box-sizing: border-box;">
+                                <!--tab3-->
+                                <div class="tab-item-sub h280" id="tab3">
+                                    <h3>견적진행</h3>
+                                    <div class="chart-wrap">
+                                    </div>
+                                </div>
+                            </section>
+                            <section style="width: 50%; box-sizing: border-box;">
+                                <!--tab4-->
+                                <div class="tab-item-sub h280" id="tab4">
+                                    <h3>견적요청</h3>
+                                    <div class="chart-wrap">
+                                    </div>
+                                </div>
+                            </section>
                         </div>
                     </div>
                 </section>
-                <section style="height: 287px; margin-bottom: 0">
+            </div>
+                <!--<section style="height: 287px; margin-bottom: 0">
                     <div class="title-wrap">
                         <h3>발전/매출 현황</h3>
                     </div>
@@ -495,7 +510,7 @@
                         </table>
                     </div>
                 </section>
-            </div>
+            </div>-->
         </div>
     </div> <!--//layout-contents end -->
     <footer>
