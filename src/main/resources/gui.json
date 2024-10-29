@@ -3,12 +3,10 @@
   "order_request":       {"name": "주문의뢰",   "templates": { "default": "request/request/order_request.html" }},
   "order_status":        {"name": "주문 현황",   "templates": { "default": "order_status/order_status.html"}},
   "progress_status":     {"name": "진행 현황",   "templates": { "default": "progress_status/progress_status.html"}},
-  "dashboard":           {"name": "dashboard",   "templates": { "default": "order_status/dashboard.html"}},
-  "order-dashboard":     {"name": "Order Dashboard",   "templates": { "default": ""}},
-
+  "dashboard":           {"name": "dashboard",   "templates": { "default": "dashboard/dashboard_main.html"}},
+  "order_dashboard":     {"name": "Order Dashboard",   "templates": { "default": "order_dashboard/order_dashboard"}},
 
   "wm_dashboard_plc":       { "name": "계통도",        "templates": { "default": "dashboard/dashboard_plc_main.html" }},
-  "wm_dashboard_ems":       { "name": "EMS 모니터링",   "templates": { "default": "dashboard/dashboard_ems_main.html" }},
   "wm_dashboard_cctv":      { "name": "CCTV 모니터링",      "templates": { "default": "dashboard/dashboard_cctv_main.html" }},
   "wm_dashboard_robot":     { "name": "로봇 모니터링",   "templates": { "default": "dashboard/dashboard_robot_main.html" }},
 

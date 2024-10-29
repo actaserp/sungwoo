@@ -32,15 +32,15 @@
         <header>
             <div class="left">
                 <div class="logo">
-                    <img src="/images/logo/logo-only.svg" alt="로고">
-                    <h1>SUNGWOO</h1>
+                    <img src="/images/logo/actas_log.png" alt="로고" style="max-width: 90%; height: auto; ">
                 </div>
+                <h3> SUNGWOO </h3>
             </div>
             <div class="right"> 
 
                 <div class="weather">
                     <div class="wt-main">
-                        <p class="area"> 서울 엑타스</p>
+                        <p class="area"> 서울 (현제 위치)</p>
                         <div class="wt-graphic">
                             <img id="weatherIcon" src="" alt="">
                             <!--                            <p id="temperature"></p> &lt;!&ndash; 기존의 <span> 태그를 제거 -->
@@ -280,8 +280,7 @@
                                             주문 현황
                                         </a>
                                         <ul class="dep2" id="dep2-order-status">
-                                            <a href="progress_status/progress_status.html"></a>
-                                            <a href="progress_status/progress_status.html"></a>
+
                                         </ul>
                                     </li>
                                   <!--  <li class="dep1-1">
@@ -473,120 +472,6 @@
 <script type="text/javascript" src="/js/nth-tabs.js"></script>
 
 <th:block th:replace="system_js :: system_js"></th:block>
-
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script type="text/javascript">
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function (OneSignal) {
-        console.log('Initializing OneSignal...');
-        await OneSignal.init({
-            appId: "7a2c2128-9320-475e-9941-e0875bbde1b3", // OneSignal에서 제공한 App ID
-            allowLocalhostAsSecureOrigin: true,
-            notifyButton: {
-                enable: false,
-            },
-        });
-
-        let _csrf = document.getElementsByName('_csrf')[0].value;
-        var pushid = '[[${pushid}]]';
-        var id = '[[${id}]]';
-        console.log('Existing pushid:', pushid);
-        console.log('Existing id:', id);
-
-        // 자동으로 수집된 정보
-        const deviceModel = /iPhone/.test(navigator.userAgent) ? 'iPhone' :
-            /Android/.test(navigator.userAgent) ? 'Android' :
-                'Desktop';  // 기기 모델
-        const deviceOS = /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' :
-            /Android/.test(navigator.userAgent) ? 'Android' :
-                'Unknown';  // OS 종류
-
-        const browserType = getBrowserType();
-
-        // pushid가 없으면 사용자가 구독하도록 요청
-        if (!pushid || pushid === '') {
-            const payload = {
-                properties:{
-                    language: "ko",
-                    timezone_id: "Asia/Seoul"
-                },
-                identity: {
-                    external_id: "foms" // 서버에서 정의한 사용자 ID
-                },
-                subscriptions: [
-                    {
-                        "type": browserType,
-                        "enabled": true,
-                        "notification_types": 1,
-                        "session_time": 98,
-                        "session_count": 6,
-                        "sdk": "",
-                        "device_model": deviceModel,
-                        "device_os": deviceOS,
-                        "rooted": false,
-                        "test_type": 1,
-                        "app_version": "5.1.7",
-                        "web_auth": "",
-                        "web_p256": ""
-                    }
-                ]
-            };
-
-            // 사용자 생성 및 구독 API 호출
-            $.ajax({
-                url: `https://api.onesignal.com/apps/7a2c2128-9320-475e-9941-e0875bbde1b3/users`,
-                type: 'POST',
-                contentType: 'application/json',
-                headers: {
-                    'Authorization': 'ODJhNWQ0NzAtYmFhYi00ZWVjLWFjZjEtZDYyMWFlNjQ2MTk4' // OneSignal의 REST API 키
-                },
-                data: JSON.stringify(payload),
-                success: function(data) {
-                    pushid = data.subscriptions[0].id;  // OneSignal에서 반환한 pushid (Player ID)
-                    console.log('data.subscriptions[0].id', data.subscriptions[0].id);
-                    // 새로운 pushid를 서버에 저장하는 API 호출
-                    $.ajax({
-                        url: '/save-pushid',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        headers: {
-                            'X-CSRF-Token': _csrf
-                        },
-                        data: JSON.stringify({ id: id, pushid: pushid }),
-                        success: function(data) {
-                            console.log('Push ID successfully saved to server:', data);
-                        },
-                        error: function(error) {
-                            console.error('Error saving Push ID to server:', error);
-                        }
-                    });
-
-                    console.log('User successfully created and subscribed:', data);
-                },
-                error: function(error) {
-                    console.error('Error creating user and subscribing:', error);
-                }
-            });
-        }
-    });
-
-    function getBrowserType() {
-        const userAgent = navigator.userAgent;
-
-        if (/Firefox/i.test(userAgent)) {
-            return "FirefoxPush";  // Firefox 브라우저
-        } else if (/Chrome/i.test(userAgent)) {
-            return "ChromePush";   // Chrome 브라우저
-        } else if (/Safari/i.test(userAgent) && !/Chrome/i.test(userAgent)) {
-            return "SafariPush";   // Safari 브라우저 (Chrome 제외)
-        } else if (/Edg/i.test(userAgent)) {
-            return "EdgePush";     // Microsoft Edge 브라우저
-        } else {
-            return "WebPush";      // 그 외 웹 브라우저 기본값
-        }
-    }
-</script>
-
 
 <script src="/js/common.js?v=1060"></script>
 <script type="text/javascript" src="/js/yumenu.js?v=1071"></script>

@@ -48,504 +48,170 @@
         </div>
         <div class="tab-wrap">
             <ul class="tab-links">
-                <input type="hidden" id="checkdtParam" name="checkdtParam" th:value="${checkdt}"/>
                 <li>
-                    <a href="#tab1" title="목록" id="listTabLink">주문 등록</a>
-                </li>
-                <li>
-                    <a href="#tab2" title="등록" onclick="registClick()" >주문의뢰현황</a>
+                    <a href="#tab1" title="주문 캘린더" class="tab-button">주문 캘린더</a>
                 </li>
             </ul>
             <div class="tab-contents">
                 <!-- Section -->
-                <section class="tab-item" id="tab1">
-                    <div class="section-top">
-                        <div class="title-wrap">
-                            <h3>주문의뢰</h3>
-                        </div>
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <a class="btn btn-excell" title="신규등록">
-                                        <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                        신규등록
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="btn btn-file" title="파일 첨부" data-popup="popup1"
-                                       onclick="showPopup(this)">
-                                        파일 첨부<span>(0)</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="btn btn-delete" title="삭제">
-                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                        삭제
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="btn btn-edit" id="btnSave" title="저장">
-                                        <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                                        저장
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="table-wrap">
-                        <table class="write-table">
-                            <caption>티켓 테이블</caption>
-                            <tbody>
-                            <tr>
-                                <th>
-                                    <label for="requester">
-                                        주문일자
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="order_date" name="requester" disabled>
-                                </td>
-                                <th>
-                                    <label for="tketcrdtm">
-                                        사업자번호
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="date" id="saupnum" name="tketcrdtm">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="tkettypenm">
-                                        담당자
-                                    </label>
-                                </th>
-                                <td>
-                                    <select id="tkettypenm"></select>
-                                </td>
-                                <th>
-                                    <label for="tketnm">
-                                        연락처
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="tketnm" name="tketnm" style="width: 100%">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="requesterhp">
-                                        주소
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="requesterhp" name="requesterhp">
-                                </td>
-                                <th>
-                                    <label for="tketrcpnm">
-                                        납품희망일
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="tketrcpnm" name="tketrcpnm">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="priority">
-                                        제목
-                                    </label>
-                                </th>
-                                <td>
-                                    <select id="priority" name="priority">
-                                    </select>
-                                </td>
-
-                            </tr>
-                            <tr>
-
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="tketrem">
-                                        내용
-                                    </label>
-                                </th>
-                                <td colspan="3">
-                                    <div class="textarea-box">
-                                        <textarea id="mytextarea"></textarea>
-                                        <!--<p class="text-count" id="text-count">0/100</p>-->
+                <section class="tab-item" id="tab1" style="height: 1010px; margin-bottom: 10%">
+                    <div class="row" style="display: flex;">
+                        <!-- 왼쪽 섹션: 50% 차지 -->
+                        <section
+                                style="width: 60%; box-sizing: border-box; height: 940px; margin-right: 20px; border-radius: 10px; ">
+                            <div class="title-wrap">
+                                <h3>주문 캘린더</h3>
+                                <div class="btn-wrap">
+                                </div>
+                            </div>
+                            <div class="calendar-wrap">
+                                <div id="calendar"></div>
+                            </div>
+                        </section>
+                        <!-- 오른쪽 섹션을 감싸는 div -->
+                        <div style="display: flex; flex-direction: column; width: 40%;">
+                            <!-- 위쪽 섹션 -->
+                            <section style=" box-sizing: border-box;">
+                                <div style="margin-bottom: 15px">
+                                    <h3>2024년 주문 현황</h3>
+                                </div>
+                                <div class="tab-contents">
+                                    <div class="row">
+                                        <div class="section-card-wrap">
+                                            <section style="flex: 0.5; margin-right: 5px;">
+                                                <div class="title">
+                                                    <h3>주문</h3>
+                                                </div>
+                                                <div class="data">4</div>
+                                                <dl>
+                                                    <dt>전일대비</dt>
+                                                    <dd>
+                                                        <span class="down"></span>
+                                                        <span class="fs18 fw600">1.20</span>
+                                                        <span class="unit">%</span>
+                                                    </dd>
+                                                </dl>
+                                            </section>
+                                            <section style="flex: 0.5; margin-right: 5px;">
+                                                <div class="title">
+                                                    <h3>진행</h3>
+                                                </div>
+                                                <div class="data">0</div>
+                                                <dl>
+                                                    <dt>전일대비</dt>
+                                                    <dd>
+                                                        <span class="up"></span> 1.20 <span class="unit">%</span>
+                                                    </dd>
+                                                </dl>
+                                            </section>
+                                            <section style="flex: 0.5; margin-right: 5px;">
+                                                <div class="title">
+                                                    <h3>출고</h3>
+                                                </div>
+                                                <div class="data">4</div>
+                                                <dl>
+                                                    <dt>전일대비</dt>
+                                                    <dd>
+                                                        <span class="down"></span> 1.20 <span class="unit">%</span>
+                                                    </dd>
+                                                </dl>
+                                            </section>
+                                        </div> <!--//main-card-wrap end -->
                                     </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                                </div>
+                            </section>
+
+                            <!-- 아래쪽 섹션 (넓게 설정) -->
+                            <section style="flex: 1; box-sizing: border-box; margin-top: 20px;">
+                                <div class="tab-item-sub" id="tab1_2">
+                                    <div class="section-top" style="margin-top: 40px;">
+                                        <div class="search-wrap">
+                                            <dl>
+                                                <dt>
+                                                    조회일자<span class="eq">*</span>
+                                                </dt>
+                                                <dd>
+                                                    <ul class="date-box">
+                                                        <li>
+                                                            <input type="date" id="" name="startDate"
+                                                                   value="2024-08-01">
+                                                            <label for="date1" class="hide">시작일</label>
+                                                        </li>
+                                                        <li>
+                                                            <input type="date" id="" name="endDate" value="2024-08-31">
+                                                            <label for="date2" class="hide">종료일</label>
+                                                        </li>
+                                                        <li>
+                                                            <a class="btn btn-delete" title="검색" id="btn-srch">
+                                                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                                                검색
+                                                            </a>
+                                                        </li>
+                                                    </ul>
+                                                </dd>
+                                            </dl>
+                                        </div>
+                                    </div> <!--//section-top end -->
+                                    <div class="container-fluid" style="padding-left: 0; padding-right: 0;">
+                                        <!-- 그리드 영역 -->
+                                        <div class="col-12" style="margin-bottom: 10px;">
+                                            <div id="theGrid" style="width: 100%; height: 400px;"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </section>
+                        </div>
                     </div>
                 </section>
-                <!-- Section -->
-                <section class="tab-item" id="tab2" style="height: 832px;">
-                    <div class="section-top">
-                        <div class="title-wrap">
-                            <h3>주문의뢰현황</h3>
-                        </div>
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <a class="btn btn-excell" title="신규등록">
-                                        <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                        신규등록
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="btn btn-file" title="파일 첨부" data-popup="popup1"
-                                       onclick="showPopup(this)">
-                                        파일 첨부<span>(0)</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="btn btn-delete" title="삭제">
-                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                        삭제
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="btn btn-edit" id="btnSave" title="저장">
-                                        <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                                        저장
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="table-wrap">
-                        <table class="write-table">
-                            <caption>티켓 테이블</caption>
-                            <tbody>
-                            <tr>
-                                <th>
-                                    <label for="requester">
-                                        요청자
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="requester" name="requester" disabled>
-                                </td>
-                                <th>
-                                    <label for="tketcrdtm">
-                                        발행일자
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="date" id="tketcrdtm" name="tketcrdtm">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="tkettypenm">
-                                        요청유형
-                                    </label>
-                                </th>
-                                <td>
-                                    <select id="tkettypenm"></select>
-                                </td>
-                                <th>
-                                    <label for="tketnm">
-                                        티켓 명
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="tketnm" name="tketnm" style="width: 100%">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="requesterhp">
-                                        요청자 연락처
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="requesterhp" name="requesterhp">
-                                </td>
-                                <th>
-                                    <label for="tketrcpnm">
-                                        요청자 소속사
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="tketrcpnm" name="tketrcpnm">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="priority">
-                                        우선순위
-                                    </label>
-                                </th>
-                                <td>
-                                    <select id="priority" name="priority">
-                                    </select>
-                                </td>
-                                <th>
-                                    <label for="tketflag">
-                                        상태
-                                    </label>
-                                </th>
-                                <td>
-                                    <select id="tketflag" name="tketflag" disabled>
-                                        <option value="ticket_create" selected></option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="ktname">
-                                        담당자
-                                    </label>
-                                </th>
-                                <td>
-                                    <select type="text" id="ktname" name="ktname">
-
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="tketrem">
-                                        내용
-                                    </label>
-                                </th>
-                                <td colspan="3">
-                                    <div class="textarea-box">
-                                        <textarea id="tketrem" placeholder="내용"></textarea>
-                                        <p class="text-count" id="text-count">0/100</p>
-                                    </div>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-
-            </div> <!--//tab-contens end-->
-        </div> <!--//tab-wrap end-->
+            </div>
+        </div>
+        </section>
+    </div> <!--//tab-contens end-->
+    </div> <!--//tab-wrap end-->
     </div> <!--//layout-contents end -->
     <footer style="margin-top:5px;">
         <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
     </footer>
     <div style="height: 10px"></div>
-
-    <div class="modal">
-        <div class="popup-wrapper w700" id="popup1">
-            <div class="popup-title">
-                <h3>파일 업로드</h3>
-                <a title="팝업닫기" onclick="closePopup('popup1')" class="btn-popup-close">
-                    <img src="/images/icon/btn-popup-close.svg" alt="닫기">
-                </a>
-            </div>
-            <div class="popup-contents">
-                <div class="table-wrap">
-                    <table class="write-table">
-                        <caption>전기안전 점검 첨부파일</caption>
-                        <colgroup>
-                            <col class="wp20">
-                            <col class="wp80">
-                        </colgroup>
-                        <tbody>
-                        <tr>
-                            <th>
-                                첨부파일
-                            </th>
-                            <td>
-                                <div id="uploadComponent1" class="upload-component">
-                                    <div class="upload-filebox">
-                                        <img src="/images/icon/ico-fileupload.svg" alt="업로드아이콘">
-                                        <a class="btn" title="파일업로드">파일 업로드</a>
-                                        <input type="file" id="fileInput1" class="fileInput" multiple>
-                                        <p>Maximun upload file size <span>1GiB</span></p>
-                                    </div>
-
-                                    <div class="upload-filelist">
-                                        <div class="title">
-                                            <h5>Files (0)</h5>
-                                            <a title="Delete all" class="btn-file-deleteall">Delete all</a>
-                                        </div>
-                                        <ul class="filelist" id="filelist">
-                                        </ul>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="popup-button">
-                    <button type="button" onclick="closePopup('popup1')" class="btn-navy">확인</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal">
-        <div class="popup-wrapper w700" id="popup2">
-            <div class="popup-title">
-                <h3>파일 업로드</h3>
-                <a title="팝업닫기" onclick="closePopup('popup2')" class="btn-popup-close">
-                    <img src="/images/icon/btn-popup-close.svg" alt="닫기">
-                </a>
-            </div>
-            <div class="popup-contents">
-                <div class="table-wrap">
-                    <table class="write-table">
-                        <caption>전기안전 점검 첨부파일</caption>
-                        <colgroup>
-                            <col class="wp20">
-                            <col class="wp80">
-                        </colgroup>
-                        <tbody>
-                        <tr>
-                            <th>
-                                첨부파일
-                            </th>
-                            <td>
-                                <div id="uploadComponent2" class="upload-component2">
-                                    <div class="upload-filebox2">
-                                        <img src="/images/icon/ico-fileupload.svg" alt="업로드아이콘">
-                                        <a class="btn" title="파일업로드">파일 업로드</a>
-                                        <input type="file" id="fileInput2" class="fileInput2" multiple>
-                                        <p>Maximun upload file size <span>1GiB</span></p>
-                                    </div>
-
-                                    <div class="upload-filelist2">
-                                        <div class="title">
-                                            <h5>Files (0)</h5>
-                                            <a title="Delete all" class="btn-file-deleteall2">Delete all</a>
-                                        </div>
-                                        <ul class="filelist2" id="filelist2">
-                                        </ul>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="popup-button">
-                    <button type="button" onclick="closePopup('popup2')" class="btn-navy">확인</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </th:block>
 
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-    <script src="https://cdn.tiny.cloud/1/vz0rv2lnngp83gy5arhr4hzhqyr3z08rnj8zq7mx8c0otwi7/tinymce/5/tinymce.min.js" referrerpolicy="origin">
-        tinymce.init({
-            language: "ko_KR", //한글판으로 변경
-            selector: "#mytextarea", // TinyMCE를 적용할 textarea 요소의 선택자를 지정
-            plugins: "paste image imagetools", // 'paste', 'image', 'imagetools' 플러그인 추가
-            height: 500,
-            width: 900,
-            toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image", // 'image' 버튼 툴바에 추가
-            paste_data_images: true, // 이미지 붙여넣기 설정 활성화
-            file_picker_types: 'image', // TinyMCE에서 이미지를 선택할 때, 이미지 파일만 선택 (옵션 : media, file 등)
-            images_upload_handler(blobInfo, success) { // 이미지를 업로드하는 핸들러 함수
-                // blobInfo : TinyMCE에서 이미지 업로드 시 사용되는 정보를 담고 있는 객체
-                const file = new File([blobInfo.blob()], blobInfo.filename());
-                const fileName = blobInfo.filename();
-
-                if (fileName.includes("blobid")) {
-                    success(URL.createObjectURL(file));
-                } else {
-                    imageFiles.push(file);
-                    success(URL.createObjectURL(file)); // Blob 객체의 임시 URL을 생성해 이미지 미리보기 적용
-                }
-            }
-        });
-    </script>
     <script type="text/javascript">
 
-        var theGrid;
-        var theGrid2;
+        let theGrid;
 
         document.readyState === 'complete' ? init() : window.onload = init;
 
-        <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
+        // 초반 페이지 진입시 그리드 바인딩 시작
         function init() {
-            setDefaultDates('startDate', 'endDate');
-
+            initCalendar();
             fetchListData();
-            fetchListData_action();
-
-            clearForm();
-
-            // spworkcd, spcompcd, spplancd의 값이 변경될 때마다 데이터 다시 로드
-            document.getElementById('spworkcd').addEventListener('change', fetchListData);
-            document.getElementById('spcompcd').addEventListener('change', fetchListData);
-            document.getElementById('spplancd').addEventListener('change', fetchListData);
-            document.getElementById('spworkcd').addEventListener('change', clearForm);
-            document.getElementById('spcompcd').addEventListener('change', clearForm);
-            document.getElementById('spplancd').addEventListener('change', clearForm);
         }
 
+
         function fetchListData() {
-            let data2 = [];
-
-            // 임시 데이터 배열 정의
-            var tempData = [];
-            for (var i = 0; i < 20; i++) {
-                tempData.push({
-                    rownum: i + 1,
-                    tketcrdtm: '',
-                    tketnm: '',
-                    tkettypenm: '',
-                    tketrusernm: '',
-                    tketflag: '',
-                    tketactrem: '',
-                    downloads: '',
-                    remark: ''
-                });
-            }
-
-            // $.ajax({
-            //     url: '/api/ticket/ticket/read',
-            //     type: 'GET',
-            //     async: false,
-            //     success: function (data) {
-            //         data2 = data.data;
-            //     }
-            // })
-
-            viewdata = new wijmo.collections.CollectionView(data2);
+            let tempData = []; // 데이터를 담을 배열
 
             if (!theGrid) {
-                // 데이터 그리드에 바인딩
                 theGrid = new wijmo.grid.FlexGrid('#theGrid', {
                     autoGenerateColumns: false,
                     showMarquee: true,
                     columns: [
-                        {binding: 'rownum', header: '순번', width: 80, align: 'center'},
-                        {binding: 'tketcrdtm', header: '발생일자', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'requester', header: '요청자', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'tketnm', header: '티켓 명', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'tkettypenm', header: '유형', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'tketrusernm', header: '담당자', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'tketflag', header: '상태', width: '*', minWidth: 100, align: 'center'},
-                        {
-                            header: '파일',
-                            binding: 'downloads',
-                            width: '*',
-                            minWidth: 100,
-                            align: 'center',
-                            cssClass: 'filedown',
-                        },
+                        { binding: 'rownum', header: 'No', align: 'center', width: 100 },
+                        { binding: 'standdt', header: '의뢰일자', align: 'center', width: 250 },
+                        { binding: 'title', header: '제목', align: 'center', width: 250 },
+                        { binding: 'smpcost', header: '납품희망일', align: 'center', width: 250 },
+                        { binding: 'progress', header: '진행구분', align: 'center', width: 200 },
+                        { binding: 'amount', header: '금액', align: 'center', width: 200 }
                     ],
                     itemsSource: tempData
                 });
+
                 // 선택이 변경될 때, 현재 항목 업데이트
-                theGrid.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
-                new FlexGridContextMenu(theGrid);
+                theGrid.rowHeaders.columns.splice(0, 1);
+                new wijmo.grid.FlexGridContextMenu(theGrid);
                 window.downloadFileName = '티켓현황';
             } else {
                 // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
@@ -553,172 +219,54 @@
             }
         }
 
-        function fetchListData_action() {
-            let data2 = [];
 
-            // 임시 데이터 배열 정의
-            var tempData = [];
-            for (var i = 0; i < 20; i++) {
-                tempData.push({
-                    rownum: i + 1,
-                    tketcrdtm: '',
-                    tketnm: '',
-                    tkettypenm: '',
-                    tketrusernm: '',
-                    tketflag: '',
-                    tketactrem: '',
-                    downloads: '',
-                    remark: ''
-                });
-            }
+        function initCalendar() {
+            var calendarEl = document.getElementById('calendar');
+            if (calendarEl) {
 
-            // $.ajax({
-            //     url: '/api/ticket/ticket/read',
-            //     type: 'GET',
-            //     async: false,
-            //     success: function (data) {
-            //         data2 = data.data;
-            //     }
-            // })
-
-            viewdata = new wijmo.collections.CollectionView(data2);
-
-            if (!theGrid2) {
-                // 데이터 그리드에 바인딩
-                theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
-                    autoGenerateColumns: false,
-                    showMarquee: true,
-                    columns: [
-                        {binding: 'rownum', header: '순번', width: 80, align: 'center'},
-                        {binding: 'tketcrdtm', header: '발생일자', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'requester', header: '요청자', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'tketnm', header: '티켓 명', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'tkettypenm', header: '유형', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'tketrusernm', header: '담당자', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'tketflag', header: '상태', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'action', header: '조치', width: '*', minWidth: 100, align: 'center'},
+                // FullCalendar 설정
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    locale: 'ko',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    initialView: 'dayGridMonth',
+                    height: 714,
+                    dayHeaderFormat: {weekday: 'short'},
+                    views: {
+                        dayGridMonth: {
+                            dayCellContent: function (arg) {
+                                return arg.dayNumberText.replace('일', '');
+                            }
+                        }
+                    },
+                    dateClick: function (info) {
+                        console.log('Clicked on: ' + info.dateStr);
+                    },
+                    events: [
+                        {title: '거래', start: '2024-09-03'},
+                        {title: '거래', start: '2024-09-05'},
+                        {title: '거래', start: '2024-09-10'},
+                        {title: '거래', start: '2024-09-12'},
+                        {title: '거래', start: '2024-09-19'},
+                        {title: '거래', start: '2024-09-24'},
+                        {title: '거래', start: '2024-09-26'},
                         {
-                            header: '파일',
-                            binding: 'downloads',
-                            width: '*',
-                            minWidth: 100,
-                            align: 'center',
-                            cssClass: 'filedown',
+                            title: '추석',
+                            start: '2024-09-17',
+                            backgroundColor: '#EC193A',
+                            borderColor: '#EC193A',
+                            textColor: 'white'
                         },
                     ],
-                    itemsSource: tempData
                 });
-                // 선택이 변경될 때, 현재 항목 업데이트
-                theGrid2.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
-                new FlexGridContextMenu(theGrid2);
-                window.downloadFileName = '조치현황';
-            } else {
-                // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-                theGrid2.itemsSource = viewdata;
+                calendar.render();
             }
         }
 
-        // 초기화
-        function clearForm() {
-            const date = new Date();
-            const today = date.toISOString().split('T')[0];
-            document.getElementById('tketcrdtm').value = today;
-
-            document.getElementById('requester').value = '[[${username}]]';
-
-            ['tketrem'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
-
-        }
-
-        function registClick(){
-
-            $.ajax({
-                url: '/api/operate/ticket/ktlist',
-                type: 'GET',
-                async: false,
-                success: function (data) {
-                    if (data.success) {
-                        let data2 = data.data;
-                        let selectElement = $('#ktname'); // select 요소를 가져옴
-
-                        // data2 리스트를 순회하며 <option> 생성
-                        data2.forEach(function (item) {
-                            let option = $('<option></option>')
-                                .val(item.name)
-                                .text(item.name)
-                                .attr('data-tel', item.tel); // hidden 속성으로 item.tel 저장
-                            selectElement.append(option); // <option>을 select 요소에 추가
-                        });
-                        let selectedTel = $('#ktname option:selected').data('tel');
-                        console.log(selectedTel);
-
-                    } else {
-                        Alert.alert('', '불러오기에 실패했습니다. ');
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    Alert.alert('', '에러가 발생하였습니다.');
-                }
-            });
-        }
-
-
-
-        $(document).ready(function (e) {
-
-            let userid = '[[${userid}]]';
-            let agentcy = null;
-
-            $.ajax({
-                url: '/api/operate/ticket/requesterinfo',
-                type: 'GET',
-                data: {
-                    'userid': userid,
-                },
-                async: false,
-                success: function (data) {
-                    if (data.success) {
-                        let data2 = data.data;
-
-                        document.getElementById('requesterhp').value = data2.tel;
-                        document.getElementById('tketrcpnm').value = data2.Value;
-                        agentcy = data2.agencycd;
-
-                        // 조건에 따라 <li> 태그의 display를 변경
-                        if (userid === 'admin' || agentcy == '254') {
-                            $('.confirm-item').each(function() {
-                                $(this).css('display', 'block');  // <li> 요소 보이게 설정
-                            });
-                        }
-
-                    } else {
-                        Alert.alert('', '불러오기에 실패했습니다. ');
-                    }
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    Alert.alert('', '에러가 발생하였습니다.');
-                }
-            });
-
-            // 점검결과 공통코드 리스트
-            const parentId = 241;
-            const selectElementId = 'tketflag';
-            fetchCommonCodes(parentId, selectElementId);
-
-            const parentId2 = 247;
-            const selectElementId2 = 'tkettypenm';
-            fetchCommonCodes(parentId2, selectElementId2);
-
-            const parentId3 = 250;
-            const selectElementId3 = 'priority';
-            fetchCommonCodes(parentId3, selectElementId3);
-
-        });
-
     </script>
-
 </th:block>
 </html>
 
