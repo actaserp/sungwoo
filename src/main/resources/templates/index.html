@@ -272,14 +272,14 @@
                                            주문 의뢰
                                         </a>
                                         <ul class="dep2" id="dep2-order-request">
-                                            <a href="request/request/order_request.html"></a>
+                                           <!-- <a href="request/request/order_request.html"></a>-->
                                         </ul>
                                     </li>
                                     <li class="dep1-1">
                                         <a href="#a" title="주문현황" class="ico-lnb03">
                                             주문 현황
                                         </a>
-                                        <ul class="dep2" id="dep2-operation-management">
+                                        <ul class="dep2" id="dep2-order-status">
 
                                         </ul>
                                     </li>
@@ -652,11 +652,11 @@
 
     $(document).ready(function () {
 
-        // 메뉴 매핑
+        // 메뉴 매핑(FrontFolder_id)
         const dep2Mappings = {
-            1: '#dep2-monitoring',
-            2: '#dep2-dep2-order-request',
-            3: '#dep2-operation-management',
+            1: '#dep2-monitoring',  //대시보드
+            2: '#dep2-order-request',  //주문의뢰
+            3: '#dep2-order-status',    // 주문현황
             4: '#dep2-inspection-management',
             5: '#dep2-system-settings'
         };
