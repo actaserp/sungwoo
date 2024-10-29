@@ -54,7 +54,7 @@
           <a href="#tab1" title="목록" id="listTabLink">주문 등록</a>
         </li>
         <li>
-          <a href="#tab2" title="등록" onclick="registClick()" >주문의뢰현황</a>
+          <a href="#tab2" title="등록">주문의뢰현황</a>
         </li>
       </ul>
       <div class="tab-contents">
@@ -204,13 +204,13 @@
               <dl>
                 <dt>
                   <label for="searchtketnm">
-                    제목<span class="eq">*</span>
+                    품명<span class="eq">*</span>
                   </label>
                 </dt>
                 <dd>
                   <div class="srch-box">
                     <input type="text" id="searchtketnm" name="searchtketnm" class="input-srch"
-                           placeholder="제목 검색" style="border-radius: 5px;">
+                           placeholder="품명" style="border-radius: 5px;">
                     <!--                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>-->
                   </div>
                 </dd>
@@ -293,58 +293,6 @@
       </div>
     </div>
   </div>
-
-  <div class="modal">
-    <div class="popup-wrapper w700" id="popup2">
-      <div class="popup-title">
-        <h3>파일 업로드</h3>
-        <a title="팝업닫기" onclick="closePopup('popup2')" class="btn-popup-close">
-          <img src="/images/icon/btn-popup-close.svg" alt="닫기">
-        </a>
-      </div>
-      <div class="popup-contents">
-        <div class="table-wrap">
-          <table class="write-table">
-            <caption>전기안전 점검 첨부파일</caption>
-            <colgroup>
-              <col class="wp20">
-              <col class="wp80">
-            </colgroup>
-            <tbody>
-            <tr>
-              <th>
-                첨부파일
-              </th>
-              <td>
-                <div id="uploadComponent2" class="upload-component2">
-                  <div class="upload-filebox2">
-                    <img src="/images/icon/ico-fileupload.svg" alt="업로드아이콘">
-                    <a class="btn" title="파일업로드">파일 업로드</a>
-                    <input type="file" id="fileInput2" class="fileInput2" multiple>
-                    <p>Maximun upload file size <span>1GiB</span></p>
-                  </div>
-
-                  <div class="upload-filelist2">
-                    <div class="title">
-                      <h5>Files (0)</h5>
-                      <a title="Delete all" class="btn-file-deleteall2">Delete all</a>
-                    </div>
-                    <ul class="filelist2" id="filelist2">
-                    </ul>
-                  </div>
-                </div>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="popup-button">
-          <button type="button" onclick="closePopup('popup2')" class="btn-navy">확인</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </th:block>
 
 <th:block layout:fragment="scripts">
@@ -382,18 +330,17 @@
 
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
-      setDefaultDates('startDate', 'endDate');
+      fetchListData();
 
-
-      clearForm();
+      //clearForm();
 
       // spworkcd, spcompcd, spplancd의 값이 변경될 때마다 데이터 다시 로드
-      document.getElementById('spworkcd').addEventListener('change', fetchListData);
-      document.getElementById('spcompcd').addEventListener('change', fetchListData);
-      document.getElementById('spplancd').addEventListener('change', fetchListData);
-      document.getElementById('spworkcd').addEventListener('change', clearForm);
-      document.getElementById('spcompcd').addEventListener('change', clearForm);
-      document.getElementById('spplancd').addEventListener('change', clearForm);
+      // document.getElementById('spworkcd').addEventListener('change', fetchListData);
+      // document.getElementById('spcompcd').addEventListener('change', fetchListData);
+      // document.getElementById('spplancd').addEventListener('change', fetchListData);
+      // document.getElementById('spworkcd').addEventListener('change', clearForm);
+      // document.getElementById('spcompcd').addEventListener('change', clearForm);
+      // document.getElementById('spplancd').addEventListener('change', clearForm);
     }
 
     function fetchListData() {
@@ -401,17 +348,19 @@
 
       // 임시 데이터 배열 정의
       var tempData = [];
-      for (var i = 0; i < 20; i++) {
+      for (var i = 0; i < 10; i++) {
         tempData.push({
           rownum: i + 1,
-          tketcrdtm: '',
-          tketnm: '',
-          tkettypenm: '',
-          tketrusernm: '',
-          tketflag: '',
-          tketactrem: '',
-          downloads: '',
-          remark: ''
+          orderdate: '',
+          compnm: '',
+          managernm: '',
+          managernum: '',
+          title: '',
+          name: '',
+          orderprice: '',
+          swmanager: '',
+          resdate: '',
+          state: '',
         });
       }
 
@@ -433,14 +382,16 @@
           showMarquee: true,
           columns: [
             {binding: 'rownum', header: '순번', width: 80, align: 'center'},
-            {binding: '주문일자', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
-            {binding: '납품일자', header: '납품일자', width: '*', minWidth: 100, align: 'center'},
-            {binding: '납품방법', header: '납품방법', width: '*', minWidth: 100, align: 'center'},
-            {binding: '영업담당자', header: '영업담당자', width: '*', minWidth: 100, align: 'center'},
-            {binding: '연락처', header: '연락처', width: '*', minWidth: 100, align: 'center'},
-            {binding: '제목', header: '제목', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'state', header: '상태', width: '*', minWidth: 100, align: 'center'},
-
+            {binding: 'orderdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'compnm', header: '업체명', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'managernm', header: '담당자', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'managernum', header: '연락처', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'title', header: '제목', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'name', header: '품명', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'orderprice', header: '견적금액', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'swmanager', header: '수주담당', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'resdate', header: '납품예정일', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'state', header: '진행구분', width: '*', minWidth: 100, align: 'center'}
           ],
           itemsSource: tempData
         });
