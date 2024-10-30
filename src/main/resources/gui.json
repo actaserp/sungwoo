@@ -4,7 +4,7 @@
   "order_status":        {"name": "주문 현황",   "templates": { "default": "order_status/order_status.html"}},
   "progress_status":     {"name": "진행 현황",   "templates": { "default": "progress_status/progress_status.html"}},
   "dashboard":           {"name": "dashboard",   "templates": { "default": "dashboard/dashboard_main.html"}},
-  "Order Dashboard":     {"name": "Order Dashboard",   "templates": { "default": "dashboard/order_dashboard.html"}},
+  "order_dashboard":     {"name": "order_dashboard",   "templates": { "default": "order_dashboard/order_dashboard_main.html"}},
 
   "wm_dashboard_plc":       { "name": "계통도",        "templates": { "default": "dashboard/dashboard_plc_main.html" }},
   "wm_dashboard_cctv":      { "name": "CCTV 모니터링",      "templates": { "default": "dashboard/dashboard_cctv_main.html" }},
