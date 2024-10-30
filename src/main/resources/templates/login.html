@@ -166,13 +166,13 @@
     <div class="dashboard-login-wrap">
         <div class="login-wrap">
             <div class="left">
-                <img src="/images/sample/login_main.png" alt="로그인 이미지" style="height: 626px">
+                <img src="/images/sample/login.png" alt="로그인 이미지" style="height: 626px">
             </div>
             <div class="right">
                 <form method="post" class="form" role="form" id="loginFrm" action="/postLogin">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <div class="login-logo">
-                        <!--<img src="/images/logo/login-logo.png" alt="로고">-->
+                      <!--<img src="/images/logo/login-logo.png" alt="로고">-->
                         <h1>ACTASERP</h1>
                     </div>
                     <div class="login-form">
@@ -290,7 +290,7 @@
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="phone" name="tel">
+                                        <input type="text" id="phone" name="phone">
                                     </div>
                                 </td>
                                 <th>
@@ -347,8 +347,7 @@
                                 </td>
                                 <th>
                                     <label for="passwordchk">
-                                        비밀번호
-                                        확인
+                                        비밀번호확인
                                     </label>
                                 </th>
                                 <td>
@@ -681,38 +680,44 @@
 
 
     const requiredFields = [
-        { id: 'agency', name: '소속사' },
+        { id: 'compnm', name: '업체명' },
         { id: 'agencyDepartment', name: '소속부서' },
+        { id: 'level', name: '직급' },
         { id: 'name', name: '성명' },
+        { id: 'phone', name: '핸드폰' },
+        { id: 'tel', name: '전화번호' },
+        { id: 'email', name: '이메일' },
         { id: 'id', name: 'ID' },
         { id: 'password', name: '비밀번호' },
         { id: 'passwordchk', name: '비밀번호확인' },
-        { id: 'authType', name: '권한그룹' },
-        { id: 'firstSelect', name: '관할지역' },
-        { id: 'secondSelect', name: '발전산단' },
-        { id: 'thirdSelect', name: '발전소' }
+        // { id: 'authType', name: '권한그룹' },
+        { id: 'saupnum', name: '사업자번호' },
+        { id: 'postno', name: '우편번호' }
     ];
 
-    // 필드명과 name값으로 유효성 검사할 필드 배열
-    const nameBasedFields = [
-        { name: 'spworkcd', displayName: '관할지역' },
-        { name: 'spcompcd', displayName: '발전산단' },
-        { name: 'spplancd', displayName: '발전소' }
-    ];
-
-    const clearFieldList = ['agency', 'agencyDepartment', 'name', 'id', 'password', 'passwordchk', 'authType', 'firstSelect', 'secondSelect', 'thirdSelect', 'tel', 'level', 'email',
-        'reason', 'AuthenticationCodeRegister']
+    const clearFieldList =
+        [
+            'compnm',
+            'agencyDepartment',
+            'level',
+            'name',
+            'phone',
+            'tel',
+            'email',
+            'id',
+            'password',
+            'passwordchk',
+            'saupnum',
+            'postno',
+            'address1',
+            'placeAddress',
+            'address2'
+        ]
 
     // 유효성 검사
     function validateFields() {
         for (let field of requiredFields) {
             if (!validateFieldById(field.id, field.name)) {
-                return false;
-            }
-        }
-
-        for (let field of nameBasedFields) {
-            if (!validateFieldsByName(field.name, field.displayName)) {
                 return false;
             }
         }
@@ -878,7 +883,7 @@
         const selectConfigurations = [
             {  url: '/user-codes/parent',params: { parentId: 154 },elementId: 'agency', valueField: "id"},
             {  url: '/user-codes/parent',params: { parentId: 110 },elementId: 'firstSelect', valueField: "id"},
-            {  url: '/user-auth/type',params: {},elementId: 'authType',valueField: "code",textField: 'name'}
+            // {  url: '/user-auth/type',params: {},elementId: 'authType',valueField: "code",textField: 'name'}
         ];
         selectConfigurations.forEach(config => initializeSelect(config));
 
@@ -887,7 +892,7 @@
         let _CsrfValue = _csrf[0].value;
 
 
-        //아이디 중복확인 신청
+        //아이디 중복확인 신청(승인된 아이디 중)
         let btnDuplicate = $('#btnDuplicate');
         btnDuplicate.click(function (e){
 
@@ -998,7 +1003,6 @@
 
         $('#BtnAuthenticationRegister').click(function (e){
 
-            console.log('클릭');
             let email = document.getElementById('email');
             let mail   = email.value;
 
@@ -1077,7 +1081,7 @@
 
         })
 
-        //권한신청 버튼 클릭
+        //사용자신청 버튼 클릭
         let btnRegistersend = $('#btnSaveAuth');
 
         btnRegistersend.click(function (e) {
@@ -1089,8 +1093,8 @@
                 return;
             }
 
-            let authType = document.getElementById('authType');
-            let authTypeText = authType.options[authType.selectedIndex].text;
+            // let authType = document.getElementById('authType');
+            // let authTypeText = authType.options[authType.selectedIndex].text;
 
             if (!validateFields()) {
                 return false;
@@ -1126,29 +1130,11 @@
                 return Array.from(inputs).map(input => input.options[input.selectedIndex].text).join(',');
             }
 
-            let spworkcdString = extractSelectValues('spworkcd');
-            let spcompcdString = extractSelectValues('spcompcd');
-            let spplancdString = extractSelectValues('spplancd');
-
-            let firstText  = extractSelectTexts('spworkcd');
-            let secondText = extractSelectTexts('spcompcd');
-            let thirdText  = extractSelectTexts('spplancd');
-            let agencynm = extractSelectTexts('agency');
-
             let data = FormUtil.extractForm($('#bomForm'));
 
-            data.spworkcd = spworkcdString;
-            data.spcompcd = spcompcdString;
-            data.spplancd = spplancdString;
-
-            data.firstText = firstText;
-            data.secondText = secondText;
-            data.thirdText = thirdText;
-            data.authTypeText = authTypeText;
-            data.agencynm = agencynm;
+            // data.authTypeText = authTypeText;
 
             data.AuthenticationCode = $('#AuthenticationCodeRegister').val().trim();
-
 
             let fnSuccess = function (res) {
                 if(res.success){

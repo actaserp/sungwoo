@@ -78,25 +78,35 @@ public class TB_RP940{
     @Column(name = "\"agencynm\"")
     private String agencynm;
 
+    @Column(name = "\"compnm\"")
+    private String compnm;
+    @Column(name = "\"phone\"")
+    private String phone;
+    @Column(name = "\"Saupnum\"")
+    private String Saupnum;
+    @Column(name = "\"Postno\"")
+    private String Postno;
+    @Column(name = "\"Address1\"")
+    private String Address1;
+    @Column(name = "\"Address2\"")
+    private String Address2;
 
     public static TB_RP940 toSaveEntity(TB_RP940Dto DTO){
         TB_RP940 tbRp940 = new TB_RP940();
         tbRp940.setUserid(DTO.getId());  //id
-        tbRp940.setAgencycd(DTO.getAgency());
-        tbRp940.setAgencynm(DTO.getAgencynm());
+        tbRp940.setCompnm(DTO.getCompnm());  // 업체명
         tbRp940.setDivinm(DTO.getAgencyDepartment()); //소속부서
         tbRp940.setRanknm(DTO.getLevel());
         tbRp940.setUsernm(DTO.getName());
         tbRp940.setUserhp(DTO.getTel());
+        tbRp940.setPhone(DTO.getPhone());
         tbRp940.setUsermail(DTO.getEmail());
         tbRp940.setLoginpw(DTO.getPassword());
-        tbRp940.setAuthgrpcd(DTO.getAuthType());
-        tbRp940.setAuthgrpnm(DTO.getAuthgrpnm());
-        tbRp940.setAskreason(DTO.getReason());
+        tbRp940.setSaupnum(DTO.getSaupnum());
+        tbRp940.setPostno(DTO.getPostno());
+        tbRp940.setAddress1(DTO.getAddress1());
+        tbRp940.setAddress2(DTO.getAddress2());
         tbRp940.setAppflag(DTO.getAppflag());
-        tbRp940.setAppuser("");
-        tbRp940.setAppreason("");
-        tbRp940.setAppdatem(DTO.getAppdatem());
         return tbRp940;
 
     }

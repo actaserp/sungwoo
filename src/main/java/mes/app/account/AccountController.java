@@ -17,7 +17,13 @@ import javax.transaction.Transactional;
 
 import mes.app.MailService;
 import mes.app.UtilClass;
+import mes.app.account.service.TB_RP940_Service;
+import mes.app.account.service.TB_RP945_Service;
+import mes.app.system.service.AuthListService;
+import mes.domain.DTO.TB_RP940Dto;
+import mes.domain.DTO.TB_RP945Dto;
 import mes.domain.DTO.UserCodeDto;
+import mes.domain.entity.TB_RP940;
 import mes.domain.entity.UserCode;
 import mes.domain.entity.UserGroup;
 import mes.domain.repository.*;
@@ -64,7 +70,26 @@ public class AccountController {
 	SqlRunner sqlRunner;
 
 	@Autowired
+	TB_RP940_Service tbRp940Service;
+
+	@Autowired
+	TB_RP945_Service tbRp945Service;
+
+
+	@Autowired
+	TB_RP940Repository tb_rp940Repository;
+
+	@Autowired
+	TB_RP945Repository tb_rp945Repository;
+
+	@Autowired
 	MailService emailService;
+
+	@Autowired
+	AuthListService authListService;
+
+	@Autowired
+	TB_RP920Repository tbRp920Repository;
 
 
 	@Resource(name="authenticationManager")
@@ -72,7 +97,8 @@ public class AccountController {
 	@Autowired
 	private UserGroupRepository userGroupRepository;
 
-
+	private Boolean flag;
+	private Boolean flag_pw;
 
 	private final ConcurrentHashMap<String, String> tokenStore = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<String, Long> tokenExpiry = new ConcurrentHashMap<>();
@@ -249,67 +275,77 @@ public class AccountController {
 	@PostMapping("/Register/save")
 	@Transactional
 	public AjaxResult RegisterUser(
-			@RequestParam(value = "agency") String agency,
+			@RequestParam(value = "compnm") String compnm,
 			@RequestParam(value = "agencyDepartment") String agencyDepartment,
 			@RequestParam(value = "level", required = false) String level,
 			@RequestParam(value = "name") String name,
+			@RequestParam(value = "phone", required = false) String phone,
 			@RequestParam(value = "tel", required = false) String tel,
 			@RequestParam(value = "email", required = false) String email,
 			@RequestParam(value = "id") String id,
 			@RequestParam(value = "password") String password,
-			@RequestParam(value = "authType") String authType,
-			@RequestParam(value = "spworkcd") String spworkcd,
-			@RequestParam(value = "spcompcd") String spcompcd,
-			@RequestParam(value = "spplancd") String spplancd,
-			@RequestParam(value = "reason") String reason,
-			@RequestParam(value = "firstText") String firstText,
-			@RequestParam(value = "secondText") String secondText,
-			@RequestParam(value = "thirdText") String thirdText,
-			@RequestParam(value = "authTypeText") String authTypeText,
-			@RequestParam(value = "agencynm") String agencynm,
-			@RequestParam(value = "AuthenticationCode") String AuthenticationCode
+			@RequestParam(value = "saupnum") String saupnum,
+			@RequestParam(value = "postno") String postno,
+			@RequestParam(value = "address1") String address1,
+			@RequestParam(value = "address2") String address2
 
 	){
 
 		AjaxResult result = new AjaxResult();
 
 		try {
-			result = verifyAuthenticationCode(AuthenticationCode, email);
-			if(result.success){
+
+			Optional<TB_RP940> rp940 = tb_rp940Repository.findByUserid(id);
+			Optional<User> user = userRepository.findByUsername(id);
+
+			if(rp940.isPresent()){
+				result.success = false;
+				result.message = "이미 신청하신 아이디입니다.";
+				return result;
+			}
+			if(user.isPresent()){
+				result.success = false;
+				result.message = "이미 가입 완료된 계정입니다.";
+				return result;
+			}
+
+
+			if(flag){
 				//클라에서 동적으로 값이 넘어와서 몇개인지 모름, 그래서 쉼표구분자로 리스트형태로 분개해서 서버에서 노가다 뛰어여한다.
 
+				TB_RP940Dto dto = TB_RP940Dto.builder()
+						.compnm(compnm)
+						.phone(phone)
+						.saupnum(saupnum)
+						.postno(postno)
+						.address1(address1)
+						.address2(address2)
+						.agencyDepartment(agencyDepartment)
+						//.authType(authType)
+						//.authgrpnm(authTypeText)
+						.appflag("N")
+						.email(email)
+						.id(id)
+						.level(level)
+						.tel(tel.replaceAll("-",""))
+						.name(name)
+						.password(Pbkdf2Sha256.encode(password))
+						.build();
 
-				UtilClass util = new UtilClass();
-				List<Integer> spworkidList = util.parseUserIdsToInt(spworkcd);
-				List<Integer> spcompidList = util.parseUserIdsToInt(spcompcd);
-				List<Integer> spplanidList = util.parseUserIdsToInt(spplancd);
-
-
-				List<String> firstTextList = Arrays.asList(firstText.split(","));
-				List<String> secondTextList = Arrays.asList(secondText.split(","));
-				List<String> thirdTextList = Arrays.asList(thirdText.split(","));
-
-
-				// 필요한 모든 UserCode를 한 번에 조회
-				Map<Integer, UserCode> spworkCodes = userCodeRepository.findAllById(spworkidList)
-						.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
-				Map<Integer, UserCode> spcompCodes = userCodeRepository.findAllById(spcompidList)
-						.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
-				Map<Integer, UserCode> spplanCodes = userCodeRepository.findAllById(spplanidList)
-						.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
+				tbRp940Service.save(dto);
 
 				result.success = true;
 				result.message = "신청이 완료되었습니다.";
-				return result;
+				flag = false;
 			}else{
-				return result;
+				result.success = false;
+				result.message = "코드가 인증되지 않았습니다.";
 			}
+			return result;
 		} catch(Exception e){
 			System.out.println(e);
 
-			result.success = false;
-			result.message = "에러가발생하였습니다.";
-			return result;
+			throw e;
 		}
 
 	}
