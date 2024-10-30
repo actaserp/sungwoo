@@ -12,7 +12,7 @@
     <div class="page-title-wrap">
       <div class="left">
         <h2>Order Management Dashboard</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png"
-                                                                                                  alt="알람 아이콘"></a>
+                                                                                alt="알람 아이콘"></a>
         <!--                <a title="북마크" class="bookmark toggle">-->
         <!--                    내 메뉴-->
         <!--                </a>-->
@@ -25,19 +25,25 @@
     <div class="search-wrap" id="searchWrap" style="display: none">
       <ul>
         <li>
-          <select title="지역">
-            <option>대구</option>
+          <select title="지역" id="spworkcd" name="spworkcd"
+                  onchange="updateCompcdOptions(); saveSelectedSandanData(); ">
+            <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
           </select>
+          <input type="hidden" id="spworknm" name="spworknm">
         </li>
         <li>
-          <select title="구">
-            <option>성서산단</option>
+          <select title="산단" id="spcompcd" name="spcompcd"
+                  onchange="updatePlancdOptions(); saveSelectedSandanData();">
+            <!-- 산단 옵션을 JavaScript에서 동적으로 채움 -->
           </select>
+          <input type="hidden" id="spcompnm" name="spcompnm">
         </li>
         <li>
-          <select title="동">
-            <option>성서</option>
+          <select title="시설" id="spplancd" name="spplancd"
+                  onchange="updatePlannm(); saveSelectedSandanData()">
+            <!-- 시설 옵션을 JavaScript에서 동적으로 채움 -->
           </select>
+          <input type="hidden" id="spplannm" name="spplannm">
         </li>
       </ul>
       <div class="card-btn-wrap">
@@ -94,7 +100,7 @@
           <div class="swiper-slide">
             <section>
               <div class="title">
-                <h3>견적진행</h3>
+                <h3>견적 진행</h3>
                 <a href="#" title="더보기" class="btn-plus"></a>
               </div>
               <dl>
@@ -134,7 +140,7 @@
           <div class="swiper-slide">
             <section>
               <div class="title">
-                <h3>제작진행</h3>
+                <h3>매출액</h3>
                 <a href="#" title="더보기" class="btn-plus"></a>
               </div>
               <dl>
@@ -154,7 +160,7 @@
           <div class="swiper-slide">
             <section>
               <div class="title">
-                <h3>매축액</h3>
+                <h3>수주액</h3>
                 <a href="#" title="더보기" class="btn-plus"></a>
               </div>
               <dl>
@@ -174,7 +180,7 @@
           <div class="swiper-slide">
             <section>
               <div class="title">
-                <h3>수주액</h3>
+                <h3>견적진행</h3>
                 <a href="#" title="더보기" class="btn-plus"></a>
               </div>
               <dl>
@@ -194,7 +200,7 @@
           <div class="swiper-slide">
             <section>
               <div class="title">
-                <h3>견적진행</h3>
+                <h3>견적요청</h3>
                 <a href="#" title="더보기" class="btn-plus"></a>
               </div>
               <dl>
@@ -214,7 +220,7 @@
           <div class="swiper-slide">
             <section>
               <div class="title">
-                <h3>견적요청</h3>
+                <h3>매출액</h3>
                 <a href="#" title="더보기" class="btn-plus"></a>
               </div>
               <dl>
@@ -234,7 +240,7 @@
           <div class="swiper-slide">
             <section>
               <div class="title">
-                <h3>제작진행</h3>
+                <h3>수주액</h3>
                 <a href="#" title="더보기" class="btn-plus"></a>
               </div>
               <dl>
@@ -254,69 +260,70 @@
         </div> <!--//swiper-wrapper end -->
       </div> <!--//main-card-wrap end -->
     </div>
-    <div class="row row-2">
-      <div class="col wp100">
-        <section>
-          <div class="title-wrap">
-            <!--<h3>시간대별 현황</h3>-->
-            <ul class="tab-links-sub">
-              <li>
-                <a href="#tab1" title="매출액"></a>
-              </li>
-              <li>
-                <a href="#tab2" title="수주액"></a>
-              </li>
-              <li>
-                <a href="#tab3" title="견적진행"></a>
-              </li>
-              <li>
-                <a href="#tab4" title="견적요청"></a>
-              </li>
-            </ul>
-          </div>
 
-          <div class="tab-contents" style="display: flex; flex-wrap: wrap; flex-direction: column; gap: 20px; margin-bottom: 10%;">
-            <div class="tab-row" style="display: flex; width: 100%; gap: 20px; margin-bottom: 3px;">
-              <section style="width: 50%; box-sizing: border-box;">
-                <!--tab1-->
-                <div class="tab-item-sub h280" id="tab1">
-                  <h3>매출액</h3>
-                  <div class="chart-wrap">
-                    <img src="/images/sample/sample-chart.svg" alt="">
-                  </div>
-                </div>
-              </section>
-              <section style="width: 50%; box-sizing: border-box;">
-                <!--tab2-->
-                <div class="tab-item-sub h280" id="tab2">
-                  <h3>수주액</h3>
-                  <div class="chart-wrap">
-                  </div>
-                </div>
-              </section>
-            </div>
-            <div class="tab-row" style="display: flex; width: 100%; gap: 20px;">
-              <section style="width: 50%; box-sizing: border-box;">
-                <!--tab3-->
-                <div class="tab-item-sub h280" id="tab3">
-                  <h3>견적진행</h3>
-                  <div class="chart-wrap">
-                  </div>
-                </div>
-              </section>
-              <section style="width: 50%; box-sizing: border-box;">
-                <!--tab4-->
-                <div class="tab-item-sub h280" id="tab4">
-                  <h3>견적요청</h3>
-                  <div class="chart-wrap">
-                  </div>
-                </div>
-              </section>
-            </div>
-          </div>
+    <div class="col wp100">
+      <section>
+        <div class="title-wrap">
+          <!--<h3>시간대별 현황</h3>-->
+          <ul class="tab-links-sub">
+            <li>
+              <a href="#tab1" title="매출액"></a>
+            </li>
+            <li>
+              <a href="#tab2" title="수주액"></a>
+            </li>
+            <li>
+              <a href="#tab3" title="견적진행"></a>
+            </li>
+            <li>
+              <a href="#tab4" title="견적요청"></a>
+            </li>
+          </ul>
+        </div>
 
-        </section>
-      </div>
+        <div class="tab-contents">
+          <div class="tab-row" style="display: flex; width: 100%; gap: 20px; margin-bottom: 3px;">
+            <section style="width: 50%; height: 200px;">
+              <!--tab1-->
+              <div class="tab-item-sub h280" id="tab1">
+                <h3>매출액</h3>
+                <div class="chart-wrap">
+                  <div id="chartHolder1" style="width: 100%; "></div>
+                </div>
+              </div>
+            </section>
+            <section style="width: 50%; height: 200px;">
+              <!--tab2-->
+              <div class="tab-item-sub h280" id="tab2">
+                <h3>수주액</h3>
+                <div class="chart-wrap">
+                  <div id="chartHolder2" style="width: 100%;"></div>
+                </div>
+              </div>
+            </section>
+          </div>
+          <div class="tab-row" style="display: flex; width: 100%; gap: 20px;">
+            <section style="width: 50% ; height: 200px;">
+              <!--tab3-->
+              <div class="tab-item-sub h280" id="tab3">
+                <h3>견적진행</h3>
+                <div class="chart-wrap">
+                  <div id="chartHolder3" style="width: 100%; "></div>
+                </div>
+              </div>
+            </section>
+            <section style="width: 50%;  height: 200px;">
+              <!--tab4-->
+              <div class="tab-item-sub h280" id="tab4">
+                <h3>견적요청</h3>
+                <div class="chart-wrap">
+                  <div id="chartHolder4" style="width: 100%;"></div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
     </div>
   </div> <!--//layout-contents end -->
   <footer>
@@ -325,6 +332,14 @@
   </div>
 
   <div style="height: 10px"></div>
+
+
+  <div id="chartModal" class="modal" style="opacity:100">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="modalChartHolder" style="width: 100%; height: 500px;"></div>
+    </div>
+  </div>
 
   <!-- [대시보드] 팝업  -->
   <div class="dashboard-layout-popup">
@@ -347,7 +362,7 @@
               <a title="숨김" class="btn-hidden"></a>
             </div>
             <dl>
-              <dt>LNG사용량</dt>
+              <dt> 매출액 </dt>
               <dd>
                 9,999 <span class="unit">Nm³</span>
               </dd>
@@ -494,19 +509,30 @@
       </div>
     </div>
   </div>
-  <script type="text/javascript">
+  <script>
+
+  let csrfToken = $("[name=_csrf]").val();
+
+  var swiper = new Swiper(".card-swiper", {
+      slidesPerView: 5,
+      spaceBetween: 20,
+      autoplay: {
+        delay: 2500,
+        disableOnInteraction: false,
+      },
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+    });
+
     document.readyState === 'complete' ? init() : window.onload = init;
 
-    <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
+      // 산단 연동
       initializeSelections();
-      initializeCharts();
-    }
+      createCharts();
 
-    function initializeCharts() {
-      var chartVars = "rMateOnLoadCallFunction=chartReadyHandler";
-      rMateChartH5.create("chart1", "chartHolder1", chartVars, "100%", "100%");
-      rMateChartH5.create("chart2", "chartHolder2", chartVars, "100%", "100%");
     }
 
     $('#btnSave').click(function(){
@@ -550,6 +576,61 @@
               });
 
     });
+
+    function createCharts() {
+      const chartVars = "rMateOnLoadCallFunction=chartReadyHandler";
+
+      // 금액 데이터
+      const revenueData = [
+        { label: "1월", value: 150000 },
+        { label: "2월", value: 200000 },
+        { label: "3월", value: 250000 },
+        { label: "4월", value: 300000 },
+        { label: "5월", value: 350000 },
+        { label: "6월", value: 350000 },
+        { label: "7월", value: 350000 },
+        { label: "8월", value: 350000 },
+        { label: "9월", value: 350000 },
+        { label: "10월", value: 350000 },
+        { label: "11월", value: 350000 },
+        { label: "12월", value: 350000 },
+      ];
+
+      // 건수 데이터 (예시)
+      const countData = [
+        { label: "1월", value: 3 },
+        { label: "2월", value: 4 },
+        { label: "3월", value: 5 },
+        { label: "4월", value: 6 },
+        { label: "5월", value: 6 },
+        { label: "6월", value: 7 },
+        { label: "7월", value: 7 },
+        { label: "8월", value: 7 },
+        { label: "9월", value: 7 },
+        { label: "10월", value: 7 },
+        { label: "11월", value: 7 },
+        { label: "12월", value: 7 },
+      ];
+
+      // 차트 생성
+      rMateChartH5.create("chart1", "chartHolder1", chartVars, "100%", "100%");
+      rMateChartH5.setData("chart1", revenueData);
+
+      rMateChartH5.create("chart2", "chartHolder2", chartVars, "100%", "100%");
+      rMateChartH5.setData("chart2", revenueData);
+
+      rMateChartH5.create("chart3", "chartHolder3", chartVars, "100%", "100%");
+      rMateChartH5.setData("chart3", countData);
+
+      rMateChartH5.create("chart4", "chartHolder4", chartVars, "100%", "100%");
+      rMateChartH5.setData("chart4", countData);
+    }
+
+    function chartReadyHandler() {
+      console.log("차트가 준비되었습니다.");
+    }
+
   </script>
+  <!--</body>-->
 </th:block>
 </html>

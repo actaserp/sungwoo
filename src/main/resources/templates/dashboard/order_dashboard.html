@@ -1,0 +1,272 @@
+<html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<style>
+
+</style>
+<th:block layout:fragment="content">
+
+  <!--- (레이아웃) Contents 영역 -->
+  <div class="layout-contents">
+    <!-- Page Title -->
+    <div class="page-title-wrap">
+      <div class="left">
+        <h2>Order Dashboard</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png"
+                                                                             alt="알람 아이콘"></a>
+        <!--                <a href="#" title="북마크" class="bookmark toggle">-->
+        <!--                    내메뉴-->
+        <!--                </a>-->
+      </div>
+      <ul class="page-navi">
+        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+        <li>대시보드</li>
+      </ul>
+    </div>
+    <!-- Select -->
+    <div class="search-wrap" id="searchWrap" style="display: none">
+      <ul>
+        <li>
+          <select title="지역" id="spworkcd" name="spworkcd"
+                  onchange="updateCompcdOptions(); saveSelectedSandanData(); ">
+            <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
+          </select>
+          <input type="hidden" id="spworknm" name="spworknm">
+        </li>
+        <li>
+          <select title="산단" id="spcompcd" name="spcompcd"
+                  onchange="updatePlancdOptions(); saveSelectedSandanData();">
+            <!-- 산단 옵션을 JavaScript에서 동적으로 채움 -->
+          </select>
+          <input type="hidden" id="spcompnm" name="spcompnm">
+        </li>
+        <li>
+          <select title="시설" id="spplancd" name="spplancd"
+                  onchange="updatePlannm(); saveSelectedSandanData()">
+            <!-- 시설 옵션을 JavaScript에서 동적으로 채움 -->
+          </select>
+          <input type="hidden" id="spplannm" name="spplannm">
+        </li>
+      </ul>
+    </div>
+    <div class="tab-wrap">
+      <ul class="tab-links">
+        <li>
+          <a href="#tab1" title="주문 캘린더" class="tab-button">주문 캘린더</a>
+        </li>
+      </ul>
+      <div class="tab-contents">
+        <!-- Section -->
+        <section class="tab-item" id="tab1" style="height: 1010px; margin-bottom: 10%">
+          <div class="row" style="display: flex;">
+            <!-- 왼쪽 섹션: 50% 차지 -->
+            <section
+                    style="width: 60%; box-sizing: border-box; height: 940px; margin-right: 20px; border-radius: 10px; ">
+              <div class="title-wrap">
+                <h3>주문 캘린더</h3>
+                <div class="btn-wrap">
+                </div>
+              </div>
+              <div class="calendar-wrap">
+                <div id="calendar"></div>
+              </div>
+            </section>
+            <!-- 오른쪽 섹션을 감싸는 div -->
+            <div style="display: flex; flex-direction: column; width: 40%;">
+              <!-- 위쪽 섹션 -->
+              <section style=" box-sizing: border-box;">
+                <div style="margin-bottom: 15px">
+                  <h3>2024년 주문 현황</h3>
+                </div>
+                <div class="tab-contents">
+                  <div class="row">
+                    <div class="section-card-wrap">
+                      <section style="flex: 0.5; margin-right: 5px;">
+                        <div class="title">
+                          <h3>주문</h3>
+                        </div>
+                        <div class="data">4</div>
+                        <dl>
+                          <dt>전일대비</dt>
+                          <dd>
+                            <span class="down"></span>
+                            <span class="fs18 fw600">1.20</span>
+                            <span class="unit">%</span>
+                          </dd>
+                        </dl>
+                      </section>
+                      <section style="flex: 0.5; margin-right: 5px;">
+                        <div class="title">
+                          <h3>진행</h3>
+                        </div>
+                        <div class="data">0</div>
+                        <dl>
+                          <dt>전일대비</dt>
+                          <dd>
+                            <span class="up"></span> 1.20 <span class="unit">%</span>
+                          </dd>
+                        </dl>
+                      </section>
+                      <section style="flex: 0.5; margin-right: 5px;">
+                        <div class="title">
+                          <h3>출고</h3>
+                        </div>
+                        <div class="data">4</div>
+                        <dl>
+                          <dt>전일대비</dt>
+                          <dd>
+                            <span class="down"></span> 1.20 <span class="unit">%</span>
+                          </dd>
+                        </dl>
+                      </section>
+                    </div> <!--//main-card-wrap end -->
+                  </div>
+                </div>
+              </section>
+
+              <!-- 아래쪽 섹션 (넓게 설정) -->
+              <section style="flex: 1; box-sizing: border-box; margin-top: 20px;">
+                <div class="tab-item-sub" id="tab1_2">
+                  <div class="section-top" style="margin-top: 40px;">
+                    <div class="search-wrap">
+                      <dl>
+                        <dt>
+                          조회일자<span class="eq">*</span>
+                        </dt>
+                        <dd>
+                          <ul class="date-box">
+                            <li>
+                              <input type="date" id="" name="startDate"
+                                     value="2024-08-01">
+                              <label for="date1" class="hide">시작일</label>
+                            </li>
+                            <li>
+                              <input type="date" id="" name="endDate" value="2024-08-31">
+                              <label for="date2" class="hide">종료일</label>
+                            </li>
+                            <li>
+                              <a class="btn btn-delete" title="검색" id="btn-srch">
+                                <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                검색
+                              </a>
+                            </li>
+                          </ul>
+                        </dd>
+                      </dl>
+                    </div>
+                  </div> <!--//section-top end -->
+                  <div class="container-fluid" style="padding-left: 0; padding-right: 0;">
+                    <!-- 그리드 영역 -->
+                    <div class="col-12" style="margin-bottom: 10px;">
+                      <div id="theGrid" style="width: 100%; height: 400px;"></div>
+                    </div>
+                  </div>
+
+                </div>
+              </section>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    </section>
+  </div> <!--//tab-contens end-->
+  </div> <!--//tab-wrap end-->
+  </div> <!--//layout-contents end -->
+  <footer style="margin-top:5px;">
+    <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
+  </footer>
+  <div style="height: 10px"></div>
+</th:block>
+
+<th:block layout:fragment="scripts">
+  <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+  <script type="text/javascript">
+
+    let theGrid;
+
+    document.readyState === 'complete' ? init() : window.onload = init;
+
+    // 초반 페이지 진입시 그리드 바인딩 시작
+    function init() {
+      initCalendar();
+      fetchListData();
+    }
+
+
+    function fetchListData() {
+      let tempData = []; // 데이터를 담을 배열
+
+      if (!theGrid) {
+        theGrid = new wijmo.grid.FlexGrid('#theGrid', {
+          autoGenerateColumns: false,
+          showMarquee: true,
+          columns: [
+            { binding: 'rownum', header: 'No', align: 'center', width: 100 },
+            { binding: 'standdt', header: '의뢰일자', align: 'center', width: 250 },
+            { binding: 'title', header: '제목', align: 'center', width: 250 },
+            { binding: 'smpcost', header: '납품희망일', align: 'center', width: 250 },
+            { binding: 'progress', header: '진행구분', align: 'center', width: 200 },
+            { binding: 'amount', header: '금액', align: 'center', width: 200 }
+          ],
+          itemsSource: tempData
+        });
+
+        // 선택이 변경될 때, 현재 항목 업데이트
+        theGrid.rowHeaders.columns.splice(0, 1);
+        new wijmo.grid.FlexGridContextMenu(theGrid);
+        window.downloadFileName = '티켓현황';
+      } else {
+        // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
+        theGrid.itemsSource = viewdata;
+      }
+    }
+
+
+    function initCalendar() {
+      var calendarEl = document.getElementById('calendar');
+      if (calendarEl) {
+
+        // FullCalendar 설정
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+          locale: 'ko',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          },
+          initialView: 'dayGridMonth',
+          height: 714,
+          dayHeaderFormat: {weekday: 'short'},
+          views: {
+            dayGridMonth: {
+              dayCellContent: function (arg) {
+                return arg.dayNumberText.replace('일', '');
+              }
+            }
+          },
+          dateClick: function (info) {
+            console.log('Clicked on: ' + info.dateStr);
+          },
+          events: [
+            {title: '거래', start: '2024-09-03'},
+            {title: '거래', start: '2024-09-05'},
+            {title: '거래', start: '2024-09-10'},
+            {title: '거래', start: '2024-09-12'},
+            {title: '거래', start: '2024-09-19'},
+            {title: '거래', start: '2024-09-24'},
+            {title: '거래', start: '2024-09-26'},
+            {
+              title: '추석',
+              start: '2024-09-17',
+              backgroundColor: '#EC193A',
+              borderColor: '#EC193A',
+              textColor: 'white'
+            },
+          ],
+        });
+        calendar.render();
+      }
+    }
+
+  </script>
+</th:block>
+</html>
+
