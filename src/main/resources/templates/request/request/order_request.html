@@ -112,7 +112,7 @@
                     사업자번호
                   </label>
                 </th>
-                <td>
+                <td colspan="3">
                   <input type="text" id="tketcrdtm" name="tketrcpnm">
                 </td>
               </tr>
@@ -123,15 +123,23 @@
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="tkettypenm" name="tkettypenm" style="width: 100%">
+                  <input type="text" id="tkettypenm" name="tkettypenm">
                 </td>
                 <th>
                   <label for="tketnm">
+                    핸드폰
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="tketnm" name="tketnm" placeholder="핸드폰">
+                </td>
+                <th>
+                  <label for="compnum">
                     연락처
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="tketnm" name="tketnm" style="width: 100%">
+                  <input type="text" id="compnum" name="compnum" placeholder="연락처">
                 </td>
               </tr>
               <tr>
@@ -148,7 +156,7 @@
                     납품희망일
                   </label>
                 </th>
-                <td>
+                <td colspan="3">
                   <input type="date" id="tketrcpnm" name="tketcrdtm">
                 </td>
               </tr>
@@ -158,8 +166,8 @@
                     제목
                   </label>
                 </th>
-                <td>
-                  <input type="date" id="priority" name="priority">
+                <td colspan="5">
+                  <input type="text" id="priority" name="priority">
                 </td>
               </tr>
               <tr>
@@ -186,7 +194,7 @@
             <div class="search-wrap">
               <dl>
                 <dt>
-                  조회일자<span class="eq">*</span>
+                  주문일자<span class="eq">*</span>
                 </dt>
                 <dd>
                   <ul class="date-box">
@@ -204,13 +212,28 @@
               <dl>
                 <dt>
                   <label for="searchtketnm">
-                    품명<span class="eq">*</span>
+                    제목<span class="eq">*</span>
                   </label>
                 </dt>
                 <dd>
                   <div class="srch-box">
                     <input type="text" id="searchtketnm" name="searchtketnm" class="input-srch"
-                           placeholder="품명" style="border-radius: 5px;">
+                           placeholder="제목" style="border-radius: 5px;">
+                    <!--                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>-->
+                  </div>
+                </dd>
+              </dl>
+              <dl>
+                <dt>
+                  <label for="searchstate">
+                    진행구분<span class="eq">*</span>
+                  </label>
+                </dt>
+                <dd>
+                  <div class="srch-box">
+                    <select id="searchstate" name="searchstate">
+                      <option value="전체">전체</option>
+                    </select>
                     <!--                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>-->
                   </div>
                 </dd>
@@ -351,16 +374,17 @@
       for (var i = 0; i < 10; i++) {
         tempData.push({
           rownum: i + 1,
+          state: '',
           orderdate: '',
           compnm: '',
-          managernm: '',
-          managernum: '',
           title: '',
-          name: '',
-          orderprice: '',
-          swmanager: '',
-          resdate: '',
-          state: '',
+          reservatedate: '',
+          category: '',
+          touse: '',
+          ton: '',
+          site: '',
+          price: '',
+          other: ''
         });
       }
 
@@ -382,16 +406,17 @@
           showMarquee: true,
           columns: [
             {binding: 'rownum', header: '순번', width: 80, align: 'center'},
+            {binding: 'state', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
             {binding: 'orderdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
             {binding: 'compnm', header: '업체명', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'managernm', header: '담당자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'managernum', header: '연락처', width: '*', minWidth: 100, align: 'center'},
             {binding: 'title', header: '제목', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'name', header: '품명', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'orderprice', header: '견적금액', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'swmanager', header: '수주담당', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'resdate', header: '납품예정일', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'state', header: '진행구분', width: '*', minWidth: 100, align: 'center'}
+            {binding: 'reservatedate', header: '출하예정일', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'category', header: '제품유형', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'touse', header: '용도별', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'ton', header: '톤별', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'site', header: '시트별', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'price', header: '금액', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'}
           ],
           itemsSource: tempData
         });
