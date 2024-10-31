@@ -105,23 +105,23 @@
                   </label>
                 </th>
                 <td>
-                  <input type="date" id="requester" name="tketcrdtm" value="2024-10-29" disabled>
-                </td>
-                <th>
-                  <label for="tketcrdtm">
-                    사업자번호
-                  </label>
-                </th>
-                <td>
-                  <input type="text" id="tketcrdtm" name="tketrcpnm">
+                  <input type="date" id="requester" name="tketcrdtm" value="2024-10-29" style="width: 200px" disabled>
                 </td>
                 <th>
                   <label for="tketrcpnm">
                     납품희망일
                   </label>
                 </th>
+                <td>
+                  <input type="date" id="tketrcpnm" name="tketcrdtm" style="width: 200px">
+                </td>
+                <th>
+                  <label for="tketrcpnm">
+                    연락처
+                  </label>
+                </th>
                 <td colspan="3">
-                  <input type="date" id="tketrcpnm" name="tketcrdtm">
+                  <input type="text" id="tketrcpnm" name="tketcrdtm">
                 </td>
               </tr>
               <tr>
@@ -131,35 +131,14 @@
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="tkettypenm" name="tkettypenm">
+                  <input type="text" id="tkettypenm" name="tkettypenm" style="width: 200px">
                 </td>
                 <th>
                   <label for="tketnm">
-                    핸드폰
-                  </label>
-                </th>
-                <td>
-                  <input type="text" id="tketnm" name="tketnm" placeholder="핸드폰">
-                </td>
-                <th>
-                  <label for="compnum">
-                    연락처
-                  </label>
-                </th>
-                <td>
-                  <input type="text" id="compnum" name="compnum" placeholder="연락처">
-                </td>
-              </tr>
-              <tr>
-                <th>
-                  <label for="postno">
                     주소
                   </label>
                 </th>
                 <td colspan="5">
-                  <!--                                    <input type="text" id="postno" name="postno" placeholder="00000" style="width: 117px">-->
-                  <!--                                    <input type="text" id="address1" name="address1" placeholder="대구" style="width: 117px">-->
-                  <!--                                    <input type="text" id="address2" name="address2" placeholder="성서" style="width: 116px">-->
                   <input type="text" id="postno" placeholder="우편번호"
                          onclick="sample4_execDaumPostcode()"
                          style="width: 100px; margin-bottom: 3px;">
@@ -167,6 +146,40 @@
                   <input type="hidden" id="placeAddress" placeholder="지번주소">
                   <input type="text" id="address2" placeholder="상세주소" style="width: 34.7%">
                   <span id="guide" style="color:#999;display:none"></span>
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <label for="compnum">
+                    두께
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="compnum" name="compnum" placeholder="연락처" style="width: 200px">
+                </td>
+                <th>
+                  <label for="postno">
+                    폭
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="compnum" name="compnum" placeholder="연락처" style="width: 200px">
+                </td>
+                <th>
+                  <label for="postno">
+                    길이
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="compnum" name="compnum" placeholder="연락처" style="width: 200px">
+                </td>
+                <th>
+                  <label for="postno">
+                    높이
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="compnum" name="compnum" placeholder="연락처" style="width: 200px">
                 </td>
               </tr>
               <tr>
@@ -179,21 +192,160 @@
                   <input type="text" id="priority" name="priority" style="width: 62%">
                 </td>
               </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="section-top">
+            <div class="title-wrap">
+              <h3>세부사항</h3>
+            </div>
+            <div class="button-wrap" style="margin-bottom: 10px; margin-top: 10px">
+              <ul>
+                <li>
+                  <a class="btn btn-delete" title="삭제">
+                    <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                    행추가
+                  </a>
+                </li>
+                <li>
+                  <a class="btn btn-edit" id="" title="저장">
+                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                    행삭제
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="write-table">
+              <caption>티켓 테이블</caption>
+              <tbody>
               <tr>
                 <th>
-                  <label for="mytextarea">
-                    내용
+                  <label for="requester">
+                    제품구성
                   </label>
                 </th>
-                <td colspan="3">
-                  <div class="textarea-box">
-                    <textarea id="mytextarea"></textarea>
-                    <!--<p class="text-count" id="text-count">0/100</p>-->
-                  </div>
+                <td>
+                  <select id="searchstate" name="searchstate" style="width: 100px">
+                    <option value="전체">전체</option>
+                  </select>
+                </td>
+                <th>
+                  <label for="requester">
+                    수량
+                  </label>
+                </th>
+                <td>
+                  <input type="number" id="" name="" style="width: 100px">
+                </td>
+                <th>
+                  <label for="tketcrdtm">
+                    T(두께)
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="tketcrdtm" name="tketrcpnm" style="width: 100px">
+                </td>
+                <th>
+                  <label for="tketrcpnm">
+                    W/H(폭 또는 높이)
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="tketcrdtm" name="tketrcpnm" style="width: 100px">
+                </td>
+
+                <th>
+                  <label for="tketrcpnm">
+                    L(길이)
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="tketcrdtm" name="tketrcpnm" style="width: 100px">
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <label for="tketrcpnm">
+                    외부마감재
+                  </label>
+                </th>
+                <td>
+                  <select id="searchstate" name="searchstate" style="width: 100px">
+                    <option value="전체">전체</option>
+                  </select>
+                </td>
+                <th>
+                  <label for="tketrcpnm">
+                    외부보강재
+                  </label>
+                </th>
+                <td>
+                  <select id="searchstate" name="searchstate" style="width: 100px">
+                    <option value="전체">전체</option>
+                  </select>
+                </td>
+                <th>
+                  <label for="tketrcpnm">
+                    내부보강재
+                  </label>
+                </th>
+                <td>
+                  <select id="searchstate" name="searchstate" style="width: 100px">
+                    <option value="전체">전체</option>
+                  </select>
+                </td>
+                <th>
+                  <label for="tketrcpnm">
+                    내부마감재
+                  </label>
+                </th>
+                <td>
+                  <select id="searchstate" name="searchstate" style="width: 100px">
+                    <option value="전체">전체</option>
+                  </select>
+                </td>
+                <th>
+                  <label for="tketrcpnm">
+                    옵션 및 요청사항
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="tketcrdtm" name="tketrcpnm" style="width: 100px">
                 </td>
               </tr>
               </tbody>
             </table>
+            <div class="container-fluid">
+              <p id=""></p>
+              <div id="theGrid2" style="max-height: 714px"></div>
+            </div>
+          </div>
+          <div class="section-top" style="margin-top: 13px">
+            <div class="title-wrap">
+              <h3>(참고페이지)</h3>
+            </div>
+            <div class="table-wrap">
+              <table class="write-table">
+                <caption>티켓 테이블</caption>
+                <tbody>
+                <tr>
+                  <th>
+                    <label for="mytextarea">
+                      내용
+                    </label>
+                  </th>
+                  <td colspan="3">
+                    <div class="textarea-box">
+                      <textarea id="mytextarea"></textarea>
+                      <!--<p class="text-count" id="text-count">0/100</p>-->
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
         <!--       주문등록 탭 종료   / 주문 의뢰현황 시작       -->
@@ -261,10 +413,10 @@
               </dl>
             </div>
           </div>
-            <div class="container-fluid">
-              <p id="selectedItem"></p>
-              <div id="theGrid" style="max-height: 714px"></div>
-            </div>
+          <div class="container-fluid">
+            <p id="selectedItem"></p>
+            <div id="theGrid" style="max-height: 714px"></div>
+          </div>
         </section>
         <!--      주문 의뢰 현황 종료          -->
       </div> <!--//tab-contens end-->
@@ -408,13 +560,14 @@
   <script type="text/javascript">
 
     var theGrid;
+    var theGrid2;
 
     document.readyState === 'complete' ? init() : window.onload = init;
 
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
       fetchListData();
-
+      fetchListData2();
       //clearForm();
 
       // spworkcd, spcompcd, spplancd의 값이 변경될 때마다 데이터 다시 로드
@@ -490,6 +643,65 @@
       }
     }
 
+    function fetchListData2() {
+      let data2 = [];
+
+      // 임시 데이터 배열 정의
+      var tempData = [];
+      for (var i = 0; i < 3; i++) {
+        tempData.push({
+          rownum: i + 1,
+          state: '',
+          orderdate: '',
+          compnm: '',
+          title: '',
+          reservatedate: '',
+          category: '',
+          touse: '',
+          ton: '',
+          site: ''
+        });
+      }
+
+      // $.ajax({
+      //     url: '/api/ticket/ticket/read',
+      //     type: 'GET',
+      //     async: false,
+      //     success: function (data) {
+      //         data2 = data.data;
+      //     }
+      // })
+
+      viewdata = new wijmo.collections.CollectionView(data2);
+
+      if (!theGrid2) {
+        // 데이터 그리드에 바인딩
+        theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
+          autoGenerateColumns: false,
+          showMarquee: true,
+          columns: [
+            {binding: 'rownum', header: '제품구성', width: 80, align: 'center'},
+            {binding: 'state', header: '수량', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'orderdate', header: 'T(두께)', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'compnm', header: 'W/H(폭 또는 높이)', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'title', header: 'L(길이)', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'reservatedate', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'category', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'touse', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'ton', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'site', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'}
+          ],
+          itemsSource: tempData
+        });
+        // 선택이 변경될 때, 현재 항목 업데이트
+        theGrid2.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
+        new FlexGridContextMenu(theGrid2);
+        window.downloadFileName = '티켓현황';
+      } else {
+        // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
+        theGrid2.itemsSource = viewdata;
+      }
+    }
     // 초기화
     function clearForm() {
       const date = new Date();
@@ -506,10 +718,6 @@
 
     function saveOrder(){
 
-    }
-
-    $(document).ready(function (e) {
-      // 페이지 진입시
     }
   </script>
 
