@@ -81,7 +81,9 @@
                                                 <div class="title">
                                                     <h3>주문</h3>
                                                 </div>
-                                                <div class="data">4</div>
+                                                <div class="data">
+                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
                                                 <dl>
                                                     <dt>전일대비</dt>
                                                     <dd>
@@ -95,7 +97,9 @@
                                                 <div class="title">
                                                     <h3>진행</h3>
                                                 </div>
-                                                <div class="data">0</div>
+                                                <div class="data">
+                                                    0<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
                                                 <dl>
                                                     <dt>전일대비</dt>
                                                     <dd>
@@ -107,7 +111,9 @@
                                                 <div class="title">
                                                     <h3>출고</h3>
                                                 </div>
-                                                <div class="data">4</div>
+                                                <div class="data">
+                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
                                                 <dl>
                                                     <dt>전일대비</dt>
                                                     <dd>
@@ -178,17 +184,16 @@
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <script type="text/javascript">
-
         let theGrid;
+        let calendar; // 전역으로 calendar 변수 선언
 
         document.readyState === 'complete' ? init() : window.onload = init;
 
-        // 초반 페이지 진입시 그리드 바인딩 시작
+        // 초기화 함수
         function init() {
             initCalendar();
             fetchListData();
         }
-
 
         function fetchListData() {
             let tempData = []; // 데이터를 담을 배열
@@ -211,20 +216,18 @@
                 // 선택이 변경될 때, 현재 항목 업데이트
                 theGrid.rowHeaders.columns.splice(0, 1);
                 new wijmo.grid.FlexGridContextMenu(theGrid);
-                window.downloadFileName = '티켓현황';
+                window.downloadFileName = '주문현황';
             } else {
                 // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-                theGrid.itemsSource = viewdata;
+                theGrid.itemsSource = viewdata; // viewdata가 정의되어 있어야 함
             }
         }
-
 
         function initCalendar() {
             var calendarEl = document.getElementById('calendar');
             if (calendarEl) {
-
                 // FullCalendar 설정
-                var calendar = new FullCalendar.Calendar(calendarEl, {
+                calendar = new FullCalendar.Calendar(calendarEl, {
                     locale: 'ko',
                     headerToolbar: {
                         left: 'prev,next today',
@@ -233,7 +236,7 @@
                     },
                     initialView: 'dayGridMonth',
                     height: 714,
-                    dayHeaderFormat: {weekday: 'short'},
+                    dayHeaderFormat: { weekday: 'short' },
                     views: {
                         dayGridMonth: {
                             dayCellContent: function (arg) {
@@ -244,27 +247,78 @@
                     dateClick: function (info) {
                         console.log('Clicked on: ' + info.dateStr);
                     },
-                    events: [
-                        {title: '거래', start: '2024-09-03'},
-                        {title: '거래', start: '2024-09-05'},
-                        {title: '거래', start: '2024-09-10'},
-                        {title: '거래', start: '2024-09-12'},
-                        {title: '거래', start: '2024-09-19'},
-                        {title: '거래', start: '2024-09-24'},
-                        {title: '거래', start: '2024-09-26'},
-                        {
-                            title: '추석',
-                            start: '2024-09-17',
+                    events: [] // 기본 이벤트는 빈 배열로 설정
+                });
+
+                // 공휴일 데이터 가져오기
+                fetchHolidays().then(holidays => {
+                    holidays.forEach(holiday => {
+                        console.log('Adding holiday:', holiday); // 공휴일 추가 확인
+                        calendar.addEvent({
+                            title: holiday.name, // 공휴일 이름
+                            start: holiday.date,  // 공휴일 날짜
                             backgroundColor: '#EC193A',
                             borderColor: '#EC193A',
                             textColor: 'white'
-                        },
-                    ],
+                        });
+                    });
+                    calendar.render(); // 캘린더 렌더링
+                }).catch(error => {
+                    console.error('공휴일 데이터를 가져오는 데 실패했습니다:', error);
                 });
-                calendar.render();
             }
         }
 
+        // 공휴일 데이터를 가져오는 함수
+        async function fetchHolidays() {
+            const currentYear = new Date().getFullYear();
+            const yearsToFetch = [currentYear - 1, currentYear, currentYear + 1]; // 전년도, 현재 연도, 다음 연도 배열 생성
+
+            const holidays = [];
+
+            for (const year of yearsToFetch) {
+                const yearHolidays = await fetchHolidaysForYear(year);
+                holidays.push(...yearHolidays);
+            }
+
+            return holidays;
+        }
+
+        async function fetchHolidaysForYear(year) {
+            return new Promise((resolve, reject) => {
+                var xhr = new XMLHttpRequest();
+                var url = 'http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo';
+                var queryParams = '?' + encodeURIComponent('serviceKey') + '=' + 'R3P3syhq6qRP0cz8mbV2J5t%2B32WwaSN9sH8ZW4k59oKAU3Ze0WvcljMrN36OJqxs38%2F780hMD4QfhCiDZQNUyA%3D%3D';
+                queryParams += '&' + encodeURIComponent('solYear') + '=' + encodeURIComponent(year);
+                queryParams += '&' + encodeURIComponent('numOfRows') + '=' + encodeURIComponent('30');
+
+                xhr.open('GET', url + queryParams);
+                xhr.onreadystatechange = function () {
+                    if (this.readyState == 4) {
+                        if (this.status == 200) {
+                            var parser = new DOMParser();
+                            var xmlDoc = parser.parseFromString(this.responseText, "text/xml");
+
+                            // XML에서 원하는 데이터 추출
+                            var items = xmlDoc.getElementsByTagName("item");
+                            let holidays = [];
+                            for (var i = 0; i < items.length; i++) {
+                                var locdate = items[i].getElementsByTagName("locdate")[0].textContent;
+                                var dateName = items[i].getElementsByTagName("dateName")[0].textContent;
+
+                                holidays.push({ date: locdate, name: dateName });
+                            }
+                            resolve(holidays);
+                        } else {
+                            console.error('오류 발생. HTTP 상태 코드:', this.status);
+                            reject(this.status);
+                        }
+                    }
+                };
+
+                xhr.send();
+            });
+        }
     </script>
 </th:block>
 </html>
