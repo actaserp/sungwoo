@@ -185,7 +185,6 @@ public class UserService {
 
     }
 
-
     public List<Map<String, Object>> getUserSandanList(String id) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
@@ -211,6 +210,5 @@ public class UserService {
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         return items;
     }
-
 
 }
