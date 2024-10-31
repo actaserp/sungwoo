@@ -12,7 +12,6 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.swing.text.html.Option;
 import javax.transaction.Transactional;
 
 import mes.app.MailService;
@@ -309,8 +308,10 @@ public class AccountController {
 				return result;
 			}
 
-
-			if(flag){
+			if(flag == null){
+				result.success = false;
+				result.message = "코드가 인증되지 않았습니다.";
+			} else if (flag){
 				//클라에서 동적으로 값이 넘어와서 몇개인지 모름, 그래서 쉼표구분자로 리스트형태로 분개해서 서버에서 노가다 뛰어여한다.
 
 				TB_RP940Dto dto = TB_RP940Dto.builder()
@@ -396,6 +397,7 @@ public class AccountController {
 
 		return result;
 	}
+
 
 	private void sendEmailLogic(String mail, String usernm){
 		Random random = new Random();
@@ -525,6 +527,29 @@ public class AccountController {
 		return dtoList;
 	}
 
+	@PostMapping("/authentication")
+	public AjaxResult Authentication(@RequestParam(value = "AuthenticationCode") String AuthenticationCode,
+									 @RequestParam(value = "email", required = false) String email,
+									 @RequestParam String type
+	){
 
+		AjaxResult result = verifyAuthenticationCode(AuthenticationCode, email);
+
+		if(type.equals("new")){
+			if(result.success){
+				flag = true;
+				result.message = "인증되었습니다.";
+
+			}
+
+		}else{
+			if(result.success){
+				flag_pw = true;
+				result.message = "인증되었습니다.";
+			}
+		}
+
+		return result;
+	}
 
 }

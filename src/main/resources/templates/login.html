@@ -246,7 +246,7 @@
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="compnm">
+                                        <input type="text" id="compnm" name="compnm">
                                     </div>
                                 </td>
                                 <th>
@@ -314,9 +314,10 @@
                                     <div class="input-clear">
                                         <input type="text" id="email" name="email">
                                         <button type="button" style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;" id="BtnAuthenticationRegister">코드발급</button>
-                                        <label style="width: 9%; margin-top: 10px">인증코드: </label>
-                                        <input type="text" id="AuthenticationCodeRegister" name="AuthenticationCodeRegister" required="" maxlength="38" autocomplete="off" style="width: 30%;border: none;border-bottom: 1px solid;
+                                        <label style="width: 7%; margin-top: 10px; margin-left: 30px">인증코드:</label>
+                                        <input type="text" id="AuthenticationCodeRegister" name="AuthenticationCodeRegister" required="" maxlength="38" autocomplete="off" style="width: 10%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
+                                        <button type="button" id="Authentication" style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;">코드인증</button>
                                     </div>
                                     <div style="margin-top: 5px; text-align: center;">
                                         <span id="timer2" style="width: 10%; text-align: right; color: red;"></span>
@@ -362,7 +363,7 @@
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="saupnum">
+                                        <input type="text" id="saupnum" name="saupnum">
                                     </div>
                                 </td>
                                 <th>
@@ -374,13 +375,13 @@
                                     <!--                                    <input type="text" id="postno" name="postno" placeholder="00000" style="width: 117px">-->
                                     <!--                                    <input type="text" id="address1" name="address1" placeholder="대구" style="width: 117px">-->
                                     <!--                                    <input type="text" id="address2" name="address2" placeholder="성서" style="width: 116px">-->
-                                    <input type="text" id="postno" placeholder="우편번호"
+                                    <input type="text" id="postno" name="postno" placeholder="우편번호"
                                            onclick="sample4_execDaumPostcode()"
                                            style="width: 85px; margin-bottom: 3px;">
-                                    <input type="text" id="address1" placeholder="도로명주소" style="width: 270px" disabled>
-                                    <input type="hidden" id="placeAddress" placeholder="지번주소">
+                                    <input type="text" id="address1" name="address1" placeholder="도로명주소" style="width: 270px" readonly>
+                                    <input type="hidden" id="placeAddress" name="placeAddress" placeholder="지번주소">
                                     <span id="guide" style="color:#999;display:none"></span>
-                                    <input type="text" id="address2" placeholder="상세주소" style="width: 360px">
+                                    <input type="text" id="address2" name="address2" placeholder="상세주소" style="width: 360px">
                                 </td>
                             </tr>
                             <tr>
@@ -1132,6 +1133,7 @@
 
             let data = FormUtil.extractForm($('#bomForm'));
 
+            console.log("요청 data : ", data);
             // data.authTypeText = authTypeText;
 
             data.AuthenticationCode = $('#AuthenticationCodeRegister').val().trim();
@@ -1294,6 +1296,29 @@
         }
         $('#loginFrm').validate({ submitHandler: submitHandler });
     });
+
+    let btnAuthentication = $('#Authentication');
+    btnAuthentication.click(function (e){
+        let emailDom = document.getElementById('email');
+        let email = emailDom.value;
+        let AuthenticationCode = document.getElementById('AuthenticationCodeRegister').value;
+        let data = { email, AuthenticationCode, type: 'new' }
+
+
+        let fnSuccess = function (res){
+            if(res.success){
+                emailAuthCode = true;
+                Alert.alert('', res.message);
+                emailDom.readOnly = true;
+                document.getElementById('timer2').style.display = 'none';
+
+            }else{
+                emailAuthCode = false;
+                Alert.alert('', res.message);
+            }
+        }
+        AjaxUtil.postAsyncData("/authentication", data, fnSuccess);
+    })
 
 </script>
 
