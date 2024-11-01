@@ -155,6 +155,31 @@
                 transform: rotate(360deg);
             }
         }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 300px;
+            color: red;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* 툴팁 위치 조정 */
+            left: 50%;
+            margin-left: -100px; /* 툴팁 중앙 정렬 */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -178,9 +203,10 @@
                     </div>
                     <div class="login-form">
                         <dl>
-                            <dt><label for="loginId">아이디</label></dt>
+                            <dt><label for="loginId">아이디(사업자 번호)</label></dt>
                             <dd>
-                                <input type="text" id="loginId" name="username" required autofocus title="아이디 입력" placeholder="아이디를 입력해주세요">
+                                <input type="text" id="loginId" name="username"
+                                       required autofocus title="아이디 입력" placeholder="사업자 등록번호를 입력해주세요 예)123 456 789">
                             </dd>
                             <!-- 에러메시지 출력 -->
                             <dd class="hint-red" id="hint-red" style="display: none">
@@ -189,9 +215,18 @@
                             </dd>
                         </dl>
                         <dl>
-                            <dt><label for="loginPwd">비밀번호</label></dt>
+                            <dt>
+                                <label for="loginPwd">비밀번호
+                                    <span class="tooltip"
+                                          style="display: inline-block;width: 13px; height: 13px;border: 2px solid red;border-radius: 50%;text-align: center;line-height: 15px;color: red;margin-right: 5px;">
+                                         <span style="position: absolute; top: -2px; left: 0;">?</span>
+                                        <span class="tooltiptext" style="color: red;">최초비밀번호는 사업자번호 5자리입니다.</span>
+                                    </span>
+                                </label>
+                            </dt>
                             <dd>
-                                <input type="password" id="loginPwd" name="password" placeholder="비밀번호를 입력해주세요" required title="패스워드 입력" autocomplete="off">
+                                <input type="password" id="loginPwd" name="password" placeholder="비밀번호를 입력해주세요"
+                                       autocomplete="off">
                             </dd>
                         </dl>
                         <div class="check-save">
@@ -201,10 +236,10 @@
                         <button type="submit" class="btn-login" id="login">로그인</button>
                         <ul class="btn-login-etc">
                             <li>
-                                <a class="btn btn-popup-open" data-popup="popup1" title="사용자신청" onclick="RegisterUser()">사용자등록</a>
+                                <a class="btn btn-popup-open" data-popup="popup1" title="사용자등록" onclick="RegisterUser()">사용자등록</a>
                             </li>
                             <li>
-                                <a href="#" class="btn btn-popup-open" data-popup="popup2" title="아이디 찾기" onclick="openModal()">아이디 찾기</a>
+                                <a href="#" class="btn btn-popup-open" data-popup="popup2" title="등록확인" onclick="openModal()">등록 확인</a>
                             </li>
                             <li>
                                 <a href="#" class="btn" title="비밀번호 찾기" onclick="openPwModal()">비밀번호 찾기</a>
@@ -221,7 +256,7 @@
         <div class="popup-overlay"  id="popup1"></div>
         <div class="popup-wrapper" id="wrapper1" style="width: 1100px">
             <div class="popup-title">
-                <h3>사용자신청</h3>
+                <h3>사용자 등록</h3>
                 <a onclick="RegisterUserClose()" title="팝업닫기" class="btn-popup-close">
                     <img src="/images/icon/btn-popup-close.svg" alt="닫기">
                 </a>
@@ -231,7 +266,7 @@
                 <form id="bomForm">
                     <div class="table-wrap">
                         <table class="write-table">
-                            <caption>사용자권한신청 테이블</caption>
+                            <caption>사용자등록등록 테이블</caption>
                             <colgroup>
                                 <col class="wp20">
                                 <col class="wp30">
@@ -247,43 +282,53 @@
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="compnm" name="compnm">
+                                        <input type="text" id="cltnm" name="cltnm">
                                     </div>
                                 </td>
                                 <th>
                                     <label for="">
-                                        소속부서
+                                        대표자
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="agencyDepartment" name="agencyDepartment">
+                                        <input type="text" id="prenm" name="prenm">
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <th>
                                     <label for="">
-                                        직급
+                                        업태
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="level" name="level">
+                                        <input type="text" id=" biztypenm" name="biztypenm">
                                     </div>
                                 </td>
                                 <th>
                                     <label for="">
-                                        성명
+                                        종목
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="name" name="name">
+                                        <input type="text" id="bizitemnm" name="bizitemnm">
                                     </div>
                                 </td>
                             </tr>
                             <tr>
+                                <th>
+                                    <label for="">
+                                        전화번호
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="tel" name="tel">
+                                    </div>
+                                </td>
                                 <th>
                                     <label for="">
                                         핸드폰
@@ -294,15 +339,19 @@
                                         <input type="text" id="phone" name="phone">
                                     </div>
                                 </td>
+                            </tr>
+                            <tr>
                                 <th>
                                     <label for="">
-                                        전화번호
+                                        사업자 번호<br>(아이디)
                                     </label>
                                 </th>
-                                <td>
+                                <td colspan="3">
                                     <div class="input-clear">
-                                        <input type="text" id="tel" name="tel">
+                                        <input type="text" id="id" name="saupnum" class="wp50"
+                                               style="width: 360px !important;">
                                     </div>
+                                    <a href="#" class="btn" id="btnDuplicate">중복확인</a>
                                 </td>
                             </tr>
                             <tr>
@@ -314,11 +363,19 @@
                                 <td colspan="3">
                                     <div class="input-clear">
                                         <input type="text" id="email" name="email">
-                                        <button type="button" style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;" id="BtnAuthenticationRegister">코드발급</button>
+                                        <button type="button"
+                                                style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;"
+                                                id="BtnAuthenticationRegister">코드발급
+                                        </button>
                                         <label style="width: 7%; margin-top: 10px; margin-left: 30px">인증코드:</label>
-                                        <input type="text" id="AuthenticationCodeRegister" name="AuthenticationCodeRegister" required="" maxlength="38" autocomplete="off" style="width: 10%;border: none;border-bottom: 1px solid;
+                                        <input type="text" id="AuthenticationCodeRegister"
+                                               name="AuthenticationCodeRegister" required="" maxlength="38"
+                                               autocomplete="off" style="width: 10%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
-                                        <button type="button" id="Authentication" style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;">코드인증</button>
+                                        <button type="button" id="Authentication"
+                                                style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;">
+                                            코드인증
+                                        </button>
                                     </div>
                                     <div style="margin-top: 5px; text-align: center;">
                                         <span id="timer2" style="width: 10%; text-align: right; color: red;"></span>
@@ -327,76 +384,31 @@
                             </tr>
                             <tr>
                                 <th>
-                                    <label for="">
-                                        ID
-                                    </label>
-                                </th>
-                                <td colspan="3">
-                                    <div class="input-clear">
-                                        <input type="text" id="id" name="id" class="wp50" style="width: 360px !important;">
-                                    </div>
-                                    <a href="#" class="btn" id="btnDuplicate">중복확인</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="password">
-                                        비밀번호
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="password" id="password" name="password">
-                                </td>
-                                <th>
-                                    <label for="passwordchk">
-                                        비밀번호확인
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="password" id="passwordchk" name="passwordchk">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="">
-                                        사업자번호
-                                    </label>
-                                </th>
-                                <td>
-                                    <div class="input-clear">
-                                        <input type="text" id="saupnum" name="saupnum">
-                                    </div>
-                                </td>
-                                <th>
                                     <label for="postno">
                                         주소
                                     </label>
                                 </th>
-                                <td>
-                                    <!--                                    <input type="text" id="postno" name="postno" placeholder="00000" style="width: 117px">-->
-                                    <!--                                    <input type="text" id="address1" name="address1" placeholder="대구" style="width: 117px">-->
-                                    <!--                                    <input type="text" id="address2" name="address2" placeholder="성서" style="width: 116px">-->
-                                    <input type="text" id="postno" name="postno" placeholder="우편번호"
-                                           onclick="sample4_execDaumPostcode()"
-                                           style="width: 85px; margin-bottom: 3px;">
-                                    <input type="text" id="address1" name="address1" placeholder="도로명주소" style="width: 270px" readonly>
-                                    <input type="hidden" id="placeAddress" name="placeAddress" placeholder="지번주소">
-                                    <span id="guide" style="color:#999;display:none"></span>
-                                    <input type="text" id="address2" name="address2" placeholder="상세주소" style="width: 360px">
+                                <td colspan="3">
+                                    <div class="input-clear">
+                                        <input type="text" id="postno" name="cltadres" placeholder="우편번호"
+                                               onclick="sample4_execDaumPostcode()"
+                                               style="width: 85px; margin-bottom: 3px; display: inline-block;">
+                                        <input type="text" id="address1" name="dzipcd" placeholder="도로명주소"
+                                               style="width: 380px; display: inline-block; margin-left: 5px;"
+                                               readonly="">
+                                        <input type="text" id="address2" name="dadres" placeholder="상세주소"
+                                               style="width: 390px; display: inline-block; margin-left: 7px;">
+                                    </div>
                                 </td>
-                            </tr>
-                            <tr>
-
                             </tr>
                             </tbody>
                         </table>
                     </div>
-
                 </form>
             </div>
             <div class="popup-button">
                 <button class="btn-popup-close" onclick="RegisterUserClose()">취소</button>
-                <button class="btn-navy" id="btnSaveAuth">신청</button>
+                <button class="btn-navy" id="btnSaveAuth">등록</button>
             </div>
         </div>
     </div> <!-- //dashboard-layout-popup end -->
@@ -404,18 +416,18 @@
     <!--#############################################################################################  아이디-->
     <div id="idFindModal" class="modal">
         <div class="modal-content">
-            <h2 style="text-align: center;">아이디 찾기</h2>
+            <h2 style="text-align: center;">등록여부 확인</h2>
             <form id="idFindForm">
                 <div style="margin-top: 10px;">
-                    <label style="width: 15%;">이름: </label>
+                    <label style="width: 15%;">사업자 <br>번호 : </label>
                     <input type="text" id="usernm" name="usernm" required="" maxlength="20" autocomplete="off" style="width: 80%;">
                 </div>
                 <div style="margin-top: 10px;">
-                    <label style="width: 15%;">이메일: </label>
+                    <label style="width: 15%;">대표자: </label>
                     <input type="email" id="mail" name="mail" required="" maxlength="30" autocomplete="off" style="width: 80%;">
                 </div>
                 <div class="hint-red" id="ErrMessage" style="margin: 5px auto 0;">
-                    <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">신청시 등록한 이메일을 입력해주세요.
+                    <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">등록시 등록한 이메일을 입력해주세요.
                 </div>
                 <div id="ErrMsg" style="margin-top: 10px;text-align: center; display: none; color: red;"><span>해당 사용자는 존재하지 않습니다.</span></div>
 
@@ -434,7 +446,7 @@
             <form id="pwFindForm">
 
                 <div style="margin-top: 10px;">
-                    <label style="width: 15%;">아이디: </label>
+                    <label style="width: 15%;">사업자<br>번호: </label>
                     <input type="text" id="userid" name="userid" required="" maxlength="20" autocomplete="off" style="width: 80%;">
 
                 </div>
@@ -445,7 +457,7 @@
                     <button type="button" style="margin: 0px;width: 17%;background: white;color: #03428E;border: 1px solid #03428E;" id="BtnAuthentication">코드발급</button>
                 </div>
                 <div class="hint-red" style="margin: 5px auto 0;">
-                    <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">신청시 등록한 이메일을 입력해주세요.
+                    <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">등록시 등록한 이메일을 입력해주세요.
                 </div>
 
                 <div style="margin-top: 10px;">
@@ -456,7 +468,7 @@
                 </div>
 
                 <div style="margin-top: 10px;" id="PasswordInputDiv">
-                    <label style="width: 15%;">변경 비밀번호: </label>
+                    <label style="width: 15%;">변경<br> 비밀번호: </label>
                     <input type="password" id="PasswordChange" name="PasswordChange" autocomplete="off" style="width: 70%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                 </div>
@@ -466,8 +478,6 @@
                     <input type="password" id="PasswordChangeChk" name="PasswordChangeChk" autocomplete="off" style="width: 70%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                 </div>
-
-
 
                 <div style="margin: 0 auto;">
                     <button type="button" onclick="closePwModal()" style="width: 100px; margin-right: 10px; background: white; border: 1px solid #03428E; border-radius: 3px; color: #03428E">닫기</button>
@@ -682,34 +692,33 @@
 
 
     const requiredFields = [
-        { id: 'compnm', name: '업체명' },
-        { id: 'agencyDepartment', name: '소속부서' },
-        { id: 'level', name: '직급' },
-        { id: 'name', name: '성명' },
+        { id: 'cltnm', name: '업체명' },
+        // { id: 'agencyDepartment', name: '소속부서' },
+        { id: 'prenm', name: '대표자' },
+        // { id: 'name', name: '성명' },
         { id: 'phone', name: '핸드폰' },
         { id: 'tel', name: '전화번호' },
         { id: 'email', name: '이메일' },
-        { id: 'id', name: 'ID' },
-        { id: 'password', name: '비밀번호' },
-        { id: 'passwordchk', name: '비밀번호확인' },
+        { id: 'id', name: '사업자번호' },
+        // { id: 'password', name: '비밀번호' },
+        // { id: 'passwordchk', name: '비밀번호확인' },
+        {id:'biztypenm',name: '업태'},
+        {id:'bizitemnm',name: '종목'},
         // { id: 'authType', name: '권한그룹' },
-        { id: 'saupnum', name: '사업자번호' },
+        // { id: 'saupnum', name: '사업자번호' },
         { id: 'postno', name: '우편번호' }
     ];
 
     const clearFieldList =
         [
-            'compnm',
-            'agencyDepartment',
-            'level',
-            'name',
+            'cltnm',
+            'prenm',
             'phone',
             'tel',
             'email',
             'id',
-            'password',
-            'passwordchk',
-            'saupnum',
+            'biztypenm',
+            'bizitemnm',
             'postno',
             'address1',
             'placeAddress',
@@ -894,7 +903,7 @@
         let _CsrfValue = _csrf[0].value;
 
 
-        //아이디 중복확인 신청(승인된 아이디 중)
+        //아이디 중복확인 등록(승인된 아이디 중)
         let btnDuplicate = $('#btnDuplicate');
         btnDuplicate.click(function (e){
 
@@ -1084,7 +1093,7 @@
         })
 
         //사용자신청 버튼 클릭
-        let btnRegistersend = $('#btnSaveAuth');
+        /*let btnRegistersend = $('#btnSaveAuth');
 
         btnRegistersend.click(function (e) {
 
@@ -1166,7 +1175,91 @@
             //끝
 
             RegisterUserClose();
-        })
+        })*/
+
+        // 사용자 등록 버튼 클릭
+        let btnRegistersend = $('#btnSaveAuth');
+
+        btnRegistersend.click(function (e) {
+            e.preventDefault(); // 기본 버튼 클릭 동작 방지
+
+            const authCode = $('#AuthenticationCodeRegister').val().trim();
+            if (!authCode) {
+                Alert.alert('', '인증코드를 입력해주세요.');
+                $('#AuthenticationCodeRegister').focus();
+                return;
+            }
+
+            if (!validateFields()) {
+                return false;
+            }
+
+            // 중복 확인 여부 체크
+            if (!AuthCode) {
+                Alert.alert('', '아이디 중복 확인을 하지 않으셨습니다.');
+                return;
+            }
+
+            const emailInput = document.getElementById('email');
+            const emailValue = emailInput.value.trim();
+
+            // 이메일 유효성 검사
+            if (!emailValidate(emailValue)) {
+                Alert.alert('', '유효한 이메일 형식을 입력하세요.');
+                return false;
+            }
+
+            // 사업자 번호 입력값 가져오기
+            const saupnumInput = document.getElementById('id');
+            const saupnumValue = saupnumInput.value.trim();
+
+            // 사업자 번호가 5자리 이상인지 확인
+            if (saupnumValue.length < 5) {
+                Alert.alert('', '사업자 번호는 최소 5자리 이상이어야 합니다.');
+                return false;
+            }
+
+            // 비밀번호를 사업자 번호 뒤 5자리로 설정
+            let password = saupnumValue.slice(-5); // 사업자 번호의 뒤 5자리
+
+            // // 비밀번호 확인 필드도 자동으로 설정
+            // let password2 = password;
+
+            // 폼 데이터 추출
+            let data = FormUtil.extractForm($('#bomForm'));
+            data.password = password; // 폼 데이터에 비밀번호 추가
+            data.AuthenticationCode = authCode;
+
+            console.log("요청 data : ", data);
+
+            let fnSuccess = function (res) {
+                if (res.success) {
+                    Alert.alert('', res.message);
+                    $("#modal-close-button").trigger('click');
+                } else {
+                    Alert.alert('', res.message);
+                }
+            };
+
+            // AJAX 요청
+            AjaxUtil.postAsyncData("/Register/save", data, fnSuccess);
+
+            // 폼 필드 초기화
+            AuthCode = false;
+            clearFieldList.forEach(field => clearForm(field));
+
+            // 사업자 번호 필드 읽기 가능
+            let idField = document.getElementById('id');
+            idField.removeAttribute('readonly');
+
+            // 추가된 발전 지역 요소들 삭제
+            const elements = document.getElementsByClassName('new-fl-ac');
+            Array.from(elements).forEach(element => {
+                element.remove();
+            });
+
+            RegisterUserClose();
+        });
 
         function clearForm(param){
             let clearValue = document.getElementById(param);

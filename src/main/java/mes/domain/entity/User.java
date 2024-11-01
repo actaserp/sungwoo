@@ -11,19 +11,22 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.sql.DataSource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+
 
 @Entity
 @Table(name="auth_user")
-@Setter
 @Getter
+@Setter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 //auth_user --> 유저테이블, user_profile --> 유저에 대한 정보 테이블, TB_RP940 --> 회원가입 신청 목록 테이블, TB_RP945 --> 유저들의 산단정보(산단, 발전소, 지역) 테이블 이 4개가 관련되어있음
 public class User implements Serializable {
 
@@ -33,7 +36,7 @@ public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	int id;
 
 	String password;
@@ -67,6 +70,9 @@ public class User implements Serializable {
 
 	@Column(name = "tel")
 	String tel;
+
+	@Column(name = "Phone")
+	String phone;
 
 	@Column(name = "agencycd")
 	String agencycd;

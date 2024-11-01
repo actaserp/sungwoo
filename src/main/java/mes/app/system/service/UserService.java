@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import io.micrometer.core.instrument.util.StringUtils;
 import mes.domain.services.SqlRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -209,6 +210,11 @@ public class UserService {
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         return items;
+    }
+
+    @Transactional
+    public void save(User user) {
+        userRepository.save(user);
     }
 
 }

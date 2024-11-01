@@ -5,8 +5,6 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -15,18 +13,19 @@ import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
 import mes.app.MailService;
-import mes.app.UtilClass;
 import mes.app.account.service.TB_RP940_Service;
 import mes.app.account.service.TB_RP945_Service;
+import mes.app.account.service.TB_XClientService;
+import mes.app.account.service.UserProfileService;
 import mes.app.system.service.AuthListService;
-import mes.domain.DTO.TB_RP940Dto;
-import mes.domain.DTO.TB_RP945Dto;
+import mes.app.system.service.UserService;
 import mes.domain.DTO.UserCodeDto;
-import mes.domain.entity.TB_RP940;
-import mes.domain.entity.UserCode;
-import mes.domain.entity.UserGroup;
+import mes.domain.entity.*;
+import mes.domain.entity.actasEntity.TB_XCLIENT;
+import mes.domain.entity.actasEntity.TB_XCLIENTId;
 import mes.domain.repository.*;
-import org.apache.fop.layoutmgr.BorderOrPaddingElement;
+import mes.domain.repository.actasRepository.TB_XClientRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -45,7 +44,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
-import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
 import mes.domain.security.CustomAuthenticationToken;
 import mes.domain.security.Pbkdf2Sha256;
@@ -89,6 +87,14 @@ public class AccountController {
 
 	@Autowired
 	TB_RP920Repository tbRp920Repository;
+	@Autowired
+	UserProfileService userProfileService;
+	@Autowired
+	TB_XClientService tbXClientService;
+	@Autowired
+	TB_XClientRepository tbXClientRepository;
+	@Autowired
+	JdbcTemplate jdbcTemplate;
 
 
 	@Resource(name="authenticationManager")
@@ -101,6 +107,8 @@ public class AccountController {
 
 	private final ConcurrentHashMap<String, String> tokenStore = new ConcurrentHashMap<>();
 	private final ConcurrentHashMap<String, Long> tokenExpiry = new ConcurrentHashMap<>();
+    @Autowired
+    private UserService userService;
 
 	@GetMapping("/login")
 	public ModelAndView loginPage(
@@ -270,85 +278,88 @@ public class AccountController {
 
 	}
 
-	/**권한신청**/
 	@PostMapping("/Register/save")
 	@Transactional
 	public AjaxResult RegisterUser(
-			@RequestParam(value = "compnm") String compnm,
-			@RequestParam(value = "agencyDepartment") String agencyDepartment,
-			@RequestParam(value = "level", required = false) String level,
-			@RequestParam(value = "name") String name,
+			@RequestParam(value = "cltnm") String cltnm, // 업체명
+			@RequestParam(value = "prenm") String prenm, // 대표자
+			@RequestParam(value = "biztypenm") String biztypenm, // 업태
+			@RequestParam(value = "bizitemnm") String bizitemnm, // 종목
 			@RequestParam(value = "phone", required = false) String phone,
 			@RequestParam(value = "tel", required = false) String tel,
 			@RequestParam(value = "email", required = false) String email,
 			@RequestParam(value = "id") String id,
 			@RequestParam(value = "password") String password,
-			@RequestParam(value = "saupnum") String saupnum,
 			@RequestParam(value = "postno") String postno,
-			@RequestParam(value = "address1") String address1,
-			@RequestParam(value = "address2") String address2
-
-	){
-
+			@RequestParam(value = "address1") String address1
+	) {
 		AjaxResult result = new AjaxResult();
 
 		try {
-
-			Optional<TB_RP940> rp940 = tb_rp940Repository.findByUserid(id);
-			Optional<User> user = userRepository.findByUsername(id);
-
-			if(rp940.isPresent()){
-				result.success = false;
-				result.message = "이미 신청하신 아이디입니다.";
-				return result;
-			}
-			if(user.isPresent()){
-				result.success = false;
-				result.message = "이미 가입 완료된 계정입니다.";
-				return result;
-			}
-
-			if(flag == null){
-				result.success = false;
-				result.message = "코드가 인증되지 않았습니다.";
-			} else if (flag){
-				//클라에서 동적으로 값이 넘어와서 몇개인지 모름, 그래서 쉼표구분자로 리스트형태로 분개해서 서버에서 노가다 뛰어여한다.
-
-				TB_RP940Dto dto = TB_RP940Dto.builder()
-						.compnm(compnm)
-						.phone(phone)
-						.saupnum(saupnum)
-						.postno(postno)
-						.address1(address1)
-						.address2(address2)
-						.agencyDepartment(agencyDepartment)
-						//.authType(authType)
-						//.authgrpnm(authTypeText)
-						.appflag("N")
+			if (flag) {
+				// 사용자 저장
+				User user = User.builder()
+						.username(id)
+						.password(Pbkdf2Sha256.encode(password)) // 비밀번호 해시화
 						.email(email)
-						.id(id)
-						.level(level)
-						.tel(tel.replaceAll("-",""))
-						.name(name)
-						.password(Pbkdf2Sha256.encode(password))
+						.first_name(cltnm)
+						.last_name(prenm)
+						.tel(tel)
+						.phone(phone)
 						.build();
 
-				tbRp940Service.save(dto);
+				userService.save(user); // User 저장
+
+				// 사용자 프로필 저장 (JDBC 사용)
+				String sql = "INSERT INTO user_profile (user_id, name) VALUES (?, ?)";
+				jdbcTemplate.update(sql, user.getId(), prenm);
+
+				// TB_XCLIENT 저장
+				String maxCltcd = tbXClientRepository.findMaxCltcd(); // 최대 cltcd 조회
+				String newCltcd = generateNewCltcd(maxCltcd); // 새로운 cltcd 생성
+
+				TB_XCLIENT tbXClient = TB_XCLIENT.builder()
+						.saupnum(id) // 사업자번호
+						.prenm(prenm) // 대표자명
+						.biztypenm(biztypenm) // 업태명
+						.bizitemnm(bizitemnm) // 종목명
+						.zipcd(postno) // 우편번호
+						.cltadres(address1) // 주소
+						.telnum(tel) // 전화번호
+						.hptelnum(phone) // 핸드폰번호
+						.agneremail(email) // 담당자 email
+						.id(new TB_XCLIENTId(newCltcd, id)) // cltcd와 custcd 설정
+						.build();
+
+				tbXClientService.save(tbXClient); // TB_XCLIENT 저장
 
 				result.success = true;
 				result.message = "신청이 완료되었습니다.";
 				flag = false;
-			}else{
+			} else {
 				result.success = false;
 				result.message = "코드가 인증되지 않았습니다.";
 			}
-			return result;
-		} catch(Exception e){
+		} catch (Exception e) {
+			result.success = false;
+			result.message = "오류 발생: " + e.getMessage();
 			System.out.println(e);
-
-			throw e;
 		}
 
+		return result;
+	}
+
+
+	// 새로운 cltcd 생성 메서드
+	private String generateNewCltcd(String maxCltcd) {
+		int newNumber = 1; // 기본값
+		// 최대 cltcd 값이 null이 아니고 "SW"로 시작하는 경우
+		if (maxCltcd != null && maxCltcd.startsWith("SW")) {
+			String numberPart = maxCltcd.substring(2); // "SW"를 제외한 부분
+			newNumber = Integer.parseInt(numberPart) + 1; // 숫자 증가
+		}
+		// 새로운 cltcd 생성: "SW" 접두사와 5자리 숫자로 포맷
+		return String.format("SW%05d", newNumber);
 	}
 
 	@PostMapping("/user-auth/searchAccount")

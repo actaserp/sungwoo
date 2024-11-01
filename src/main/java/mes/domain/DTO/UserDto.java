@@ -1,10 +1,11 @@
 package mes.domain.DTO;
 
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import mes.domain.entity.User;
 
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class UserDto {
