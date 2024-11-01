@@ -1,6 +1,8 @@
 <html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
 <style>
-
+  .wj-cell {
+    padding: 0 !important;
+  }
 </style>
 <th:block layout:fragment="content">
 
@@ -648,9 +650,10 @@
 
       // 임시 데이터 배열 정의
       var tempData = [];
-      for (var i = 0; i < 3; i++) {
+      for (var i = 0; i < 7; i++) {
         tempData.push({
           rownum: i + 1,
+          kind: '',
           state: '',
           orderdate: '',
           compnm: '',
@@ -680,7 +683,8 @@
           autoGenerateColumns: false,
           showMarquee: true,
           columns: [
-            {binding: 'rownum', header: '제품구성', width: 80, align: 'center'},
+            {binding: 'rownum', header: '순번', width: 80, align: 'center'},
+            {binding: 'kind', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
             {binding: 'state', header: '수량', width: '*', minWidth: 100, align: 'center'},
             {binding: 'orderdate', header: 'T(두께)', width: '*', minWidth: 100, align: 'center'},
             {binding: 'compnm', header: 'W/H(폭 또는 높이)', width: '*', minWidth: 100, align: 'center'},
@@ -693,6 +697,10 @@
           ],
           itemsSource: tempData
         });
+        theGrid2.rows.defaultSize *= 2 / 3;
+        // FlexGrid의 최대 높이를 제한하여 스크롤바를 활성화
+        theGrid2.hostElement.style.maxHeight = '220px'; // 약 5개의 행 높이에 맞게 설정
+        theGrid2.hostElement.style.overflowY = 'auto';
         // 선택이 변경될 때, 현재 항목 업데이트
         theGrid2.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
         new FlexGridContextMenu(theGrid2);
