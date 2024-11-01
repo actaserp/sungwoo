@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1, minimum-scale=1, maximum-scale=1">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="-1">
     <link rel="icon" type="image/png" href="/img/sungwoo_logo2.png">
 
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" /> <!-- Slide css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/> <!-- Slide css -->
     <link rel="stylesheet" href="/css/import.css"/>
-    <link rel="stylesheet" href="/css/login_mes.css" />
-    <link rel="stylesheet" href="/resource/ax5ui/ax5ui.all.css" />
+    <link rel="stylesheet" href="/css/login_mes.css"/>
+    <link rel="stylesheet" href="/resource/ax5ui/ax5ui.all.css"/>
 
 
     <title> SEONGWOO </title>
@@ -88,17 +89,28 @@
         }
 
         @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
+            0% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-5px);
+            }
+            50% {
+                transform: translateX(5px);
+            }
+            75% {
+                transform: translateX(-5px);
+            }
+            100% {
+                transform: translateX(0);
+            }
         }
 
         #ErrMsg.show {
             display: block;
             animation: shake 0.5s ease;
         }
+
         #loader2 {
             position: fixed;
             top: 0;
@@ -154,6 +166,35 @@
                 transform: rotate(360deg);
             }
         }
+
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 300px;
+            background-color: #f9f9f9;
+            color: red;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* 툴팁 위치 조정 */
+            left: 50%;
+            margin-left: -100px; /* 툴팁 중앙 정렬 */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
     </style>
 </head>
 <body>
@@ -170,16 +211,17 @@
             </div>
             <div class="right">
                 <form method="post" class="form" role="form" id="loginFrm" action="/postLogin">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     <div class="login-logo">
-                      <!--<img src="/images/logo/login-logo.png" alt="로고">-->
+                        <!--<img src="/images/logo/login-logo.png" alt="로고">-->
                         <h1>ACTASERP</h1>
                     </div>
                     <div class="login-form">
                         <dl>
                             <dt><label for="loginId">아이디(사업자 번호)</label></dt>
                             <dd>
-                                <input type="text" id="loginId" name="username" placeholder="사업자 등록번호를 입력해주세요 예)123 456 789">
+                                <input type="text" id="loginId" name="saupnum"
+                                       placeholder="사업자 등록번호를 입력해주세요 예)123 456 789">
                             </dd>
                             <!-- 에러메시지 출력 -->
                             <dd class="hint-red" id="hint-red" style="display: none">
@@ -189,13 +231,17 @@
                         </dl>
                         <dl>
                             <dt>
-                                <label for="loginPwd">비밀번호</label>
+                                <label for="loginPwd">비밀번호
+                                    <span class="tooltip"
+                                          style="display: inline-block;width: 13px; height: 13px;border: 2px solid red;border-radius: 50%;text-align: center;line-height: 15px;color: red;margin-right: 5px;">
+                                         <span style="position: absolute; top: -2px; left: 0;">?</span>
+                                        <span class="tooltiptext" style="color: red;">최초비밀번호는 사업자번호 5자리입니다.</span>
+                                    </span>
+                                </label>
                             </dt>
                             <dd>
-                                <span style="display: inline-block; width: 20px; height: 20px; border: 2px solid red; border-radius: 50%; text-align: center; line-height: 20px; color: red; margin-right: 5px; vertical-align: middle;">?</span>
-                                <span style="color: red;">최초비밀번호는 사업자번호 5자리입니다.</span>
-                                <input type="password" id="loginPwd" name="password" placeholder="비밀번호를 입력해주세요" autocomplete="off">
-
+                                <input type="password" id="loginPwd" name="password" placeholder="비밀번호를 입력해주세요"
+                                       autocomplete="off">
                             </dd>
                         </dl>
                         <div class="check-save">
@@ -205,10 +251,12 @@
                         <button type="submit" class="btn-login" id="login">로그인</button>
                         <ul class="btn-login-etc">
                             <li>
-                                <a class="btn btn-popup-open" data-popup="popup1" title="사용자신청" onclick="RegisterUser()">사용자등록</a>
+                                <a class="btn btn-popup-open" data-popup="popup1" title="사용자신청"
+                                   onclick="RegisterUser()">사용자등록</a>
                             </li>
                             <li>
-                                <a href="#" class="btn btn-popup-open" data-popup="popup2" title="등록 확인" onclick="openModal()">등록 확인</a>
+                                <a href="#" class="btn btn-popup-open" data-popup="popup2" title="등록 확인"
+                                   onclick="openModal()">등록 확인</a>
                             </li>
                             <li>
                                 <a href="#" class="btn" title="비밀번호 찾기" onclick="openPwModal()">비밀번호 찾기</a>
@@ -222,7 +270,7 @@
     </div>
     <!-- [사용자권한] 팝업  -->
     <div class="dashboard-layout-popup">
-        <div class="popup-overlay"  id="popup1"></div>
+        <div class="popup-overlay" id="popup1"></div>
         <div class="popup-wrapper" id="wrapper1" style="width: 1100px">
             <div class="popup-title">
                 <h3>사용자 등록</h3>
@@ -245,79 +293,80 @@
                             <tbody>
                             <tr>
                                 <th>
-                                    <label for="companyName">
+                                    <label for="signUp_cltnm">
                                         업체명
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="companyName" name="companyName">
+                                        <input type="text" id="signUp_cltnm" name="cltnm">
                                     </div>
                                 </td>
                                 <th>
-                                    <label for="Representative">
+                                    <label for="signUp_prenm">
                                         대표자
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="Representative" name="Representative">
+                                        <input type="text" id="signUp_prenm" name="prenm">
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <th>
-                                    <label for="businessType">
+                                    <label for="signUp_biztypenm">
                                         업태
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="businessType" name="businessType">
+                                        <input type="text" id="signUp_biztypenm" name="biztypenm">
                                     </div>
                                 </td>
                                 <th>
-                                    <label for="Category">
+                                    <label for="signUp_bizitemnm">
                                         종목
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="Category" name="Category">
+                                        <input type="text" id="signUp_bizitemnm" name="bizitemnm">
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <th>
-                                    <label for="tel">
+                                    <label for="signUp_telnum">
                                         전화번호
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="tel" name="tel">
+                                        <input type="text" id="signUp_telnum" name="telnum">
                                     </div>
                                 </td>
                                 <th>
-                                    <label for="phone">
+                                    <label for="sinUp_hptelnum">
                                         핸드폰
                                     </label>
                                 </th>
                                 <td>
                                     <div class="input-clear">
-                                        <input type="text" id="phone" name="phone">
+                                        <input type="text" id="sinUp_hptelnum" name="sinUp_hptelnum">
                                     </div>
                                 </td>
                             </tr>
                             <tr>
                                 <th>
-                                    <label for="businessNo">
-                                        아이디(사업자 번호)
+                                    <label for="signUp_saupnum">
+                                        사업자 번호<br>(아이디)
                                     </label>
                                 </th>
                                 <td colspan="3">
                                     <div class="input-clear">
-                                        <input type="text" id="businessNo" name="businessNo" class="wp50" style="width: 360px !important;">
+                                        <input type="text" id="signUp_saupnum" name="saupnum" class="wp50"
+                                               style="width: 360px !important;">
                                     </div>
                                     <a href="#" class="btn" id="btnDuplicate">중복확인</a>
                                 </td>
@@ -330,7 +379,7 @@
                                 </th>
                                 <td colspan="3">
                                     <div class="input-clear">
-                                        <input type="text" id="email" name="email">
+                                        <input type="text" id="email" name="agneremailf">
                                         <button type="button"
                                                 style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;"
                                                 id="BtnAuthenticationRegister">코드발급
@@ -358,11 +407,13 @@
                                 </th>
                                 <td colspan="3">
                                     <div class="input-clear">
-                                        <input type="text" id="postno" name="postno" placeholder="우편번호"
-                                               onclick="sample4_execDaumPostcode()" style="width: 85px; margin-bottom: 3px; display: inline-block;">
-                                        <input type="text" id="address1" name="address1" placeholder="도로명주소"
-                                               style="width: 380px; display: inline-block; margin-left: 5px;" readonly="">
-                                        <input type="text" id="address2" name="address2" placeholder="상세주소"
+                                        <input type="text" id="postno" name="cltadres" placeholder="우편번호"
+                                               onclick="sample4_execDaumPostcode()"
+                                               style="width: 85px; margin-bottom: 3px; display: inline-block;">
+                                        <input type="text" id="address1" name="dzipcd" placeholder="도로명주소"
+                                               style="width: 380px; display: inline-block; margin-left: 5px;"
+                                               readonly="">
+                                        <input type="text" id="address2" name="dadres" placeholder="상세주소"
                                                style="width: 390px; display: inline-block; margin-left: 7px;">
                                     </div>
                                 </td>
@@ -386,22 +437,31 @@
             <h2 style="text-align: center;">등록 확인</h2>
             <form id="idFindForm">
                 <div style="margin-top: 10px;">
-                    <label style="width: 15%;">사업자번호 </label>
-                    <input type="text" id="businessNo_ok" name="businessNo_ok" required="" maxlength="20" autocomplete="off" style="width: 80%;">
+                    <label style="width: 15%;">사업자 <br>번호 </label>
+                    <input type="text" id="businessNo_ok" name="businessNo_ok" required="" maxlength="20"
+                           autocomplete="off" style="width: 80%;">
                 </div>
                 <div style="margin-top: 10px;">
                     <label style="width: 15%;">대표자 </label>
-                    <input type="text" id="Representative_ok" name="Representative_ok" required="" maxlength="30" autocomplete="off" style="width: 80%;">
+                    <input type="text" id="Representative_ok" name="Representative_ok" required="" maxlength="30"
+                           autocomplete="off" style="width: 80%;">
                 </div>
-<!--                <div class="hint-red" id="ErrMessage" style="margin: 5px auto 0;">-->
-<!--                    <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">신청시 등록한 이메일을 입력해주세요.-->
-<!--                </div>-->
-                <div id="ErrMsg" style="margin-top: 10px;text-align: center; display: none; color: red;"><span>해당 사용자는 존재하지 않습니다.</span></div>
+                <!--                <div class="hint-red" id="ErrMessage" style="margin: 5px auto 0;">-->
+                <!--                    <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">신청시 등록한 이메일을 입력해주세요.-->
+                <!--                </div>-->
+                <div id="ErrMsg" style="margin-top: 10px;text-align: center; display: none; color: red;"><span>해당 사용자는 존재하지 않습니다.</span>
+                </div>
 
 
                 <div style="margin: 0 auto;">
-                    <button type="button" onclick="closeModal()" style="width: 100px;margin-right: 10px; background: white; border: 1px solid #03428E; border-radius: 3px; color: #03428E">닫기</button>
-                    <button type="button" style="width: 100px; border: 1px solid white; border-radius: 3px; color: white; background: #03428E" id="btnSearch">아이디(사업자번호) 찾기</button>
+                    <button type="button" onclick="closeModal()"
+                            style="width: 100px;margin-right: 10px; background: white; border: 1px solid #03428E; border-radius: 3px; color: #03428E">
+                        닫기
+                    </button>
+                    <button type="button"
+                            style="width: 100px; border: 1px solid white; border-radius: 3px; color: white; background: #03428E"
+                            id="btnSearch">등록번호찾기
+                    </button>
                 </div>
             </form>
         </div>
@@ -413,15 +473,20 @@
             <form id="pwFindForm">
 
                 <div style="margin-top: 10px;">
-                    <label style="width: 15%;">아이디(사업자번호)(): </label>
-                    <input type="text" id="userid" name="userid" required="" maxlength="20" autocomplete="off" style="width: 80%;">
+                    <label style="width: 15%;">사업자 <br>번호:</label>
+                    <input type="text" id="userid" name="userid" required="" maxlength="18" autocomplete="off"
+                           style="width: 80%;">
 
                 </div>
 
                 <div style="margin-top: 10px;">
                     <label style="width: 15%;">이메일: </label>
-                    <input type="email" id="mailAddres" name="mailAddres" required="" maxlength="20" autocomplete="off" style="width: 62%;">
-                    <button type="button" style="margin: 0px;width: 17%;background: white;color: #03428E;border: 1px solid #03428E;" id="BtnAuthentication">코드발급</button>
+                    <input type="email" id="mailAddres" name="mailAddres" required="" maxlength="20" autocomplete="off"
+                           style="width: 62%;">
+                    <button type="button"
+                            style="margin: 0px;width: 17%;background: white;color: #03428E;border: 1px solid #03428E;"
+                            id="BtnAuthentication">코드발급
+                    </button>
                 </div>
                 <div class="hint-red" style="margin: 5px auto 0;">
                     <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">등록시 등록한 이메일을 입력해주세요.
@@ -429,13 +494,14 @@
 
                 <div style="margin-top: 10px;">
                     <label style="width: 15%;">인증코드: </label>
-                    <input type="text" id="AuthenticationCode" name="AuthenticationCode" required="" maxlength="38" autocomplete="off" style="width: 70%;border: none;border-bottom: 1px solid;
+                    <input type="text" id="AuthenticationCode" name="AuthenticationCode" required="" maxlength="38"
+                           autocomplete="off" style="width: 70%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                     <span id="timer" style="width: 10%; text-align: right; color: red; display: inline-block;"></span>
                 </div>
 
                 <div style="margin-top: 10px;" id="PasswordInputDiv">
-                    <label style="width: 15%;">변경 비밀번호: </label>
+                    <label style="width: 15%;">변경 <br>비밀번호: </label>
                     <input type="password" id="PasswordChange" name="PasswordChange" autocomplete="off" style="width: 70%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                 </div>
@@ -447,10 +513,15 @@
                 </div>
 
 
-
                 <div style="margin: 0 auto;">
-                    <button type="button" onclick="closePwModal()" style="width: 100px; margin-right: 10px; background: white; border: 1px solid #03428E; border-radius: 3px; color: #03428E">닫기</button>
-                    <button type="button" style="width: 100px; border: 1px solid white; border-radius: 3px; color: white; background: #03428E" id="btnPwSearch">비밀번호 변경</button>
+                    <button type="button" onclick="closePwModal()"
+                            style="width: 100px; margin-right: 10px; background: white; border: 1px solid #03428E; border-radius: 3px; color: #03428E">
+                        닫기
+                    </button>
+                    <button type="button"
+                            style="width: 100px; border: 1px solid white; border-radius: 3px; color: white; background: #03428E"
+                            id="btnPwSearch">비밀번호 변경
+                    </button>
                 </div>
             </form>
         </div>
@@ -466,8 +537,6 @@
 <script type="text/javascript" src="/js/js.cookie.js"></script>
 <script type="text/javascript" src="/js/common.js?v=1050"></script>
 <script type="text/javascript" src="/resource/JavaScript-Templates/tmpl.js"></script>
-
-
 
 
 <script type="text/javascript" src="/js/ax5commUtil.js?v=1050"></script>
@@ -557,14 +626,13 @@
     //##############################################  아이디 찾기 모달 끝
 
 
-
     <!-- 점검자 추가 버튼 이벤트-->
     function addselectField(button) {
         // 새로운 td 요소를 생성합니다.
         var newTd = document.createElement('div');
         newTd.className = 'fl-ac new-fl-ac';
 
-        if(!window.cloneCounter){
+        if (!window.cloneCounter) {
             window.cloneCounter = 1;
         } else {
             window.cloneCounter++;
@@ -598,7 +666,7 @@
         // 삭제 버튼을 생성합니다.
         var deleteButton = document.createElement('button');
         deleteButton.textContent = '발전시설 삭제';
-        deleteButton.onclick = function() {
+        deleteButton.onclick = function () {
             deleteSelectField(newInput); // 삭제 버튼을 클릭하면 해당 입력 필드를 삭제하는 함수 호출
             deleteSelectField(newInput2);
             deleteSelectField(newInput3);
@@ -637,15 +705,15 @@
             $.ajax({
                 url: '/user-codes/code',
                 type: 'GET',
-                data: { code: code },
-                success: function(data) {
+                data: {code: code},
+                success: function (data) {
                     nextSelect.empty();
                     nextSelect.append('<option value="">선택하세요</option>');
-                    data.forEach(function(item) {
+                    data.forEach(function (item) {
                         nextSelect.append('<option value="' + item.id + '">' + item.value + '</option>');
                     });
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     // 통신 실패 시 처리
 
 
@@ -661,19 +729,19 @@
 
 
     const requiredFields = [
-        { id: 'compnm', name: '업체명' },
-        { id: 'agencyDepartment', name: '소속부서' },
-        { id: 'level', name: '직급' },
-        { id: 'name', name: '성명' },
-        { id: 'phone', name: '핸드폰' },
-        { id: 'tel', name: '전화번호' },
-        { id: 'email', name: '이메일' },
-        { id: 'id', name: 'ID' },
-        { id: 'password', name: '비밀번호' },
-        { id: 'passwordchk', name: '비밀번호확인' },
+        {id: 'compnm', name: '업체명'},
+        {id: 'agencyDepartment', name: '소속부서'},
+        {id: 'level', name: '직급'},
+        {id: 'name', name: '성명'},
+        {id: 'phone', name: '핸드폰'},
+        {id: 'tel', name: '전화번호'},
+        {id: 'email', name: '이메일'},
+        {id: 'id', name: 'ID'},
+        {id: 'password', name: '비밀번호'},
+        {id: 'passwordchk', name: '비밀번호확인'},
         // { id: 'authType', name: '권한그룹' },
-        { id: 'saupnum', name: '사업자번호' },
-        { id: 'postno', name: '우편번호' }
+        {id: 'saupnum', name: '사업자번호'},
+        {id: 'postno', name: '우편번호'}
     ];
 
     const clearFieldList =
@@ -739,7 +807,7 @@
     }
 
 
-    function RegisterUser(){
+    function RegisterUser() {
         let popup = document.getElementById('popup1');
         let wrapper = document.getElementById('wrapper1');
 
@@ -747,7 +815,7 @@
         wrapper.style.display = 'block';
     }
 
-    function RegisterUserClose(){
+    function RegisterUserClose() {
         let popup = document.getElementById('popup1');
         let wrapper = document.getElementById('wrapper1');
 
@@ -764,17 +832,15 @@
                                   valueField = "code",    // 데이터의 값 필드 이름
                                   textField = "value"     // 데이터의 표시 필드 이름
                               }) {
-        $.get(url, params, function(data){
+        $.get(url, params, function (data) {
             let selectElement = $(`#${elementId}`);
             selectElement.empty();
             selectElement.append(`<option value="">${defaultOption}</option>`);
-            data.forEach(function(item) {
+            data.forEach(function (item) {
                 selectElement.append(`<option value="${item[valueField]}">${item[textField]}</option>`);
             });
         });
     }
-
-
 
 
     var userinfo = {
@@ -816,8 +882,7 @@
     var isChangeLang = 'N';
 
 
-
-    function emailValidate(emailVal){
+    function emailValidate(emailVal) {
         const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
         return emailPattern.test(emailVal);
@@ -862,8 +927,8 @@
 
 
         const selectConfigurations = [
-            {  url: '/user-codes/parent',params: { parentId: 154 },elementId: 'agency', valueField: "id"},
-            {  url: '/user-codes/parent',params: { parentId: 110 },elementId: 'firstSelect', valueField: "id"},
+            {url: '/user-codes/parent', params: {parentId: 154}, elementId: 'agency', valueField: "id"},
+            {url: '/user-codes/parent', params: {parentId: 110}, elementId: 'firstSelect', valueField: "id"},
             // {  url: '/user-auth/type',params: {},elementId: 'authType',valueField: "code",textField: 'name'}
         ];
         selectConfigurations.forEach(config => initializeSelect(config));
@@ -875,32 +940,31 @@
 
         //아이디 중복확인 신청(승인된 아이디 중)
         let btnDuplicate = $('#btnDuplicate');
-        btnDuplicate.click(function (e){
+        btnDuplicate.click(function (e) {
 
             let userid = document.getElementById('id').value;
-            if(userid.trim() === '' || userid === null){
+            if (userid.trim() === '' || userid === null) {
                 Alert.alert('', '빈 값은 불가능합니다.');
                 return;
             }
-            let data = {  userid }
+            let data = {userid}
 
             let fnSuccess = function (res) {
-                if(res.success){
+                if (res.success) {
                     AuthCode = true;
                     Alert.alert('', res.message);
                     document.getElementById('id').readOnly = true;
 
-                } else if (!res.success){
+                } else if (!res.success) {
                     AuthCode = false;
                     Alert.alert('', res.message);
                 }
             };
             AjaxUtil.postAsyncData("/useridchk", data, fnSuccess);
-
         })
 
         //아이디 찾기
-        $('#btnSearch').click(function (e){
+        $('#btnSearch').click(function (e) {
 
             const errMsgDiv = document.getElementById('ErrMsg');
             const errMsgSpan = errMsgDiv.querySelector('span');
@@ -913,19 +977,21 @@
             let usernm = document.getElementById('usernm').value;
             let mail = document.getElementById('mail').value;
 
-            if(usernm.trim().length === 0 || mail.trim().length === 0){
+            if (usernm.trim().length === 0 || mail.trim().length === 0) {
                 Alert.alert('', '빈 값은 불가능합니다.');
                 return false;
             }
 
 
-            if(!emailValidate(mail.trim()))
-            { Alert.alert('', '유효한 이메일 형식을 입력하세요.'); return false; }
+            if (!emailValidate(mail.trim())) {
+                Alert.alert('', '유효한 이메일 형식을 입력하세요.');
+                return false;
+            }
 
-            let data = { usernm, mail, _CsrfValue }
+            let data = {usernm, mail, _CsrfValue}
 
-            let fnSuccess = function (res){
-                if(res.success){
+            let fnSuccess = function (res) {
+                if (res.success) {
                     if (Array.isArray(res.data)) {
                         errMsgSpan.textContent = res.data.join(', ') + '입니다.'; // 각 배열 요소를 쉼표로 구분하여 표시
                     } else {
@@ -934,83 +1000,111 @@
                     errMsgDiv.style.display = 'block';
                     errMsgDiv.style.color = 'black';
                     errMsgDiv.classList.add('show');
-                } else if (!res.success){
+                } else if (!res.success) {
 
                     errMsgDiv.style.display = 'block';
                     errMsgDiv.classList.add('show');
 
-                    errMsgDiv.addEventListener('animationend', function() {
+                    errMsgDiv.addEventListener('animationend', function () {
                         errMsgDiv.classList.remove('show');
                     });
 
                 }
             };
-            AjaxUtil.postAsyncData("/user-auth/searchAccount", data, fnSuccess, function(){ Alert.alert('', '서버통신 실패') });
+            AjaxUtil.postAsyncData("/user-auth/searchAccount", data, fnSuccess, function () {
+                Alert.alert('', '서버통신 실패')
+            });
         })
 
         //비밀번호  찾기 > 이메일 인증
-        $('#BtnAuthentication').click(function (e){
+        $('#BtnAuthentication').click(function (e) {
             let user = document.getElementById('userid');
             let usernm = user.value;
 
             let email = document.getElementById('mailAddres');
-            let mail   = email.value;
+            let mail = email.value;
 
-            if(usernm.trim().length === 0){ Alert.alert('', '아이디를 입력해주세요.'); user.focus(); return;}
-            else if(mail.trim().length === 0){ Alert.alert('', '이메일을 입력해주세요.'); email.focus();  return;}
+            if (usernm.trim().length === 0) {
+                Alert.alert('', '아이디를 입력해주세요.');
+                user.focus();
+                return;
+            } else if (mail.trim().length === 0) {
+                Alert.alert('', '이메일을 입력해주세요.');
+                email.focus();
+                return;
+            }
 
-            if(!emailValidate(mail.trim())){Alert.alert('', '유효한 이메일 형식을 입력하세요.'); email.focus();  return false; }
-            let data = { usernm, mail, _CsrfValue }
+            if (!emailValidate(mail.trim())) {
+                Alert.alert('', '유효한 이메일 형식을 입력하세요.');
+                email.focus();
+                return false;
+            }
+            let data = {usernm, mail, _CsrfValue}
             showLoader();
 
-            let fnSuccess = function (res){
-                if(res.success){
+            let fnSuccess = function (res) {
+                if (res.success) {
                     hideLoader();
                     $('#userid').attr('readonly', true);
 
-                    Alert.alert('', res.message, function(e){
+                    Alert.alert('', res.message, function (e) {
 
                         startTimer(180, 'timer');
                     });
-                }
-                else if(!res.success){
+                } else if (!res.success) {
                     hideLoader();
-                    Alert.alert('', res.message, function(){});
+                    Alert.alert('', res.message, function () {
+                    });
 
                 }
             };
-            AjaxUtil.postAsyncData("/user-auth/AuthenticationEmail", data, fnSuccess, function(){hideLoader(); Alert.alert('', '서버통신 실패');});
+            AjaxUtil.postAsyncData("/user-auth/AuthenticationEmail", data, fnSuccess, function () {
+                hideLoader();
+                Alert.alert('', '서버통신 실패');
+            });
         })
 
-        $('#BtnAuthenticationRegister').click(function (e){
+        //이메일 코드발급
+        $('#BtnAuthenticationRegister').click(function (e) {
 
             let email = document.getElementById('email');
-            let mail   = email.value;
+            let mail = email.value;
 
-            if(mail.trim().length === 0){ Alert.alert('', '이메일을 입력해주세요.'); email.focus();  return;}
-            if(!emailValidate(mail.trim())){ Alert.alert('', '유효한 이메일 형식을 입력하세요.'); email.focus();  return false; }
-            let data = {  usernm: 'empty',mail, _CsrfValue }
+            if (mail.trim().length === 0) {
+                Alert.alert('', '이메일을 입력해주세요.');
+                email.focus();
+                return;
+            }
+            if (!emailValidate(mail.trim())) {
+                Alert.alert('', '유효한 이메일 형식을 입력하세요.');
+                email.focus();
+                return false;
+            }
+            let data = {usernm: 'empty', mail, _CsrfValue}
             showLoader();
-            let fnSuccess = function (res){
-                if(res.success){
+            let fnSuccess = function (res) {
+                if (res.success) {
                     hideLoader();
 
-                    Alert.alert('', res.message, function(e){
+                    Alert.alert('', res.message, function (e) {
 
                         startTimer(180, 'timer2');
                     });
-                }
-                else if(!res.success){
+                } else if (!res.success) {
                     hideLoader();
-                    Alert.alert('', res.message, function(){});
+                    Alert.alert('', res.message, function () {
+                    });
 
                 }
             };
-            AjaxUtil.postAsyncData("/user-auth/AuthenticationEmail", data, fnSuccess, function(){hideLoader(); Alert.alert('', '서버통신 실패');});
+            AjaxUtil.postAsyncData("/user-auth/AuthenticationEmail", data, fnSuccess, function () {
+                hideLoader();
+                Alert.alert('', '서버통신 실패');
+            });
         })
 
         //비밀번호 재설정
-        $('#btnPwSearch').click(function(){
+        $('#btnPwSearch').click(function () {
 
             const authCode = $('#AuthenticationCode').val().trim();
             const email = $('#mailAddres').val().trim();
@@ -1047,12 +1141,18 @@
                 Alert.alert('', '변경 비밀번호와 확인 비밀번호가 일치하지 않습니다.');
                 return;
             }
-            if(!emailValidate(email.trim())){Alert.alert('', '유효한 이메일 형식을 입력하세요.'); email.focus();  return; }
+            if (!emailValidate(email.trim())) {
+                Alert.alert('', '유효한 이메일 형식을 입력하세요.');
+                email.focus();
+                return;
+            }
 
-            const data = { code: authCode, _CsrfValue, mail: email, password: password, userid : userid };
+            const data = {code: authCode, _CsrfValue, mail: email, password: password, userid: userid};
 
             const fnSuccess = function (res) {
-                Alert.alert('', res.message, function(){ location.reload(); });
+                Alert.alert('', res.message, function () {
+                    location.reload();
+                });
             };
 
             AjaxUtil.postAsyncData("/user-auth/verifyCode", data, fnSuccess, function () {
@@ -1075,44 +1175,46 @@
                 return;
             }
 
+            // 필드 유효성 검사
             if (!validateFields()) {
                 return false; // 필드 유효성 검사 실패 시 종료
             }
 
+            // 사업자 번호 확인
             if (!AuthCode) {
                 Alert.alert('', '사업자 번호 확인을 하지 않으셨습니다.');
                 return;
             }
 
+            // 이메일 유효성 검사
             const emailInput = document.getElementById('email');
             const emailValue = emailInput.value.trim();
-
             if (!emailValidate(emailValue)) {
                 Alert.alert('', '유효한 이메일 형식을 입력하세요.');
                 return false;
             }
 
-            let data = FormUtil.extractForm($('#bomForm')); // 폼 데이터 추출
+            // 폼 데이터 추출
+            let data = FormUtil.extractForm($('#bomForm'));
             console.log("요청 data : ", data);
 
-            data.AuthenticationCode = authCode; // 인증 코드 추가
+            // 인증 코드를 추가
+            data.AuthenticationCode = authCode;
 
-            // 사업자 번호의 뒤 5자리로 비밀번호 설정 (주석 처리된 부분)
-            /*
-            let businessNumber = $('#businessNo').val().trim();
+            // 사업자 번호의 뒤 5자리로 비밀번호 설정
+            let businessNumber = $('#signUp_saupnum').val().trim(); // 사업자 번호 입력 필드 ID 확인
             if (businessNumber.length >= 5) {
                 data.password = businessNumber.slice(-5); // 뒤 5자리 비밀번호 설정
             } else {
                 Alert.alert('', '사업자 번호가 너무 짧습니다.');
                 return;
             }
-            */
 
             // Ajax 요청
             let fnSuccess = function (res) {
                 if (res.success) {
-                    Alert.alert('', "정상등록 되었습니다. 최초 비밀번호는 사업자번호의 뒤 5자리입니다.");
-                    $("#modal-close-button").trigger('click');
+                    Alert.alert('', "정상 등록 되었습니다. 최초 비밀번호는 사업자번호의 뒤 5자리입니다.");
+                    $("#modal-close-button").trigger('click'); // 모달 닫기
                 } else {
                     Alert.alert('', res.message);
                 }
@@ -1130,9 +1232,10 @@
             RegisterUserClose(); // 팝업 닫기
         });
 
-        function clearForm(param){
+
+        function clearForm(param) {
             let clearValue = document.getElementById(param);
-            if(clearValue){
+            if (clearValue) {
                 clearValue.value = '';
             }
 
@@ -1156,9 +1259,9 @@
         $('.pass_box i').on('click', function () {
             $('.pass_box input').toggleClass('active');
             if ($('.pass_box input').hasClass('active')) {
-                $(this).attr('class', "icon ion-md-eye").css({ "color": "#5567ff" }).prev('input').attr('type', "text");
+                $(this).attr('class', "icon ion-md-eye").css({"color": "#5567ff"}).prev('input').attr('type', "text");
             } else {
-                $(this).attr('class', "icon ion-md-eye-off").css({ "color": "#989db1" }).prev('.pass_box input').attr('type', 'password');
+                $(this).attr('class', "icon ion-md-eye-off").css({"color": "#989db1"}).prev('.pass_box input').attr('type', 'password');
             }
         });
 
@@ -1171,7 +1274,7 @@
 
         $('#login_chk').change(function () {
             if ($('#login_chk').is(':checked')) {
-                Cookies.set('loginId', $('#loginId').val(), { expires: 7 });
+                Cookies.set('loginId', $('#loginId').val(), {expires: 7});
             } else {
                 Cookies.remove('loginId');
             }
@@ -1179,7 +1282,7 @@
 
         $('#loginId').keyup(function () {
             if ($('#login_chk').is(':checked')) {
-                Cookies.set('loginId', $('#loginId').val(), { path: '/', expires: 7 });
+                Cookies.set('loginId', $('#loginId').val(), {path: '/', expires: 7});
             }
         });
 
@@ -1191,10 +1294,10 @@
 
         function submitHandler(form) {
 
-            var submitData = $(form).serialize() + '&isChangeLang=' + isChangeLang;            
+            var submitData = $(form).serialize() + '&isChangeLang=' + isChangeLang;
             $.post('/login', submitData, function (result) {
                 let code = result.data.code;
-            
+
                 if (code == 'NOUSER') {
 
                     Alert.alert('', '아이디 또는 비밀번호가 일치하지 않습니다.');
@@ -1205,25 +1308,27 @@
                     let redtext = document.getElementById('hint-red');
                     redtext.style.display = 'block';
                     Alert.alert('', '아이디 또는 비밀번호가 일치하지 않습니다.', clearFields);
-                }
-                else if (code == 'NOPW') {
-                    Alert.alert('', '비밀번호가 일치하지 않습니다', function () { $('#loginPwd').val(''); $('#loginPwd').focus(); });
-                }
-                else if (code == 'ETC') {
+                } else if (code == 'NOPW') {
+                    Alert.alert('', '비밀번호가 일치하지 않습니다', function () {
+                        $('#loginPwd').val('');
+                        $('#loginPwd').focus();
+                    });
+                } else if (code == 'ETC') {
                     Alert.alert('', '로그인에 실패했습니다.&lt;br&gt;다시 시도하십시요', clearFields);
                 } else if (code == 'NOAUTH') {
                     Alert.alert('', '시스템 접근 권한이 없습니다. 시스템관리자에게 확인하시기 바랍니다', clearFields);
                 } else if (code == 'FIRST') {
-                    Alert.alert('', '비밀번호를 변경하십시요.', function () { location.href = '/pwdchange'; });
+                    Alert.alert('', '비밀번호를 변경하십시요.', function () {
+                        location.href = '/pwdchange';
+                    });
                 } else if (code == 'NOTCONFIRM') {
                     Alert.alert('', '승인되지 않은 사용자입니다.', clearFields);
-                }
-                else {
-                 
+                } else {
+
                     if (code == 'OK') {
                         let lang_cd = sessionStorage.getItem('lang_code');
                         let url = '/api/common/labels';
-                        let pData = { lang_code: lang_cd };
+                        let pData = {lang_code: lang_cd};
                         let fnsuccess = function (result) {
                             dic = {};
                             $.each(result, function (idx, item) {
@@ -1234,7 +1339,7 @@
                                 } else {
                                     dic[storageKey] = data;
                                 }
-                                data.push({ 'label_code': item.label_code, 'text': item.text, 'desc': item.descr });
+                                data.push({'label_code': item.label_code, 'text': item.text, 'desc': item.descr});
                             });
 
                             $.each(dic, function (k, v) {
@@ -1257,25 +1362,26 @@
                 Alert.alert('', JSON.parse(e.responseText).message);
             });
         }
-        $('#loginFrm').validate({ submitHandler: submitHandler });
+
+        $('#loginFrm').validate({submitHandler: submitHandler});
     });
 
     let btnAuthentication = $('#Authentication');
-    btnAuthentication.click(function (e){
+    btnAuthentication.click(function (e) {
         let emailDom = document.getElementById('email');
         let email = emailDom.value;
         let AuthenticationCode = document.getElementById('AuthenticationCodeRegister').value;
-        let data = { email, AuthenticationCode, type: 'new' }
+        let data = {email, AuthenticationCode, type: 'new'}
 
 
-        let fnSuccess = function (res){
-            if(res.success){
+        let fnSuccess = function (res) {
+            if (res.success) {
                 emailAuthCode = true;
                 Alert.alert('', res.message);
                 emailDom.readOnly = true;
                 document.getElementById('timer2').style.display = 'none';
 
-            }else{
+            } else {
                 emailAuthCode = false;
                 Alert.alert('', res.message);
             }
