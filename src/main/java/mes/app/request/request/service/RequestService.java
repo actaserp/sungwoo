@@ -34,18 +34,15 @@ public class RequestService {
         }
     }
 
-    public List<Map<String, Object>> getInspecList(String searchusr, String startDate, String endDate) {
+    public List<Map<String, Object>> getInspecList() {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
-        dicParam.addValue("paramusr", "%" +searchusr+ "%");
-
         String sql = """
                 select 
-                ROW_NUMBER() OVER (ORDER BY indatem DESC) AS rownum,
                 *
-                from tb_rp920
-                order by indatem desc
+                from TB_DA007W
+                order by indate desc
                 """;
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);

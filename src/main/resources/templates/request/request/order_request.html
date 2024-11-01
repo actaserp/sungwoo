@@ -1,8 +1,6 @@
 <html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
 <style>
-  .write-table th {
-    text-align: center; !important;
-  }
+
 </style>
 <th:block layout:fragment="content">
 
@@ -98,45 +96,45 @@
           </div>
           <div class="table-wrap">
             <table class="write-table">
-              <caption>티켓 테이블</caption>
+              <caption>주문등록 테이블</caption>
               <tbody>
               <tr>
-                <th>
-                  <label for="requester">
+                <th style="text-align: center">
+                  <label for="reqdate">
                     주문일자
                   </label>
                 </th>
                 <td>
-                  <input type="date" id="requester" name="tketcrdtm" value="2024-10-29" style="width: 200px" disabled>
+                  <input type="date" id="reqdate" name="reqdate" value="2024-10-29" style="width: 200px" readonly>
                 </td>
-                <th>
-                  <label for="tketrcpnm">
+                <th style="text-align: center">
+                  <label for="deldate">
                     납품희망일
                   </label>
                 </th>
                 <td>
-                  <input type="date" id="tketrcpnm" name="tketcrdtm" style="width: 200px">
+                  <input type="date" id="deldate" name="deldate" style="width: 200px">
                 </td>
-                <th>
-                  <label for="tketrcpnm">
+                <th style="text-align: center">
+                  <label for="telno">
                     연락처
                   </label>
                 </th>
                 <td colspan="3">
-                  <input type="text" id="tketrcpnm" name="tketcrdtm">
+                  <input type="text" id="telno" name="telno">
                 </td>
               </tr>
               <tr>
-                <th>
-                  <label for="tkettypenm">
+                <th style="text-align: center">
+                  <label for="perid">
                     담&ensp;당&ensp;자
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="tkettypenm" name="tkettypenm" style="width: 200px">
+                  <input type="text" id="perid" name="perid" style="width: 200px">
                 </td>
-                <th>
-                  <label for="tketnm">
+                <th style="text-align: center">
+                  <label for="postno">
                     주&ensp;&ensp;&ensp;&ensp;&ensp;소
                   </label>
                 </th>
@@ -151,47 +149,47 @@
                 </td>
               </tr>
               <tr>
-                <th>
-                  <label for="compnum">
+                <th style="text-align: center">
+                  <label for="panel_ht">
                     두&ensp;&ensp;&ensp;&nbsp;께
                   </label>
                 </th>
                 <td>
-                  <input type="number" id="" name="" style="width: 200px">
+                  <input type="number" id="panel_ht" name="panel_ht" style="width: 200px">
                 </td>
-                <th>
-                  <label for="postno">
+                <th style="text-align: center">
+                  <label for="panel_hw">
                     폭
                   </label>
                 </th>
                 <td>
-                  <input type="number" id="" name="" style="width: 200px">
+                  <input type="number" id="panel_hw" name="panel_hw" style="width: 200px">
                 </td>
-                <th>
-                  <label for="postno">
+                <th style="text-align: center">
+                  <label for="panel_hl">
                     길&ensp;&ensp;이
                   </label>
                 </th>
                 <td>
-                  <input type="number" id="" name="" style="width: 200px">
+                  <input type="number" id="panel_hl" name="panel_hl" style="width: 200px">
                 </td>
-                <th>
-                  <label for="postno">
+                <th style="text-align: center">
+                  <label for="panel_hh">
                     높&ensp;&ensp;이
                   </label>
                 </th>
                 <td>
-                  <input type="number" id="" name="" style="width: 200px">
+                  <input type="number" id="panel_hh" name="panel_hh" style="width: 200px">
                 </td>
               </tr>
               <tr>
-                <th>
-                  <label for="priority">
-                    제&ensp;목
+                <th style="text-align: center">
+                  <label for="remark">
+                    제&ensp;&ensp;&ensp;&nbsp;목
                   </label>
                 </th>
                 <td colspan="7">
-                  <input type="text" id="priority" name="priority" style="width: 62%">
+                  <input type="text" id="remark" name="remark" style="width: 62%">
                 </td>
               </tr>
               </tbody>
@@ -204,13 +202,13 @@
             <div class="button-wrap" style="margin-bottom: 10px; margin-top: 10px">
               <ul>
                 <li>
-                  <a class="btn btn-delete" title="삭제">
+                  <a class="btn btn-saverow" id="btn-saverow" title="행추가">
                     <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                     행추가
                   </a>
                 </li>
                 <li>
-                  <a class="btn btn-edit" id="" title="저장">
+                  <a class="btn btn-deleterow" id="btn-deleterow" title="행삭제">
                     <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
                     행삭제
                   </a>
@@ -220,96 +218,96 @@
           </div>
           <div class="table-wrap">
             <table class="write-table">
-              <caption>티켓 테이블</caption>
+              <caption>세부사항 테이블</caption>
               <tbody>
               <tr>
-                <th>
-                  <label for="requester">
+                <th style="text-align: center">
+                  <label for="hgrb">
                     제품구성
                   </label>
                 </th>
                 <td>
-                  <select id="searchstate" name="searchstate" style="width: 100px">
+                  <select id="hgrb" name="hgrb" style="width: 100px">
                     <option value="전체">전체</option>
                   </select>
                 </td>
-                <th>
-                  <label for="requester">
+                <th style="text-align: center">
+                  <label for="qty">
                     수&ensp;량
                   </label>
                 </th>
                 <td>
-                  <input type="number" id="" name="" style="width: 100px">
+                  <input type="number" id="qty" name="qty" style="width: 100px">
                 </td>
-                <th>
-                  <label for="tketcrdtm">
-                    T(두께)
+                <th style="text-align: center">
+                  <label for="panel_t">
+                    T (두께)
                   </label>
                 </th>
                 <td>
-                  <input type="number" id="" name="" style="width: 100px">
+                  <input type="number" id="panel_t" name="panel_t" style="width: 100px">
                 </td>
-                <th>
-                  <label for="tketrcpnm">
-                    W/H(폭 또는 높이)
+                <th style="text-align: center">
+                  <label for="panel_w">
+                    W/H (폭 또는 높이)
                   </label>
                 </th>
                 <td>
-                  <input type="number" id="" name="" style="width: 100px">
+                  <input type="number" id="panel_w" name="panel_w" style="width: 100px">
                 </td>
 
-                <th>
-                  <label for="tketrcpnm">
-                    L(길이)
+                <th style="text-align: center">
+                  <label for="panel_l">
+                    L (길이)
                   </label>
                 </th>
                 <td>
-                  <input type="number" id="" name="" style="width: 100px">
+                  <input type="number" id="panel_l" name="panel_l" style="width: 100px">
                 </td>
               </tr>
               <tr>
-                <th>
-                  <label for="tketrcpnm">
+                <th style="text-align: center">
+                  <label for="exfmtypedv">
                     외부마감재
                   </label>
                 </th>
                 <td>
-                  <select id="searchstate" name="searchstate" style="width: 100px">
+                  <select id="exfmtypedv" name="exfmtypedv" style="width: 100px">
                     <option value="전체">전체</option>
                   </select>
                 </td>
-                <th>
-                  <label for="tketrcpnm">
+                <th style="text-align: center">
+                  <label for="infmtypedv">
                     외부보강재
                   </label>
                 </th>
                 <td>
-                  <select id="searchstate" name="searchstate" style="width: 100px">
+                  <select id="infmtypedv" name="infmtypedv" style="width: 100px">
                     <option value="전체">전체</option>
                   </select>
                 </td>
-                <th>
-                  <label for="tketrcpnm">
+                <th style="text-align: center">
+                  <label for="stframedv">
                     내부보강재
                   </label>
                 </th>
                 <td>
-                  <select id="searchstate" name="searchstate" style="width: 100px">
+                  <select id="stframedv" name="stframedv" style="width: 100px">
                     <option value="전체">전체</option>
                   </select>
                 </td>
-                <th>
-                  <label for="tketrcpnm">
+                <th style="text-align: center">
+                  <label for="stexplydv">
                     내부마감재
                   </label>
                 </th>
                 <td>
-                  <select id="searchstate" name="searchstate" style="width: 100px">
+                  <select id="stexplydv" name="stexplydv" style="width: 100px">
                     <option value="전체">전체</option>
                   </select>
                 </td>
-                <th>
-                  <label for="tketrcpnm">
+                <th style="text-align: center">
+                  <label for="remarkrequest">
                     옵션 및 요청사항
                   </label>
                 </th>
@@ -468,7 +466,7 @@
       </div>
       <div class="popup-contents">
         <div class="table-wrap">
-          <table class="write-table">
+          <table class="write-table" style="border-top: 0px;">
             <caption>주문의뢰 요청사항</caption>
             <colgroup>
               <col class="wp20">
@@ -483,13 +481,13 @@
                     <tbody>
                     <tr style="align-items: center">
                       <th>
-                        <label for="mytextarea">
+                        <label for="remarkrequest">
                           내용
                         </label>
                       </th>
                       <td colspan="3">
                         <div class="textarea-box">
-                          <textarea id="mytextarea"></textarea>
+                          <textarea id="remarkrequest"></textarea>
                           <!--<p class="text-count" id="text-count">0/100</p>-->
                         </div>
                       </td>
@@ -617,7 +615,6 @@
       var tempData = [];
       for (var i = 0; i < 10; i++) {
         tempData.push({
-          rownum: i + 1,
           state: '',
           orderdate: '',
           compnm: '',
@@ -649,7 +646,6 @@
           autoGenerateColumns: false,
           showMarquee: true,
           columns: [
-            {binding: 'rownum', header: '순번', width: 80, align: 'center'},
             {binding: 'state', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
             {binding: 'orderdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
             {binding: 'compnm', header: '업체명', width: '*', minWidth: 100, align: 'center'},
@@ -678,28 +674,21 @@
     function fetchListData2() {
       let data2 = [];
 
-      // 임시 데이터 배열 정의
-      var tempData = [];
-      for (var i = 0; i < 3; i++) {
-        tempData.push({
-          rownum: i + 1,
-          kind: '',
-          state: '',
-          orderdate: '',
-          compnm: '',
-          title: '',
-          reservatedate: '',
-          category: '',
-          touse: '',
-          ton: '',
-          site: ''
-        });
-      }
+      $.ajax({
+        url: '/api/request/request/read',
+        type: 'GET',
+        data: {},
+        async: false,
+        success: function (data) {
+          data2 = data.data;
+        }
+      })
+
       viewdata = new wijmo.collections.CollectionView(data2);
 
       if (!theGrid2) {
         const minRows = 5;
-        const rowData = [...tempData];
+        const rowData = viewdata;
 
         while (rowData.length < minRows) {
           rowData.push({}); // 빈 객체 추가로 빈 행 생성
@@ -711,17 +700,16 @@
           isReadOnly: true,
           selectionMode: wijmo.grid.SelectionMode.Row,
           columns: [
-            {binding: 'rownum', header: '순번', width: 60, align: 'center'},
-            {binding: 'kind', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'state', header: '수량', width: 80, align: 'center'},
-            {binding: 'orderdate', header: 'T', width: 80, align: 'center'},
-            {binding: 'compnm', header: 'W/H', width: 80, align: 'center'},
-            {binding: 'title', header: 'L', width: 80, align: 'center'},
-            {binding: 'reservatedate', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'category', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'touse', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'ton', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'site', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'}
+            {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'qty', header: '수량', width: 80, align: 'center'},
+            {binding: 'panel_t', header: 'T', width: 80, align: 'center'},
+            {binding: 'panel_w', header: 'W/H', width: 80, align: 'center'},
+            {binding: 'panel_l', header: 'L', width: 80, align: 'center'},
+            {binding: 'exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'remark', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'}
           ],
           itemsSource: rowData,
         });
