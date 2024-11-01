@@ -1,7 +1,7 @@
 <html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
 <style>
-  .wj-cell {
-    padding: 0 !important;
+  .write-table th {
+    text-align: center; !important;
   }
 </style>
 <th:block layout:fragment="content">
@@ -129,7 +129,7 @@
               <tr>
                 <th>
                   <label for="tkettypenm">
-                    담당자
+                    담&ensp;당&ensp;자
                   </label>
                 </th>
                 <td>
@@ -137,7 +137,7 @@
                 </td>
                 <th>
                   <label for="tketnm">
-                    주소
+                    주&ensp;&ensp;&ensp;&ensp;&ensp;소
                   </label>
                 </th>
                 <td colspan="5">
@@ -153,11 +153,11 @@
               <tr>
                 <th>
                   <label for="compnum">
-                    두께
+                    두&ensp;&ensp;&ensp;&nbsp;께
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="compnum" name="compnum" placeholder="연락처" style="width: 200px">
+                  <input type="number" id="" name="" style="width: 200px">
                 </td>
                 <th>
                   <label for="postno">
@@ -165,32 +165,32 @@
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="compnum" name="compnum" placeholder="연락처" style="width: 200px">
+                  <input type="number" id="" name="" style="width: 200px">
                 </td>
                 <th>
                   <label for="postno">
-                    길이
+                    길&ensp;&ensp;이
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="compnum" name="compnum" placeholder="연락처" style="width: 200px">
+                  <input type="number" id="" name="" style="width: 200px">
                 </td>
                 <th>
                   <label for="postno">
-                    높이
+                    높&ensp;&ensp;이
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="compnum" name="compnum" placeholder="연락처" style="width: 200px">
+                  <input type="number" id="" name="" style="width: 200px">
                 </td>
               </tr>
               <tr>
                 <th>
                   <label for="priority">
-                    제목
+                    제&ensp;목
                   </label>
                 </th>
-                <td colspan="5">
+                <td colspan="7">
                   <input type="text" id="priority" name="priority" style="width: 62%">
                 </td>
               </tr>
@@ -235,7 +235,7 @@
                 </td>
                 <th>
                   <label for="requester">
-                    수량
+                    수&ensp;량
                   </label>
                 </th>
                 <td>
@@ -247,7 +247,7 @@
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="tketcrdtm" name="tketrcpnm" style="width: 100px">
+                  <input type="number" id="" name="" style="width: 100px">
                 </td>
                 <th>
                   <label for="tketrcpnm">
@@ -255,7 +255,7 @@
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="tketcrdtm" name="tketrcpnm" style="width: 100px">
+                  <input type="number" id="" name="" style="width: 100px">
                 </td>
 
                 <th>
@@ -264,7 +264,7 @@
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="tketcrdtm" name="tketrcpnm" style="width: 100px">
+                  <input type="number" id="" name="" style="width: 100px">
                 </td>
               </tr>
               <tr>
@@ -314,7 +314,10 @@
                   </label>
                 </th>
                 <td>
-                  <input type="text" id="tketcrdtm" name="tketrcpnm" style="width: 100px">
+                  <a class="btn btn-request" title="요청사항" data-popup="popup2"
+                     onclick="showPopup(this)">
+                    요청사항 작성
+                  </a>
                 </td>
               </tr>
               </tbody>
@@ -322,31 +325,6 @@
             <div class="container-fluid">
               <p id=""></p>
               <div id="theGrid2" style="max-height: 714px"></div>
-            </div>
-          </div>
-          <div class="section-top" style="margin-top: 13px">
-            <div class="title-wrap">
-              <h3>(참고페이지)</h3>
-            </div>
-            <div class="table-wrap">
-              <table class="write-table">
-                <caption>티켓 테이블</caption>
-                <tbody>
-                <tr>
-                  <th>
-                    <label for="mytextarea">
-                      내용
-                    </label>
-                  </th>
-                  <td colspan="3">
-                    <div class="textarea-box">
-                      <textarea id="mytextarea"></textarea>
-                      <!--<p class="text-count" id="text-count">0/100</p>-->
-                    </div>
-                  </td>
-                </tr>
-                </tbody>
-              </table>
             </div>
           </div>
         </section>
@@ -479,6 +457,57 @@
       </div>
     </div>
   </div>
+
+  <div class="modal">
+    <div class="popup-wrapper w700" id="popup2" style="min-width: 1050px">
+      <div class="popup-title">
+        <h3>옵션 및 요청사항</h3>
+        <a title="팝업닫기" onclick="closePopup('popup2')" class="btn-popup-close">
+          <img src="/images/icon/btn-popup-close.svg" alt="닫기">
+        </a>
+      </div>
+      <div class="popup-contents">
+        <div class="table-wrap">
+          <table class="write-table">
+            <caption>주문의뢰 요청사항</caption>
+            <colgroup>
+              <col class="wp20">
+              <col class="wp80">
+            </colgroup>
+            <tbody>
+            <tr>
+              <td>
+                <div class="table-wrap">
+                  <table class="write-table">
+                    <caption>티켓 테이블</caption>
+                    <tbody>
+                    <tr style="align-items: center">
+                      <th>
+                        <label for="mytextarea">
+                          내용
+                        </label>
+                      </th>
+                      <td colspan="3">
+                        <div class="textarea-box">
+                          <textarea id="mytextarea"></textarea>
+                          <!--<p class="text-count" id="text-count">0/100</p>-->
+                        </div>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="popup-button">
+          <button type="button" onclick="closePopup('popup2')" class="btn-navy">작성완료</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </th:block>
 
 <th:block layout:fragment="scripts">
@@ -493,19 +522,19 @@
       width: 900,
       toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image", // 'image' 버튼 툴바에 추가
       paste_data_images: true, // 이미지 붙여넣기 설정 활성화
-      file_picker_types: 'image', // TinyMCE에서 이미지를 선택할 때, 이미지 파일만 선택 (옵션 : media, file 등)
-      images_upload_handler(blobInfo, success) { // 이미지를 업로드하는 핸들러 함수
-        // blobInfo : TinyMCE에서 이미지 업로드 시 사용되는 정보를 담고 있는 객체
-        const file = new File([blobInfo.blob()], blobInfo.filename());
-        const fileName = blobInfo.filename();
-
-        if (fileName.includes("blobid")) {
-          success(URL.createObjectURL(file));
-        } else {
-          imageFiles.push(file);
-          success(URL.createObjectURL(file)); // Blob 객체의 임시 URL을 생성해 이미지 미리보기 적용
-        }
-      }
+      file_picker_types: 'image' // TinyMCE에서 이미지를 선택할 때, 이미지 파일만 선택 (옵션 : media, file 등)
+      // images_upload_handler(blobInfo, success) { // 이미지를 업로드하는 핸들러 함수
+      //   // blobInfo : TinyMCE에서 이미지 업로드 시 사용되는 정보를 담고 있는 객체
+      //   const file = new File([blobInfo.blob()], blobInfo.filename());
+      //   const fileName = blobInfo.filename();
+      //
+      //   if (fileName.includes("blobid")) {
+      //     success(URL.createObjectURL(file));
+      //   } else {
+      //     imageFiles.push(file);
+      //     success(URL.createObjectURL(file)); // Blob 객체의 임시 URL을 생성해 이미지 미리보기 적용
+      //   }
+      // }
     });
   </script>
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -645,12 +674,13 @@
       }
     }
 
+    // 주문등록 세부내용 그리드
     function fetchListData2() {
       let data2 = [];
 
       // 임시 데이터 배열 정의
       var tempData = [];
-      for (var i = 0; i < 7; i++) {
+      for (var i = 0; i < 3; i++) {
         tempData.push({
           rownum: i + 1,
           kind: '',
@@ -665,46 +695,49 @@
           site: ''
         });
       }
-
-      // $.ajax({
-      //     url: '/api/ticket/ticket/read',
-      //     type: 'GET',
-      //     async: false,
-      //     success: function (data) {
-      //         data2 = data.data;
-      //     }
-      // })
-
       viewdata = new wijmo.collections.CollectionView(data2);
 
       if (!theGrid2) {
+        const minRows = 5;
+        const rowData = [...tempData];
+
+        while (rowData.length < minRows) {
+          rowData.push({}); // 빈 객체 추가로 빈 행 생성
+        }
         // 데이터 그리드에 바인딩
         theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
           autoGenerateColumns: false,
           showMarquee: true,
+          isReadOnly: true,
+          selectionMode: wijmo.grid.SelectionMode.Row,
           columns: [
-            {binding: 'rownum', header: '순번', width: 80, align: 'center'},
+            {binding: 'rownum', header: '순번', width: 60, align: 'center'},
             {binding: 'kind', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'state', header: '수량', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'orderdate', header: 'T(두께)', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'compnm', header: 'W/H(폭 또는 높이)', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'title', header: 'L(길이)', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'state', header: '수량', width: 80, align: 'center'},
+            {binding: 'orderdate', header: 'T', width: 80, align: 'center'},
+            {binding: 'compnm', header: 'W/H', width: 80, align: 'center'},
+            {binding: 'title', header: 'L', width: 80, align: 'center'},
             {binding: 'reservatedate', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'category', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'touse', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'ton', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'site', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'}
           ],
-          itemsSource: tempData
+          itemsSource: rowData,
         });
-        theGrid2.rows.defaultSize *= 2 / 3;
+        let selector = new wijmo.grid.selector.Selector(theGrid2, {
+          itemChecked: (e, ctx) => {
+            SelectItem = theGrid2.rows.filter(r => r.isSelected);
+
+          }
+        })
+
         // FlexGrid의 최대 높이를 제한하여 스크롤바를 활성화
-        theGrid2.hostElement.style.maxHeight = '220px'; // 약 5개의 행 높이에 맞게 설정
+        theGrid2.hostElement.style.maxHeight = '300px'; // 약 5개의 행 높이에 맞게 설정
         theGrid2.hostElement.style.overflowY = 'auto';
         // 선택이 변경될 때, 현재 항목 업데이트
-        theGrid2.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
         new FlexGridContextMenu(theGrid2);
-        window.downloadFileName = '티켓현황';
+        window.downloadFileName = '주문등록';
       } else {
         // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
         theGrid2.itemsSource = viewdata;
