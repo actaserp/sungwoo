@@ -16,48 +16,51 @@ import javax.persistence.Table;
 public class TB_DA006W {
 
     @EmbeddedId
-    private TB_DA006W_PK id;
+    private TB_DA006W_PK pk;
 
     @Column(name = "\"cltcd\"")  // 거래처코드
     String cltcd;
 
-    @Column(name = "\"cltnm\"")  // 용도별
+    @Column(name = "\"cltnm\"")  // 거래처명
     String cltnm;
 
-    @Column(name = "\"saupnum\"")  // 용도별
+    @Column(name = "\"saupnum\"")  // 사업자번호
     String saupnum;
 
-    @Column(name = "\"cltzipcd\"")  // 용도별
+    @Column(name = "\"cltzipcd\"")  // 업체우편번호
     String cltzipcd;
 
-    @Column(name = "\"cltaddr\"")  // 용도별
+    @Column(name = "\"cltaddr\"")  // 업체주소
     String cltaddr;
 
-    @Column(name = "\"delzipcd\"")  // 용도별
+    @Column(name = "\"cltaddr02\"") // 업체 상세주소
+    String cltaddr02;
+
+    @Column(name = "\"delzipcd\"")  //
     String delzipcd;
 
-    @Column(name = "\"deladdr\"")  // 용도별
+    @Column(name = "\"deladdr\"")  // 납품주소
     String deladdr;
 
-    @Column(name = "\"deldate\"")  // 용도별
+    @Column(name = "\"deldate\"")  // 납기희망일
     String deldate;
 
-    @Column(name = "\"perid\"")  // 용도별
+    @Column(name = "\"perid\"")  // 담당자
     String perid;
 
-    @Column(name = "\"divicd\"")  // 용도별
+    @Column(name = "\"divicd\"")  //
     String divicd;
 
-    @Column(name = "\"domcls\"")  // 용도별
+    @Column(name = "\"domcls\"")  //
     String domcls;
 
-    @Column(name = "\"moncls\"")  // 용도별
+    @Column(name = "\"moncls\"")  //
     String moncls;
 
-    @Column(name = "\"monrate\"")  // 용도별
+    @Column(name = "\"monrate\"")  //
     String monrate;
 
-    @Column(name = "\"remark\"")  // 용도별
+    @Column(name = "\"remark\"")  // 요청사항 내용
     String remark;
 
     @Column(name = "\"operid\"")  // 용도별
@@ -96,7 +99,7 @@ public class TB_DA006W {
     @Column(name = "\"inperid\"")  // 용도별
     String inperid;
 
-    @Column(name = "\"tel\"")  // 용도별
-    String tel;
+    @Column(name = "\"telno\"")  // 용도별
+    String telno;
 
 }

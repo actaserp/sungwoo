@@ -86,7 +86,7 @@
                   </a>
                 </li>
                 <li>
-                  <a class="btn btn-edit" id="btnSave" title="저장">
+                  <a class="btn btn-edit" id="btnSave" title="저장" onclick="saveOrder()">
                     <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
                     저장
                   </a>
@@ -105,7 +105,7 @@
                   </label>
                 </th>
                 <td>
-                  <input type="date" id="reqdate" name="reqdate" value="2024-10-29" style="width: 200px" readonly>
+                  <input type="date" id="reqdate" name="reqdate" value="" style="width: 200px" readonly>
                 </td>
                 <th style="text-align: center">
                   <label for="deldate">
@@ -228,7 +228,7 @@
                 </th>
                 <td>
                   <select id="hgrb" name="hgrb" style="width: 100px">
-                    <option value="전체">전체</option>
+                    <option value="" selected disabled>선택</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -273,7 +273,7 @@
                 </th>
                 <td>
                   <select id="exfmtypedv" name="exfmtypedv" style="width: 100px">
-                    <option value="전체">전체</option>
+                    <option value="" selected disabled>선택</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -283,7 +283,7 @@
                 </th>
                 <td>
                   <select id="infmtypedv" name="infmtypedv" style="width: 100px">
-                    <option value="전체">전체</option>
+                    <option value="" selected disabled>선택</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -293,7 +293,7 @@
                 </th>
                 <td>
                   <select id="stframedv" name="stframedv" style="width: 100px">
-                    <option value="전체">전체</option>
+                    <option value="" selected disabled>선택</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -303,7 +303,7 @@
                 </th>
                 <td>
                   <select id="stexplydv" name="stexplydv" style="width: 100px">
-                    <option value="전체">전체</option>
+                    <option value="" selected disabled>선택</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -455,7 +455,7 @@
       </div>
     </div>
   </div>
-
+  <!--요청사항 popup -->
   <div class="modal">
     <div class="popup-wrapper w700" id="popup2" style="min-width: 1050px">
       <div class="popup-title">
@@ -514,7 +514,7 @@
   <script>
     tinymce.init({
       language: "ko_KR", //한글판으로 변경
-      selector: "#mytextarea", // TinyMCE를 적용할 textarea 요소의 선택자를 지정
+      selector: "#remarkrequest", // TinyMCE를 적용할 textarea 요소의 선택자를 지정
       plugins: "paste image imagetools", // 'paste', 'image', 'imagetools' 플러그인 추가
       height: 500,
       width: 900,
@@ -595,48 +595,29 @@
 
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
-      fetchListData();
+      //fetchListData();
       fetchListData2();
-      //clearForm();
+      getTodayDate();
 
-      // spworkcd, spcompcd, spplancd의 값이 변경될 때마다 데이터 다시 로드
-      // document.getElementById('spworkcd').addEventListener('change', fetchListData);
-      // document.getElementById('spcompcd').addEventListener('change', fetchListData);
-      // document.getElementById('spplancd').addEventListener('change', fetchListData);
-      // document.getElementById('spworkcd').addEventListener('change', clearForm);
-      // document.getElementById('spcompcd').addEventListener('change', clearForm);
-      // document.getElementById('spplancd').addEventListener('change', clearForm);
     }
-
+    // 주문의뢰현황 그리드
     function fetchListData() {
       let data2 = [];
 
-      // 임시 데이터 배열 정의
-      var tempData = [];
-      for (var i = 0; i < 10; i++) {
-        tempData.push({
-          state: '',
-          orderdate: '',
-          compnm: '',
-          title: '',
-          reservatedate: '',
-          category: '',
-          touse: '',
-          ton: '',
-          site: '',
-          price: '',
-          other: ''
-        });
+      $.ajax({
+        url: '/api/request/request/order_read',
+        type: 'GET',
+        data: {},
+        async: false,
+        success: function (data) {
+          data2 = data.data;
+        }
+      })
+      // 최소 5개의 행을 만들기 위해 빈 객체 추가
+      const minRows = 12;
+      while (data2.length < minRows) {
+        data2.push({}); // 빈 객체를 추가하여 빈 행을 생성
       }
-
-      // $.ajax({
-      //     url: '/api/ticket/ticket/read',
-      //     type: 'GET',
-      //     async: false,
-      //     success: function (data) {
-      //         data2 = data.data;
-      //     }
-      // })
 
       viewdata = new wijmo.collections.CollectionView(data2);
 
@@ -648,17 +629,17 @@
           columns: [
             {binding: 'state', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
             {binding: 'orderdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'compnm', header: '업체명', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'title', header: '제목', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'compnm', header: '업체명', width: '*', minWidth: 100, align: 'left'},
+            {binding: 'title', header: '제목', width: '*', minWidth: 100, align: 'left'},
             {binding: 'reservatedate', header: '출하예정일', width: '*', minWidth: 100, align: 'center'},
             {binding: 'category', header: '제품유형', width: '*', minWidth: 100, align: 'center'},
             {binding: 'touse', header: '용도별', width: '*', minWidth: 100, align: 'center'},
             {binding: 'ton', header: '톤별', width: '*', minWidth: 100, align: 'center'},
             {binding: 'site', header: '시트별', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'price', header: '금액', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'price', header: '금액', width: '*', minWidth: 100, align: 'right'},
             {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'}
           ],
-          itemsSource: tempData
+          itemsSource: viewdata
         });
         // 선택이 변경될 때, 현재 항목 업데이트
         theGrid.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
@@ -683,16 +664,16 @@
           data2 = data.data;
         }
       })
+      // 최소 5개의 행을 만들기 위해 빈 객체 추가
+      const minRows = 5;
+      while (data2.length < minRows) {
+        data2.push({}); // 빈 객체를 추가하여 빈 행을 생성
+      }
 
       viewdata = new wijmo.collections.CollectionView(data2);
 
       if (!theGrid2) {
-        const minRows = 5;
-        const rowData = viewdata;
 
-        while (rowData.length < minRows) {
-          rowData.push({}); // 빈 객체 추가로 빈 행 생성
-        }
         // 데이터 그리드에 바인딩
         theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
           autoGenerateColumns: false,
@@ -701,25 +682,25 @@
           selectionMode: wijmo.grid.SelectionMode.Row,
           columns: [
             {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'qty', header: '수량', width: 80, align: 'center'},
-            {binding: 'panel_t', header: 'T', width: 80, align: 'center'},
-            {binding: 'panel_w', header: 'W/H', width: 80, align: 'center'},
-            {binding: 'panel_l', header: 'L', width: 80, align: 'center'},
+            {binding: 'qty', header: '수량', width: 80, align: 'right'},
+            {binding: 'panel_t', header: 'T', width: 80, align: 'right'},
+            {binding: 'panel_w', header: 'W/H', width: 80, align: 'right'},
+            {binding: 'panel_l', header: 'L', width: 80, align: 'right'},
             {binding: 'exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'remark', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'}
+            {binding: 'remark', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'left'}
           ],
-          itemsSource: rowData,
+          itemsSource: viewdata,
         });
+        // 첫열에 selectBox 추가
         let selector = new wijmo.grid.selector.Selector(theGrid2, {
           itemChecked: (e, ctx) => {
             SelectItem = theGrid2.rows.filter(r => r.isSelected);
 
           }
         })
-
         // FlexGrid의 최대 높이를 제한하여 스크롤바를 활성화
         theGrid2.hostElement.style.maxHeight = '300px'; // 약 5개의 행 높이에 맞게 설정
         theGrid2.hostElement.style.overflowY = 'auto';
@@ -742,12 +723,255 @@
       ['tketrem'].forEach(id => {
         document.getElementById(id).value = '';
       });
-
     }
-
+    // 주문등록
     function saveOrder(){
+      // 필수 입력 필드 검사
+      let requiredFields = [
+        {id: '#reqdate', label: '주문일자를 작성해주세요'},
+        {id: '#deldate', label: '납품희망일을 선택해주세요'},
+        {id: '#telno', label: '연락처를 작성해주세요'},
+        {id: '#perid', label: '담당자명을 작성해주세요'},
+        {id: '#postno', label: '주소를 작성해주세요'},
+        {id: '#panel_ht', label: '두께를 작성해주세요'},
+        {id: '#panel_hw', label: '폭을 작성해주세요'},
+        {id: '#panel_hl', label: '길이를 작성해주세요'},
+        {id: '#panel_hh', label: '높이를 작성해주세요'},
+        {id: '#remark', label: '제목을 작성해주세요'}
+      ];
+
+      for (let i = 0; i < requiredFields.length; i++) {
+        let field = requiredFields[i];
+        let $element = $(field.id);
+        let value = $element.val();
+
+        // 요소가 존재하지 않거나, 값이 빈 문자열(선택되지 않은 경우)인 경우 경고
+        if ($element.length === 0 || value === null || value.trim() === '') {
+          Alert.alert('', field.label);
+          return;
+        }
+      }
+      // title 값을 가져오기
+      const title = document.getElementById('btnSave').title;
+
+      // 알림 메시지를 결정하는 변수
+      let alertMessage;
+      // title 값에 따라 알림 메시지 설정
+      if (title === "저장") {
+        alertMessage = '저장하시겠습니까?';
+      } else {
+        alertMessage = '수정하시겠습니까?';
+      }
+      Alert.confirm('', alertMessage, function () {
+        // 주문번호 생성
+        let reqnum = generateRandomStringWithDate()
+        let formData = new FormData();
+        // 다른 데이터를 FormData에 추가합니다.
+        formData.append('reqnum', reqnum);
+        formData.append('reqdate', $('#reqdate').val());
+        formData.append('deldate', $('#deldate').val());
+        formData.append('telno', $('#telno').val());
+        formData.append('perid', $('#perid').val());
+        formData.append('postno', $('#postno').val());
+        formData.append('address1', $('#address1').val());
+        formData.append('address2', $('#address2').val());
+        formData.append('panel_ht', $('#panel_ht').val());
+        formData.append('panel_hw', $('#panel_hw').val());
+        formData.append('panel_hl', $('#panel_hl').val());
+        formData.append('panel_hh', $('#panel_hh').val());
+        formData.append('remark', $('#remark').val());
+
+        let bodyForms = [];
+        // 그리드 행의 데이터를 detailForm 객체에 저장하는 함수
+        function extractGridData() {
+          // 그리드가 초기화된 상태인지 확인
+          if (!theGrid2) {
+            console.error("세부항목 데이터가 존재하진 않습니다.");
+            return;
+          }
+          // 모든 그리드 행 데이터를 순회하여 detailForms에 추가
+          for (let i = 0; i < theGrid2.rows.length; i++) {
+            // 각 행의 데이터를 객체로 생성
+            let rowData = theGrid2.rows[i].dataItem;
+            // rowData가 null인지 확인
+            if (rowData && rowData.hgrb !== undefined) {
+              let bodyForm = {
+                hgrb: rowData.hgrb,
+                qty: rowData.qty,
+                panel_t: rowData.panel_t,
+                panel_w: rowData.panel_w,
+                panel_l: rowData.panel_l,
+                exfmtypedv: rowData.exfmtypedv,
+                infmtypedv: rowData.infmtypedv,
+                stframedv: rowData.stframedv,
+                stexplydv: rowData.stexplydv,
+                remarkrequest: rowData.remarkrequest
+              };
+              // bodyForms 배열에 detailForm 객체 추가
+              bodyForms.push(bodyForm);
+            }
+          }
+        }
+        extractGridData();
+
+        formData.append('bodyData', JSON.stringify(bodyForms));
+        // 새로 추가된 파일만 폼 데이터에 추가
+        uploadedFiles.forEach((file, index) => {
+          formData.append('filelist', file);
+        });
+
+        // 삭제된 파일 목록 추가
+        deletedFiles.forEach((file, index) => {
+          formData.append('deletedFiles', new Blob([JSON.stringify(file)], {type: 'application/json'}));
+        });
+
+        function sendAjaxRequest(url) {
+          $.ajax({
+            url: url,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+              'X-CSRF-Token': $('[name=_csrf]').val() // CSRF 토큰을 헤더에 추가
+            },
+            success: handleAjaxResponse,
+            error: function () {
+              Alert.alert('', '에러가발생하였습니다.');
+            }
+          });
+        }
+
+        function handleAjaxResponse(response) {
+          if (response.success) {
+            Alert.alert('', response.message, function () {
+              fetchListData();
+              resetFormFields();  // Reset all fields after successful save
+            });
+          } else {
+            Alert.alert('', '저장에 실패했습니다.');
+          }
+        }
+        sendAjaxRequest('/api/request/request/save');
+      })
+    }
+    // DOM이 완전히 준비된 후에 특정 코드 실행
+    $(document).ready(function (e) {
+      const selectElementId = 'hgrb';
+      getListHgrb(selectElementId);
+
+      const selectElementId2 = ['exfmtypedv','infmtypedv','stframedv','stexplydv'];
+      for (const items of selectElementId2){
+        getListCgrb(items);
+      }
+    })
+    // 제품구성 리스트 불러오는 function
+    function getListHgrb(selectElementId){
+      fetch(`/api/request/request/getListHgrb`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const selectElement = document.getElementById(selectElementId);
+
+          // "전체" 옵션이 있는지 확인
+          const allOption = selectElement.querySelector('option[value=""]:not([disabled]):not([hidden])');
+
+          // "선택" 옵션이 있는지 확인
+          const defaultOption = selectElement.querySelector('option[value=""][disabled][hidden]');
+
+          // 기존 옵션 제거 (특정 옵션 제외)
+          selectElement.innerHTML = ''; // 모든 옵션 제거
+
+          // "전체" 옵션이 있으면 다시 추가 (선택 가능하게 설정)
+          if (allOption) {
+            allOption.selected = true; // 전체를 기본 선택으로 유지
+            selectElement.appendChild(allOption);
+          }
+
+          // "선택" 옵션이 있으면 다시 추가 (선택 불가능하게 설정)
+          if (defaultOption) {
+            selectElement.appendChild(defaultOption);
+          }
+
+          data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.dtl_cd;
+            option.textContent = item.spcompnm; // item.value를 데이터베이스의 "Value" 필드로 변경
+            selectElement.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching options:', error);
+        });
+    }
+    // 보강재,마감재 리스트 불러오는 function
+    function getListCgrb(selectElementId){
+      fetch(`/api/request/request/getListCgrb`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+          }
+          return response.json();
+        })
+        .then(data => {
+          const selectElement = document.getElementById(selectElementId);
+
+          // "전체" 옵션이 있는지 확인
+          const allOption = selectElement.querySelector('option[value=""]:not([disabled]):not([hidden])');
+
+          // "선택" 옵션이 있는지 확인
+          const defaultOption = selectElement.querySelector('option[value=""][disabled][hidden]');
+
+          // 기존 옵션 제거 (특정 옵션 제외)
+          selectElement.innerHTML = ''; // 모든 옵션 제거
+
+          // "전체" 옵션이 있으면 다시 추가 (선택 가능하게 설정)
+          if (allOption) {
+            allOption.selected = true; // 전체를 기본 선택으로 유지
+            selectElement.appendChild(allOption);
+          }
+
+          // "선택" 옵션이 있으면 다시 추가 (선택 불가능하게 설정)
+          if (defaultOption) {
+            selectElement.appendChild(defaultOption);
+          }
+
+          data.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.dtl_cd;
+            option.textContent = item.spcompnm; // item.value를 데이터베이스의 "Value" 필드로 변경
+            selectElement.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching options:', error);
+        });
+    }
+    // 셀렉트값에 따라 id 히든으로 넘기기
+    function updateSelect(selectId, hiddenInputId) {
+      var selectElement = document.getElementById(selectId);
+      var selectedOptionText = selectElement.options[selectElement.selectedIndex].text;
+      document.getElementById(hiddenInputId).value = selectedOptionText;
+    }
+    // 주문일자 오늘날짜로 default
+    function getTodayDate() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
+      const day = String(today.getDate()).padStart(2, '0');
+      document.getElementById('reqdate').value = `${year}-${month}-${day}`;
+    }
+    // 세부사항 삭제(마지막 세부사항 삭제시 헤드정보도 같이 삭제)
+    function deleteBody(){
 
     }
+    // 헤드정보 삭제(세부사항 존재시 안내 alert기능)
+
+    // 세부사항 행 추가
   </script>
 
 </th:block>

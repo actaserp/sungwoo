@@ -15,7 +15,7 @@ import javax.persistence.*;
 public class TB_DA007W {
 
     @EmbeddedId
-    private TB_DA007W_PK id;
+    private TB_DA007W_PK pk;
 
     @Column(name = "\"egrb\"")  // 용도별
     String egrb;

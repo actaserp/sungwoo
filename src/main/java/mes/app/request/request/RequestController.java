@@ -1,13 +1,12 @@
 package mes.app.request.request;
 
-import mes.app.operate.service.PowerService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import mes.app.request.request.service.RequestService;
 import mes.config.Settings;
 import mes.domain.entity.User;
-import mes.domain.entity.actasEntity.TB_RP920;
-import mes.domain.entity.actasEntity.TB_RP920_PK;
+import mes.domain.entity.actasEntity.*;
 import mes.domain.model.AjaxResult;
-import mes.domain.repository.TB_RP920Repository;
 import mes.domain.repository.actasRepository.TB_DA007WRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -47,7 +46,7 @@ public class RequestController {
     public AjaxResult savePower(@RequestParam Map<String, String> params,
                                 @RequestParam(value = "filelist", required = false) MultipartFile files,
                                 Authentication auth) throws IOException {
-
+        ObjectMapper objectMapper = new ObjectMapper();
         User user = (User) auth.getPrincipal();
         Timestamp now = new Timestamp(System.currentTimeMillis());
         AjaxResult result = new AjaxResult();
@@ -55,24 +54,13 @@ public class RequestController {
         String nspworkcd = params.get("spworkcd");
         String nspcompcd = params.get("spcompcd");
 
-//        if (nspworkcd != null && nspcompcd != null) {
-//
-//            Optional<String> checknovalue = tb_da007WRepository.findMaxChecknoBySpplancd(nspworkcd, nspcompcd);
-//            if (checknovalue.isPresent()) {
-//                Integer checknointvalue = Integer.parseInt(checknovalue.get()) + 1;
-//                newKey = String.format("%03d", checknointvalue);
-//            } else {
-//                newKey = "001";
-//            }
-//
-//        }
+        TB_DA006W_PK headpk = new TB_DA006W_PK();
+        headpk.setCustcd("ZZ");
+        headpk.setSpjangcd("ZZ");
+        headpk.setReqdate(params.get("reqdate"));
+        headpk.setReqnum(params.get("reqnum"));
 
-        TB_RP920_PK pk = new TB_RP920_PK();
-        pk.setSpworkcd(nspworkcd);
-        pk.setSpcompcd(nspcompcd);
-        pk.setSpplancd(newKey);
-
-        TB_RP920 tbRp920 = new TB_RP920();
+        TB_DA006W tbDa006 = new TB_DA006W();
 
         if(files != null){
 
@@ -102,37 +90,33 @@ public class RequestController {
             File saveFile = new File(path + File.separator + file_uuid_name);
             mFile.transferTo(saveFile);
 
-            tbRp920.setFilepath(saveFilePath);
-            tbRp920.setFilesvnm(file_uuid_name);
-            tbRp920.setFileornm(fileName);
-            tbRp920.setFilesize(fileSize);
+//            tbDa006.setFilepath(saveFilePath);
+//            tbDa006.setFilesvnm(file_uuid_name);
+//            tbDa006.setFileornm(fileName);
+//            tbDa006.setFilesize(fileSize);
 //            tbRp920.setFilerem();
         }
 
-        tbRp920.setPk(pk);
-        tbRp920.setSpworknm(params.get("spworknm"));
-        tbRp920.setSpcompnm(params.get("spcompnm"));
-        tbRp920.setSpplannm(params.get("spplannm"));
-        tbRp920.setSpwtycd(params.get("spwtycd"));
-        tbRp920.setSpwtynm(params.get("spwtynm"));
-        tbRp920.setMakercd(params.get("makercd"));
-        tbRp920.setMakernm(params.get("makernm"));
-        tbRp920.setSetupdt(params.get("setupdt"));
-        tbRp920.setPwcapa(Double.parseDouble(params.get("pwcapa")));
-        tbRp920.setPostno(params.get("postno"));
-        tbRp920.setAddress1(params.get("address1"));
-        tbRp920.setAddress2(params.get("address2"));
-        tbRp920.setWorkyn(params.get("workyn"));
-        tbRp920.setMcltcd(params.get("mcltcd"));
-        tbRp920.setMcltnm(params.get("mcltnm"));
-        tbRp920.setMcltusrnm(params.get("mcltusrnm"));
-        tbRp920.setMcltusrhp(params.get("mcltusrhp"));
-        tbRp920.setRemark(params.get("remark"));
-        tbRp920.setIndatem(now);
-        tbRp920.setInuserid(String.valueOf(user.getId()));
-        tbRp920.setInusernm(user.getUsername());
+        tbDa006.setPk(headpk);
+        tbDa006.setCltcd(params.get("cltcd"));
+        tbDa006.setCltnm(params.get("cltnm"));
+        tbDa006.setSaupnum(params.get("saupnum"));
+        tbDa006.setCltzipcd(params.get("postno"));
+        tbDa006.setCltaddr(params.get("address1"));
+        tbDa006.setCltaddr02(params.get("address2"));
+        tbDa006.setDeladdr(params.get("deladdr"));
+        tbDa006.setDeldate(params.get("deldate"));
+        tbDa006.setPerid(params.get("perid"));
+        tbDa006.setPanel_ht(params.get("panel_ht"));
+        tbDa006.setPanel_hw(params.get("panel_hw"));
+        tbDa006.setPanel_hl(params.get("panel_hl"));
+        tbDa006.setIndate(String.valueOf(now));
+        tbDa006.setInperid(String.valueOf(user.getId()));
+        tbDa006.setTelno(params.get("mcltusrhp"));
+        tbDa006.setRemark(params.get("remark"));
+        //tbDa006.setOrdtext(now);
 
-        boolean successcode = requestService.save(tbRp920);
+        boolean successcode = requestService.save(tbDa006);
         if (successcode) {
             result.success = true;
             result.message = "저장하였습니다.";
@@ -140,7 +124,60 @@ public class RequestController {
             result.success = false;
             result.message = "저장에 실패하였습니다.";
         }
+        TB_DA007W_PK bodypk = new TB_DA007W_PK();
 
+        TB_DA007W tbDa007 = new TB_DA007W();
+
+        // 'bodyData' 필드를 JSON 문자열로 받아오기
+        try {
+            String bodyDataJson = params.get("bodyData");
+
+            if (bodyDataJson != null) {
+                // JSON 문자열을 Map으로 변환
+                Map<String, Object> jsonData = objectMapper.readValue(bodyDataJson, new TypeReference<Map<String, Object>>() {});
+
+
+                // Map을 통해 필드에 접근
+                bodypk.setCustcd("ZZ");
+                bodypk.setSpjangcd("ZZ");
+                bodypk.setReqdate(params.get("bodydata"));
+                bodypk.setReqnum(params.get("reqnum"));
+                bodypk.setReqseq(findMaxReqseq(params.get("reqnum")));
+
+                tbDa007.setPk(bodypk);
+                tbDa007.setHgrb((String) jsonData.get("hgrb"));
+                tbDa007.setPanel_t((String) jsonData.get("panel_t"));
+                tbDa007.setPanel_w((String)jsonData.get("panel_w"));
+                tbDa007.setPanel_l((String)jsonData.get("panel_l"));
+                tbDa007.setQty((String) jsonData.get("qty"));
+                tbDa007.setExfmtypedv((String)jsonData.get("exfmtypedv"));
+                tbDa007.setInfmtypedv((String)jsonData.get("infmtypedv"));
+                tbDa007.setStframedv((String)jsonData.get("stframedv"));
+                tbDa007.setStexplydv((String)jsonData.get("stexplydv"));
+                tbDa007.setRemark((String)jsonData.get("remarkrequest"));
+                tbDa007.setIndate(String.valueOf(now));
+                tbDa007.setInperid(String.valueOf(user.getId()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            result.success = false;
+            result.message = "JSON 파싱 오류";
+            return result;
+        }
+        boolean successcodebody = requestService.saveBody(tbDa007);
+        if (successcodebody) {
+            result.success = true;
+            result.message = "세부사항 저장하였습니다.";
+        } else {
+            result.success = false;
+            result.message = "세부사항 저장에 실패하였습니다.";
+        }
         return result;
+    }
+
+    public String findMaxReqseq(String reqnum) {
+        int reqseq = tb_da007WRepository.findMaxReqseq(reqnum);
+
+        return String.valueOf(reqseq + 1);
     }
 }
