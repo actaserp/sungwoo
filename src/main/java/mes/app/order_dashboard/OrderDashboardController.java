@@ -1,4 +1,4 @@
-package mes.app.order_dashboard.service;
+package mes.app.order_dashboard;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

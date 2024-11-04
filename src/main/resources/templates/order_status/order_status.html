@@ -324,7 +324,7 @@
                 // 공휴일 데이터 가져오기
                 fetchHolidays().then(holidays => {
                     holidays.forEach(holiday => {
-                        console.log('Adding holiday:', holiday); // 공휴일 추가 확인
+                        // console.log('Adding holiday:', holiday); // 공휴일 추가 확인
                         calendar.addEvent({
                             title: holiday.name, // 공휴일 이름
                             start: holiday.date,  // 공휴일 날짜

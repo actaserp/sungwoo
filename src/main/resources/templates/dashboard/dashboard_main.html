@@ -59,7 +59,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>매출액</h3>
+                                <h3>주문의뢰건수</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -79,7 +79,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>수주액</h3>
+                                <h3>견적확인건수</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -99,7 +99,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>견적 진행</h3>
+                                <h3>제작진행건수</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -119,7 +119,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>견적요청</h3>
+                                <h3>출고건수</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -139,7 +139,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>매출액</h3>
+                                <h3>MoM</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -159,7 +159,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>수주액</h3>
+                                <h3>주문의뢰건수</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -179,7 +179,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>견적진행</h3>
+                                <h3>견적확인건수</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -199,7 +199,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>견적요청</h3>
+                                <h3>제작진행건수</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -219,7 +219,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>매출액</h3>
+                                <h3>출고건수</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -239,7 +239,7 @@
                     <div class="swiper-slide">
                         <section>
                             <div class="title">
-                                <h3>수주액</h3>
+                                <h3>MoM</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -285,7 +285,8 @@
                 <div class="tab-item-sub h280" id="tab1">
                   <h3>매출액</h3>
                   <div class="chart-wrap">
-                    <div id="chartHolder1"  style="width: 100%; height: 420px; padding-top: 13px"></div>
+                   <!-- <div id="chartHolder1"  style="width: 100%; height: 420px; padding-top: 13px"></div>-->
+                      <canvas id="revenueChart"></canvas>
                   </div>
                 </div>
               </section>
@@ -293,7 +294,8 @@
                 <div class="tab-item-sub h280" id="tab2">
                   <h3>수주액</h3>
                   <div class="chart-wrap">
-                    <div id="chartHolder2"  style="width: 100%; height: 420px; padding-top: 13px"></div>
+                    <!--<div id="chartHolder2"  style="width: 100%; height: 420px; padding-top: 13px"></div>-->
+                      <canvas id="orderChart"></canvas>
                   </div>
                 </div>
               </section>
@@ -303,7 +305,8 @@
                 <div class="tab-item-sub h280" id="tab3">
                   <h3>견적진행</h3>
                   <div class="chart-wrap">
-                    <div id="chartHolder3"  style="width: 100%; height: 420px; padding-top: 13px"></div>
+                    <!--<div id="chartHolder3"  style="width: 100%; height: 420px; padding-top: 13px"></div>-->
+                      <canvas id="estimateChart"></canvas>
                   </div>
                 </div>
               </section>
@@ -311,7 +314,8 @@
                 <div class="tab-item-sub h280" id="tab4">
                   <h3>견적요청</h3>
                   <div class="chart-wrap">
-                    <div id="chartHolder4"  style="width: 100%; height: 420px; padding-top: 13px"></div>
+                    <!--<div id="chartHolder4"  style="width: 100%; height: 420px; padding-top: 13px"></div>-->
+                      <canvas id="requestChart"></canvas>
                   </div>
                 </div>
               </section>
@@ -509,260 +513,116 @@
     <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
     <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
     <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
+        // 차트 데이터 설정
+        const revenueData = {
+            labels: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+            datasets: [{
+                label: '청구금액',
+                data: [1200, 1500, 1800, 2100, 2400, 2700, 1500, 1600, 1600, 1900, 2200, 2500],
+                backgroundColor: 'rgba(98, 178, 253, 0.5)',
+                borderColor: 'rgba(98, 178, 253, 1)',
+                borderWidth: 1
+            }]
+        };
 
-      // 차트 생성 및 데이터 설정
-      function createCharts() {
-        // 매출액 차트 데이터 및 레이아웃
-        var revenueLayout =
-                `<rMateChart backgroundColor="#FFFFFF" borderStyle="none">
-            <Options>
-                <Caption text="매출액 데이터"/>
-                <Legend defaultMouseOverAction="true"/>
-            </Options>
-            <NumberFormatter id="numFmt" useThousandsSeparator="true"/>
-            <Combination2DChart showDataTips="true">
-                <horizontalAxis>
-                    <CategoryAxis categoryField="Month"/>
-                </horizontalAxis>
-                <verticalAxis>
-                    <LinearAxis id="vAxis1" interval="500" formatter="{numFmt}" maximum="3000"/>
-                </verticalAxis>
-                <series>
-                    <Column2DSet type="clustered">
-                        <series>
-                            <Column2DSeries yField="ASKAMT" displayName="청구금액" fill="#62b2fd">
-                                <showDataEffect><SeriesInterpolate/></showDataEffect>
-                            </Column2DSeries>
-                        </series>
-                    </Column2DSet>
-                </series>
-                <verticalAxisRenderers>
-                    <Axis2DRenderer axis="{vAxis1}" showLine="true"/>
-                </verticalAxisRenderers>
-            </Combination2DChart>
-        </rMateChart>`;
+        const orderData = {
+            labels: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+            datasets: [{
+                label: '수주금액',
+                data: [1000, 1200, 1500, 1800, 2000, 2200, 2400, 2600, 2800, 3000, 3200, 3500],
+                backgroundColor: 'rgba(98, 178, 253, 0.5)',
+                borderColor: 'rgba(98, 178, 253, 1)',
+                borderWidth: 1
+            }]
+        };
 
-        var revenueData = [
-          {"Month": "1월", "ASKAMT": 1200},
-          {"Month": "2월", "ASKAMT": 1500},
-          {"Month": "3월", "ASKAMT": 1800},
-          {"Month": "4월", "ASKAMT": 2100},
-          {"Month": "5월", "ASKAMT": 2400},
-          {"Month": "6월", "ASKAMT": 2700},
-          {"Month": "7월", "ASKAMT": 1500},
-          {"Month": "8월", "ASKAMT": 1600},
-          {"Month": "9월", "ASKAMT": 1600},
-          {"Month": "10월", "ASKAMT": 1900},
-          {"Month": "11월", "ASKAMT": 2200},
-          {"Month": "12월", "ASKAMT": 2500}
-        ];
+        const estimateData = {
+            labels: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+            datasets: [{
+                label: '진행금액',
+                data: [800, 900, 1200, 1500, 1800, 2100, 2500, 2700, 2900, 3100, 3300, 3500],
+                backgroundColor: 'rgba(98, 178, 253, 0.5)',
+                borderColor: 'rgba(98, 178, 253, 1)',
+                borderWidth: 1
+            }]
+        };
 
-        // 수주액 차트 데이터 및 레이아웃
-        var orderLayout =
-                `<rMateChart backgroundColor="#FFFFFF" borderStyle="none">
-            <Options>
-                <Caption text="수주액 데이터"/>
-                <Legend defaultMouseOverAction="true"/>
-            </Options>
-            <NumberFormatter id="numFmt" useThousandsSeparator="true"/>
-            <Combination2DChart showDataTips="true">
-                <horizontalAxis>
-                    <CategoryAxis categoryField="Month"/>
-                </horizontalAxis>
-                <verticalAxis>
-                    <LinearAxis id="vAxis1" interval="500" formatter="{numFmt}" maximum="3000"/>
-                </verticalAxis>
-                <series>
-                    <Column2DSet type="clustered">
-                        <series>
-                            <Column2DSeries yField="ORDERAMT" displayName="수주금액" fill="#62b2fd">
-                                <showDataEffect><SeriesInterpolate/></showDataEffect>
-                            </Column2DSeries>
-                        </series>
-                    </Column2DSet>
-                </series>
-                <verticalAxisRenderers>
-                    <Axis2DRenderer axis="{vAxis1}" showLine="true"/>
-                </verticalAxisRenderers>
-            </Combination2DChart>
-        </rMateChart>`;
-        var orderData = [
-          {"Month": "1월", "ORDERAMT": 1000},
-          {"Month": "2월", "ORDERAMT": 1200},
-          {"Month": "3월", "ORDERAMT": 1500},
-          {"Month": "4월", "ORDERAMT": 1800},
-          {"Month": "5월", "ORDERAMT": 2000},
-          {"Month": "6월", "ORDERAMT": 2200},
-          {"Month": "7월", "ORDERAMT": 2400},
-          {"Month": "8월", "ORDERAMT": 2600},
-          {"Month": "9월", "ORDERAMT": 2800},
-          {"Month": "10월", "ORDERAMT": 3000},
-          {"Month": "11월", "ORDERAMT": 3200},
-          {"Month": "12월", "ORDERAMT": 3500}
-        ];
+        const requestData = {
+            labels: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
+            datasets: [{
+                label: '요청금액',
+                data: [700, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800],
+                backgroundColor: 'rgba(98, 178, 253, 0.5)',
+                borderColor: 'rgba(98, 178, 253, 1)',
+                borderWidth: 1
+            }]
+        };
 
-        // 견적진행 차트 데이터 및 레이아웃
-        var estimateLayout =
-                `<rMateChart backgroundColor="#FFFFFF" borderStyle="none">
-            <Options>
-                <Caption text="견적진행 데이터"/>
-                <Legend defaultMouseOverAction="true"/>
-            </Options>
-            <NumberFormatter id="numFmt" useThousandsSeparator="true"/>
-            <Combination2DChart showDataTips="true">
-                <horizontalAxis>
-                    <CategoryAxis categoryField="Month"/>
-                </horizontalAxis>
-                <verticalAxis>
-                    <LinearAxis id="vAxis1" interval="500" formatter="{numFmt}" maximum="3000"/>
-                </verticalAxis>
-                <series>
-                    <Column2DSet type="clustered">
-                        <series>
-                            <Column2DSeries yField="ESTIMATEAMT" displayName="진행금액" fill="#62b2fd">
-                                <showDataEffect><SeriesInterpolate/></showDataEffect>
-                            </Column2DSeries>
-                        </series>
-                    </Column2DSet>
-                </series>
-                <verticalAxisRenderers>
-                    <Axis2DRenderer axis="{vAxis1}" showLine="true"/>
-                </verticalAxisRenderers>
-            </Combination2DChart>
-        </rMateChart>`;
+        // 차트 생성 함수
+        function createCharts() {
+            const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+            const ctxOrder = document.getElementById('orderChart').getContext('2d');
+            const ctxEstimate = document.getElementById('estimateChart').getContext('2d');
+            const ctxRequest = document.getElementById('requestChart').getContext('2d');
 
-        var estimateData = [
-          {"Month": "1월", "ESTIMATEAMT": 800},
-          {"Month": "2월", "ESTIMATEAMT": 900},
-          {"Month": "3월", "ESTIMATEAMT": 1200},
-          {"Month": "4월", "ESTIMATEAMT": 1500},
-          {"Month": "5월", "ESTIMATEAMT": 1800},
-          {"Month": "6월", "ESTIMATEAMT": 2100},
-          {"Month": "7월", "ESTIMATEAMT": 2500},
-          {"Month": "8월", "ESTIMATEAMT": 2700},
-          {"Month": "9월", "ESTIMATEAMT": 2900},
-          {"Month": "10월", "ESTIMATEAMT": 3100},
-          {"Month": "11월", "ESTIMATEAMT": 3300},
-          {"Month": "12월", "ESTIMATEAMT": 3500}
-        ];
+            new Chart(ctxRevenue, {
+                type: 'bar',
+                data: revenueData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
 
-        // 견적요청 차트 데이터 및 레이아웃
-        var requestLayout =
-                `<rMateChart backgroundColor="#FFFFFF" borderStyle="none">
-            <Options>
-                <Caption text="견적요청 데이터"/>
-                <Legend defaultMouseOverAction="true"/>
-            </Options>
-            <NumberFormatter id="numFmt" useThousandsSeparator="true"/>
-            <Combination2DChart showDataTips="true">
-                <horizontalAxis>
-                    <CategoryAxis categoryField="Month"/>
-                </horizontalAxis>
-                <verticalAxis>
-                    <LinearAxis id="vAxis1" interval="500" formatter="{numFmt}" maximum="3000"/>
-                </verticalAxis>
-                <series>
-                    <Column2DSet type="clustered">
-                        <series>
-                            <Column2DSeries yField="REQUESTAMT" displayName="요청금액" fill="#62b2fd">
-                                <showDataEffect><SeriesInterpolate/></showDataEffect>
-                            </Column2DSeries>
-                        </series>
-                    </Column2DSet>
-                </series>
-                <verticalAxisRenderers>
-                    <Axis2DRenderer axis="{vAxis1}" showLine="true"/>
-                </verticalAxisRenderers>
-            </Combination2DChart>
-        </rMateChart>`;
+            new Chart(ctxOrder, {
+                type: 'bar',
+                data: orderData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
 
-        var requestData = [
-          {"Month": "1월", "REQUESTAMT": 700},
-          {"Month": "2월", "REQUESTAMT": 800},
-          {"Month": "3월", "REQUESTAMT": 1000},
-          {"Month": "4월", "REQUESTAMT": 1200},
-          {"Month": "5월", "REQUESTAMT": 1400},
-          {"Month": "6월", "REQUESTAMT": 1600},
-          {"Month": "7월", "REQUESTAMT": 1800},
-          {"Month": "8월", "REQUESTAMT": 2000},
-          {"Month": "9월", "REQUESTAMT": 2200},
-          {"Month": "10월", "REQUESTAMT": 2400},
-          {"Month": "11월", "REQUESTAMT": 2600},
-          {"Month": "12월", "REQUESTAMT": 2800}
-        ];
+            new Chart(ctxEstimate, {
+                type: 'bar',
+                data: estimateData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
 
-        // 각 차트 생성 및 데이터 설정
-        rMateChartH5.create("chart1", "chartHolder1", "", "100%", "100%");
-        rMateChartH5.calls("chart1", {"setLayout": revenueLayout, "setData": revenueData});
-
-        rMateChartH5.create("chart2", "chartHolder2", "", "100%", "100%");
-        rMateChartH5.calls("chart2", {"setLayout": orderLayout, "setData": orderData});
-
-        rMateChartH5.create("chart3", "chartHolder3", "", "100%", "100%");
-        rMateChartH5.calls("chart3", {"setLayout": estimateLayout, "setData": estimateData});
-
-        rMateChartH5.create("chart4", "chartHolder4", "", "100%", "100%");
-        rMateChartH5.calls("chart4", {"setLayout": requestLayout, "setData": requestData});
-      }
-
-      // 페이지 로드 시 모든 차트 생성 및 표시
-      document.addEventListener('DOMContentLoaded', function() {
-        createCharts(); // 모든 차트 생성
-        showAllTabs(); // 모든 탭 보이기
-      });
-
-      // 모든 탭을 보이도록 하는 함수
-      function showAllTabs() {
-        const tabs = document.querySelectorAll('.tab-item-sub');
-        tabs.forEach(tab => {
-          tab.style.display = 'block'; // 모든 탭을 보이게 설정
-        });
-      }
-
-      // 탭 클릭 시 차트 생성
-      document.querySelector('a[href="#tab1"]').addEventListener('click', function() {
-        setTimeout(() => {
-          createCharts(); // 첫 번째 탭의 차트 생성
-          showTab('tab1'); // 첫 번째 탭 보이기
-        }, 100);
-      });
-
-      document.querySelector('a[href="#tab2"]').addEventListener('click', function() {
-        setTimeout(() => {
-          createCharts(); // 두 번째 탭의 차트 생성
-          showTab('tab2'); // 두 번째 탭 보이기
-        }, 100);
-      });
-
-      document.querySelector('a[href="#tab3"]').addEventListener('click', function() {
-        setTimeout(() => {
-          createCharts(); // 세 번째 탭의 차트 생성
-          showTab('tab3'); // 세 번째 탭 보이기
-        }, 100);
-      });
-
-      document.querySelector('a[href="#tab4"]').addEventListener('click', function() {
-        setTimeout(() => {
-          createCharts(); // 네 번째 탭의 차트 생성
-          showTab('tab4'); // 네 번째 탭 보이기
-        }, 100);
-      });
-
-      // 특정 탭을 보여주는 함수
-      function showTab(tabId) {
-        const tabs = document.querySelectorAll('.tab-item-sub');
-        tabs.forEach(tab => {
-          tab.style.display = 'none'; // 모든 탭 숨기기
-        });
-
-        const activeTab = document.getElementById(tabId);
-        if (activeTab) {
-          activeTab.style.display = 'block'; // 선택된 탭 표시
+            new Chart(ctxRequest, {
+                type: 'bar',
+                data: requestData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
         }
-      }
 
-      let csrfToken = $("[name=_csrf]").val();
+        // 페이지 로드 시 모든 차트 생성 및 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            createCharts(); // 모든 차트 생성
+            showAllTabs();
+        });
+
+        let csrfToken = $("[name=_csrf]").val();
 
         var swiper = new Swiper(".card-swiper", {
             slidesPerView: 5,
@@ -780,7 +640,7 @@
         document.readyState === 'complete' ? init() : window.onload = init;
 
         function init() {
-            // createCharts();
+
         }
 
         $('#btnSave').click(function () {
@@ -824,9 +684,6 @@
                 });
 
         });
-
-
-
     </script>
 </th:block>
 </html>

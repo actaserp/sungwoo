@@ -1,5 +1,13 @@
 <html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
 <style>
+  .container-fluid {
+    padding: 20px;
+  }
+
+  .chart-wrap {
+    display: flex; /* Flexbox로 정렬 */
+    align-items: center; /* 수직 중앙 정렬 */
+  }
 
 </style>
 <th:block layout:fragment="content">
@@ -140,7 +148,7 @@
 
           <div class="container-fluid">
             <div class="chart-wrap" style="justify-content: normal">
-              <div id="chartHolder1" style="width:600px; height:400px; margin-left: 20px">
+              <canvas id="myChart" width="400" height="100px"></canvas>
               </div>
             </div>
             <div>
@@ -158,16 +166,28 @@
     <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
   </footer>
 
+<!--  <div id="chartModal" class="modal" style="opacity:100">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <div id="modalChartHolder" style="width: 100%; height: 500px;"></div> &lt;!&ndash; 차트를 보여줄 모달의 div &ndash;&gt;
+    </div>
+  </div>-->
+
   <div id="chartModal" class="modal" style="opacity:100">
     <div class="modal-content">
       <span class="close">&times;</span>
-      <div id="modalChartHolder" style="width: 100%; height: 500px;"></div> <!-- 차트를 보여줄 모달의 div -->
+      <div id="modalChartHolder" style="width: 100%; height: 500px;">
+        <canvas id="modalChart"></canvas>
+      </div>
     </div>
   </div>
+
+
 </th:block>
 
 <th:block layout:fragment="scripts">
   <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="text/javascript">
     var theGrid;
 
@@ -176,7 +196,7 @@
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
       fetchListData();
-      createTab1Charts();
+      createChart();
     }
 
     function fetchListData() {
@@ -230,74 +250,54 @@
       }
     }
 
-    function createTab1Charts() {
-      let chartVars = "rMateOnLoadCallFunction=chartReadyHandler"; // 필요시 사용될 변수
+    function createChart() {
+      const ctx = document.getElementById('myChart').getContext('2d');
 
-      let chartsTab1 = [
-        {name: "chart1", vars: chartVars}
-      ];
+      const labels = ['판넬수출', '특장기타', '특장일반'];
+      const data = {
+        labels: labels,
+        datasets: [{
+          label: '진행 현황',
+          data: [21, 15, 30],
+          fill: false,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(255, 159, 64, 0.2)',
+            'rgba(54, 162, 235, 0.2)'
+          ],
+          borderWidth: 1,
+          barThickness: 30 // 막대 두께를 10으로 설정 (원하는 값으로 조정 가능)
+        }]
+      };
 
-      chartsTab1.forEach(chart => {
-        let chartID = chart.name.replace(/\D/g, ""); // 숫자만 추출
-        rMateChartH5.create(chart.name, "chartHolder" + chartID, chart.vars, "250%", "100%");
-      });
-    }
+      const config = {
+        type: 'bar',
+        data: data,
+        options: {
+          indexAxis: 'y',
+          scales: {
+            x: {
 
-    // 콜백 함수 정의
-    function chartReadyHandler(id) {
-      let chartIndex = id.replace(/\D/g, "");
-      // chart1에 대한 레이아웃과 데이터 설정
-      if (chartIndex === "1") {
-        var layoutStr =
-                '<rMateChart>'
-                + '<DateFormatter id="dateFmt" formatString="M월"/>'
-                + '<Bar3DChart showDataTips="true">'
-                + '<verticalAxis>'
-                + '<CategoryAxis id="vAxis" categoryField="cat"/>'
-                + '</verticalAxis>'
-                + '<horizontalAxis>'
-                + '<DateTimeAxis displayLocalTime="true" id="hAxis" labelUnits="months" minimum="2032/01/01" maximum="2032/12/31"/>'
-                + '</horizontalAxis>'
-                + '<series>'
-                + '<Bar3DSeries minField="date1" xField="date2" labelPosition="inside" insideLabelField="cat" color="#ffffff" insideLabelYOffset="-2">'
-                + '<showDataEffect>'
-                + '<SeriesSlide direction="right" duration="1000"/>'
-                + '</showDataEffect>'
-                + '</Bar3DSeries>'
-                + '</series>'
-                + '<verticalAxisRenderers>'
-                + '<Axis3DEdgeRenderer axis="{vAxis}" showOuterStroke="false">'
-                + '<axisStroke>'
-                + '<Stroke color="#bbbbbbb"/>'
-                + '</axisStroke>'
-                + '</Axis3DEdgeRenderer>'
-                + '</verticalAxisRenderers>'
-                + '<horizontalAxisRenderers>'
-                + '<Axis3DEdgeRenderer axis="{hAxis}" showOuterStroke="false" formatter="{dateFmt}">'
-                + '<axisStroke>'
-                + '<Stroke color="#bbbbbbb"/>'
-                + '</axisStroke>'
-                + '</Axis3DEdgeRenderer>'
-                + '</horizontalAxisRenderers>'
-                + '<backgroundElements>'
-                + '<GridLines direction="vertical" showBorderStroke="false"/>'
-                + '</backgroundElements>'
-                + '</Bar3DChart>'
-                + '</rMateChart>';
+            },
+            y: {
+              title: {
+                display: true,
+                text: ''
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: 'rgb(255, 99, 132)'
+              }
+            }
+          }
+        }
+      };
 
-        var chartData = [
-          {"cat": "판넬수출", "date1": "2032/01/21", "date2": "2032/03/15"},
-          {"cat": "특장기타", "date1": "2032/01/01", "date2": "2032/02/15"},
-          {"cat": "특장기타", "date1": "2032/04/01", "date2": "2032/06/30"},
-          {"cat": "특장일반", "date1": "2032/02/01", "date2": "2032/04/30"},
-         /* {"cat": "제목5", "date1": "2032/06/01", "date2": "2032/09/30"},
-          {"cat": "제목6", "date1": "2032/02/01", "date2": "2032/07/15"},
-          {"cat": "제목7", "date1": "2032/09/01", "date2": "2032/10/30"},
-          {"cat": "제목8", "date1": "2032/10/15", "date2": "2032/11/30"}*/
-        ];
-        document.getElementById(id).setLayout(layoutStr);
-        document.getElementById(id).setData(chartData);
-      }
+      const myChart = new Chart(ctx, config);
     }
   </script>
 </th:block>

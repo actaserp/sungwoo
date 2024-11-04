@@ -2,6 +2,7 @@ package mes.app.account;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -21,9 +22,11 @@ import mes.app.system.service.AuthListService;
 import mes.app.system.service.UserService;
 import mes.domain.DTO.UserCodeDto;
 import mes.domain.entity.*;
+import mes.domain.entity.actasEntity.TB_XA012;
 import mes.domain.entity.actasEntity.TB_XCLIENT;
 import mes.domain.entity.actasEntity.TB_XCLIENTId;
 import mes.domain.repository.*;
+import mes.domain.repository.actasRepository.TB_XA012Repository;
 import mes.domain.repository.actasRepository.TB_XClientRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.AuthenticationException;
@@ -88,7 +91,7 @@ public class AccountController {
 	@Autowired
 	TB_RP920Repository tbRp920Repository;
 	@Autowired
-	UserProfileService userProfileService;
+	TB_XA012Repository tbXA012Repository;
 	@Autowired
 	TB_XClientService tbXClientService;
 	@Autowired
@@ -300,19 +303,41 @@ public class AccountController {
 				// 사용자 저장
 				User user = User.builder()
 						.username(id)
-						.password(Pbkdf2Sha256.encode(password)) // 비밀번호 해시화
+						.password(Pbkdf2Sha256.encode(password))
 						.email(email)
-						.first_name(cltnm)
-						.last_name(prenm)
+						.first_name(prenm)
+						.last_name("")
 						.tel(tel)
+						.active(true)
+						.is_staff(false)
+						.date_joined(new Timestamp(System.currentTimeMillis()))
+						.superUser(false)
 						.phone(phone)
+
 						.build();
 
 				userService.save(user); // User 저장
 
-				// 사용자 프로필 저장 (JDBC 사용)
-				String sql = "INSERT INTO user_profile (user_id, name) VALUES (?, ?)";
-				jdbcTemplate.update(sql, user.getId(), prenm);
+				// UserProfile 저장 (JDBC 사용)
+				String sql = "INSERT INTO user_profile (_created, _creater_id, User_id, lang_code, Name) VALUES (?, ?, ?, ?, ?)";
+				jdbcTemplate.update(sql,
+						new Timestamp(System.currentTimeMillis()), // 현재 시간
+						user.getId(), // _creater_id (현재 로그인한 사용자 ID)
+						user.getId(), // User_id (저장할 사용자 ID)
+						"ko-KR", // lang_code (예: 한국어)
+						prenm // Name (사용자 이름)
+				);
+
+				// TB_XA012에서 custcd와 spjangcd로 조회
+				String custcd = "SWSPANEL";
+				List<String> spjangcds = Arrays.asList("ZZ", "YY");
+
+				List<TB_XA012> tbX_A012List = tbXA012Repository.findByCustcdAndSpjangcds(custcd, spjangcds);
+				if (tbX_A012List.isEmpty()) {
+					result.success = false;
+					result.message = "custcd 및 spjangcd에 해당하는 데이터를 찾을 수 없습니다.";
+					return result;
+				}
 
 				// TB_XCLIENT 저장
 				String maxCltcd = tbXClientRepository.findMaxCltcd(); // 최대 cltcd 조회
@@ -321,6 +346,7 @@ public class AccountController {
 				TB_XCLIENT tbXClient = TB_XCLIENT.builder()
 						.saupnum(id) // 사업자번호
 						.prenm(prenm) // 대표자명
+						.cltnm(cltnm)	//업체명
 						.biztypenm(biztypenm) // 업태명
 						.bizitemnm(bizitemnm) // 종목명
 						.zipcd(postno) // 우편번호
@@ -328,13 +354,13 @@ public class AccountController {
 						.telnum(tel) // 전화번호
 						.hptelnum(phone) // 핸드폰번호
 						.agneremail(email) // 담당자 email
-						.id(new TB_XCLIENTId(newCltcd, id)) // cltcd와 custcd 설정
+						.id(new TB_XCLIENTId(custcd, newCltcd))
 						.build();
 
 				tbXClientService.save(tbXClient); // TB_XCLIENT 저장
 
 				result.success = true;
-				result.message = "신청이 완료되었습니다.";
+				result.message = "등록이 완료되었습니다.";
 				flag = false;
 			} else {
 				result.success = false;
@@ -342,7 +368,7 @@ public class AccountController {
 			}
 		} catch (Exception e) {
 			result.success = false;
-			result.message = "오류 발생: " + e.getMessage();
+			System.out.println("오류 발생: " + e.getMessage());
 			System.out.println(e);
 		}
 
@@ -362,7 +388,7 @@ public class AccountController {
 		return String.format("SW%05d", newNumber);
 	}
 
-	@PostMapping("/user-auth/searchAccount")
+	/*@PostMapping("/user-auth/searchAccount")
 	public AjaxResult IdSearch(@RequestParam("usernm") final String usernm,
 							   @RequestParam("mail") final String mail){
 
@@ -374,6 +400,25 @@ public class AccountController {
 			result.success = true;
 			result.data = user;
 		}else {
+			result.success = false;
+			result.message = "해당 사용자가 존재하지 않습니다.";
+		}
+		return result;
+	}*/
+
+	@PostMapping("/user-auth/searchAccount")
+	public AjaxResult IdSearch(@RequestParam("usernm") final String usernm,
+							   @RequestParam("userid1") final String userid1) {
+
+		AjaxResult result = new AjaxResult();
+
+		// 사업자 번호와 대표자를 기반으로 사용자 검색
+		List<String> user = userRepository.findByFirstNameAndBusinessNumberNative(usernm, userid1);
+
+		if (!user.isEmpty()) {
+			result.success = true;
+			result.data = user;
+		} else {
 			result.success = false;
 			result.message = "해당 사용자가 존재하지 않습니다.";
 		}
@@ -394,7 +439,8 @@ public class AccountController {
 			return result;
 		}
 
-		boolean flag = userRepository.existsByUsernameAndEmail(usernm, mail);
+		int exists = userRepository.existsByUsernameAndEmail(usernm, mail);
+		boolean flag = exists > 0;
 
 		if(flag) {
 			sendEmailLogic(mail, usernm);
@@ -408,7 +454,6 @@ public class AccountController {
 
 		return result;
 	}
-
 
 	private void sendEmailLogic(String mail, String usernm){
 		Random random = new Random();
