@@ -6,10 +6,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface TB_DA007WRepository extends JpaRepository<TB_DA007W,String> {
-    @Query(value = "SELECT MAX(t.reqseq) FROM TB_DA007W t WHERE t.reqnum", nativeQuery = true)
-    int findMaxReqseq(@Param("reqnum") String reqnum);
+    @Query(value = "SELECT COALESCE(MAX(t.reqseq), 0) FROM TB_DA007W t WHERE " +
+            "t.reqnum = reqnum AND t.custcd = custcd AND t.spjangcd = spjangcd AND t.reqdate = reqdate", nativeQuery = true)
+    int findMaxReqseq(@Param("reqnum") String reqnum
+                    , @Param("custcd") String custcd
+                    , @Param("spjangcd") String spjangcd
+                    , @Param("reqdate") String reqdate);
+
+    @Query(value = "SELECT t.reqseq FROM TB_DA007W t WHERE " +
+            "t.reqnum = reqnum AND t.custcd = custcd AND t.spjangcd = spjangcd AND t.reqdate = reqdate", nativeQuery = true)
+    List<String> findReqseq(@Param("reqnum") String reqnum
+            , @Param("custcd") String custcd
+            , @Param("spjangcd") String spjangcd
+            , @Param("reqdate") String reqdate);
 }

@@ -7,16 +7,30 @@ import mes.config.Settings;
 import mes.domain.entity.User;
 import mes.domain.entity.actasEntity.*;
 import mes.domain.model.AjaxResult;
+import mes.domain.repository.actasRepository.TB_DA006WRepository;
 import mes.domain.repository.actasRepository.TB_DA007WRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+import mes.app.UtilClass;
 
 @RestController
 @RequestMapping("/api/request/request")
@@ -26,7 +40,10 @@ public class RequestController {
     private RequestService requestService;
 
     @Autowired
-    private TB_DA007WRepository tb_da007WRepository;
+    private TB_DA007WRepository tbda007WRepository;
+
+    @Autowired
+    private TB_DA006WRepository tbda006WRepository;
 
     @Autowired
     Settings settings;
@@ -42,6 +59,17 @@ public class RequestController {
         return result;
     }
 
+    @GetMapping("/order_read")
+    public AjaxResult getOrderList() {
+
+        List<Map<String, Object>> items = this.requestService.getOrderList();
+
+        AjaxResult result = new AjaxResult();
+        result.data = items;
+
+        return result;
+    }
+
     @PostMapping("/save")
     public AjaxResult savePower(@RequestParam Map<String, String> params,
                                 @RequestParam(value = "filelist", required = false) MultipartFile files,
@@ -50,15 +78,15 @@ public class RequestController {
         User user = (User) auth.getPrincipal();
         Timestamp now = new Timestamp(System.currentTimeMillis());
         AjaxResult result = new AjaxResult();
-        String newKey = "";
-        String nspworkcd = params.get("spworkcd");
-        String nspcompcd = params.get("spcompcd");
+        String username = user.getUsername();
+        Map<String, Object> userInfo = requestService.getUserInfo(username);
 
         TB_DA006W_PK headpk = new TB_DA006W_PK();
-        headpk.setCustcd("ZZ");
+        headpk.setCustcd((String) userInfo.get("custcd"));
         headpk.setSpjangcd("ZZ");
         headpk.setReqdate(params.get("reqdate"));
-        headpk.setReqnum(params.get("reqnum"));
+        String reqnum = String.valueOf(tbda006WRepository.findMaxReqnum("ZZ","ZZ",params.get("reqdate")) + 1);
+        headpk.setReqnum(reqnum);
 
         TB_DA006W tbDa006 = new TB_DA006W();
 
@@ -98,19 +126,19 @@ public class RequestController {
         }
 
         tbDa006.setPk(headpk);
-        tbDa006.setCltcd(params.get("cltcd"));
-        tbDa006.setCltnm(params.get("cltnm"));
-        tbDa006.setSaupnum(params.get("saupnum"));
+        tbDa006.setCltcd((String) userInfo.get("cltcd"));
+        tbDa006.setCltnm((String) userInfo.get("cltnm"));
+        tbDa006.setSaupnum((String) userInfo.get("cltcd"));
+
         tbDa006.setCltzipcd(params.get("postno"));
         tbDa006.setCltaddr(params.get("address1"));
         tbDa006.setCltaddr02(params.get("address2"));
-        tbDa006.setDeladdr(params.get("deladdr"));
-        tbDa006.setDeldate(params.get("deldate"));
-        tbDa006.setPerid(params.get("perid"));
+        tbDa006.setDeldate(params.get("deldate").replaceAll("-",""));
+        tbDa006.setPerid(params.get("perid"));      // 담당자명
         tbDa006.setPanel_ht(params.get("panel_ht"));
         tbDa006.setPanel_hw(params.get("panel_hw"));
         tbDa006.setPanel_hl(params.get("panel_hl"));
-        tbDa006.setIndate(String.valueOf(now));
+        tbDa006.setIndate(String.valueOf(now).replaceAll("-",""));
         tbDa006.setInperid(String.valueOf(user.getId()));
         tbDa006.setTelno(params.get("mcltusrhp"));
         tbDa006.setRemark(params.get("remark"));
@@ -122,7 +150,7 @@ public class RequestController {
             result.message = "저장하였습니다.";
         } else {
             result.success = false;
-            result.message = "저장에 실패하였습니다.";
+            result.message = "head 저장에 실패하였습니다.";
         }
         TB_DA007W_PK bodypk = new TB_DA007W_PK();
 
@@ -131,32 +159,51 @@ public class RequestController {
         // 'bodyData' 필드를 JSON 문자열로 받아오기
         try {
             String bodyDataJson = params.get("bodyData");
-
             if (bodyDataJson != null) {
                 // JSON 문자열을 Map으로 변환
                 Map<String, Object> jsonData = objectMapper.readValue(bodyDataJson, new TypeReference<Map<String, Object>>() {});
-
-
                 // Map을 통해 필드에 접근
                 bodypk.setCustcd("ZZ");
                 bodypk.setSpjangcd("ZZ");
-                bodypk.setReqdate(params.get("bodydata"));
+                bodypk.setReqdate(params.get("reqdate"));
                 bodypk.setReqnum(params.get("reqnum"));
-                bodypk.setReqseq(findMaxReqseq(params.get("reqnum")));
+                List<String> reqseqList = tbda007WRepository.findReqseq(reqnum, "ZZ","ZZ",params.get("reqdate"));
+                if(!reqseqList.contains((String)jsonData.get("reqseq"))) {
+                    String reqseq = String.valueOf(tbda007WRepository.findMaxReqseq(reqnum, "ZZ", "ZZ", params.get("reqdate")) + 1);
+                    bodypk.setReqseq(reqseq);
 
-                tbDa007.setPk(bodypk);
-                tbDa007.setHgrb((String) jsonData.get("hgrb"));
-                tbDa007.setPanel_t((String) jsonData.get("panel_t"));
-                tbDa007.setPanel_w((String)jsonData.get("panel_w"));
-                tbDa007.setPanel_l((String)jsonData.get("panel_l"));
-                tbDa007.setQty((String) jsonData.get("qty"));
-                tbDa007.setExfmtypedv((String)jsonData.get("exfmtypedv"));
-                tbDa007.setInfmtypedv((String)jsonData.get("infmtypedv"));
-                tbDa007.setStframedv((String)jsonData.get("stframedv"));
-                tbDa007.setStexplydv((String)jsonData.get("stexplydv"));
-                tbDa007.setRemark((String)jsonData.get("remarkrequest"));
-                tbDa007.setIndate(String.valueOf(now));
-                tbDa007.setInperid(String.valueOf(user.getId()));
+                    tbDa007.setPk(bodypk);
+                    tbDa007.setHgrb((String) jsonData.get("hgrb"));
+                    tbDa007.setPanel_t((String) jsonData.get("panel_t"));
+                    tbDa007.setPanel_w((String) jsonData.get("panel_w"));
+                    tbDa007.setPanel_l((String) jsonData.get("panel_l"));
+                    tbDa007.setQty((String) jsonData.get("qty"));
+                    tbDa007.setExfmtypedv((String) jsonData.get("exfmtypedv"));
+                    tbDa007.setInfmtypedv((String) jsonData.get("infmtypedv"));
+                    tbDa007.setStframedv((String) jsonData.get("stframedv"));
+                    tbDa007.setStexplydv((String) jsonData.get("stexplydv"));
+                    tbDa007.setRemark((String) jsonData.get("remarkrequest"));
+                    tbDa007.setIndate(String.valueOf(now));
+                    tbDa007.setInperid(String.valueOf(user.getId()));
+
+                    boolean successcodebody = requestService.saveBody(tbDa007);
+                    if (successcodebody) {
+                        result.success = true;
+                        result.message = "세부사항 저장하였습니다.";
+                    } else {
+                        result.success = false;
+                        result.message = "세부사항 저장에 실패하였습니다.";
+                    }
+                }else {
+                    boolean successcodebody = requestService.updateBody(tbDa007);
+                    if (successcodebody) {
+                        result.success = true;
+                        result.message = "세부사항 수정하였습니다.";
+                    } else {
+                        result.success = false;
+                        result.message = "세부사항 수정에 실패하였습니다.";
+                    }
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -164,20 +211,144 @@ public class RequestController {
             result.message = "JSON 파싱 오류";
             return result;
         }
-        boolean successcodebody = requestService.saveBody(tbDa007);
-        if (successcodebody) {
-            result.success = true;
-            result.message = "세부사항 저장하였습니다.";
-        } else {
-            result.success = false;
-            result.message = "세부사항 저장에 실패하였습니다.";
-        }
+
         return result;
     }
 
-    public String findMaxReqseq(String reqnum) {
-        int reqseq = tb_da007WRepository.findMaxReqseq(reqnum);
+    @PostMapping("/downloader")
+    public ResponseEntity<?> downloadFile(@RequestBody List<Map<String, Object>> reqnums) throws IOException {
 
-        return String.valueOf(reqseq + 1);
+        // 파일 목록과 파일 이름을 담을 리스트 초기화
+        List<File> filesToDownload = new ArrayList<>();
+        List<String> fileNames = new ArrayList<>();
+
+        // ZIP 파일 이름을 설정할 변수 초기화
+        String tketcrdtm = null;
+        String tketnm = null;
+
+        // 파일을 메모리에 쓰기
+        for (Map<String, Object> reqnum : reqnums) {
+            // 다운로드 위한 파일 정보 조회
+            List<Map<String, Object>> fileList = requestService.download(reqnum);
+
+            for (Map<String, Object> fileInfo : fileList) {
+                String filePath = (String) fileInfo.get("filepath");    // 파일 경로
+                String fileName = (String) fileInfo.get("filesvnm");    // 파일 이름(uuid)
+                String originFileName = (String) fileInfo.get("fileornm");  //파일 원본이름(origin Name)
+
+                if (tketcrdtm == null) {
+                    tketcrdtm = (String) fileInfo.get("tketcrdtm");
+                }
+                if (tketnm == null) {
+                    tketnm = (String) fileInfo.get("tketnm");
+                }
+
+                File file = new File(filePath + File.separator + fileName);
+
+                // 파일이 실제로 존재하는지 확인
+                if (file.exists()) {
+                    filesToDownload.add(file);
+                    fileNames.add(originFileName); // 다운로드 받을 파일 이름을 originFileName으로 설정
+                }
+            }
+        }
+
+        // 파일이 없는 경우
+        if (filesToDownload.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 파일이 하나인 경우 그 파일을 바로 다운로드
+        if (filesToDownload.size() == 1) {
+            File file = filesToDownload.get(0);
+            String originFileName = fileNames.get(0); // originFileName 가져오기
+
+            HttpHeaders headers = new HttpHeaders();
+            String encodedFileName = URLEncoder.encode(originFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + originFileName + "\"; filename*=UTF-8''" + encodedFileName);
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentLength(file.length());
+
+            ByteArrayResource resource = new ByteArrayResource(Files.readAllBytes(file.toPath()));
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(resource);
+        }
+
+        String zipFileName = (tketcrdtm != null && tketnm != null) ? tketcrdtm + "_" + tketnm + ".zip" : "download.zip";
+
+        // 파일이 두 개 이상인 경우 ZIP 파일로 묶어서 다운로드
+        ByteArrayOutputStream zipBaos = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOut = new ZipOutputStream(zipBaos)) {
+
+            for (int i = 0; i < filesToDownload.size(); i++) {
+                File file = filesToDownload.get(i);
+                String originFileName = fileNames.get(i); // originFileName 가져오기
+
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    ZipEntry zipEntry = new ZipEntry(originFileName);
+                    zipOut.putNextEntry(zipEntry);
+
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = fis.read(buffer)) > 0) {
+                        zipOut.write(buffer, 0, len);
+                    }
+
+                    zipOut.closeEntry();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
+            }
+
+            zipOut.finish();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        ByteArrayResource zipResource = new ByteArrayResource(zipBaos.toByteArray());
+
+        HttpHeaders headers = new HttpHeaders();
+        String encodedZipFileName = URLEncoder.encode(zipFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + zipFileName + "\"; filename*=UTF-8''" + encodedZipFileName);
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentLength(zipResource.contentLength());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(zipResource);
+    }
+    //제품구성 리스트 불러오는 function
+    @GetMapping("/getListHgrb")
+    public AjaxResult getListHgrb(){
+        List<Map<String, Object>> items = this.requestService.getListHgrb();
+
+        AjaxResult result = new AjaxResult();
+        result.data = items;
+        return result;
+    }
+    //보강재, 마감재 리스트 불러오는 function
+    @GetMapping("/getListCgrb")
+    public AjaxResult getListCgrb(){
+        List<Map<String, Object>> items = this.requestService.getListCgrb();
+
+        AjaxResult result = new AjaxResult();
+        result.data = items;
+        return result;
+    }
+    // 유저정보 불러와 input태그 value
+    @GetMapping("/getUserInfo")
+    public AjaxResult getUserInfo(Authentication auth){
+        User user = (User) auth.getPrincipal();
+        String username = user.getUsername();
+        Map<String, Object> userInfo = requestService.getMyInfo(username);
+
+        AjaxResult result = new AjaxResult();
+        result.data = userInfo;
+        return result;
     }
 }
+

@@ -81,7 +81,7 @@
                 </li>
                 <li>
                   <a class="btn btn-delete" title="삭제">
-                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" onclick="deletehead()">
                     삭제
                   </a>
                 </li>
@@ -142,9 +142,9 @@
                   <input type="text" id="postno" placeholder="우편번호"
                          onclick="sample4_execDaumPostcode()"
                          style="width: 100px; margin-bottom: 3px;">
-                  <input type="text" id="address1" placeholder="도로명주소" style="width: 20%" disabled>
+                  <input type="text" id="address1" placeholder="도로명주소" style="width: 28%" disabled>
                   <input type="hidden" id="placeAddress" placeholder="지번주소">
-                  <input type="text" id="address2" placeholder="상세주소" style="width: 34.7%">
+                  <input type="text" id="address2" placeholder="상세주소" style="width: 34%">
                   <span id="guide" style="color:#999;display:none"></span>
                 </td>
               </tr>
@@ -202,13 +202,13 @@
             <div class="button-wrap" style="margin-bottom: 10px; margin-top: 10px">
               <ul>
                 <li>
-                  <a class="btn btn-saverow" id="btn-saverow" title="행추가">
+                  <a class="btn btn-saverow" id="btn-saverow" title="행추가" onclick="addBody()">
                     <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                     행추가
                   </a>
                 </li>
                 <li>
-                  <a class="btn btn-deleterow" id="btn-deleterow" title="행삭제">
+                  <a class="btn btn-deleterow" id="btn-deleterow" title="행삭제" onclick="deleteBody()">
                     <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
                     행삭제
                   </a>
@@ -598,7 +598,7 @@
       //fetchListData();
       fetchListData2();
       getTodayDate();
-
+      getMyInfo();
     }
     // 주문의뢰현황 그리드
     function fetchListData() {
@@ -764,10 +764,8 @@
       }
       Alert.confirm('', alertMessage, function () {
         // 주문번호 생성
-        let reqnum = generateRandomStringWithDate()
         let formData = new FormData();
         // 다른 데이터를 FormData에 추가합니다.
-        formData.append('reqnum', reqnum);
         formData.append('reqdate', $('#reqdate').val());
         formData.append('deldate', $('#deldate').val());
         formData.append('telno', $('#telno').val());
@@ -805,7 +803,8 @@
                 infmtypedv: rowData.infmtypedv,
                 stframedv: rowData.stframedv,
                 stexplydv: rowData.stexplydv,
-                remarkrequest: rowData.remarkrequest
+                remarkrequest: rowData.remarkrequest,
+                reqseq: rowData.reqseq
               };
               // bodyForms 배열에 detailForm 객체 추가
               bodyForms.push(bodyForm);
@@ -846,7 +845,7 @@
           if (response.success) {
             Alert.alert('', response.message, function () {
               fetchListData();
-              resetFormFields();  // Reset all fields after successful save
+              resetFormFields();
             });
           } else {
             Alert.alert('', '저장에 실패했습니다.');
@@ -897,10 +896,10 @@
             selectElement.appendChild(defaultOption);
           }
 
-          data.forEach(item => {
+          data.data.forEach(item => {
             const option = document.createElement('option');
-            option.value = item.dtl_cd;
-            option.textContent = item.spcompnm; // item.value를 데이터베이스의 "Value" 필드로 변경
+            option.value = item.hgrb;
+            option.textContent = item.hgrbnm; // item.value를 데이터베이스의 "Value" 필드로 변경
             selectElement.appendChild(option);
           });
         })
@@ -940,10 +939,10 @@
             selectElement.appendChild(defaultOption);
           }
 
-          data.forEach(item => {
+          data.data.forEach(item => {
             const option = document.createElement('option');
-            option.value = item.dtl_cd;
-            option.textContent = item.spcompnm; // item.value를 데이터베이스의 "Value" 필드로 변경
+            option.value = item.cgrb;
+            option.textContent = item.cgrbnm; // item.value를 데이터베이스의 "Value" 필드로 변경
             selectElement.appendChild(option);
           });
         })
@@ -965,13 +964,125 @@
       const day = String(today.getDate()).padStart(2, '0');
       document.getElementById('reqdate').value = `${year}-${month}-${day}`;
     }
-    // 세부사항 삭제(마지막 세부사항 삭제시 헤드정보도 같이 삭제)
-    function deleteBody(){
+    // 행(세부사항) 추가
+    function addBody(){
+      const newRowData = {
+        hgrb: document.getElementById("hgrb").value,
+        qty: document.getElementById("qty").value,
+        panel_t: document.getElementById("panel_t").value,
+        panel_w: document.getElementById("panel_w").value,
+        panel_l: document.getElementById("panel_l").value,
+        exfmtypedv: document.getElementById("exfmtypedv").value,
+        infmtypedv: document.getElementById("infmtypedv").value,
+        stframedv: document.getElementById("stframedv").value,
+        stexplydv: document.getElementById("stexplydv").value,
+        remark: document.getElementById("remark").value,
+      };
+      viewdata.push(newRowData);
 
+      theGrid2.collectionView.refresh();
+    }
+    // 행(세부사항) 삭제(마지막 세부사항 삭제시 헤드정보도 같이 삭제)
+    function deleteBody(){
+      let delList = [];
+      let selectedItems = theGrid2.selectedItems;
+
+      for (let i = 0; i < selectedItems.length; i++) {
+        delList.push(
+                selectedItems[i].reqseq
+        );
+      }
+      Alert.confirm('', '삭제하시겠습니까?', function () {
+        let data = {
+          'reqseq': JSON.stringify(delList),
+          '_csrf': csrfToken
+        }
+        let fnSuccess = function (res) {
+          if (res.success) {
+            Alert.alert('', '삭제되었습니다.');
+            fetchListData();
+          }
+        }
+        AjaxUtil.postAsyncData('/api/request/request/deletebody', data, fnSuccess);
+      });
     }
     // 헤드정보 삭제(세부사항 존재시 안내 alert기능)
+    function deletehead(){
 
-    // 세부사항 행 추가
+    }
+    // 필드값 초기화
+    function resetFormFields() {
+      const fieldsToReset = [
+        'reqdate', 'deldate', 'telno', 'perid',
+        'postno', 'address1', 'address2', 'panel_ht',
+        'panel_hw', 'panel_hl', 'panel_hh', 'remark', 'hgrb',
+        'qty', 'panel_t', 'panel_w', 'panel_l',
+        'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv', 'remarkrequest'
+        // 'remark'  // Uncomment if needed
+      ];
+
+      fieldsToReset.forEach(fieldId => {
+        document.getElementById(fieldId).value = '';
+        document.getElementById('setupdt').value = today;
+      });
+      $('.filelist').empty(); // 파일 리스트 초기화
+      uploadedFiles = []; // 업로드된 파일 리스트 초기화
+      deletedFiles = [];
+      // 초기화된 파일 개수 업데이트
+      updateFileCount();
+      resetFileInput($('.fileInput'));
+      $('.text-count').text('0/100'); // 글자 수 0으로 초기화
+      // 특정 필드에 대한 btn-clear 숨김 처리
+      $('#doctitle').each(function () {
+        $(this).siblings('.btn-clear').hide();
+      });
+
+      document.getElementById('btnSave').title = "저장";
+    }
+
+    // 파일 개수 업데이트 함수
+    function updateFileCount() {
+      const fileCount = uploadedFiles.length;
+      $('.upload-filelist .title h5').text(`Files (${fileCount})`);
+      $('.btn-file span').text(`(${fileCount})`);
+    }
+
+    // 다운로드
+    function downloadFile_power() {
+      let selectedItems = theGrid.selectedItems; // 선택된 항목 가져오기
+      let downloadList = [];
+
+      // 선택된 항목에서 다운로드할 파일 목록 생성
+      selectedItems.forEach(function (item) {
+        downloadList.push({
+          uniqcode: item.uniqcode
+        });
+      });
+
+      // 다운로드 URL 지정
+      let downloadUrl = '/api/request/request/downloader';
+
+      // Jung.js에서 정의한 downloadFiles 함수 호출
+      downloadFiles(downloadList, downloadUrl);
+    }
+    // 내정보 불러오는 함수
+    function getMyInfo() {
+      $.ajax({
+        url: '/api/request/request/getUserInfo', // 데이터를 가져올 URL
+        type: 'GET',
+        success: function(data) {
+          console.log('내정보 data : ', data);
+          document.getElementById("telno").value = data.data.hptelnum;
+          document.getElementById("perid").value = data.data.hptelnum;
+          document.getElementById("postno").value = data.data.zipcd;
+          document.getElementById("address1").value = data.data.cltadres;
+          document.getElementById("address2").value = '';
+        },
+        error: function(error) {
+          console.log('정보를 불러오는데 실패했습니다.', error);
+        }
+      });
+    }
   </script>
 
 </th:block>
