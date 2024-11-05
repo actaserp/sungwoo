@@ -294,7 +294,8 @@ public class AccountController {
 			@RequestParam(value = "id") String id,
 			@RequestParam(value = "password") String password,
 			@RequestParam(value = "postno") String postno,
-			@RequestParam(value = "address1") String address1
+			@RequestParam(value = "address1") String address1,
+			@RequestParam(value = "address2") String address2
 	) {
 		AjaxResult result = new AjaxResult();
 
@@ -319,14 +320,16 @@ public class AccountController {
 				userService.save(user); // User 저장
 
 				// UserProfile 저장 (JDBC 사용)
-				String sql = "INSERT INTO user_profile (_created, _creater_id, User_id, lang_code, Name) VALUES (?, ?, ?, ?, ?)";
+				String sql = "INSERT INTO user_profile (_created, _creater_id, User_id, lang_code, Name, UserGroup_id) VALUES (?, ?, ?, ?, ?, ?)";
 				jdbcTemplate.update(sql,
 						new Timestamp(System.currentTimeMillis()), // 현재 시간
 						user.getId(), // _creater_id (현재 로그인한 사용자 ID)
 						user.getId(), // User_id (저장할 사용자 ID)
 						"ko-KR", // lang_code (예: 한국어)
-						prenm // Name (사용자 이름)
+						prenm, // Name (사용자 이름)
+						7 // UserGroup_id (저장할 사용자 그룹 ID: 7)
 				);
+
 
 				// TB_XA012에서 custcd와 spjangcd로 조회
 				String custcd = "SWSPANEL";
@@ -339,6 +342,8 @@ public class AccountController {
 					return result;
 				}
 
+				String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " " + address2 : ""); // 상세주소가 있을 경우 공백으로 구분하여 결합
+
 				// TB_XCLIENT 저장
 				String maxCltcd = tbXClientRepository.findMaxCltcd(); // 최대 cltcd 조회
 				String newCltcd = generateNewCltcd(maxCltcd); // 새로운 cltcd 생성
@@ -350,7 +355,7 @@ public class AccountController {
 						.biztypenm(biztypenm) // 업태명
 						.bizitemnm(bizitemnm) // 종목명
 						.zipcd(postno) // 우편번호
-						.cltadres(address1) // 주소
+						.cltadres(fullAddress) // 주소
 						.telnum(tel) // 전화번호
 						.hptelnum(phone) // 핸드폰번호
 						.agneremail(email) // 담당자 email
