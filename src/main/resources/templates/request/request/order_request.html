@@ -97,6 +97,7 @@
           <div class="table-wrap">
             <table class="write-table">
               <caption>주문등록 테이블</caption>
+              <input type="hidden" id="reqnum" name="reqnum">
               <tbody>
               <tr>
                 <th style="text-align: center">
@@ -142,9 +143,8 @@
                   <input type="text" id="postno" placeholder="우편번호"
                          onclick="sample4_execDaumPostcode()"
                          style="width: 100px; margin-bottom: 3px;">
-                  <input type="text" id="address1" placeholder="도로명주소" style="width: 28%" disabled>
+                  <input type="text" id="address1" placeholder="도로명주소" style="width: 38%" disabled>
                   <input type="hidden" id="placeAddress" placeholder="지번주소">
-                  <input type="text" id="address2" placeholder="상세주소" style="width: 34%">
                   <span id="guide" style="color:#999;display:none"></span>
                 </td>
               </tr>
@@ -202,13 +202,13 @@
             <div class="button-wrap" style="margin-bottom: 10px; margin-top: 10px">
               <ul>
                 <li>
-                  <a class="btn btn-saverow" id="btn-saverow" title="행추가" onclick="addBody()">
+                  <a class="btn btn-saverow" id="btn-saverow" name="saverow" title="행추가" onclick="addBody()">
                     <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                     행추가
                   </a>
                 </li>
                 <li>
-                  <a class="btn btn-deleterow" id="btn-deleterow" title="행삭제" onclick="deleteBody()">
+                  <a class="btn btn-deleterow" id="btn-deleterow" name="deleterow" title="행삭제" onclick="deleteBody()">
                     <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
                     행삭제
                   </a>
@@ -477,7 +477,7 @@
               <td>
                 <div class="table-wrap">
                   <table class="write-table">
-                    <caption>티켓 테이블</caption>
+                    <caption>요청사항</caption>
                     <tbody>
                     <tr style="align-items: center">
                       <th>
@@ -520,19 +520,37 @@
       width: 900,
       toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image", // 'image' 버튼 툴바에 추가
       paste_data_images: true, // 이미지 붙여넣기 설정 활성화
-      file_picker_types: 'image' // TinyMCE에서 이미지를 선택할 때, 이미지 파일만 선택 (옵션 : media, file 등)
-      // images_upload_handler(blobInfo, success) { // 이미지를 업로드하는 핸들러 함수
-      //   // blobInfo : TinyMCE에서 이미지 업로드 시 사용되는 정보를 담고 있는 객체
-      //   const file = new File([blobInfo.blob()], blobInfo.filename());
-      //   const fileName = blobInfo.filename();
-      //
-      //   if (fileName.includes("blobid")) {
-      //     success(URL.createObjectURL(file));
-      //   } else {
-      //     imageFiles.push(file);
-      //     success(URL.createObjectURL(file)); // Blob 객체의 임시 URL을 생성해 이미지 미리보기 적용
-      //   }
-      // }
+      file_picker_types: 'image', // TinyMCE에서 이미지를 선택할 때, 이미지 파일만 선택 (옵션 : media, file 등)
+      automatic_uploads: true,
+
+      // 이미지 업로드 핸들러 설정
+      images_upload_handler: function (blobInfo, success, failure) {
+        let formData = new FormData();
+        formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+        // 서버 엔드포인트 호출
+        fetch('/api/request/request/uploadEditor', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+          }
+          return response.json(); // JSON 파싱 시도
+        })
+        .then(data => {
+          if (data.location) {
+            success(data.location); // 업로드 성공 시 이미지 URL 반환
+          } else {
+            failure('Image upload failed: Invalid server response.');
+          }
+        })
+        .catch(error => {
+          console.error('Upload error:', error); // 오류 메시지 확인
+          failure('Image upload failed: ' + error.message);
+        });
+      }
     });
   </script>
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -590,14 +608,22 @@
 
     var theGrid;
     var theGrid2;
+    var viewdata1;
+    var viewdata2;
+    let SelectItem;
+    let delBodyList = [];
+    let csrfToken = $("[name=_csrf]").val();
 
     document.readyState === 'complete' ? init() : window.onload = init;
-
+    // 오늘 날짜 설정
+    const date = new Date();
+    date.setHours(date.getHours() + 9); // UTC+9로 한국 시간 설정
+    const today = date.toISOString().split('T')[0];
+    document.getElementById('reqdate').value = today;
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
-      //fetchListData();
+      fetchListData();
       fetchListData2();
-      getTodayDate();
       getMyInfo();
     }
     // 주문의뢰현황 그리드
@@ -619,7 +645,7 @@
         data2.push({}); // 빈 객체를 추가하여 빈 행을 생성
       }
 
-      viewdata = new wijmo.collections.CollectionView(data2);
+      viewdata1 = new wijmo.collections.CollectionView(data2);
 
       if (!theGrid) {
         // 데이터 그리드에 바인딩
@@ -627,10 +653,10 @@
           autoGenerateColumns: false,
           showMarquee: true,
           columns: [
-            {binding: 'state', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'orderdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'compnm', header: '업체명', width: '*', minWidth: 100, align: 'left'},
-            {binding: 'title', header: '제목', width: '*', minWidth: 100, align: 'left'},
+            {binding: 'ordfalg', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'cltnm', header: '업체명', width: '*', minWidth: 100, align: 'left'},
+            {binding: 'remark', header: '제목', width: '*', minWidth: 100, align: 'left'},
             {binding: 'reservatedate', header: '출하예정일', width: '*', minWidth: 100, align: 'center'},
             {binding: 'category', header: '제품유형', width: '*', minWidth: 100, align: 'center'},
             {binding: 'touse', header: '용도별', width: '*', minWidth: 100, align: 'center'},
@@ -639,7 +665,7 @@
             {binding: 'price', header: '금액', width: '*', minWidth: 100, align: 'right'},
             {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'}
           ],
-          itemsSource: viewdata
+          itemsSource: viewdata1
         });
         // 선택이 변경될 때, 현재 항목 업데이트
         theGrid.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
@@ -647,7 +673,7 @@
         window.downloadFileName = '티켓현황';
       } else {
         // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-        theGrid.itemsSource = viewdata;
+        theGrid.itemsSource = viewdata1;
       }
     }
 
@@ -658,7 +684,9 @@
       $.ajax({
         url: '/api/request/request/read',
         type: 'GET',
-        data: {},
+        data: {
+          'reqnum': $('#reqnum').val()
+        },
         async: false,
         success: function (data) {
           data2 = data.data;
@@ -666,11 +694,16 @@
       })
       // 최소 5개의 행을 만들기 위해 빈 객체 추가
       const minRows = 5;
-      while (data2.length < minRows) {
-        data2.push({}); // 빈 객체를 추가하여 빈 행을 생성
+      if(data2 == null){
+        for(i = 1 ; i ; 5){
+          data2.push({});
+        }
+      }else {
+        while (data2.length < minRows) {
+          data2.push({}); // 빈 객체를 추가하여 빈 행을 생성
+        }
       }
-
-      viewdata = new wijmo.collections.CollectionView(data2);
+      viewdata2 = new wijmo.collections.CollectionView(data2);
 
       if (!theGrid2) {
 
@@ -690,9 +723,9 @@
             {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'remark', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'left'}
+            {binding: 'remarkrequest', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'left'}
           ],
-          itemsSource: viewdata,
+          itemsSource: viewdata2,
         });
         // 첫열에 selectBox 추가
         let selector = new wijmo.grid.selector.Selector(theGrid2, {
@@ -709,7 +742,7 @@
         window.downloadFileName = '주문등록';
       } else {
         // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-        theGrid2.itemsSource = viewdata;
+        theGrid2.itemsSource = viewdata2;
       }
     }
     // 초기화
@@ -772,7 +805,6 @@
         formData.append('perid', $('#perid').val());
         formData.append('postno', $('#postno').val());
         formData.append('address1', $('#address1').val());
-        formData.append('address2', $('#address2').val());
         formData.append('panel_ht', $('#panel_ht').val());
         formData.append('panel_hw', $('#panel_hw').val());
         formData.append('panel_hl', $('#panel_hl').val());
@@ -812,7 +844,6 @@
           }
         }
         extractGridData();
-
         formData.append('bodyData', JSON.stringify(bodyForms));
         // 새로 추가된 파일만 폼 데이터에 추가
         uploadedFiles.forEach((file, index) => {
@@ -858,7 +889,6 @@
     $(document).ready(function (e) {
       const selectElementId = 'hgrb';
       getListHgrb(selectElementId);
-
       const selectElementId2 = ['exfmtypedv','infmtypedv','stframedv','stexplydv'];
       for (const items of selectElementId2){
         getListCgrb(items);
@@ -875,27 +905,21 @@
         })
         .then(data => {
           const selectElement = document.getElementById(selectElementId);
-
           // "전체" 옵션이 있는지 확인
           const allOption = selectElement.querySelector('option[value=""]:not([disabled]):not([hidden])');
-
           // "선택" 옵션이 있는지 확인
           const defaultOption = selectElement.querySelector('option[value=""][disabled][hidden]');
-
           // 기존 옵션 제거 (특정 옵션 제외)
           selectElement.innerHTML = ''; // 모든 옵션 제거
-
           // "전체" 옵션이 있으면 다시 추가 (선택 가능하게 설정)
           if (allOption) {
             allOption.selected = true; // 전체를 기본 선택으로 유지
             selectElement.appendChild(allOption);
           }
-
           // "선택" 옵션이 있으면 다시 추가 (선택 불가능하게 설정)
           if (defaultOption) {
             selectElement.appendChild(defaultOption);
           }
-
           data.data.forEach(item => {
             const option = document.createElement('option');
             option.value = item.hgrb;
@@ -918,27 +942,21 @@
         })
         .then(data => {
           const selectElement = document.getElementById(selectElementId);
-
           // "전체" 옵션이 있는지 확인
           const allOption = selectElement.querySelector('option[value=""]:not([disabled]):not([hidden])');
-
           // "선택" 옵션이 있는지 확인
-          const defaultOption = selectElement.querySelector('option[value=""][disabled][hidden]');
-
+          const defaultOption = selectElement.querySelector('option[value=""][disabled]:not([hidden])');
           // 기존 옵션 제거 (특정 옵션 제외)
           selectElement.innerHTML = ''; // 모든 옵션 제거
-
           // "전체" 옵션이 있으면 다시 추가 (선택 가능하게 설정)
           if (allOption) {
             allOption.selected = true; // 전체를 기본 선택으로 유지
             selectElement.appendChild(allOption);
           }
-
-          // "선택" 옵션이 있으면 다시 추가 (선택 불가능하게 설정)
+          // "선택" 옵션이 있으면 다시 추가
           if (defaultOption) {
             selectElement.appendChild(defaultOption);
           }
-
           data.data.forEach(item => {
             const option = document.createElement('option');
             option.value = item.cgrb;
@@ -956,14 +974,6 @@
       var selectedOptionText = selectElement.options[selectElement.selectedIndex].text;
       document.getElementById(hiddenInputId).value = selectedOptionText;
     }
-    // 주문일자 오늘날짜로 default
-    function getTodayDate() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1
-      const day = String(today.getDate()).padStart(2, '0');
-      document.getElementById('reqdate').value = `${year}-${month}-${day}`;
-    }
     // 행(세부사항) 추가
     function addBody(){
       const newRowData = {
@@ -976,35 +986,45 @@
         infmtypedv: document.getElementById("infmtypedv").value,
         stframedv: document.getElementById("stframedv").value,
         stexplydv: document.getElementById("stexplydv").value,
-        remark: document.getElementById("remark").value,
+        remarkrequest: tinymce.get('remarkrequest').getContent()
       };
-      viewdata.push(newRowData);
-
-      theGrid2.collectionView.refresh();
+      // 빈 데이터가 있다면 순차적으로 최신화 (덮어쓰기 방식)
+      const sourceCollection = viewdata2.sourceCollection;
+      for (let i = 0; i < sourceCollection.length; i++) {
+        if (!sourceCollection[i].hgrb || sourceCollection[i].hgrb === '') { // 빈 데이터를 찾으면
+          sourceCollection[i] = newRowData; // 새 데이터를 덮어쓰기
+          break; // 첫 번째 빈 데이터만 덮어쓰기
+        }else if(i === 5){
+          viewdata2.push(newRowData);
+        }
+      }
+      // CollectionView 갱신
+      viewdata2.refresh();
+      theGrid2.refresh();
     }
     // 행(세부사항) 삭제(마지막 세부사항 삭제시 헤드정보도 같이 삭제)
     function deleteBody(){
-      let delList = [];
-      let selectedItems = theGrid2.selectedItems;
-
-      for (let i = 0; i < selectedItems.length; i++) {
-        delList.push(
-                selectedItems[i].reqseq
-        );
+      if(SelectItem === undefined || SelectItem.length === 0){
+        Alert.alert('', '삭제할 항목을 선택하세요.');
+        return;
       }
-      Alert.confirm('', '삭제하시겠습니까?', function () {
-        let data = {
-          'reqseq': JSON.stringify(delList),
-          '_csrf': csrfToken
-        }
-        let fnSuccess = function (res) {
-          if (res.success) {
-            Alert.alert('', '삭제되었습니다.');
-            fetchListData();
+      Alert.confirm('', '삭제하시겠습니까?\n주의!\n세부사항을 모두 삭제할 시 주문의뢰가 삭제 됩니다.', function () {
+        SelectItem.forEach(selectedRow => {
+          const selectedData = selectedRow.dataItem;
+          const index = viewdata2.sourceCollection.indexOf(selectedData);
+          if (index > -1) {
+            viewdata2.sourceCollection.splice(index, 1);
           }
+        });
+        viewdata2.refresh();
+        theGrid2.refresh();
+        // 모든 행이 빈지 검사하여 헤더 삭제 메서드 호출
+        const allRowsEmpty = viewdata2.sourceCollection.every(row => !row.hgrb || row.hgrb === '');
+        if (allRowsEmpty) {
+          deletehead();
+          fetchListData2();
         }
-        AjaxUtil.postAsyncData('/api/request/request/deletebody', data, fnSuccess);
-      });
+      })
     }
     // 헤드정보 삭제(세부사항 존재시 안내 alert기능)
     function deletehead(){
@@ -1023,7 +1043,7 @@
 
       fieldsToReset.forEach(fieldId => {
         document.getElementById(fieldId).value = '';
-        document.getElementById('setupdt').value = today;
+        document.getElementById('reqdate').value = today;
       });
       $('.filelist').empty(); // 파일 리스트 초기화
       uploadedFiles = []; // 업로드된 파일 리스트 초기화
@@ -1073,10 +1093,9 @@
         success: function(data) {
           console.log('내정보 data : ', data);
           document.getElementById("telno").value = data.data.hptelnum;
-          document.getElementById("perid").value = data.data.hptelnum;
+          document.getElementById("perid").value = data.data.prenm;
           document.getElementById("postno").value = data.data.zipcd;
           document.getElementById("address1").value = data.data.cltadres;
-          document.getElementById("address2").value = '';
         },
         error: function(error) {
           console.log('정보를 불러오는데 실패했습니다.', error);

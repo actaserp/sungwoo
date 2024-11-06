@@ -32,6 +32,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import mes.app.UtilClass;
 
+import javax.transaction.Transactional;
+
 @RestController
 @RequestMapping("/api/request/request")
 public class RequestController {
@@ -47,31 +49,45 @@ public class RequestController {
 
     @Autowired
     Settings settings;
-
+    // 주문등록 세부사항 그리드 read
     @GetMapping("/read")
-    public AjaxResult getList() {
-
-        List<Map<String, Object>> items = this.requestService.getInspecList();
+    public AjaxResult getList(@RequestParam Map<String, String> params
+                            , Authentication auth) {
+        User user = (User) auth.getPrincipal();
+        String username = user.getUsername();
+        Map<String, Object> userInfo = requestService.getUserInfo(username);
+        TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
+        tbDa006WPk.setReqnum(params.get("reqnum"));
+        tbDa006WPk.setSpjangcd("ZZ");
+        tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
+        List<Map<String, Object>> items = this.requestService.getInspecList(tbDa006WPk);
 
         AjaxResult result = new AjaxResult();
         result.data = items;
 
         return result;
     }
-
+    // 주문의뢰현황 그리드 read
     @GetMapping("/order_read")
     public AjaxResult getOrderList() {
-
         List<Map<String, Object>> items = this.requestService.getOrderList();
-
+        // 각 항목에서 'remark' 키를 찾아 'remarkrequest'로 변경
+        for (Map<String, Object> item : items) {
+            if (item.containsKey("remark")) {
+                Object remarkValue = item.get("remark");
+                item.put("remarkrequest", remarkValue); // remark를 remarkrequest로 변경
+                item.remove("remark"); // 'remark' 키 삭제 (필요하면)
+            }
+        }
         AjaxResult result = new AjaxResult();
         result.data = items;
 
         return result;
     }
-
+    //신규등록
+    @Transactional
     @PostMapping("/save")
-    public AjaxResult savePower(@RequestParam Map<String, String> params,
+    public AjaxResult saveOrder(@RequestParam Map<String, String> params,
                                 @RequestParam(value = "filelist", required = false) MultipartFile files,
                                 Authentication auth) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -84,15 +100,15 @@ public class RequestController {
         TB_DA006W_PK headpk = new TB_DA006W_PK();
         headpk.setCustcd((String) userInfo.get("custcd"));
         headpk.setSpjangcd("ZZ");
-        headpk.setReqdate(params.get("reqdate"));
+        headpk.setReqdate(params.get("reqdate").replaceAll("-",""));
         String reqnum = String.valueOf(tbda006WRepository.findMaxReqnum("ZZ","ZZ",params.get("reqdate")) + 1);
         headpk.setReqnum(reqnum);
 
         TB_DA006W tbDa006 = new TB_DA006W();
+        TB_DA006WFile tbDa006WFile = new TB_DA006WFile();
 
         if(files != null){
-
-            String path = settings.getProperty("file_upload_path") + "발전소";
+            String path = settings.getProperty("file_upload_path") + "주문등록";
 
             float fileSize = (float) files.getSize();
 
@@ -118,11 +134,18 @@ public class RequestController {
             File saveFile = new File(path + File.separator + file_uuid_name);
             mFile.transferTo(saveFile);
 
-//            tbDa006.setFilepath(saveFilePath);
-//            tbDa006.setFilesvnm(file_uuid_name);
-//            tbDa006.setFileornm(fileName);
-//            tbDa006.setFilesize(fileSize);
-//            tbRp920.setFilerem();
+            tbDa006WFile.setFilepath(saveFilePath);
+            tbDa006WFile.setFilesvnm(file_uuid_name);
+            tbDa006WFile.setFileornm(fileName);
+            tbDa006WFile.setFilesize(fileSize);
+            tbDa006WFile.setCustcd((String) userInfo.get("custcd"));
+            tbDa006WFile.setSpjangcd("ZZ");
+            tbDa006WFile.setReqdate(params.get("reqdate").replaceAll("-",""));
+            tbDa006WFile.setReqnum(reqnum);
+            tbDa006WFile.setIndatem(params.get("reqdate").replaceAll("-",""));
+            tbDa006WFile.setInuserid(String.valueOf(user.getId()));
+            tbDa006WFile.setInusernm(username);
+            //tbDa006WFile.setFilerem();
         }
 
         tbDa006.setPk(headpk);
@@ -132,13 +155,12 @@ public class RequestController {
 
         tbDa006.setCltzipcd(params.get("postno"));
         tbDa006.setCltaddr(params.get("address1"));
-        tbDa006.setCltaddr02(params.get("address2"));
         tbDa006.setDeldate(params.get("deldate").replaceAll("-",""));
         tbDa006.setPerid(params.get("perid"));      // 담당자명
         tbDa006.setPanel_ht(params.get("panel_ht"));
         tbDa006.setPanel_hw(params.get("panel_hw"));
         tbDa006.setPanel_hl(params.get("panel_hl"));
-        tbDa006.setIndate(String.valueOf(now).replaceAll("-",""));
+        tbDa006.setIndate(params.get("deldate").replaceAll("-",""));
         tbDa006.setInperid(String.valueOf(user.getId()));
         tbDa006.setTelno(params.get("mcltusrhp"));
         tbDa006.setRemark(params.get("remark"));
@@ -159,49 +181,53 @@ public class RequestController {
         // 'bodyData' 필드를 JSON 문자열로 받아오기
         try {
             String bodyDataJson = params.get("bodyData");
-            if (bodyDataJson != null) {
-                // JSON 문자열을 Map으로 변환
-                Map<String, Object> jsonData = objectMapper.readValue(bodyDataJson, new TypeReference<Map<String, Object>>() {});
+            if (bodyDataJson != null && !bodyDataJson.isEmpty()) {
+                // JSON 배열을 List<Map<String, Object>>로 변환
+                List<Map<String, Object>> jsonDataList = objectMapper.readValue(
+                        bodyDataJson, new TypeReference<List<Map<String, Object>>>() {}
+                );
                 // Map을 통해 필드에 접근
-                bodypk.setCustcd("ZZ");
+                bodypk.setCustcd((String) userInfo.get("custcd"));
                 bodypk.setSpjangcd("ZZ");
-                bodypk.setReqdate(params.get("reqdate"));
-                bodypk.setReqnum(params.get("reqnum"));
-                List<String> reqseqList = tbda007WRepository.findReqseq(reqnum, "ZZ","ZZ",params.get("reqdate"));
-                if(!reqseqList.contains((String)jsonData.get("reqseq"))) {
-                    String reqseq = String.valueOf(tbda007WRepository.findMaxReqseq(reqnum, "ZZ", "ZZ", params.get("reqdate")) + 1);
-                    bodypk.setReqseq(reqseq);
+                bodypk.setReqdate(params.get("reqdate").replaceAll("-",""));
+                bodypk.setReqnum(reqnum);
+                List<String> reqseqList = tbda007WRepository.findReqseq(reqnum, (String) userInfo.get("custcd"),"ZZ",params.get("reqdate").replaceAll("-",""));
+                for (Map<String, Object> jsonData : jsonDataList) {
+                    if (!reqseqList.contains((String) jsonData.get("reqseq"))) {
+                        String reqseq = String.valueOf(tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ", params.get("reqdate").replaceAll("-","")) + 1);
+                        bodypk.setReqseq(reqseq);
 
-                    tbDa007.setPk(bodypk);
-                    tbDa007.setHgrb((String) jsonData.get("hgrb"));
-                    tbDa007.setPanel_t((String) jsonData.get("panel_t"));
-                    tbDa007.setPanel_w((String) jsonData.get("panel_w"));
-                    tbDa007.setPanel_l((String) jsonData.get("panel_l"));
-                    tbDa007.setQty((String) jsonData.get("qty"));
-                    tbDa007.setExfmtypedv((String) jsonData.get("exfmtypedv"));
-                    tbDa007.setInfmtypedv((String) jsonData.get("infmtypedv"));
-                    tbDa007.setStframedv((String) jsonData.get("stframedv"));
-                    tbDa007.setStexplydv((String) jsonData.get("stexplydv"));
-                    tbDa007.setRemark((String) jsonData.get("remarkrequest"));
-                    tbDa007.setIndate(String.valueOf(now));
-                    tbDa007.setInperid(String.valueOf(user.getId()));
+                        tbDa007.setPk(bodypk);
+                        tbDa007.setHgrb((String) jsonData.get("hgrb"));
+                        tbDa007.setPanel_t((String) jsonData.get("panel_t"));
+                        tbDa007.setPanel_w((String) jsonData.get("panel_w"));
+                        tbDa007.setPanel_l((String) jsonData.get("panel_l"));
+                        tbDa007.setQty((String) jsonData.get("qty"));
+                        tbDa007.setExfmtypedv((String) jsonData.get("exfmtypedv"));
+                        tbDa007.setInfmtypedv((String) jsonData.get("infmtypedv"));
+                        tbDa007.setStframedv((String) jsonData.get("stframedv"));
+                        tbDa007.setStexplydv((String) jsonData.get("stexplydv"));
+                        tbDa007.setRemark((String) jsonData.get("remarkrequest"));
+                        tbDa007.setIndate(params.get("deldate").replaceAll("-",""));
+                        tbDa007.setInperid(String.valueOf(user.getId()));
 
-                    boolean successcodebody = requestService.saveBody(tbDa007);
-                    if (successcodebody) {
-                        result.success = true;
-                        result.message = "세부사항 저장하였습니다.";
+                        boolean successcodebody = requestService.saveBody(tbDa007);
+                        if (successcodebody) {
+                            result.success = true;
+                            result.message = "세부사항 저장하였습니다.";
+                        } else {
+                            result.success = false;
+                            result.message = "세부사항 저장에 실패하였습니다.";
+                        }
                     } else {
-                        result.success = false;
-                        result.message = "세부사항 저장에 실패하였습니다.";
-                    }
-                }else {
-                    boolean successcodebody = requestService.updateBody(tbDa007);
-                    if (successcodebody) {
-                        result.success = true;
-                        result.message = "세부사항 수정하였습니다.";
-                    } else {
-                        result.success = false;
-                        result.message = "세부사항 수정에 실패하였습니다.";
+                        boolean successcodebody = requestService.updateBody(tbDa007);
+                        if (successcodebody) {
+                            result.success = true;
+                            result.message = "세부사항 수정하였습니다.";
+                        } else {
+                            result.success = false;
+                            result.message = "세부사항 수정에 실패하였습니다.";
+                        }
                     }
                 }
             }
@@ -349,6 +375,27 @@ public class RequestController {
         AjaxResult result = new AjaxResult();
         result.data = userInfo;
         return result;
+    }
+    @PostMapping("/uploadEditor")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
+        String uploadDir = "c:\\temp\\editorFile\\";
+        // 디렉토리 확인 및 생성
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs(); // 디렉토리 생성
+        }
+
+        // 파일 저장
+        try {
+            File destinationFile = new File(uploadDir + file.getOriginalFilename());
+            file.transferTo(destinationFile);
+            String fileUrl = uploadDir + file.getOriginalFilename(); // 클라이언트로 반환할 URL
+
+            return ResponseEntity.ok(Collections.singletonMap("location", fileUrl));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("error", "파일 업로드 실패: " + e.getMessage()));
+        }
     }
 }
 

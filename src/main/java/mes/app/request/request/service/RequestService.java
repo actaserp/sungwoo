@@ -1,6 +1,7 @@
 package mes.app.request.request.service;
 
 import mes.domain.entity.actasEntity.TB_DA006W;
+import mes.domain.entity.actasEntity.TB_DA006W_PK;
 import mes.domain.entity.actasEntity.TB_DA007W;
 import mes.domain.entity.actasEntity.TB_RP920;
 import mes.domain.repository.TB_RP920Repository;
@@ -32,9 +33,7 @@ public class RequestService {
 
         try{
             tbDa006WRepository.save(tbDa006W);
-
             return true;
-
         }catch (Exception e){
             System.out.println(e + ": 에러발생");
             return false;
@@ -55,7 +54,7 @@ public class RequestService {
         }
     }
     //세부항목 불러오기
-    public List<Map<String, Object>> getInspecList() {
+    public List<Map<String, Object>> getInspecList(TB_DA006W_PK tbDa006W_pk) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
@@ -63,9 +62,14 @@ public class RequestService {
                 select 
                 *
                 from TB_DA007W
+                WHERE reqnum = :reqnum
+                AND   custcd = :custcd
+                AND   spjangcd = :spjangcd
                 order by indate desc
                 """;
-
+        dicParam.addValue("reqnum", tbDa006W_pk.getReqnum());
+        dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
+        dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         return items;
     }
