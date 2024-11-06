@@ -57,11 +57,11 @@
             </ul>
             <div class="tab-contents">
                 <!-- Section -->
-                <section class="tab-item" id="tab1" style="height: 1010px; margin-bottom: 10%">
+                <section class="tab-item" id="tab1" style="height: 900px; margin-bottom: 10px">
                     <div class="row" style="display: flex;">
                         <!-- 왼쪽 섹션: 50% 차지 -->
                         <section
-                                style="width: 60%; box-sizing: border-box; height: 940px; margin-right: 20px; border-radius: 10px; ">
+                                style="width: 60%; box-sizing: border-box; height: 830px; margin-right: 20px; border-radius: 10px; ">
                             <div class="title-wrap">
                                 <h3>주문 캘린더</h3>
                                 <div class="btn-wrap">
@@ -85,13 +85,13 @@
                                                 <div class="title">
                                                     <h3>주문</h3>
                                                 </div>
-                                                <div class="data">4</div>
+                                                <div class="data">
+                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
                                                 <dl>
                                                     <dt>전일대비</dt>
                                                     <dd>
-                                                        <span class="down"></span>
-                                                        <span class="fs18 fw600">1.20</span>
-                                                        <span class="unit">%</span>
+                                                        <span class="down"></span> 1.20 <span class="unit">%</span>
                                                     </dd>
                                                 </dl>
                                             </section>
@@ -99,7 +99,9 @@
                                                 <div class="title">
                                                     <h3>진행</h3>
                                                 </div>
-                                                <div class="data">0</div>
+                                                <div class="data">
+                                                    0<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
                                                 <dl>
                                                     <dt>전일대비</dt>
                                                     <dd>
@@ -111,7 +113,9 @@
                                                 <div class="title">
                                                     <h3>출고</h3>
                                                 </div>
-                                                <div class="data">4</div>
+                                                <div class="data">
+                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
                                                 <dl>
                                                     <dt>전일대비</dt>
                                                     <dd>
@@ -127,7 +131,7 @@
                             <!-- 아래쪽 섹션 (넓게 설정) -->
                             <section style="flex: 1; box-sizing: border-box; margin-top: 20px;">
                                 <div class="tab-item-sub" id="tab1_2">
-                                    <div class="section-top" style="margin-top: 40px;">
+                                    <div class="section-top" style="margin-top: 10px;">
                                         <div class="search-wrap">
                                             <dl>
                                                 <dt>
@@ -167,7 +171,7 @@
                         </div>
                     </div>
                 </section>
-                <section class="tab-item" id="tab2" style="height: 832px;">
+                <section class="tab-item" id="tab2" style="height: 850px;">
                     <div class="section-top">
                         <div class="search-wrap">
                             <dl>
@@ -207,12 +211,24 @@
                                         진행구분<span class="eq">*</span>
                                     </label>
                                 </dt>
-                                <dd>
+                             <!--   <dd>
                                     <div class="srch-box">
                                         <select id="searchstate" name="searchstate">
                                             <option value="전체">전체</option>
                                         </select>
-                                        <!--                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>-->
+                                        &lt;!&ndash;                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>&ndash;&gt;
+                                    </div>
+                                </dd>-->
+                                <dd>
+                                    <div class="srch-box">
+                                        <select id="searchstate" name="searchstate">
+                                            <option value="전체">전체</option>
+                                            <option value="주문의뢰">주문의뢰</option>
+                                            <option value="주문확인">주문확인</option>
+                                            <option value="주문확정">주문확정</option>
+                                            <option value="제작진행">제작진행</option>
+                                            <option value="출고">출고</option>
+                                        </select>
                                     </div>
                                 </dd>
                             </dl>
@@ -232,7 +248,7 @@
                     </div>
                     <div class="container-fluid">
                         <p id="selectedItem"></p>
-                        <div id="theGrid2" style="max-height: 714px"></div>
+                        <div id="theGrid2" style="max-height: 800px"></div>
                     </div>
                 </section>
             </div>
@@ -266,7 +282,20 @@
 
 
         function fetchListData() {
-            let tempData = []; // 데이터를 담을 배열
+            let data2 = []; // 데이터를 담을 배열
+            let emptyRowsCount = 8;
+
+            // 빈 객체를 emptyRowsCount만큼 추가
+            for (let i = 0; i < emptyRowsCount; i++) {
+                data2.push({
+                    rownum: i + 1,
+                    standdt: '',
+                    title: '',
+                    smpcost: '',
+                    progress: '',
+                    amount: ''
+                });
+            }
 
             if (!theGrid) {
                 theGrid = new wijmo.grid.FlexGrid('#theGrid', {
@@ -280,7 +309,7 @@
                         { binding: 'progress', header: '진행구분', align: 'center', width: 200 },
                         { binding: 'amount', header: '금액', align: 'center', width: 200 }
                     ],
-                    itemsSource: tempData
+                    itemsSource: data2 // 빈 객체가 추가된 배열 사용
                 });
 
                 // 선택이 변경될 때, 현재 항목 업데이트
@@ -289,9 +318,10 @@
                 window.downloadFileName = '티켓현황';
             } else {
                 // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-                theGrid.itemsSource = viewdata;
+                theGrid.itemsSource = data2; // 빈 객체가 추가된 배열 사용
             }
         }
+
 
 
         function initCalendar() {
@@ -391,69 +421,93 @@
         }
 
         function fetchListData2() {
-            let data2 = [];
+            let data2 = []; // 데이터를 담을 기본 배열 초기화
 
-            // 임시 데이터 배열 정의
-            var tempData = [];
-            for (var i = 0; i < 10; i++) {
-                tempData.push({
-                    rownum: i + 1,
-                    state: '',
-                    orderdate: '',
-                    compnm: '',
-                    title: '',
-                    reservatedate: '',
-                    category: '',
-                    touse: '',
-                    ton: '',
-                    site: '',
-                    price: '',
-                    other: ''
-                });
+            // 서버에서 데이터 가져오기
+            $.ajax({
+                url: '/api/order_status/read',
+                type: 'GET',
+                async: false,
+                success: function (response) {
+                    // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
+                    if (response && Array.isArray(response.data)) {
+                        data2 = response.data;
+                    }
+                },
+                error: function () {
+                    console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+                }
+            });
+
+            // 순번을 추가하고, 데이터가 10개 미만일 경우 빈 행을 추가
+            const minimumRows = 10;
+            data2.forEach((item, index) => {
+                item.rownum = index + 1; // 순번 추가
+            });
+
+            if (data2.length < minimumRows) {
+                const additionalRows = minimumRows - data2.length;
+                for (let i = 0; i < additionalRows; i++) {
+                    data2.push({
+                        rownum: data2.length + 1, // 현재 데이터 길이에 맞게 순번을 맞춤
+                        ordflag: '',
+                        reqdate: '',
+                        cltnm: '',
+                        remark: '',
+                        deldate: '',
+                        hgrb: '',
+                        qty: '',
+                        panel_t: '',
+                        panel_w: '',
+                        panel_l: '',
+                        exfmtypedv: '',
+                        infmtypedv: '',
+                        stframedv: '',
+                        stexplydv: '',
+                        remark: ''
+                    });
+                }
             }
 
-            // $.ajax({
-            //     url: '/api/ticket/ticket/read',
-            //     type: 'GET',
-            //     async: false,
-            //     success: function (data) {
-            //         data2 = data.data;
-            //     }
-            // })
-
-            viewdata = new wijmo.collections.CollectionView(data2);
+            // CollectionView 생성 및 FlexGrid 바인딩
+            let viewdata = new wijmo.collections.CollectionView(data2);
 
             if (!theGrid2) {
-                // 데이터 그리드에 바인딩
+                // theGrid2가 처음 생성되는 경우 설정
                 theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
                     autoGenerateColumns: false,
                     showMarquee: true,
                     columns: [
-                        {binding: 'rownum', header: '순번', width: 80, align: 'center'},
-                        {binding: 'state', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'orderdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'compnm', header: '업체명', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'title', header: '제목', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'reservatedate', header: '출하예정일', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'category', header: '제품유형', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'touse', header: '용도별', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'ton', header: '톤별', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'site', header: '시트별', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'price', header: '금액', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'}
+                        {binding: 'rownum', header: '순번', width: 70, align: 'center'},
+                        {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 150, align: 'center'},
+                        {binding: 'cltnm', header: '업체명', width: '*', minWidth: 150, align: 'center'},
+                        {binding: 'remark', header: '제목', width: '*', minWidth: 200, align: 'center'},
+                        {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 150, align: 'center'},
+                        {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'qty', header: '수량', width: 80, align: 'right'},
+                        {binding: 'panel_t', header: 'T', width: 80, align: 'right'},
+                        {binding: 'panel_w', header: 'W/H', width: 80, align: 'right'},
+                        {binding: 'panel_l', header: 'L', width: 80, align: 'right'},
+                        {binding: 'exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'remark', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'}
                     ],
-                    itemsSource: tempData
+                    itemsSource: viewdata // 서버에서 가져온 데이터를 바인딩
                 });
+
                 // 선택이 변경될 때, 현재 항목 업데이트
-                theGrid2.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
+                theGrid2.rowHeaders.columns.splice(0, 1); // 맨 앞에 헤더 부분 없애기
                 new FlexGridContextMenu(theGrid2);
-                window.downloadFileName = '티켓현황';
+                window.downloadFileName = '진행 현황';
+
             } else {
-                // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
+                // 이미 FlexGrid가 존재하는 경우, 데이터만 업데이트
                 theGrid2.itemsSource = viewdata;
             }
         }
-
     </script>
 </th:block>
 </html>

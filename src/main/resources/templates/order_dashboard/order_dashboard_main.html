@@ -53,7 +53,7 @@
             </ul>
             <div class="tab-contents">
                 <!-- Section -->
-                <section class="tab-item" id="tab1" style="height: 900px; margin-bottom: 5px">
+                <section class="tab-item" id="tab1" style="height: 900px; margin-bottom: 10px">
                     <div class="row" style="display: flex;">
                         <!-- 왼쪽 섹션: 50% 차지 -->
                         <section
@@ -87,9 +87,7 @@
                                                 <dl>
                                                     <dt>전일대비</dt>
                                                     <dd>
-                                                        <span class="down"></span>
-                                                        <span class="fs18 fw600">1.20</span>
-                                                        <span class="unit">%</span>
+                                                        <span class="down"></span> 1.20 <span class="unit">%</span>
                                                     </dd>
                                                 </dl>
                                             </section>
@@ -129,7 +127,7 @@
                             <!-- 아래쪽 섹션 (넓게 설정) -->
                             <section style="flex: 1; box-sizing: border-box; margin-top: 20px;">
                                 <div class="tab-item-sub" id="tab1_2">
-                                    <div class="section-top" style="margin-top: 40px;">
+                                    <div class="section-top" style="margin-top: 10px;">
                                         <div class="search-wrap">
                                             <dl>
                                                 <dt>
@@ -196,30 +194,43 @@
         }
 
         function fetchListData() {
-            let tempData = []; // 데이터를 담을 배열
+            let data2 = []; // 데이터를 담을 배열
+            let emptyRowsCount = 10;
+
+            // 빈 객체를 emptyRowsCount만큼 추가
+            for (let i = 0; i < emptyRowsCount; i++) {
+                data2.push({
+                    rownum: i + 1,
+                    standdt: '',
+                    title: '',
+                    smpcost: '',
+                    progress: '',
+                    amount: ''
+                });
+            }
 
             if (!theGrid) {
                 theGrid = new wijmo.grid.FlexGrid('#theGrid', {
                     autoGenerateColumns: false,
                     showMarquee: true,
                     columns: [
-                        { binding: 'rownum', header: 'No', align: 'center', width: 100 },
-                        { binding: 'standdt', header: '의뢰일자', align: 'center', width: 250 },
-                        { binding: 'title', header: '제목', align: 'center', width: 250 },
-                        { binding: 'smpcost', header: '납품희망일', align: 'center', width: 250 },
+                        { binding: 'rownum', header: 'No', align: 'center', width: 80 },
+                        { binding: 'standdt', header: '의뢰일자', align: 'center', width: 200 },
+                        { binding: 'title', header: '제목', align: 'center', width: 200 },
+                        { binding: 'smpcost', header: '납품희망일', align: 'center', width: 200 },
                         { binding: 'progress', header: '진행구분', align: 'center', width: 200 },
                         { binding: 'amount', header: '금액', align: 'center', width: 200 }
                     ],
-                    itemsSource: tempData
+                    itemsSource: data2 // 빈 객체가 추가된 배열 사용
                 });
 
                 // 선택이 변경될 때, 현재 항목 업데이트
                 theGrid.rowHeaders.columns.splice(0, 1);
                 new wijmo.grid.FlexGridContextMenu(theGrid);
-                window.downloadFileName = '주문현황';
+                window.downloadFileName = 'Order Dashboard';
             } else {
                 // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-                theGrid.itemsSource = viewdata; // viewdata가 정의되어 있어야 함
+                theGrid.itemsSource = data2; // 빈 객체가 추가된 배열 사용
             }
         }
 

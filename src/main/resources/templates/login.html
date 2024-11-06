@@ -37,7 +37,7 @@
             border-radius: 8px;
             margin: 10% auto;
             padding: 20px;
-            width: 400px;
+            width: 600px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
             position: relative;
             top: 15%;
@@ -180,6 +180,7 @@
             visibility: visible;
             opacity: 1;
         }
+
     </style>
 </head>
 <body>
@@ -206,7 +207,7 @@
                             <dt><label for="loginId">아이디(사업자 번호)</label></dt>
                             <dd>
                                 <input type="text" id="loginId" name="username"
-                                       required autofocus title="아이디 입력" placeholder="사업자 등록번호를 입력해주세요 예)123 456 789">
+                                      placeholder="사업자 등록번호를 입력해주세요 예)123 456 789">
                             </dd>
                             <!-- 에러메시지 출력 -->
                             <dd class="hint-red" id="hint-red" style="display: none">
@@ -219,7 +220,7 @@
                                 <label for="loginPwd">비밀번호
                                     <span class="tooltip"
                                           style="display: inline-block;width: 13px; height: 13px;border: 2px solid red;border-radius: 50%;text-align: center;line-height: 15px;color: red;margin-right: 5px;">
-                                         <span style="position: absolute; top: -2px; left: 0;">?</span>
+                                         <span style="position: absolute; top: -3px; left:1.5PX; font-size:10px;">?</span>
                                         <span class="tooltiptext" style="color: red;">최초비밀번호는 사업자번호 5자리입니다.</span>
                                     </span>
                                 </label>
@@ -365,7 +366,7 @@
                                         <input type="text" id="email" name="email">
                                         <button type="button"
                                                 style="margin: 0 0 0 5px;width: 14.5%;background: white;color: #03428E;border: 1px solid #03428E;"
-                                                id="BtnAuthenticationRegister">코드발급
+                                                id="BtnAuthenticationRegister2">코드발급
                                         </button>
                                         <label style="width: 7%; margin-top: 10px; margin-left: 30px">인증코드:</label>
                                         <input type="text" id="AuthenticationCodeRegister"
@@ -420,7 +421,7 @@
             <h2 style="text-align: center;">등록여부 확인</h2>
             <form id="idFindForm">
                 <div style="margin-top: 10px;">
-                    <label style="width: 15%;">사업자 <br>번호 : </label>
+                    <label style="width: 15%;">사업자 번호 : </label>
                     <input type="text" id="userid1" name="userid1" required="" maxlength="20" autocomplete="off" style="width: 80%;">
                 </div>
                <!-- <div class="hint-red" id="ErrMessage" style="margin: 5px auto 0;">
@@ -447,7 +448,7 @@
             <form id="pwFindForm">
 
                 <div style="margin-top: 10px;">
-                    <label style="width: 15%;">사업자<br>번호: </label>
+                    <label style="width: 15%;">사업자 번호: </label>
                     <input type="text" id="userid" name="userid" required="" maxlength="20" autocomplete="off" style="width: 80%;">
 
                 </div>
@@ -463,20 +464,20 @@
 
                 <div style="margin-top: 10px;">
                     <label style="width: 15%;">인증코드: </label>
-                    <input type="text" id="AuthenticationCode" name="AuthenticationCode" required="" maxlength="38" autocomplete="off" style="width: 70%;border: none;border-bottom: 1px solid;
+                    <input type="text" id="AuthenticationCode" name="AuthenticationCode" required="" maxlength="38" autocomplete="off" style="width: 80%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                     <span id="timer" style="width: 10%; text-align: right; color: red; display: inline-block;"></span>
                 </div>
 
                 <div style="margin-top: 10px;" id="PasswordInputDiv">
-                    <label style="width: 15%;">변경<br> 비밀번호: </label>
-                    <input type="password" id="PasswordChange" name="PasswordChange" autocomplete="off" style="width: 70%;border: none;border-bottom: 1px solid;
+                    <label style="width: 15%;">변경 비밀번호: </label>
+                    <input type="password" id="PasswordChange" name="PasswordChange" autocomplete="off" style="width: 80%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                 </div>
 
                 <div style="margin-top: 10px;" id="PasswordChkInputDiv">
                     <label style="width: 15%;">비밀번호 확인: </label>
-                    <input type="password" id="PasswordChangeChk" name="PasswordChangeChk" autocomplete="off" style="width: 70%;border: none;border-bottom: 1px solid;
+                    <input type="password" id="PasswordChangeChk" name="PasswordChangeChk" autocomplete="off" style="width: 80%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                 </div>
 
@@ -1024,6 +1025,48 @@
                 Alert.alert('', '서버통신 실패')
             });
         });
+
+        //사용자 등록
+        $('#BtnAuthenticationRegister2').click(function (e) {
+            let email = document.getElementById('email');
+            let mail = email.value;
+
+            let prenmInput = document.getElementById('prenm'); // prenm 입력 필드 가져오기
+            let prenm = prenmInput.value;
+
+            if (mail.trim().length === 0) {
+                Alert.alert('', '이메일을 입력해주세요.');
+                email.focus();
+                return;
+            }
+            if (!emailValidate(mail.trim())) {
+                Alert.alert('', '유효한 이메일 형식을 입력하세요.');
+                email.focus();
+                return false;
+            }
+
+            // usernm과 prenm의 실제 입력값을 서버로 전송
+            let data = { usernm: 'empty', prenm, mail, _CsrfValue };
+
+            showLoader();
+            let fnSuccess = function (res) {
+                if (res.success) {
+                    hideLoader();
+                    Alert.alert('', res.message, function(e) {
+                        startTimer(180, 'timer2');
+                    });
+                } else {
+                    hideLoader();
+                    Alert.alert('', res.message);
+                }
+            };
+
+            AjaxUtil.postAsyncData("/user-auth/SaveAuthenticationEmail", data, fnSuccess, function(){
+                hideLoader();
+                Alert.alert('', '서버통신 실패');
+            });
+        });
+
 
 
         //비밀번호 찾기 > 이메일 인증

@@ -460,11 +460,56 @@ public class AccountController {
 		return result;
 	}
 
+
+
 	private void sendEmailLogic(String mail, String usernm){
 		Random random = new Random();
 		int randomNum = 100000 + random.nextInt(900000); // 100000부터 999999까지의 랜덤 난수 생성
 		String verificationCode = String.valueOf(randomNum); // 정수를 문자열로 변환
 		emailService.sendVerificationEmail(mail, usernm, verificationCode);
+
+		tokenStore.put(mail, verificationCode);
+		tokenExpiry.put(mail, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(3));
+
+	}
+
+	@PostMapping("/user-auth/SaveAuthenticationEmail")
+	public AjaxResult saveMail(@RequestParam("usernm") final String usernm,
+							   @RequestParam("prenm") final String prenm,
+							   @RequestParam("mail") final String mail) {
+
+		AjaxResult result = new AjaxResult();
+
+		if (usernm.equals("empty")) {
+			saveEmailLogic(mail, prenm);
+
+			result.success = true;
+			result.message = "인증 메일이 발송되었습니다.";
+			return result;
+		}
+
+		int exists = userRepository.existsByUsernameAndEmail(usernm, mail);
+		boolean flag = exists > 0;
+
+		if (flag) {
+			saveEmailLogic(mail, usernm);
+
+			result.success = true;
+			result.message = "인증 메일이 발송되었습니다.";
+		} else {
+			result.success = false;
+			result.message = "해당 사용자가 존재하지 않습니다.";
+		}
+
+		return result;
+	}
+
+
+	private void saveEmailLogic(String mail, String usernm){
+		Random random = new Random();
+		int randomNum = 100000 + random.nextInt(900000); // 100000부터 999999까지의 랜덤 난수 생성
+		String verificationCode = String.valueOf(randomNum); // 정수를 문자열로 변환
+		emailService.saveVerificationEmail(mail, usernm, verificationCode);
 
 		tokenStore.put(mail, verificationCode);
 		tokenExpiry.put(mail, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(3));
