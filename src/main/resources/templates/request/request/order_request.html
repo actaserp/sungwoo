@@ -68,7 +68,7 @@
             <div class="button-wrap">
               <ul>
                 <li>
-                  <a class="btn btn-excell" title="신규등록">
+                  <a class="btn btn-excell" title="신규등록" onclick="resetFormFields()">
                     <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                     신규등록
                   </a>
@@ -307,7 +307,7 @@
                   </select>
                 </td>
                 <th style="text-align: center">
-                  <label for="remarkrequest">
+                  <label for="ordtext">
                     옵션 및 요청사항
                   </label>
                 </th>
@@ -481,13 +481,13 @@
                     <tbody>
                     <tr style="align-items: center">
                       <th>
-                        <label for="remarkrequest">
+                        <label for="ordtext">
                           내용
                         </label>
                       </th>
                       <td colspan="3">
                         <div class="textarea-box">
-                          <textarea id="remarkrequest"></textarea>
+                          <textarea id="ordtext"></textarea>
                           <!--<p class="text-count" id="text-count">0/100</p>-->
                         </div>
                       </td>
@@ -514,7 +514,7 @@
   <script>
     tinymce.init({
       language: "ko_KR", //한글판으로 변경
-      selector: "#remarkrequest", // TinyMCE를 적용할 textarea 요소의 선택자를 지정
+      selector: "#ordtext", // TinyMCE를 적용할 textarea 요소의 선택자를 지정
       plugins: "paste image imagetools", // 'paste', 'image', 'imagetools' 플러그인 추가
       height: 500,
       width: 900,
@@ -663,10 +663,66 @@
             {binding: 'ton', header: '톤별', width: '*', minWidth: 100, align: 'center'},
             {binding: 'site', header: '시트별', width: '*', minWidth: 100, align: 'center'},
             {binding: 'price', header: '금액', width: '*', minWidth: 100, align: 'right'},
-            {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'}
+            {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 100, align: 'center'}
           ],
-          itemsSource: viewdata1
+          itemsSource: viewdata1,
+          itemFormatter: function (panel, r, c, cell) {
+            if (panel.cellType === wijmo.grid.CellType.Cell) {
+              var item = panel.rows[r].dataItem; // 현재 행의 데이터 항목
+              if (panel.columns[c].binding === 'downloads') {
+                cell.innerHTML = ''; // 셀 내용 초기화
+                if (item.isdownload) {
+                  cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order()">다운로드</a>';
+                }
+              }
+            }
+          }
         });
+        // 더블클릭 이벤트
+        theGrid.hostElement.addEventListener('dblclick', function (e) {
+          // 그리드의 셀 정보 가져오기
+          let hitTest = theGrid.hitTest(e);
+          if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+            // 행(row), 행의 데이터(item) 정보 가져오기
+            let row = hitTest.row;
+            let item = theGrid.rows[row].dataItem;
+
+            document.getElementById('reqdate').value = item.reqdate;
+            document.getElementById('deldate').value = item.deldate;
+            document.getElementById('telno').value = item.telno;
+            document.getElementById('perid').value = item.perid;
+            document.getElementById('postno').value = item.postno;
+            document.getElementById('address1').value = item.address1;
+            document.getElementById('panel_ht').value = item.panel_ht;
+            document.getElementById('panel_hw').value = item.panel_hw;
+            document.getElementById('panel_hl').value = item.panel_hl;
+            document.getElementById('panel_hh').value = item.panel_hh;
+            document.getElementById('remark').value = item.remark;
+            document.getElementById('qty').value = item.qty;
+            document.getElementById('panel_t').value = item.panel_t;
+            document.getElementById('panel_w').value = item.panel_w;
+            document.getElementById('panel_l').value = item.panel_l;
+            document.getElementById('ordtext').value = item.ordtext;
+
+            const selectHgrb = document.getElementById('hgrb');
+            const selectExfmtypedv = document.getElementById('exfmtypedv');
+            const selectInfmtypedv = document.getElementById('infmtypedv');
+            const selectStframedv = document.getElementById('stframedv');
+            const selectStexplydv = document.getElementById('stexplydv');
+
+            const selectedItem = item;
+
+            setSelectedIndex(selectHgrb, selectedItem.hgrb);
+            setSelectedIndex(selectExfmtypedv, selectedItem.exfmtypedv);
+            setSelectedIndex(selectInfmtypedv, selectedItem.infmtypedv);
+            setSelectedIndex(selectStframedv, selectedItem.stframedv);
+            setSelectedIndex(selectStexplydv, selectedItem.stexplydv);
+
+            const tab1Link = document.getElementById('#tab1');
+            tab1Link.click();
+          }
+        })
         // 선택이 변경될 때, 현재 항목 업데이트
         theGrid.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
         new FlexGridContextMenu(theGrid);
@@ -723,7 +779,7 @@
             {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'remarkrequest', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'left'}
+            {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'left'}
           ],
           itemsSource: viewdata2,
         });
@@ -732,6 +788,36 @@
           itemChecked: (e, ctx) => {
             SelectItem = theGrid2.rows.filter(r => r.isSelected);
 
+          }
+        })
+        // 더블클릭 이벤트
+        theGrid2.hostElement.addEventListener('dblclick', function (e) {
+          // 그리드의 셀 정보 가져오기
+          let hitTest = theGrid2.hitTest(e);
+          if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+            // 행(row), 행의 데이터(item) 정보 가져오기
+            let row = hitTest.row;
+            let item = theGrid2.rows[row].dataItem;
+
+            document.getElementById('qty').value = item.qty;
+            document.getElementById('panel_t').value = item.panel_t;
+            document.getElementById('panel_w').value = item.panel_w;
+            document.getElementById('panel_l').value = item.panel_l;
+            document.getElementById('ordtext').value = item.ordtext;
+
+            const selectHgrb = document.getElementById('hgrb');
+            const selectExfmtypedv = document.getElementById('exfmtypedv');
+            const selectInfmtypedv = document.getElementById('infmtypedv');
+            const selectStframedv = document.getElementById('stframedv');
+            const selectStexplydv = document.getElementById('stexplydv');
+
+            const selectedItem = item;
+
+            setSelectedIndex(selectHgrb, selectedItem.hgrb);
+            setSelectedIndex(selectExfmtypedv, selectedItem.exfmtypedv);
+            setSelectedIndex(selectInfmtypedv, selectedItem.infmtypedv);
+            setSelectedIndex(selectStframedv, selectedItem.stframedv);
+            setSelectedIndex(selectStexplydv, selectedItem.stexplydv);
           }
         })
         // FlexGrid의 최대 높이를 제한하여 스크롤바를 활성화
@@ -743,6 +829,16 @@
       } else {
         // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
         theGrid2.itemsSource = viewdata2;
+      }
+    }
+    // option값 value bind
+    function setSelectedIndex(selectElement, selectedValue, selectedIndex) {
+      for (let i = 1; i < selectElement.options.length; i++) {
+        // 트림(공백 제거), 대소문자 무시, 타입 일치시키기
+        if (selectElement.options[i].text.trim().toLowerCase() === String(selectedValue).trim().toLowerCase()) {
+          selectElement.selectedIndex = i;
+          break;
+        }
       }
     }
     // 초기화
@@ -835,7 +931,7 @@
                 infmtypedv: rowData.infmtypedv,
                 stframedv: rowData.stframedv,
                 stexplydv: rowData.stexplydv,
-                remarkrequest: rowData.remarkrequest,
+                ordtext: rowData.ordtext,
                 reqseq: rowData.reqseq
               };
               // bodyForms 배열에 detailForm 객체 추가
@@ -986,7 +1082,7 @@
         infmtypedv: document.getElementById("infmtypedv").value,
         stframedv: document.getElementById("stframedv").value,
         stexplydv: document.getElementById("stexplydv").value,
-        remarkrequest: tinymce.get('remarkrequest').getContent()
+        ordtext: tinymce.get('ordtext').getContent()
       };
       // 빈 데이터가 있다면 순차적으로 최신화 (덮어쓰기 방식)
       const sourceCollection = viewdata2.sourceCollection;
@@ -1014,6 +1110,10 @@
           const index = viewdata2.sourceCollection.indexOf(selectedData);
           if (index > -1) {
             viewdata2.sourceCollection.splice(index, 1);
+            viewdata2.push({});
+          }
+          if(selectedData.reqseq !== ""){
+            delBodyList.push(selectedData.reqseq);
           }
         });
         viewdata2.refresh();
@@ -1033,11 +1133,10 @@
     // 필드값 초기화
     function resetFormFields() {
       const fieldsToReset = [
-        'reqdate', 'deldate', 'telno', 'perid',
-        'postno', 'address1', 'address2', 'panel_ht',
+        'deldate', 'panel_ht',
         'panel_hw', 'panel_hl', 'panel_hh', 'remark', 'hgrb',
         'qty', 'panel_t', 'panel_w', 'panel_l',
-        'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv', 'remarkrequest'
+        'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv', 'ordtext'
         // 'remark'  // Uncomment if needed
       ];
 
@@ -1068,14 +1167,14 @@
     }
 
     // 다운로드
-    function downloadFile_power() {
+    function downloadFile_order() {
       let selectedItems = theGrid.selectedItems; // 선택된 항목 가져오기
       let downloadList = [];
 
       // 선택된 항목에서 다운로드할 파일 목록 생성
       selectedItems.forEach(function (item) {
         downloadList.push({
-          uniqcode: item.uniqcode
+          reqnum: item.reqnum
         });
       });
 

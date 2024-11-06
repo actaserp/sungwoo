@@ -71,14 +71,6 @@ public class RequestController {
     @GetMapping("/order_read")
     public AjaxResult getOrderList() {
         List<Map<String, Object>> items = this.requestService.getOrderList();
-        // 각 항목에서 'remark' 키를 찾아 'remarkrequest'로 변경
-        for (Map<String, Object> item : items) {
-            if (item.containsKey("remark")) {
-                Object remarkValue = item.get("remark");
-                item.put("remarkrequest", remarkValue); // remark를 remarkrequest로 변경
-                item.remove("remark"); // 'remark' 키 삭제 (필요하면)
-            }
-        }
         AjaxResult result = new AjaxResult();
         result.data = items;
 
@@ -88,11 +80,11 @@ public class RequestController {
     @Transactional
     @PostMapping("/save")
     public AjaxResult saveOrder(@RequestParam Map<String, String> params,
-                                @RequestParam(value = "filelist", required = false) MultipartFile files,
+                                @RequestParam(value = "filelist", required = false) MultipartFile[] files,
+                                @RequestPart(value = "deletedFiles", required = false) MultipartFile[] deletedFiles,
                                 Authentication auth) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         User user = (User) auth.getPrincipal();
-        Timestamp now = new Timestamp(System.currentTimeMillis());
         AjaxResult result = new AjaxResult();
         String username = user.getUsername();
         Map<String, Object> userInfo = requestService.getUserInfo(username);
@@ -101,51 +93,57 @@ public class RequestController {
         headpk.setCustcd((String) userInfo.get("custcd"));
         headpk.setSpjangcd("ZZ");
         headpk.setReqdate(params.get("reqdate").replaceAll("-",""));
-        String reqnum = String.valueOf(tbda006WRepository.findMaxReqnum("ZZ","ZZ",params.get("reqdate")) + 1);
+        String reqnum = String.valueOf(tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"),"ZZ",params.get("reqdate")) + 1);
         headpk.setReqnum(reqnum);
 
         TB_DA006W tbDa006 = new TB_DA006W();
         TB_DA006WFile tbDa006WFile = new TB_DA006WFile();
 
         if(files != null){
-            String path = settings.getProperty("file_upload_path") + "주문등록";
+            for (MultipartFile multipartFile : files) {
+                String path = settings.getProperty("file_upload_path") + "주문등록";
+                MultipartFile file = multipartFile;
+                MultipartFile mFile = null;
+                mFile = file;
+                float fileSize = (float) file.getSize();
 
-            float fileSize = (float) files.getSize();
+                if(fileSize > 52428800){
+                    result.message = "파일의 크기가 초과하였습니다.";
+                    return result;
+                }
+                String fileName = file.getOriginalFilename();
+                String ext = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+                String file_uuid_name = UUID.randomUUID().toString() + "." + ext;
+                String saveFilePath = path;
+                File saveDir = new File(saveFilePath);
 
-            if(fileSize > 52428800){
-                result.message = "파일의 크기가 초과하였습니다.";
-                return result;
+
+
+                //디렉토리 없으면 생성
+                if(!saveDir.isDirectory()){
+                    saveDir.mkdirs();
+                }
+                File saveFile = new File(path + File.separator + file_uuid_name);
+                mFile.transferTo(saveFile);
+
+                tbDa006WFile.setFilepath(saveFilePath);
+                tbDa006WFile.setFilesvnm(file_uuid_name);
+                tbDa006WFile.setFileornm(fileName);
+                tbDa006WFile.setFilesize(fileSize);
+                tbDa006WFile.setCustcd((String) userInfo.get("custcd"));
+                tbDa006WFile.setSpjangcd("ZZ");
+                tbDa006WFile.setReqdate(params.get("reqdate").replaceAll("-",""));
+                tbDa006WFile.setReqnum(reqnum);
+                tbDa006WFile.setIndatem(params.get("reqdate").replaceAll("-",""));
+                tbDa006WFile.setInuserid(String.valueOf(user.getId()));
+                tbDa006WFile.setInusernm(username);
+
+                if (!requestService.saveFile(tbDa006WFile)) {
+                    result.success = false;
+                    result.message = "저장에 실패하였습니다.";
+                    break;
+                }
             }
-
-            String fileName = files.getOriginalFilename();
-            String ext = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
-            String file_uuid_name = UUID.randomUUID().toString() + "." + ext;
-            String saveFilePath = path;
-            File saveDir = new File(saveFilePath);
-            MultipartFile mFile = null;
-
-            mFile = files;
-
-            //디렉토리 없으면 생성
-            if(!saveDir.isDirectory()){
-                saveDir.mkdirs();
-            }
-
-            File saveFile = new File(path + File.separator + file_uuid_name);
-            mFile.transferTo(saveFile);
-
-            tbDa006WFile.setFilepath(saveFilePath);
-            tbDa006WFile.setFilesvnm(file_uuid_name);
-            tbDa006WFile.setFileornm(fileName);
-            tbDa006WFile.setFilesize(fileSize);
-            tbDa006WFile.setCustcd((String) userInfo.get("custcd"));
-            tbDa006WFile.setSpjangcd("ZZ");
-            tbDa006WFile.setReqdate(params.get("reqdate").replaceAll("-",""));
-            tbDa006WFile.setReqnum(reqnum);
-            tbDa006WFile.setIndatem(params.get("reqdate").replaceAll("-",""));
-            tbDa006WFile.setInuserid(String.valueOf(user.getId()));
-            tbDa006WFile.setInusernm(username);
-            //tbDa006WFile.setFilerem();
         }
 
         tbDa006.setPk(headpk);
@@ -160,9 +158,10 @@ public class RequestController {
         tbDa006.setPanel_ht(params.get("panel_ht"));
         tbDa006.setPanel_hw(params.get("panel_hw"));
         tbDa006.setPanel_hl(params.get("panel_hl"));
+        tbDa006.setPanel_hh(params.get("panel_hh"));
         tbDa006.setIndate(params.get("deldate").replaceAll("-",""));
         tbDa006.setInperid(String.valueOf(user.getId()));
-        tbDa006.setTelno(params.get("mcltusrhp"));
+        tbDa006.setTelno(params.get("telno"));
         tbDa006.setRemark(params.get("remark"));
         //tbDa006.setOrdtext(now);
 
@@ -172,7 +171,7 @@ public class RequestController {
             result.message = "저장하였습니다.";
         } else {
             result.success = false;
-            result.message = "head 저장에 실패하였습니다.";
+            result.message = "저장에 실패하였습니다.";
         }
         TB_DA007W_PK bodypk = new TB_DA007W_PK();
 
@@ -207,14 +206,14 @@ public class RequestController {
                         tbDa007.setInfmtypedv((String) jsonData.get("infmtypedv"));
                         tbDa007.setStframedv((String) jsonData.get("stframedv"));
                         tbDa007.setStexplydv((String) jsonData.get("stexplydv"));
-                        tbDa007.setRemark((String) jsonData.get("remarkrequest"));
+                        tbDa007.setOrdtext((String) jsonData.get("ordtext"));
                         tbDa007.setIndate(params.get("deldate").replaceAll("-",""));
                         tbDa007.setInperid(String.valueOf(user.getId()));
 
                         boolean successcodebody = requestService.saveBody(tbDa007);
                         if (successcodebody) {
                             result.success = true;
-                            result.message = "세부사항 저장하였습니다.";
+                            result.message = "저장하였습니다.";
                         } else {
                             result.success = false;
                             result.message = "세부사항 저장에 실패하였습니다.";
@@ -223,7 +222,7 @@ public class RequestController {
                         boolean successcodebody = requestService.updateBody(tbDa007);
                         if (successcodebody) {
                             result.success = true;
-                            result.message = "세부사항 수정하였습니다.";
+                            result.message = "수정하였습니다.";
                         } else {
                             result.success = false;
                             result.message = "세부사항 수정에 실패하였습니다.";

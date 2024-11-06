@@ -1,10 +1,8 @@
 package mes.app.request.request.service;
 
-import mes.domain.entity.actasEntity.TB_DA006W;
-import mes.domain.entity.actasEntity.TB_DA006W_PK;
-import mes.domain.entity.actasEntity.TB_DA007W;
-import mes.domain.entity.actasEntity.TB_RP920;
+import mes.domain.entity.actasEntity.*;
 import mes.domain.repository.TB_RP920Repository;
+import mes.domain.repository.actasRepository.TB_DA006WFILERepository;
 import mes.domain.repository.actasRepository.TB_DA006WRepository;
 import mes.domain.repository.actasRepository.TB_DA007WRepository;
 import mes.domain.services.SqlRunner;
@@ -27,6 +25,10 @@ public class RequestService {
 
     @Autowired
     TB_DA007WRepository tbDa007WRepository;
+
+    @Autowired
+    TB_DA006WFILERepository tbDa006WFILERepository;
+
     // 헤드정보 저장
     @Transactional
     public Boolean save(TB_DA006W tbDa006W){
@@ -201,5 +203,17 @@ public class RequestService {
         dicParam.addValue("username", username);
         Map<String, Object> userInfo = this.sqlRunner.getRow(sql, dicParam);
         return userInfo;
+    }
+    // savefile
+    public boolean saveFile(TB_DA006WFile tbDa006WFile) {
+
+        try {
+            tbDa006WFILERepository.save(tbDa006WFile);
+            return true;
+
+        } catch (Exception e) {
+            System.out.println(e + ": 에러발생");
+            return false;
+        }
     }
 }

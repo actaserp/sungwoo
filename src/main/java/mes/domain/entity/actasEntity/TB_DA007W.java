@@ -70,13 +70,13 @@ public class TB_DA007W {
     @Column(name = "\"inperid\"")  //
     String inperid;
 
-    @Column(name = "\"ordtext\"")  //
+    @Column(name = "\"ordtext\"")  // 옵션 및 요청사항
     String ordtext;
 
     // 질문필요 컬럼들 -----------------------------------
 
 
-    @Column(name = "\"remark\"")  // 옵션 및 요청사항
+    @Column(name = "\"remark\"")  //
     String remark;
 
 }
