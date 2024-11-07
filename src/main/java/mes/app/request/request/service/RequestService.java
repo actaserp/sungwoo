@@ -104,8 +104,19 @@ public class RequestService {
                     hd.panel_hw,
                     hd.panel_hl,
                     hd.panel_hh,
+                    hd.remark,
                     (
-                        SELECT bd.reqseq, bd.panel_t, bd.panel_w, bd.panel_l
+                        SELECT bd.reqseq,
+                         bd.panel_t,
+                         bd.panel_w,
+                         bd.panel_l,
+                         bd.hgrb,
+                         bd.qty,
+                         bd.exfmtypedv,
+                         bd.infmtypedv,
+                         bd.stframedv,
+                         bd.stexplydv,
+                         bd.ordtext
                         FROM ERP_SWSPANEL1.dbo.TB_DA007W bd
                         WHERE bd.custcd = hd.custcd
                           AND bd.spjangcd = hd.spjangcd
@@ -162,7 +173,8 @@ public class RequestService {
                 " hd.panel_ht," +
                 " hd.panel_hw," +
                 " hd.panel_hl," +
-                " hd.panel_hh" +
+                " hd.panel_hh," +
+                " hd.remark" +
                 " ORDER BY hd.indate DESC");
 
         dicParam.addValue("custcd", tbDa006W_pk.getCustcd());

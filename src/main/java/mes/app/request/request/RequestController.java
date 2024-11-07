@@ -129,7 +129,6 @@ public class RequestController {
 //            }
         }
 
-
         AjaxResult result = new AjaxResult();
         result.data = items;
 

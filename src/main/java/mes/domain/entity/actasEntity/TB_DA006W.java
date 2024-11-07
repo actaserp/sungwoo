@@ -73,7 +73,7 @@ public class TB_DA006W {
     String sperid;
 
     @Column(name = "\"ordflag\"")  // 용도별
-    String ordflag;
+    String ordflag = "0";
 
     @Column(name = "\"egrb\"")  // 용도별
     String egrb;

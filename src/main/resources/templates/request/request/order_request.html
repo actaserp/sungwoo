@@ -350,13 +350,13 @@
               </dl>
               <dl>
                 <dt>
-                  <label for="searchtketnm">
+                  <label for="searchRemark">
                     제목<span class="eq">*</span>
                   </label>
                 </dt>
                 <dd>
                   <div class="srch-box">
-                    <input type="text" id="searchtketnm" name="searchtketnm" class="input-srch"
+                    <input type="text" id="searchRemark" name="searchRemark" class="input-srch"
                            placeholder="제목" style="border-radius: 5px;">
                     <!--                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>-->
                   </div>
@@ -364,13 +364,13 @@
               </dl>
               <dl>
                 <dt>
-                  <label for="searchstate">
+                  <label for="searchOrdflag">
                     진행구분<span class="eq">*</span>
                   </label>
                 </dt>
                 <dd>
                   <div class="srch-box">
-                    <select id="searchstate" name="searchstate">
+                    <select id="searchOrdflag" name="searchOrdflag">
                       <option value="전체">전체</option>
                     </select>
                     <!--                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>-->
@@ -660,7 +660,12 @@
       $.ajax({
         url: '/api/request/request/order_read',
         type: 'GET',
-        data: {},
+        data: {
+          'search_startDate': $('#startDate').val(),
+          'search_endDate': $('#endDate').val(),
+          'search_remark': $('#searchRemark').val(),
+          'search_ordflag': $('#searchOrdflag').val()
+        },
         async: false,
         success: function (data) {
           data2 = data.data;
@@ -740,11 +745,11 @@
             document.getElementById('panel_hl').value = item.panel_hl;
             document.getElementById('panel_hh').value = item.panel_hh;
             document.getElementById('remark').value = item.remark;
-            document.getElementById('qty').value = item.qty;
-            document.getElementById('panel_t').value = item.panel_t;
-            document.getElementById('panel_w').value = item.panel_w;
-            document.getElementById('panel_l').value = item.panel_l;
-            document.getElementById('ordtext').value = item.ordtext;
+            document.getElementById('qty').value = item.bd_details.qty;
+            document.getElementById('panel_t').value = item.bd_details.panel_t;
+            document.getElementById('panel_w').value = item.bd_details.panel_w;
+            document.getElementById('panel_l').value = item.bd_details.panel_l;
+            document.getElementById('ordtext').value = item.bd_details.ordtext;
 
             const selectHgrb = document.getElementById('hgrb');
             const selectExfmtypedv = document.getElementById('exfmtypedv');
@@ -754,13 +759,13 @@
 
             const selectedItem = item;
 
-            setSelectedIndex(selectHgrb, selectedItem.hgrb);
-            setSelectedIndex(selectExfmtypedv, selectedItem.exfmtypedv);
-            setSelectedIndex(selectInfmtypedv, selectedItem.infmtypedv);
-            setSelectedIndex(selectStframedv, selectedItem.stframedv);
-            setSelectedIndex(selectStexplydv, selectedItem.stexplydv);
+            setSelectedIndex(selectHgrb, selectedItem.bd_details.hgrb);
+            setSelectedIndex(selectExfmtypedv, selectedItem.bd_details.exfmtypedv);
+            setSelectedIndex(selectInfmtypedv, selectedItem.bd_details.infmtypedv);
+            setSelectedIndex(selectStframedv, selectedItem.bd_details.stframedv);
+            setSelectedIndex(selectStexplydv, selectedItem.bd_details.stexplydv);
 
-            const tab1Link = document.getElementById('tab1');
+            const tab1Link = document.getElementById('listTabLink');
             tab1Link.click();
           }
         })
