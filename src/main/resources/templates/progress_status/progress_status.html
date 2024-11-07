@@ -8,6 +8,30 @@
     display: flex; /* Flexbox로 정렬 */
     align-items: center; /* 수직 중앙 정렬 */
   }
+  .modal {
+    display: none; /* 기본적으로 숨겨짐 */
+    position: fixed;
+    z-index: 10000; /* z-index 값을 높게 설정하여 다른 요소보다 위에 오도록 함 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 배경을 반투명하게 설정 */
+    overflow: auto;
+  }
+
+  .modal-content {
+    position: absolute; /* absolute로 설정하여 화면 중앙에 배치 */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* 화면 중앙 정렬 */
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 8px;
+  }
 
 </style>
 <th:block layout:fragment="content">
@@ -15,8 +39,7 @@
     <!-- Page Title -->
     <div class="page-title-wrap">
       <div class="left">
-        <h2>진행 현황</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png"
-                                                                             alt="알람 아이콘"></a>
+        <h2>진행 현황</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png" alt="알람 아이콘"></a>
         <!--<a title="북마크" class="bookmark toggle">
             내메뉴
         </a>-->
@@ -147,44 +170,34 @@
           </div>
 
           <div class="container-fluid">
-            <div class="chart-wrap" style="justify-content: normal">
+            <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
               <canvas id="myChart" width="400" height="100px"></canvas>
-              </div>
+               <span class="material-symbols-outlined"
+                style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);"
+                onclick="openModal()">zoom_out_map</span>
             </div>
+          </div>
+
+          <div>
             <div>
               <p id="selectedItem"></p>
               <div id="theGrid" style="max-height:319px"></div>
             </div>
           </div>
-        </section>
-      </div> <!--//tab-contens end-->
+        </section>>
     </div> <!--//tab-wrap end-->
   </div> <!--//layout-contents end -->
-
-
   <footer>
     <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
   </footer>
 
-<!--  <div id="chartModal" class="modal" style="opacity:100">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <div id="modalChartHolder" style="width: 100%; height: 500px;"></div> &lt;!&ndash; 차트를 보여줄 모달의 div &ndash;&gt;
-    </div>
-  </div>-->
-
-  <div id="chartModal" class="modal" style="opacity:100">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <div id="modalChartHolder" style="width: 100%; height: 500px;">
-        <canvas id="modalChart"></canvas>
-      </div>
-    </div>
-  </div>
-
-
 </th:block>
-
+<div id="chartModal" class="modal" style="opacity:100">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <canvas id="modalChartHolder" style="width: 1250px; height: 490px; display: block; box-sizing: border-box;" width="1250" height="490"></canvas>
+  </div>
+</div>
 <th:block layout:fragment="scripts">
   <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -196,26 +209,44 @@
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
       fetchListData();
-      createChart();
     }
 
     function fetchListData() {
       let data2 = [];
 
-      // 임시 데이터 배열 정의
-      var tempData = [];
-      for (var i = 0; i < 10; i++) {
-        tempData.push({
-          rownum: i + 1,
-          orderdate: '',
+      // 서버에서 데이터 가져오기
+      $.ajax({
+        url: '/api/ProgressStatus/read',
+        type: 'GET',
+        async: false,
+        success: function (response) {
+          // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
+          if (response && Array.isArray(response.data)) {
+            // 데이터에 순번(rownum) 추가
+            data2 = response.data.map((item, index) => ({
+              ...item,
+              rownum: index + 1 // 순번 추가
+            }));
+          }
+        },
+        error: function () {
+          console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+        }
+      });
+
+      // 데이터 개수가 10개 미만일 경우 빈 데이터 행 추가
+      while (data2.length < 10) {
+        data2.push({
+          rownum: data2.length + 1,
+          reqdate: '',
           estimatedate: '',
-          state: '',
-          compnm: '',
+          ordflag: '',
+          cltnm: '',
           manager: '',
-          managernum: '',
+          telnum: '',
           orderprice: '',
           resdate: '',
-          other: ''
+          remark: ''
         });
       }
 
@@ -227,46 +258,57 @@
           autoGenerateColumns: false,
           showMarquee: true,
           columns: [
-            {binding: 'rownum', header: '순번', width: 80, align: 'center'},
-            {binding: 'orderdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'estimatedate', header: '견적일자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'state', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'compnm', header: '업체명', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'manager', header: '담당자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'managernum', header: '연락처', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'orderprice', header: '금액', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'resdate', header: '출고일자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'}
+            { binding: 'rownum', header: '순번', width: 80, align: 'center' },
+            { binding: 'reqdate', header: '주문일자', width: '*', minWidth: 100, align: 'center' },
+            { binding: 'estimatedate', header: '견적일자', width: '*', minWidth: 100, align: 'center' },
+            { binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center' },
+            { binding: 'cltnm', header: '업체명', width: '*', minWidth: 100, align: 'center' },
+            { binding: 'manager', header: '담당자', width: '*', minWidth: 100, align: 'center' },
+            { binding: 'telnum', header: '연락처', width: '*', minWidth: 100, align: 'center' },
+            { binding: 'orderprice', header: '금액', width: '*', minWidth: 100, align: 'center' },
+            { binding: 'resdate', header: '출고일자', width: '*', minWidth: 100, align: 'center' },
+            { binding: 'remark', header: '비고', width: '*', minWidth: 100, align: 'center' }
           ],
-          itemsSource: tempData
+          itemsSource: viewdata
         });
-        // 선택이 변경될 때, 현재 항목 업데이트
-        theGrid.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
+        theGrid.rowHeaders.columns.splice(0, 1);
         new FlexGridContextMenu(theGrid);
-        window.downloadFileName = '티켓현황';
+        window.downloadFileName = '주문진행 형황';
       } else {
-        // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
+        // 이미 FlexGrid가 존재하는 경우, 데이터만 업데이트
         theGrid.itemsSource = viewdata;
       }
     }
 
-    function createChart() {
+    //차트
+    $(document).ready(function () {
+      // 차트 생성 및 인스턴스 저장
       const ctx = document.getElementById('myChart').getContext('2d');
 
+      // Y축에 표시될 항목 레이블
       const labels = ['판넬수출', '특장기타', '특장일반'];
+
+      // 진행 단계를 수치로 매핑
+      const stageLabels = ['주문의뢰', '주문확인', '주문확정', '제작진행', '출고'];
+
+      // 각 항목에 대응하는 단계 수치로 데이터 설정
       const data = {
         labels: labels,
         datasets: [{
           label: '진행 현황',
-          data: [21, 15, 30],
-          fill: false,
+          data: [1, 3, 5],  // 각 항목에 대응하는 단계 수치 (예: 1 = 주문의뢰, 3 = 주문확인 등)
           backgroundColor: [
             'rgba(255, 99, 132, 0.2)',
             'rgba(255, 159, 64, 0.2)',
             'rgba(54, 162, 235, 0.2)'
           ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(54, 162, 235, 1)'
+          ],
           borderWidth: 1,
-          barThickness: 30 // 막대 두께를 10으로 설정 (원하는 값으로 조정 가능)
+          barThickness: 30
         }]
       };
 
@@ -274,31 +316,86 @@
         type: 'bar',
         data: data,
         options: {
-          indexAxis: 'y',
+          indexAxis: 'y',  // 가로 막대 그래프
           scales: {
             x: {
-
-            },
-            y: {
-              title: {
-                display: true,
-                text: ''
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  // 수치에 대응하는 텍스트 단계로 변환하여 표시
+                  return stageLabels[value - 1];
+                }
               }
-            }
+            },
+            y: { beginAtZero: true }
           },
           plugins: {
             legend: {
-              position: 'top',
-              labels: {
-                color: 'rgb(255, 99, 132)'
+              position: 'top'
+            },
+            tooltip: {
+              callbacks: {
+                label: function(tooltipItem) {
+                  // 툴팁에 수치를 텍스트 단계로 변환하여 표시
+                  const stageText = stageLabels[tooltipItem.raw - 1];
+                  return `진행 현황: ${stageText}`;
+                }
               }
             }
           }
         }
       };
-
+      // `myChart` 차트를 생성하고 인스턴스를 저장
       const myChart = new Chart(ctx, config);
-    }
+      $('#myChart').data('chart', myChart);
+
+      // 모달 열기 함수
+      window.openModal = function() {
+        let chartInstance = $('#myChart').data('chart');
+        if (!chartInstance) {
+          console.error("차트를 찾을 수 없습니다.");
+          alert("차트를 찾을 수 없습니다. 차트를 먼저 생성해 주세요.");
+          return;
+        }
+
+        // 모달 열기
+        let modal = $('#chartModal');
+        modal.show();
+
+        // 모달 캔버스 컨텍스트 가져오기
+        let modalChartHolder = $('#modalChartHolder')[0].getContext('2d');
+
+        // 기존 모달 차트 삭제
+        if (window.modalChartInstance) {
+          window.modalChartInstance.destroy();
+        }
+
+        // 모달에 `myChart`의 데이터를 사용하여 새 차트 생성
+        window.modalChartInstance = new Chart(modalChartHolder, {
+          type: chartInstance.config.type,
+          data: chartInstance.config.data,
+          options: chartInstance.config.options
+        });
+      };
+
+      // 모달 닫기 이벤트
+      $(document).on('click', '.close', function () {
+        $('#chartModal').hide();
+        if (window.modalChartInstance) {
+          window.modalChartInstance.destroy();
+        }
+      });
+
+      // 모달 외부 클릭 시 닫기
+      $(window).on('click', function (event) {
+        if ($(event.target).is('#chartModal')) {
+          $('#chartModal').hide();
+          if (window.modalChartInstance) {
+            window.modalChartInstance.destroy();
+          }
+        }
+      });
+    });
   </script>
 </th:block>
 </html>

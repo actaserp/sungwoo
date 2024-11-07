@@ -612,8 +612,7 @@ function showPopup(element) {
     }
 }
 
-
-// 모달로 그래프 확장
+/*// 모달로 그래프 확장
 $(document).ready(function() {
 
     // 모든 chart-wrap 요소에 투명한 오버레이를 자동으로 추가
@@ -690,7 +689,7 @@ $(document).ready(function() {
         clickfunc(event);
     });
 
-});
+});*/
 
 // .chart-wrap에 클릭 이벤트 바인딩 (동적 요소에 대해서도 대응)
 // function clickfunc(event){
@@ -724,3 +723,90 @@ $(document).ready(function() {
 //         }
 //     }
 // }
+
+// 모달로 그래프 확장
+$(document).ready(function () {
+    // 공통 모달 HTML 추가
+    if (!$('#chartModal').length) {
+        const modalHTML = `
+            <div id="chartModal" class="modal" style="display: none; opacity: 1;">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <canvas id="modalChartHolder" style="width: 1230px; height: 490px; display: block; box-sizing: border-box;" width="1230" height="490"></canvas>
+                </div>
+            </div>
+        `;
+        $('body').append(modalHTML);
+    }
+
+    // 모든 chart-wrap 요소에 투명한 오버레이 및 클릭 이벤트 추가
+    $('.chart-wrap').each(function () {
+        let expandIcon = $('<span class="material-symbols-outlined">\n' +
+            'zoom_out_map\n' +
+            '</span>');
+
+        expandIcon.css({
+            'position': 'absolute',
+            'top': '17px',
+            'right': '3px',
+            'cursor': 'pointer',
+            'z-index': '1000',
+            'color': '#B3B3B3'
+        });
+
+        $(this).css('position', 'relative').append(expandIcon);
+
+        // 클릭 이벤트
+        expandIcon.on('click', function () {
+            let chartCanvas = $(this).siblings('canvas'); // 현재 chart-wrap의 canvas
+            let chartInstance = chartCanvas.data('chart');
+
+            if (!chartInstance) {
+                console.error("차트를 찾을 수 없습니다. 차트를 먼저 생성해 주세요.");
+                return;
+            }
+
+            // 모달 열기
+            let modal = $('#chartModal');
+            modal.css('display', 'flex'); // 모달 중앙 정렬을 위해 flex 사용
+
+            // 모달의 2D 컨텍스트 가져오기
+            let ctx = $('#modalChartHolder')[0].getContext('2d');
+
+            // 기존 모달 차트 제거
+            if (window.modalChartInstance) {
+                window.modalChartInstance.destroy();
+            }
+
+            // 모달에 클릭된 차트의 데이터를 사용하여 새 차트 생성
+            window.modalChartInstance = new Chart(ctx, {
+                type: chartInstance.config.type,
+                data: chartInstance.config.data,
+                options: chartInstance.config.options
+            });
+        });
+    });
+
+    // 모달 닫기 이벤트
+    $(document).on('click', '.close', function () {
+        $('#chartModal').css('display', 'none');
+
+        // 모달 차트 삭제
+        if (window.modalChartInstance) {
+            window.modalChartInstance.destroy();
+            window.modalChartInstance = null;
+        }
+    });
+
+    // 모달 외부 클릭 시 닫기
+    $(window).on('click', function (event) {
+        if ($(event.target).is('#chartModal')) {
+            $('#chartModal').css('display', 'none');
+
+            if (window.modalChartInstance) {
+                window.modalChartInstance.destroy();
+                window.modalChartInstance = null;
+            }
+        }
+    });
+});

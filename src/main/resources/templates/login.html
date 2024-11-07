@@ -446,13 +446,10 @@
         <div class="modal-content">
             <h2 style="text-align: center;">비밀번호 변경</h2>
             <form id="pwFindForm">
-
                 <div style="margin-top: 10px;">
                     <label style="width: 15%;">사업자 번호: </label>
                     <input type="text" id="userid" name="userid" required="" maxlength="20" autocomplete="off" style="width: 80%;">
-
                 </div>
-
                 <div style="margin-top: 10px;">
                     <label style="width: 15%;">이메일: </label>
                     <input type="email" id="mailAddres" name="mailAddres" required="" maxlength="40" autocomplete="off" style="width: 62%;">
@@ -461,26 +458,22 @@
                 <div class="hint-red" style="margin: 5px auto 0;">
                     <img src="/images/icon/ico-info-red.svg" alt="힌트메세지">등록시 등록한 이메일을 입력해주세요.
                 </div>
-
                 <div style="margin-top: 10px;">
                     <label style="width: 15%;">인증코드: </label>
                     <input type="text" id="AuthenticationCode" name="AuthenticationCode" required="" maxlength="38" autocomplete="off" style="width: 80%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                     <span id="timer" style="width: 10%; text-align: right; color: red; display: inline-block;"></span>
                 </div>
-
                 <div style="margin-top: 10px;" id="PasswordInputDiv">
                     <label style="width: 15%;">변경 비밀번호: </label>
-                    <input type="password" id="PasswordChange" name="PasswordChange" autocomplete="off" style="width: 80%;border: none;border-bottom: 1px solid;
+                    <input type="password" id="PasswordChange" name="PasswordChange" autocomplete="new-password" style="width: 80%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                 </div>
-
                 <div style="margin-top: 10px;" id="PasswordChkInputDiv">
                     <label style="width: 15%;">비밀번호 확인: </label>
                     <input type="password" id="PasswordChangeChk" name="PasswordChangeChk" autocomplete="off" style="width: 80%;border: none;border-bottom: 1px solid;
                        border-radius: 0px;">
                 </div>
-
                 <div style="margin: 0 auto;">
                     <button type="button" onclick="closePwModal()" style="width: 100px; margin-right: 10px; background: white; border: 1px solid #03428E; border-radius: 3px; color: #03428E">닫기</button>
                     <button type="button" style="width: 100px; border: 1px solid white; border-radius: 3px; color: white; background: #03428E" id="btnPwSearch">비밀번호 변경</button>

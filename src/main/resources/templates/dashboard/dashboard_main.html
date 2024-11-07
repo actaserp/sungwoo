@@ -1,5 +1,15 @@
 <html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
 <style>
+    #chartModal .modal-content {
+        width: 80vw;
+        height: 80vh;
+        max-width: 800px; /
+        max-height: 600px;
+    }
+    #modalChartHolder {
+        width: 100%;
+        height: 100%;
+    }
 
 </style>
 <th:block layout:fragment="content">
@@ -284,19 +294,27 @@
               <section style="width: 50%; height: 210px;">
                 <div class="tab-item-sub h280" id="tab1">
                   <h3>주문의뢰 건수</h3>
-                  <div class="chart-wrap">
-                   <!-- <div id="chartHolder1"  style="width: 100%; height: 420px; padding-top: 13px"></div>-->
+                  <!--<div class="chart-wrap">
+                   &lt;!&ndash; <div id="chartHolder1"  style="width: 100%; height: 420px; padding-top: 13px"></div>&ndash;&gt;
                       <canvas id="revenueChart"></canvas>
-                  </div>
+                  </div>-->
+                    <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
+                        <canvas id="revenueChart"></canvas>
+                        <span class="material-symbols-outlined" style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);" onclick="openModal('revenueChart')">zoom_out_map</span>
+                    </div>
                 </div>
               </section>
               <section style="width: 50%; height: 210px;">
                 <div class="tab-item-sub h280" id="tab2">
                   <h3>견적확인 건수</h3>
-                  <div class="chart-wrap">
-                    <!--<div id="chartHolder2"  style="width: 100%; height: 420px; padding-top: 13px"></div>-->
+                 <!-- <div class="chart-wrap">
+                    &lt;!&ndash;<div id="chartHolder2"  style="width: 100%; height: 420px; padding-top: 13px"></div>&ndash;&gt;
                       <canvas id="orderChart"></canvas>
-                  </div>
+                  </div>-->
+                    <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
+                        <canvas id="orderChart"></canvas>
+                        <span class="material-symbols-outlined" style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);" onclick="openModal('orderChart')">zoom_out_map</span>
+                    </div>
                 </div>
               </section>
             </div>
@@ -304,19 +322,27 @@
               <section style="width: 50%; height: 210px;">
                 <div class="tab-item-sub h280" id="tab3">
                   <h3>제작진행 건수</h3>
-                  <div class="chart-wrap">
-                    <!--<div id="chartHolder3"  style="width: 100%; height: 420px; padding-top: 13px"></div>-->
+                  <!--<div class="chart-wrap">
+                    &lt;!&ndash;<div id="chartHolder3"  style="width: 100%; height: 420px; padding-top: 13px"></div>&ndash;&gt;
                       <canvas id="estimateChart"></canvas>
-                  </div>
+                  </div>-->
+                    <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
+                        <canvas id="estimateChart"></canvas>
+                        <span class="material-symbols-outlined" style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);" onclick="openModal('estimateChart')">zoom_out_map</span>
+                    </div>
                 </div>
               </section>
               <section style="width: 50%; height: 210px;">
                 <div class="tab-item-sub h280" id="tab4">
                   <h3>출고 건수</h3>
-                  <div class="chart-wrap">
-                    <!--<div id="chartHolder4"  style="width: 100%; height: 420px; padding-top: 13px"></div>-->
+                  <!--<div class="chart-wrap">
+                    &lt;!&ndash;<div id="chartHolder4"  style="width: 100%; height: 420px; padding-top: 13px"></div>&ndash;&gt;
                       <canvas id="requestChart"></canvas>
-                  </div>
+                  </div>-->
+                    <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
+                        <canvas id="requestChart"></canvas>
+                        <span class="material-symbols-outlined" style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);" onclick="openModal('requestChart')">zoom_out_map</span>
+                    </div>
                 </div>
               </section>
             </div>
@@ -331,11 +357,10 @@
 
     <div style="height: 10px"></div>
 
-
     <div id="chartModal" class="modal" style="opacity:100">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <div id="modalChartHolder" style="width: 100%; height: 500px;"></div>
+            <canvas id="modalChartHolder" style="width: 1292px; height: 474px; box-sizing: border-box; display: block;" width="1292" height="474"></canvas>
         </div>
     </div>
 
@@ -507,6 +532,7 @@
             </div>
         </div>
     </div>
+
 </th:block>
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/approve_box :: approve_box"></th:block>
@@ -567,58 +593,123 @@
             const ctxEstimate = document.getElementById('estimateChart').getContext('2d');
             const ctxRequest = document.getElementById('requestChart').getContext('2d');
 
-            new Chart(ctxRevenue, {
+            // 기존 차트 인스턴스가 있으면 제거
+            if ($('#revenueChart').data('chart')) {
+                $('#revenueChart').data('chart').destroy();
+            }
+            if ($('#orderChart').data('chart')) {
+                $('#orderChart').data('chart').destroy();
+            }
+            if ($('#estimateChart').data('chart')) {
+                $('#estimateChart').data('chart').destroy();
+            }
+            if ($('#requestChart').data('chart')) {
+                $('#requestChart').data('chart').destroy();
+            }
+
+            // 차트 생성 후 인스턴스를 data 속성에 저장
+            $('#revenueChart').data('chart', new Chart(ctxRevenue, {
                 type: 'bar',
                 data: revenueData,
                 options: {
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                        y: { beginAtZero: true }
                     }
                 }
-            });
+            }));
 
-            new Chart(ctxOrder, {
+            $('#orderChart').data('chart', new Chart(ctxOrder, {
                 type: 'bar',
                 data: orderData,
                 options: {
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                        y: { beginAtZero: true }
                     }
                 }
-            });
+            }));
 
-            new Chart(ctxEstimate, {
+            $('#estimateChart').data('chart', new Chart(ctxEstimate, {
                 type: 'bar',
                 data: estimateData,
                 options: {
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                        y: { beginAtZero: true }
                     }
                 }
-            });
+            }));
 
-            new Chart(ctxRequest, {
+            $('#requestChart').data('chart', new Chart(ctxRequest, {
                 type: 'bar',
                 data: requestData,
                 options: {
                     scales: {
-                        y: {
-                            beginAtZero: true
-                        }
+                        y: { beginAtZero: true }
                     }
                 }
-            });
+            }));
         }
+        // 모달 열기 함수
+        function openModal(chartId) {
+            // 아이콘 숨기기
+            document.querySelector('.material-symbols-outlined').style.display = 'none';
 
-        // 페이지 로드 시 모든 차트 생성 및 표시
-        document.addEventListener('DOMContentLoaded', function() {
-            createCharts(); // 모든 차트 생성
+            let chartInstance = $(`#${chartId}`).data('chart'); // 클릭된 차트의 인스턴스 가져오기
+            if (!chartInstance) {
+                console.error("차트를 찾을 수 없습니다.");
+                return;
+            }
+
+            // 모달 열기
+            let modal = $('#chartModal');
+            modal.show();
+
+            // 모달 캔버스 컨텍스트 가져오기
+            let modalChartHolder = $('#modalChartHolder')[0].getContext('2d');
+            // 기존 모달 차트가 있으면 삭제 후 생성 (중복 생성 방지)
+            if (window.modalChartInstance) {
+                window.modalChartInstance.destroy();
+            }
+
+            // 약간의 지연 후 차트 생성하여 크기 문제 해결
+            setTimeout(() => {
+                window.modalChartInstance = new Chart(modalChartHolder, {
+                    type: chartInstance.config.type,
+                    data: chartInstance.config.data,
+                    options: {
+                        ...chartInstance.config.options,
+                        responsive: true,
+                        maintainAspectRatio: false // 모달 크기에 맞추도록 설정
+                    }
+                });
+
+                // 강제로 리사이즈하여 모달의 크기 맞춤
+                window.modalChartInstance.resize();
+            }, 3); // 지연 시간 조정
+        }
+        // 페이지 로드 후 모든 차트 생성 및 이벤트 바인딩
+        $(document).ready(function () {
+            createCharts(); // 모든 차트를 생성하고 인스턴스 저장
+
+            // 모달 닫기 이벤트
+            $(document).on('click', '.close', function () {
+                $('#chartModal').hide();
+                if (window.modalChartInstance) {
+                    window.modalChartInstance.destroy();
+                    window.modalChartInstance = null; // 인스턴스 초기화
+                }
+            });
+
+            // 모달 외부 클릭 시 닫기
+            $(window).on('click', function (event) {
+                if ($(event.target).is('#chartModal')) {
+                    $('#chartModal').hide();
+                    if (window.modalChartInstance) {
+                        window.modalChartInstance.destroy();
+                        window.modalChartInstance = null; // 인스턴스 초기화
+                    }
+                    document.querySelector('.material-symbols-outlined').style.display = 'inline'; // 아이콘 다시 보이기
+                }
+            });
         });
 
         let csrfToken = $("[name=_csrf]").val();
