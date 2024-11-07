@@ -11,8 +11,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class RequestService {
@@ -76,17 +78,41 @@ public class RequestService {
         return items;
     }
     //주문의뢰현황 불러오기
-    public List<Map<String, Object>> getOrderList() {
+    public List<Map<String, Object>> getOrderList(TB_DA006W_PK tbDa006W_pk) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
+        String sql = """
+                SELECT
+                    bd.*,
+                    hd.*
+                FROM
+                    TB_DA007W bd, TB_DA006W hd
+                WHERE
+                    bd.custcd = :custcd
+                    AND hd.custcd = :custcd
+                    AND bd.spjangcd = :spjangcd
+                    AND hd.spjangcd = :spjangcd
+                ORDER BY
+                    hd.indate DESC;
+                
+                """;
+        dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
+        dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+        return items;
+    }
+    // 주문의뢰현황 head정보 불러오기
+    public List<Map<String, Object>> getHeadList(TB_DA006W_PK tbDa006W_pk) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
         String sql = """
                 select 
                 *
                 from TB_DA007W
                 order by indate desc
                 """;
-
+        dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
+        dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         return items;
     }
@@ -120,7 +146,7 @@ public class RequestService {
                         filepath,
                         filesvnm,
                         fileornm
-                from tb_
+                from tb_DA006WFILE
                 where 
                     uniqcode = :uniqcode
                 """);
@@ -216,4 +242,39 @@ public class RequestService {
             return false;
         }
     }
+    // delete
+//    @Transactional
+//    public Boolean delete(TB_DA006W_PK pk) {
+//
+//        try {
+//            // TB_DA006W 삭제
+//            Optional<TB_DA006W> tbDa006W = TB_DA006WRepository.findByReqnum(pk);
+//            tbDa006W.ifPresent(tb_da006W -> TB_DA006WRepository.delete(tb_da006W));
+//
+//            // TB_DA007W 찾기
+//            List<TB_DA007W> tbDa007WList = TB_DA007WRepository.findAllByReqnum(
+//                    pk.getReqnum());
+//
+//            // 007 정보 삭제
+//            TB_DA007WRepository.deleteAll(pk.getReqnum());
+//
+//            // tb_DA006WFILE 찾기
+//            List<TB_DA006WFile> tbDa006WFiles = TB_DA006WFILERepository.findAllByReqnum(
+//                    pk.getReqnum());
+//            // 파일 삭제
+//            for (TB_DA006WFile tbDa006WFile : tbDa006WFiles) {
+//                String filePath = tbDa006WFile.getFilepath();
+//                String fileName = tbDa006WFile.getFilesvnm();
+//                File file = new File(filePath, fileName);
+//                if (file.exists()) {
+//                    file.delete();
+//                }
+//            }
+//            return true;
+//
+//        } catch (Exception e) {
+//            System.out.println(e + ": 에러발생");
+//            return false;
+//        }
+//    }
 }

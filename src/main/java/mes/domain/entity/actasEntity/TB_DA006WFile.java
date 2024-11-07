@@ -52,4 +52,10 @@ public class TB_DA006WFile {
 
     @Column(name = "\"filerem\"")  // 파일내용
     String filerem;
+
+    @Column(name = "\"fileextns\"")  // 파일내용
+    String fileextns;
+
+    @Column(name = "\"fileurl\"")  // 파일내용
+    String fileurl;
 }

@@ -9,13 +9,18 @@ import mes.domain.entity.actasEntity.*;
 import mes.domain.model.AjaxResult;
 import mes.domain.repository.actasRepository.TB_DA006WRepository;
 import mes.domain.repository.actasRepository.TB_DA007WRepository;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,12 +31,15 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import mes.app.UtilClass;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 
 @RestController
@@ -69,8 +77,16 @@ public class RequestController {
     }
     // 주문의뢰현황 그리드 read
     @GetMapping("/order_read")
-    public AjaxResult getOrderList() {
-        List<Map<String, Object>> items = this.requestService.getOrderList();
+    public AjaxResult getOrderList(Authentication auth) {
+        User user = (User) auth.getPrincipal();
+        String username = user.getUsername();
+        Map<String, Object> userInfo = requestService.getUserInfo(username);
+        TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
+        tbDa006WPk.setSpjangcd("ZZ");
+        tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
+        List<Map<String, Object>> items = this.requestService.getOrderList(tbDa006WPk);
+//        Map<String, Object> headitem = this.requestService.getHeadList(tbDa006WPk);
+//        items.add(headitem);
         AjaxResult result = new AjaxResult();
         result.data = items;
 
@@ -97,14 +113,11 @@ public class RequestController {
         headpk.setReqnum(reqnum);
 
         TB_DA006W tbDa006 = new TB_DA006W();
-        TB_DA006WFile tbDa006WFile = new TB_DA006WFile();
 
         if(files != null){
             for (MultipartFile multipartFile : files) {
                 String path = settings.getProperty("file_upload_path") + "주문등록";
                 MultipartFile file = multipartFile;
-                MultipartFile mFile = null;
-                mFile = file;
                 float fileSize = (float) file.getSize();
 
                 if(fileSize > 52428800){
@@ -124,7 +137,8 @@ public class RequestController {
                     saveDir.mkdirs();
                 }
                 File saveFile = new File(path + File.separator + file_uuid_name);
-                mFile.transferTo(saveFile);
+                file.transferTo(saveFile);
+                TB_DA006WFile tbDa006WFile = new TB_DA006WFile();
 
                 tbDa006WFile.setFilepath(saveFilePath);
                 tbDa006WFile.setFilesvnm(file_uuid_name);
@@ -137,6 +151,8 @@ public class RequestController {
                 tbDa006WFile.setIndatem(params.get("reqdate").replaceAll("-",""));
                 tbDa006WFile.setInuserid(String.valueOf(user.getId()));
                 tbDa006WFile.setInusernm(username);
+                tbDa006WFile.setFileextns(ext);
+                tbDa006WFile.setFileurl(saveFilePath);
 
                 if (!requestService.saveFile(tbDa006WFile)) {
                     result.success = false;
@@ -144,6 +160,27 @@ public class RequestController {
                     break;
                 }
             }
+        }
+        // 삭제된 파일 처리
+        if (deletedFiles != null && deletedFiles.length > 0) {
+            List<TB_RP760> tbRp760List = new ArrayList<>();
+            for (MultipartFile deletedFile : deletedFiles) {
+                String content = new String(deletedFile.getBytes(), StandardCharsets.UTF_8);
+                Map<String, String> deletedFileMap = new ObjectMapper().readValue(content, Map.class);
+
+                //TB_RP760 tbRp760 =
+//                if (tbRp760 != null) {
+//                    // 파일 삭제
+//                    String filePath = tbRp760.getFilepath();
+//                    String fileName = tbRp760.getFilesvnm();
+//                    File file = new File(filePath, fileName);
+//                    if (file.exists()) {
+//                        file.delete();
+//                    }
+//                    tbRp760List.add(tbRp760);
+//                }
+            }
+            //TBRP760Repository.deleteAll(tbRp760List);
         }
 
         tbDa006.setPk(headpk);
@@ -375,26 +412,132 @@ public class RequestController {
         result.data = userInfo;
         return result;
     }
-    @PostMapping("/uploadEditor")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
-        String uploadDir = "c:\\temp\\editorFile\\";
-        // 디렉토리 확인 및 생성
-        File directory = new File(uploadDir);
-        if (!directory.exists()) {
-            directory.mkdirs(); // 디렉토리 생성
+//    @PostMapping("/uploadEditor")
+//    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file
+//                                        , HttpServletRequest request
+//                                        , HttpServletResponse response) {
+//        String uploadDir = "c:\\temp\\editorFile\\";
+//        // 디렉토리 확인 및 생성
+//        File directory = new File(uploadDir);
+//        if (!directory.exists()) {
+//            directory.mkdirs(); // 디렉토리 생성
+//        }
+//        // 파일 저장
+//        try {
+//            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename(); // 파일 이름 중복 방지
+//            File destinationFile = new File(uploadDir + fileName);
+//            file.transferTo(destinationFile);
+//
+//            // 현재 요청의 프로토콜 및 호스트 주소 가져오기
+//            String baseUrl = request.getScheme() + "://" + request.getServerName()
+//                    + ":" + request.getServerPort();
+//
+//            // 웹 URL을 포함한 파일 경로 생성
+//            String fileUrl = baseUrl + "/images/" + fileName;
+//            File target = new File(uploadDir + fileName);
+//            file.transferTo(target);
+//            // 이미지 URL 반환
+//            String imageUrl = uploadDir + fileName;
+//            // JSON 응답 생성
+//            JSONObject jsonResponse = new JSONObject();
+//            jsonResponse.put("location", imageUrl);
+//
+//            // 응답에 JSON 전송
+//            response.setContentType("application/json");
+//            response.setCharacterEncoding("UTF-8");
+//            response.getWriter().write(jsonResponse.toString());
+//
+//
+//            return ResponseEntity.ok(Collections.singletonMap("location", fileUrl));
+//        } catch (IOException e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(Collections.singletonMap("error", "파일 업로드 실패: " + e.getMessage()));
+//        } catch (JSONException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+    @RequestMapping(value="/uploadImage")   //공지사항 이미지 등록
+    public void UploadImage ( @RequestPart(value = "file",required = false) List<MultipartFile> file
+            , Model model
+            , HttpServletRequest request
+            , HttpServletResponse response) throws IOException {
+        String ls_fileName = "";
+        String ls_errmsg = "";
+        String imageUrl = "";
+
+        String _uploadPath = Paths.get("C:", "temp", "editor_file").toString();
+        /* uploadPath에 해당하는 디렉터리가 존재하지 않으면, 부모 디렉터리를 포함한 모든 디렉터리를 생성 */
+        File dir = new File(_uploadPath);
+        if (dir.exists() == false) {
+            dir.mkdirs();
         }
 
-        // 파일 저장
         try {
-            File destinationFile = new File(uploadDir + file.getOriginalFilename());
-            file.transferTo(destinationFile);
-            String fileUrl = uploadDir + file.getOriginalFilename(); // 클라이언트로 반환할 URL
 
-            return ResponseEntity.ok(Collections.singletonMap("location", fileUrl));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("error", "파일 업로드 실패: " + e.getMessage()));
+            for(MultipartFile multipartFile : file){
+                ls_fileName = multipartFile.getOriginalFilename();
+
+
+                /* 파일이 비어있으면 비어있는 리스트 반환 */
+                if (multipartFile.getSize() < 1) {
+                    ls_errmsg = "success";
+                    return ;
+                }
+                /* 파일 확장자 */
+                final String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
+                /* 서버에 저장할 파일명 (랜덤 문자열 + 확장자) */
+                final String saveName = ls_fileName;
+
+                /* 업로드 경로에 saveName과 동일한 이름을 가진 파일 생성 */
+                File target = new File(_uploadPath, saveName);
+                multipartFile.transferTo(target);
+                _uploadPath = _uploadPath + "\\";
+                // 이미지 URL 반환
+                imageUrl = _uploadPath + saveName;
+                // JSON 응답 생성
+                JSONObject jsonResponse = new JSONObject();
+                jsonResponse.put("location", imageUrl);
+
+                // 응답에 JSON 전송
+                response.setContentType("application/json");
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write(jsonResponse.toString());
+            }
+
+        }catch (DataAccessException e){
+            throw e;
+        } catch (Exception  e){
+                /*log.info("memberUpload Exception ================================================================");
+                log.info(e.toString());
+                ls_errmsg = "[" + ls_fileName + "] failed to save";
+                throw new AttachFileException("[" + ls_fileName + "] failed to save");*/
+            //utils.showMessageWithRedirect("시스템에 문제가 발생하였습니다", "/app05/App05list/", Method.GET, model);
         }
+        return ;
+    //        utils.showMessageWithRedirect("게시글 등록이 완료되었습니다", "/app05/App05list/", Method.GET, model);
+    }
+    // 삭제 메서드
+    @DeleteMapping("/delete")
+    public AjaxResult deleteElecSafe(@RequestBody List<TB_RP750_PK> pkList) {
+        AjaxResult result = new AjaxResult();
+
+        for (TB_RP750_PK pk : pkList) {
+
+            if (pk.getCheckdt() != null) {
+                pk.setCheckdt(pk.getCheckdt().replaceAll("-", ""));
+            }
+
+            //boolean success = requestService.delete(pk);
+
+//            if (success) {
+//                result.success = true;
+//                result.message = "삭제하였습니다.";
+//            } else {
+//                result.success = false;
+//                result.message = "삭제에 실패하였습니다.";
+//            }
+        }
+        return result;
     }
 }
 
