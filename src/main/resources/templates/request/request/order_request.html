@@ -143,7 +143,7 @@
                   <input type="text" id="postno" placeholder="우편번호"
                          onclick="sample4_execDaumPostcode()"
                          style="width: 100px; margin-bottom: 3px;">
-                  <input type="text" id="address1" placeholder="도로명주소" style="width: 38%" disabled>
+                  <input type="text" id="address1" placeholder="도로명주소" style="width: 48%">
                   <input type="hidden" id="placeAddress" placeholder="지번주소">
                   <span id="guide" style="color:#999;display:none"></span>
                 </td>
@@ -381,7 +381,7 @@
                 <dt>&nbsp;</dt>
                 <dd>
                   <li>
-                    <a class="btn btn-delete" title="검색" id="searchButton1" onclick="">
+                    <a class="btn btn-delete" title="검색" id="searchButton1" onclick="fetchListData()">
                       <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
                       <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                       검색
@@ -522,61 +522,61 @@
       paste_data_images: true, // 이미지 붙여넣기 설정 활성화
       file_picker_types: 'image', // TinyMCE에서 이미지를 선택할 때, 이미지 파일만 선택 (옵션 : media, file 등)
       automatic_uploads: true,
-      images_upload_handler: function (blobInfo, success, failure) {
-        var xhr, formData;
-        xhr = new XMLHttpRequest();
-        xhr.withCredentials = false;
-        xhr.open('POST', '/api/request/request/uploadEditor');
-
-        xhr.onload = function() {
-          var json;
-          if (xhr.status != 200) {
-            failure('HTTP Error: ' + xhr.status);
-            return;
-          }
-
-          json = JSON.parse(xhr.responseText);
-          if (!json || typeof json.location != 'string') {
-            failure('Invalid JSON: ' + xhr.responseText);
-            return;
-          }
-          console.log(json.location)
-          success(json.location);
-        };
-
-        formData = new FormData();
-        formData.append('file', blobInfo.blob(), blobInfo.filename());
-        xhr.send(formData);
-      }
-      // // 이미지 업로드 핸들러 설정
       // images_upload_handler: function (blobInfo, success, failure) {
-      //   let formData = new FormData();
-      //   formData.append('file', blobInfo.blob(), blobInfo.filename());
+      //   var xhr, formData;
+      //   xhr = new XMLHttpRequest();
+      //   xhr.withCredentials = false;
+      //   xhr.open('POST', '/api/request/request/uploadEditor');
       //
-      //   // 서버 엔드포인트 호출
-      //   fetch('/api/request/request/uploadEditor', {
-      //     method: 'POST',
-      //     body: formData
-      //   })
-      //   .then(response => {
-      //     if (!response.ok) {
-      //       throw new Error('Network response was not ok: ' + response.statusText);
+      //   xhr.onload = function() {
+      //     var json;
+      //     if (xhr.status != 200) {
+      //       failure('HTTP Error: ' + xhr.status);
+      //       return;
       //     }
-      //     return response.json(); // JSON 파싱 시도
-      //   })
-      //   .then(data => {
-      //     console.log("data : ", data)
-      //     if (data.location) {
-      //       success(data.location); // 업로드 성공 시 이미지 URL 반환
-      //     } else {
-      //       failure('Image upload failed: Invalid server response.');
+      //
+      //     json = JSON.parse(xhr.responseText);
+      //     if (!json || typeof json.location != 'string') {
+      //       failure('Invalid JSON: ' + xhr.responseText);
+      //       return;
       //     }
-      //   })
-      //   .catch(error => {
-      //     console.error('Upload error:', error); // 오류 메시지 확인
-      //     failure('Image upload failed: ' + error.message);
-      //   });
+      //     console.log(json.location)
+      //     success(json.location);
+      //   };
+      //
+      //   formData = new FormData();
+      //   formData.append('file', blobInfo.blob(), blobInfo.filename());
+      //   xhr.send(formData);
       // }
+      // // 이미지 업로드 핸들러 설정
+      images_upload_handler: function (blobInfo, success, failure) {
+        let formData = new FormData();
+        formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+        // 서버 엔드포인트 호출
+        fetch('/api/request/request/uploadEditor', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+          }
+          return response.json(); // JSON 파싱 시도
+        })
+        .then(data => {
+          console.log("data : ", data)
+          if (data.location) {
+            success(data.location); // 업로드 성공 시 이미지 URL 반환
+          } else {
+            failure('Image upload failed: Invalid server response.');
+          }
+        })
+        .catch(error => {
+          console.error('Upload error:', error); // 오류 메시지 확인
+          failure('Image upload failed: ' + error.message);
+        });
+      }
     });
   </script>
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
@@ -646,6 +646,7 @@
     date.setHours(date.getHours() + 9); // UTC+9로 한국 시간 설정
     const today = date.toISOString().split('T')[0];
     document.getElementById('reqdate').value = today;
+    document.getElementById('deldate').value = today;
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
       fetchListData();
@@ -678,19 +679,32 @@
         theGrid = new wijmo.grid.FlexGrid('#theGrid', {
           autoGenerateColumns: false,
           showMarquee: true,
+          isReadOnly: true,
+          selectionMode: wijmo.grid.SelectionMode.Row,
           columns: [
             {binding: 'ordfalg', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
             {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'cltnm', header: '업체명', width: '*', minWidth: 100, align: 'left'},
-            {binding: 'remark', header: '제목', width: '*', minWidth: 100, align: 'left'},
-            {binding: 'reservatedate', header: '출하예정일', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'category', header: '제품유형', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'touse', header: '용도별', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'ton', header: '톤별', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'site', header: '시트별', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'price', header: '금액', width: '*', minWidth: 100, align: 'right'},
-            {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 100, align: 'center'}
+            {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'telno', header: '연락처', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'perid', header: '담당자', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'cltzipcd', header: '우편번호', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'cltaddr', header: '상세주소', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'panel_ht', header: '두께', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'panel_hw', header: '폭', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'panel_hl', header: '길이', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'panel_hh', header: '높이', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'remark', header: '제목', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 100, align: 'center'},
+            // {binding: 'cltnm', header: '제품구성', width: '*', minWidth: 100, align: 'left'},
+            // {binding: 'remark', header: '제목', width: '*', minWidth: 100, align: 'left'},
+            // {binding: 'reservatedate', header: '출하예정일', width: '*', minWidth: 100, align: 'center'},
+            // {binding: 'category', header: '제품유형', width: '*', minWidth: 100, align: 'center'},
+            // {binding: 'touse', header: '용도별', width: '*', minWidth: 100, align: 'center'},
+            // {binding: 'ton', header: '톤별', width: '*', minWidth: 100, align: 'center'},
+            // {binding: 'site', header: '시트별', width: '*', minWidth: 100, align: 'center'},
+            // {binding: 'price', header: '금액', width: '*', minWidth: 100, align: 'right'},
+            // {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'},
+            // {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 100, align: 'center'}
           ],
           itemsSource: viewdata1,
           itemFormatter: function (panel, r, c, cell) {
@@ -713,13 +727,14 @@
             // 행(row), 행의 데이터(item) 정보 가져오기
             let row = hitTest.row;
             let item = theGrid.rows[row].dataItem;
+            console.log("click data : ", item)
 
             document.getElementById('reqdate').value = item.reqdate;
             document.getElementById('deldate').value = item.deldate;
             document.getElementById('telno').value = item.telno;
             document.getElementById('perid').value = item.perid;
-            document.getElementById('postno').value = item.postno;
-            document.getElementById('address1').value = item.address1;
+            document.getElementById('postno').value = item.cltzipcd;
+            document.getElementById('address1').value = item.cltaddr;
             document.getElementById('panel_ht').value = item.panel_ht;
             document.getElementById('panel_hw').value = item.panel_hw;
             document.getElementById('panel_hl').value = item.panel_hl;
@@ -745,7 +760,7 @@
             setSelectedIndex(selectStframedv, selectedItem.stframedv);
             setSelectedIndex(selectStexplydv, selectedItem.stexplydv);
 
-            const tab1Link = document.getElementById('#tab1');
+            const tab1Link = document.getElementById('tab1');
             tab1Link.click();
           }
         })
@@ -894,6 +909,12 @@
         {id: '#panel_hh', label: '높이를 작성해주세요'},
         {id: '#remark', label: '제목을 작성해주세요'}
       ];
+      // 세부항목 행 추가 여부 검사
+      const allRowsEmpty = viewdata2.sourceCollection.every(row => !row.hgrb || row.hgrb === '');
+      if (allRowsEmpty) {
+        Alert.alert('', '세부항목에 추가된 항목이 없습니다.');
+        return;
+      }
 
       for (let i = 0; i < requiredFields.length; i++) {
         let field = requiredFields[i];

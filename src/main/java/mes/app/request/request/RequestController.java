@@ -77,16 +77,59 @@ public class RequestController {
     }
     // 주문의뢰현황 그리드 read
     @GetMapping("/order_read")
-    public AjaxResult getOrderList(Authentication auth) {
+    public AjaxResult getOrderList(@RequestParam(value = "search_startDate", required = false) String searchStartDate,
+                                   @RequestParam(value = "search_endDate", required = false) String searchEndDate,
+                                   @RequestParam(value = "search_remark", required = false) String searchRemark,
+                                   @RequestParam(value = "search_ordflag", required = false) String searchOrdfalg,
+                                   Authentication auth) {
         User user = (User) auth.getPrincipal();
         String username = user.getUsername();
         Map<String, Object> userInfo = requestService.getUserInfo(username);
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
         tbDa006WPk.setSpjangcd("ZZ");
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
-        List<Map<String, Object>> items = this.requestService.getOrderList(tbDa006WPk);
+        List<Map<String, Object>> items = this.requestService.getOrderList(tbDa006WPk,
+                searchStartDate, searchEndDate, searchRemark, searchOrdfalg);
 //        Map<String, Object> headitem = this.requestService.getHeadList(tbDa006WPk);
 //        items.add(headitem);
+        for (Map<String, Object> item : items) {
+            if (item.get("orgflag") == "0") {
+                item.remove("orgflag");
+                item.put("orgflag", "주문의뢰");
+            }else if (item.get("orgflag") == "1") {
+                item.remove("orgflag");
+                item.put("orgflag", "견적작성");
+            }else if (item.get("orgflag") == "2") {
+                item.remove("orgflag");
+                item.put("orgflag", "제작");
+            }else if (item.get("orgflag") == "3") {
+                item.remove("orgflag");
+                item.put("orgflag", "출고");
+            }
+//            if(item.get("hd_files")!=null){
+//                // 파일 이름과 경로를 리스트로 변환
+//                List<Map<String, Object>> fileitems = (List<Map<String, Object>>) item.get("hd_files");
+//                for (Map<String, Object> fileitem : fileitems){
+//                    if (fileitem.containsKey("fileornm") && fileitem.containsKey("filepath")) {
+//                        String filenames = (String) fileitem.get("fileornm");
+//                        String filepaths = (String) fileitem.get("filepath");
+//
+//                        List<String> filenameList = filenames != null ? Arrays.asList(filenames.split(",")) : Collections.emptyList();
+//                        List<String> filepathList = filepaths != null ? Arrays.asList(filepaths.split(",")) : Collections.emptyList();
+//
+//                        fileitem.put("filenameList", filenameList);
+//                        fileitem.put("filepathList", filepathList);
+//                        fileitem.put("isdownload", !filenameList.isEmpty() && !filepathList.isEmpty());
+//                    } else {
+//                        fileitem.put("filenameList", Collections.emptyList());
+//                        fileitem.put("filepathList", Collections.emptyList());
+//                        fileitem.put("isdownload", false);
+//                    }
+//                }
+//            }
+        }
+
+
         AjaxResult result = new AjaxResult();
         result.data = items;
 
@@ -412,131 +455,124 @@ public class RequestController {
         result.data = userInfo;
         return result;
     }
-//    @PostMapping("/uploadEditor")
-//    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file
-//                                        , HttpServletRequest request
-//                                        , HttpServletResponse response) {
-//        String uploadDir = "c:\\temp\\editorFile\\";
-//        // 디렉토리 확인 및 생성
-//        File directory = new File(uploadDir);
-//        if (!directory.exists()) {
-//            directory.mkdirs(); // 디렉토리 생성
-//        }
-//        // 파일 저장
-//        try {
-//            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename(); // 파일 이름 중복 방지
-//            File destinationFile = new File(uploadDir + fileName);
-//            file.transferTo(destinationFile);
-//
-//            // 현재 요청의 프로토콜 및 호스트 주소 가져오기
-//            String baseUrl = request.getScheme() + "://" + request.getServerName()
-//                    + ":" + request.getServerPort();
-//
-//            // 웹 URL을 포함한 파일 경로 생성
-//            String fileUrl = baseUrl + "/images/" + fileName;
-//            File target = new File(uploadDir + fileName);
-//            file.transferTo(target);
-//            // 이미지 URL 반환
-//            String imageUrl = uploadDir + fileName;
-//            // JSON 응답 생성
-//            JSONObject jsonResponse = new JSONObject();
-//            jsonResponse.put("location", imageUrl);
-//
-//            // 응답에 JSON 전송
-//            response.setContentType("application/json");
-//            response.setCharacterEncoding("UTF-8");
-//            response.getWriter().write(jsonResponse.toString());
-//
-//
-//            return ResponseEntity.ok(Collections.singletonMap("location", fileUrl));
-//        } catch (IOException e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(Collections.singletonMap("error", "파일 업로드 실패: " + e.getMessage()));
-//        } catch (JSONException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-    @RequestMapping(value="/uploadImage")   //공지사항 이미지 등록
-    public void UploadImage ( @RequestPart(value = "file",required = false) List<MultipartFile> file
-            , Model model
-            , HttpServletRequest request
-            , HttpServletResponse response) throws IOException {
-        String ls_fileName = "";
-        String ls_errmsg = "";
-        String imageUrl = "";
-
-        String _uploadPath = Paths.get("C:", "temp", "editor_file").toString();
-        /* uploadPath에 해당하는 디렉터리가 존재하지 않으면, 부모 디렉터리를 포함한 모든 디렉터리를 생성 */
-        File dir = new File(_uploadPath);
-        if (dir.exists() == false) {
-            dir.mkdirs();
+    @PostMapping("/uploadEditor")
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file
+                                        , HttpServletRequest request
+                                        , HttpServletResponse response) {
+        String uploadDir = "c:\\temp\\editorFile\\";
+        // 디렉토리 확인 및 생성
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs(); // 디렉토리 생성
         }
-
+        // 파일 저장
         try {
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename(); // 파일 이름 중복 방지
+            File destinationFile = new File(uploadDir + fileName);
+            file.transferTo(destinationFile);
 
-            for(MultipartFile multipartFile : file){
-                ls_fileName = multipartFile.getOriginalFilename();
+            // 현재 요청의 프로토콜 및 호스트 주소 가져오기
+            String baseUrl = request.getScheme() + "://" + request.getServerName()
+                    + ":" + request.getServerPort();
+
+            // 웹 URL을 포함한 파일 경로 생성
+            String fileUrl = baseUrl + "/images/" + fileName;
+            File target = new File(uploadDir + fileName);
+            file.transferTo(target);
+            // 이미지 URL 반환
+            String imageUrl = uploadDir + fileName;
+            // JSON 응답 생성
+            JSONObject jsonResponse = new JSONObject();
+            jsonResponse.put("location", imageUrl);
+
+            // 응답에 JSON 전송
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write(jsonResponse.toString());
 
 
-                /* 파일이 비어있으면 비어있는 리스트 반환 */
-                if (multipartFile.getSize() < 1) {
-                    ls_errmsg = "success";
-                    return ;
-                }
-                /* 파일 확장자 */
-                final String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
-                /* 서버에 저장할 파일명 (랜덤 문자열 + 확장자) */
-                final String saveName = ls_fileName;
-
-                /* 업로드 경로에 saveName과 동일한 이름을 가진 파일 생성 */
-                File target = new File(_uploadPath, saveName);
-                multipartFile.transferTo(target);
-                _uploadPath = _uploadPath + "\\";
-                // 이미지 URL 반환
-                imageUrl = _uploadPath + saveName;
-                // JSON 응답 생성
-                JSONObject jsonResponse = new JSONObject();
-                jsonResponse.put("location", imageUrl);
-
-                // 응답에 JSON 전송
-                response.setContentType("application/json");
-                response.setCharacterEncoding("UTF-8");
-                response.getWriter().write(jsonResponse.toString());
-            }
-
-        }catch (DataAccessException e){
-            throw e;
-        } catch (Exception  e){
-                /*log.info("memberUpload Exception ================================================================");
-                log.info(e.toString());
-                ls_errmsg = "[" + ls_fileName + "] failed to save";
-                throw new AttachFileException("[" + ls_fileName + "] failed to save");*/
-            //utils.showMessageWithRedirect("시스템에 문제가 발생하였습니다", "/app05/App05list/", Method.GET, model);
+            return ResponseEntity.ok(Collections.singletonMap("location", fileUrl));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("error", "파일 업로드 실패: " + e.getMessage()));
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
         }
-        return ;
-    //        utils.showMessageWithRedirect("게시글 등록이 완료되었습니다", "/app05/App05list/", Method.GET, model);
     }
+//    @RequestMapping(value="/uploadImage")   //공지사항 이미지 등록
+//    public void UploadImage ( @RequestPart(value = "file",required = false) List<MultipartFile> file
+//            , Model model
+//            , HttpServletRequest request
+//            , HttpServletResponse response) throws IOException {
+//        String ls_fileName = "";
+//        String ls_errmsg = "";
+//        String imageUrl = "";
+//
+//        String _uploadPath = Paths.get("C:", "temp", "editor_file").toString();
+//        /* uploadPath에 해당하는 디렉터리가 존재하지 않으면, 부모 디렉터리를 포함한 모든 디렉터리를 생성 */
+//        File dir = new File(_uploadPath);
+//        if (dir.exists() == false) {
+//            dir.mkdirs();
+//        }
+//
+//        try {
+//
+//            for(MultipartFile multipartFile : file){
+//                ls_fileName = multipartFile.getOriginalFilename();
+//
+//
+//                /* 파일이 비어있으면 비어있는 리스트 반환 */
+//                if (multipartFile.getSize() < 1) {
+//                    ls_errmsg = "success";
+//                    return ;
+//                }
+//                /* 파일 확장자 */
+//                final String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
+//                /* 서버에 저장할 파일명 (랜덤 문자열 + 확장자) */
+//                final String saveName = ls_fileName;
+//
+//                /* 업로드 경로에 saveName과 동일한 이름을 가진 파일 생성 */
+//                File target = new File(_uploadPath, saveName);
+//                multipartFile.transferTo(target);
+//                _uploadPath = _uploadPath + "\\";
+//                // 이미지 URL 반환
+//                imageUrl = _uploadPath + saveName;
+//                // JSON 응답 생성
+//                JSONObject jsonResponse = new JSONObject();
+//                jsonResponse.put("location", imageUrl);
+//
+//                // 응답에 JSON 전송
+//                response.setContentType("application/json");
+//                response.setCharacterEncoding("UTF-8");
+//                response.getWriter().write(jsonResponse.toString());
+//            }
+//
+//        }catch (DataAccessException e){
+//            throw e;
+//        } catch (Exception  e){
+//                /*log.info("memberUpload Exception ================================================================");
+//                log.info(e.toString());
+//                ls_errmsg = "[" + ls_fileName + "] failed to save";
+//                throw new AttachFileException("[" + ls_fileName + "] failed to save");*/
+//            //utils.showMessageWithRedirect("시스템에 문제가 발생하였습니다", "/app05/App05list/", Method.GET, model);
+//        }
+//        return ;
+//    //        utils.showMessageWithRedirect("게시글 등록이 완료되었습니다", "/app05/App05list/", Method.GET, model);
+//    }
     // 삭제 메서드
     @DeleteMapping("/delete")
-    public AjaxResult deleteElecSafe(@RequestBody List<TB_RP750_PK> pkList) {
+    public AjaxResult deleteElecSafe(@RequestParam String reqnum) {
         AjaxResult result = new AjaxResult();
 
-        for (TB_RP750_PK pk : pkList) {
+            boolean success = requestService.delete(reqnum);
 
-            if (pk.getCheckdt() != null) {
-                pk.setCheckdt(pk.getCheckdt().replaceAll("-", ""));
+            if (success) {
+                result.success = true;
+                result.message = "삭제하였습니다.";
+            } else {
+                result.success = false;
+                result.message = "삭제에 실패하였습니다.";
             }
-
-            //boolean success = requestService.delete(pk);
-
-//            if (success) {
-//                result.success = true;
-//                result.message = "삭제하였습니다.";
-//            } else {
-//                result.success = false;
-//                result.message = "삭제에 실패하였습니다.";
-//            }
-        }
         return result;
     }
 }

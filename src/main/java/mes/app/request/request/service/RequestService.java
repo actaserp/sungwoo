@@ -78,28 +78,96 @@ public class RequestService {
         return items;
     }
     //주문의뢰현황 불러오기
-    public List<Map<String, Object>> getOrderList(TB_DA006W_PK tbDa006W_pk) {
+    public List<Map<String, Object>> getOrderList(TB_DA006W_PK tbDa006W_pk,
+                                                  String searchStartDate, String searchEndDate, String searchRemark, String searchOrdflag) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("searchStartDate", searchStartDate);
+        dicParam.addValue("searchEndDate", searchEndDate);
+        dicParam.addValue("searchRemark", "%" + searchRemark + "%");
+        dicParam.addValue("searchOrdflag",  searchOrdflag);
 
-        String sql = """
+        StringBuilder sql = new StringBuilder("""
                 SELECT
-                    bd.*,
-                    hd.*
+                    hd.custcd AS hd_custcd,
+                    hd.spjangcd AS hd_spjangcd,
+                    hd.reqnum,
+                    hd.reqdate,          -- GROUP BY에 추가해야 하는 컬럼
+                    hd.indate AS hd_indate,
+                    hd.ordflag,
+                    hd.deldate,
+                    hd.telno,
+                    hd.perid,
+                    hd.cltzipcd,
+                    hd.cltaddr,
+                    hd.panel_ht,
+                    hd.panel_hw,
+                    hd.panel_hl,
+                    hd.panel_hh,
+                    (
+                        SELECT bd.reqseq, bd.panel_t, bd.panel_w, bd.panel_l
+                        FROM ERP_SWSPANEL1.dbo.TB_DA007W bd
+                        WHERE bd.custcd = hd.custcd
+                          AND bd.spjangcd = hd.spjangcd
+                          AND bd.reqdate = hd.reqdate
+                          AND bd.reqnum = hd.reqnum
+                        ORDER BY bd.indate DESC
+                        FOR JSON PATH
+                    ) AS bd_details,
+                    (
+                        SELECT bd.filepath, bd.filesvnm, bd.fileextns, bd.fileurl, bd.fileornm
+                        FROM ERP_SWSPANEL1.dbo.tb_DA006WFILE bd
+                        WHERE bd.custcd = hd.custcd
+                          AND bd.spjangcd = hd.spjangcd
+                          AND bd.reqdate = hd.reqdate
+                          AND bd.reqnum = hd.reqnum
+                        ORDER BY bd.indatem DESC
+                        FOR JSON PATH
+                    ) AS hd_files
                 FROM
-                    TB_DA007W bd, TB_DA006W hd
+                    ERP_SWSPANEL1.dbo.TB_DA006W hd
                 WHERE
-                    bd.custcd = :custcd
-                    AND hd.custcd = :custcd
-                    AND bd.spjangcd = :spjangcd
-                    AND hd.spjangcd = :spjangcd
-                ORDER BY
-                    hd.indate DESC;
-                
-                """;
+                    hd.custcd = 'SWSPANEL'
+                    AND hd.spjangcd = 'ZZ'
+                """);
+        // 날짜 필터
+        if (searchStartDate != null && !searchStartDate.isEmpty()) {
+            sql.append(" AND hd.indate >= :searchStartDate");
+        }
+        //
+        if (searchEndDate != null && !searchEndDate.isEmpty()) {
+            sql.append(" AND hd.indate <= :searchEndDate");
+        }
+        // 제목필터
+        if (searchRemark != null && !searchRemark.isEmpty()) {
+            sql.append(" AND remark LIKE :searchRemark");
+        }
+        // 진행구분 필터
+        if (searchOrdflag != null && !searchOrdflag.isEmpty()) {
+            sql.append(" AND ordflag LIKE :searchOrdflag");
+        }
+        // 정렬 조건 추가
+        sql.append(" GROUP BY" +
+                " hd.custcd," +
+                " hd.spjangcd," +
+                " hd.reqnum," +
+                " hd.reqdate," +
+                " hd.indate," +
+                " hd.ordflag," +
+                " hd.deldate," +
+                " hd.telno," +
+                " hd.perid," +
+                " hd.cltzipcd," +
+                " hd.cltaddr," +
+                " hd.panel_ht," +
+                " hd.panel_hw," +
+                " hd.panel_hl," +
+                " hd.panel_hh" +
+                " ORDER BY hd.indate DESC");
+
         dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
         dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }
     // 주문의뢰현황 head정보 불러오기
@@ -243,38 +311,69 @@ public class RequestService {
         }
     }
     // delete
-//    @Transactional
-//    public Boolean delete(TB_DA006W_PK pk) {
-//
-//        try {
-//            // TB_DA006W 삭제
-//            Optional<TB_DA006W> tbDa006W = TB_DA006WRepository.findByReqnum(pk);
-//            tbDa006W.ifPresent(tb_da006W -> TB_DA006WRepository.delete(tb_da006W));
-//
-//            // TB_DA007W 찾기
-//            List<TB_DA007W> tbDa007WList = TB_DA007WRepository.findAllByReqnum(
-//                    pk.getReqnum());
-//
-//            // 007 정보 삭제
-//            TB_DA007WRepository.deleteAll(pk.getReqnum());
-//
-//            // tb_DA006WFILE 찾기
-//            List<TB_DA006WFile> tbDa006WFiles = TB_DA006WFILERepository.findAllByReqnum(
-//                    pk.getReqnum());
-//            // 파일 삭제
-//            for (TB_DA006WFile tbDa006WFile : tbDa006WFiles) {
-//                String filePath = tbDa006WFile.getFilepath();
-//                String fileName = tbDa006WFile.getFilesvnm();
-//                File file = new File(filePath, fileName);
-//                if (file.exists()) {
-//                    file.delete();
-//                }
-//            }
-//            return true;
-//
-//        } catch (Exception e) {
-//            System.out.println(e + ": 에러발생");
-//            return false;
-//        }
-//    }
+    @Transactional
+    public Boolean delete(String reqnum) {
+        // TB_DA006W 삭제
+        headDelete(reqnum);
+
+        // 007 정보 삭제
+        bodyDelete(reqnum);
+
+        // tb_DA006WFILE 찾기
+        List<TB_DA006WFile> tbDa006WFiles = tbDa006WFILERepository.findAllByReqnum(reqnum);
+        // 파일 삭제
+        for (TB_DA006WFile tbDa006WFile : tbDa006WFiles) {
+            String filePath = tbDa006WFile.getFilepath();
+            String fileName = tbDa006WFile.getFilesvnm();
+            File file = new File(filePath, fileName);
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+        // 006WFile DB정보 삭제
+        fileDelete(reqnum);
+        return true;
+    }
+    // TB_DA006W 삭제
+    public void headDelete(String reqnum){
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        try {
+            String sql = """
+                    DELETE FROM TB_DA006W
+                    WHERE reqnum = :reqnum
+                """;
+            dicParam.addValue("reqnum", reqnum);
+            this.sqlRunner.queryForObject(sql, dicParam, (rs, rowNum) -> rs.getString("dtl_cd"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    // TB_DA007W 삭제
+    public void bodyDelete(String reqnum){
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        try {
+            String sql = """
+                    DELETE FROM TB_DA007W
+                    WHERE reqnum = :reqnum
+                """;
+            dicParam.addValue("reqnum", reqnum);
+            this.sqlRunner.queryForObject(sql, dicParam, (rs, rowNum) -> rs.getString("dtl_cd"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    // TB_DA006Wfile 삭제
+    public void fileDelete(String reqnum){
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        try {
+            String sql = """
+                    DELETE FROM tb_DA006WFILE
+                    WHERE reqnum = :reqnum
+                """;
+            dicParam.addValue("reqnum", reqnum);
+            this.sqlRunner.queryForObject(sql, dicParam, (rs, rowNum) -> rs.getString("dtl_cd"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
