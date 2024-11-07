@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,77 @@ public class OrderStatusService {
             AND tb007.reqnum = tb006.reqnum;
 """;
 
+        return sqlRunner.getRows(sql, params);
+    }
+
+    public List<Map<String, Object>> getModalList(String saupnum) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("saupnum", saupnum);
+        String sql = """
+                SELECT * 
+                FROM TB_XCLIENT tx;
+                """;
+        return sqlRunner.getRows(sql, params);
+    }
+
+    public List<Map<String, Object>> searchData(String startDate, String endDate, String searchCltnm, String searchtketnm, String searchstate) {
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        if (startDate != null && !startDate.isEmpty()) {
+            params.addValue("startDate", startDate);
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            params.addValue("endDate", endDate);
+        }
+        if (searchCltnm != null && !searchCltnm.isEmpty()) {
+            params.addValue("searchCltnm", "%" + searchCltnm + "%");
+        }
+        if (searchtketnm != null && !searchtketnm.isEmpty()) {
+            params.addValue("searchtketnm", "%" + searchtketnm + "%");
+        }
+        if (searchstate != null && !searchstate.isEmpty() && !searchstate.equals("전체")) {
+            params.addValue("searchstate", searchstate);
+        }
+
+        // 기본 SQL 쿼리 작성
+        String sql = """
+        SELECT
+            tb007.*,
+            tb007.reqdate,
+            tb006.*,
+            tb006.cltnm,
+            tb006.remark,
+            tb006.ordflag
+        FROM
+            TB_DA007W tb007
+        LEFT JOIN
+            TB_DA006W tb006
+        ON
+            tb007.custcd = tb006.custcd
+            AND tb007.spjangcd = tb006.spjangcd
+            AND tb007.reqdate = tb006.reqdate
+            AND tb007.reqnum = tb006.reqnum
+        WHERE 1=1
+    """;
+
+        // 조건 추가
+        if (params.hasValue("startDate")) {
+            sql += " AND tb007.reqdate >= :startDate";
+        }
+        if (params.hasValue("endDate")) {
+            sql += " AND tb007.reqdate <= :endDate";
+        }
+        if (params.hasValue("searchCltnm")) {
+            sql += " AND tb006.cltnm LIKE :searchCltnm";
+        }
+        if (params.hasValue("searchtketnm")) {
+            sql += " AND tb006.remark LIKE :searchtketnm";
+        }
+        if (params.hasValue("searchstate")) {
+            sql += " AND tb006.ordflag = :searchstate";
+        }
+
+        // 쿼리 실행 및 결과 반환
         return sqlRunner.getRows(sql, params);
     }
 }

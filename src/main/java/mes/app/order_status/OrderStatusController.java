@@ -5,12 +5,16 @@ import mes.app.order_status.service.OrderStatusService;
 import mes.domain.entity.User;
 import mes.domain.entity.actasEntity.TB_DA006W;
 import mes.domain.model.AjaxResult;
+import org.aspectj.weaver.AjAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,4 +49,46 @@ public class OrderStatusController {
 
         return result;
     }
+    @GetMapping("/ModalRead")
+    public AjaxResult ModalRead(Authentication auth) {
+        AjaxResult result = new AjaxResult();
+        try {
+            User user = (User) auth.getPrincipal();
+            String saupnum = user.getUsername();    //id= 사업자번호
+
+            List<Map<String, Object>> modalList = orderStatusService.getModalList(saupnum);
+
+            result.success = true;
+            result.data = modalList;
+            result.message = "데이터 조회 성공";
+
+        } catch (Exception e) {
+            // 오류 발생 시 실패 상태 설정
+            result.success = false;
+            result.message = "데이터를 가져오는 중 오류가 발생했습니다.";
+        }
+
+        return result;
+    }
+
+
+    @GetMapping("/searchData")
+    public ResponseEntity<Map<String, Object>> searchData(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String searchCltnm,
+            @RequestParam(required = false) String searchtketnm,
+            @RequestParam(required = false) String searchstate) {
+
+        System.out.println("검색요청 들어옴");
+
+        // 검색 결과를 서비스에서 가져오기
+        List<Map<String, Object>> result = orderStatusService.searchData(startDate, endDate, searchCltnm, searchtketnm, searchstate);
+
+        // 응답 데이터를 "data" 키로 래핑하여 JSON 형식으로 반환
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", result);
+        return ResponseEntity.ok(response);
+    }
+
 }
