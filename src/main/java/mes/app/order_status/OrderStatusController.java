@@ -9,10 +9,7 @@ import org.aspectj.weaver.AjAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +50,6 @@ public class OrderStatusController {
     @GetMapping("/ModalRead")
     public AjaxResult ModalRead(@RequestParam(required = false) String searchTerm) {
         AjaxResult result = new AjaxResult();
-        System.out.println("팝업 정보 요청");
 
         try {
             List<Map<String, Object>> modalList = orderStatusService.getModalListByClientName(searchTerm);
@@ -79,8 +75,6 @@ public class OrderStatusController {
             @RequestParam(required = false) String searchtketnm,
             @RequestParam(required = false) String searchstate) {
 
-        System.out.println("검색요청 들어옴");
-
         // 검색 결과를 서비스에서 가져오기
         List<Map<String, Object>> result = orderStatusService.searchData(startDate, endDate, searchCltnm, searchtketnm, searchstate);
 
@@ -88,6 +82,27 @@ public class OrderStatusController {
         Map<String, Object> response = new HashMap<>();
         response.put("data", result);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getOrdtext")
+    public AjaxResult getOrdtext(@RequestParam("reqdate") String reqdate, @RequestParam("remark") String remark) {
+        System.out.println("요청사항 팝업 들어옴: reqdate = " + reqdate + ", remark = " + remark);
+
+        AjaxResult result = new AjaxResult();
+        try {
+            String ordtextData = orderStatusService.getOrdtextByParams(reqdate, remark);
+
+            result.success = true;
+            result.data = ordtextData;
+            result.message = "데이터 조회 성공";
+
+        } catch (Exception e) {
+            result.success = false;
+            result.message = "데이터를 가져오는 중 오류가 발생했습니다.";
+            e.printStackTrace(); // 오류 로그 출력
+        }
+
+        return result;
     }
 
 }

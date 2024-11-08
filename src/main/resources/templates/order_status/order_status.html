@@ -264,10 +264,10 @@
                                     <div class="srch-box">
                                         <select id="searchstate" name="searchstate">
                                             <option value="전체">전체</option>
-                                            <option value="주문의뢰">주문의뢰</option>
-                                            <option value="견적작성">견적작성</option>
-                                            <option value="제작">제작</option>
-                                            <option value="출고">출고</option>
+                                            <option value="0">주문의뢰</option>
+                                            <option value="1">견적작성</option>
+                                            <option value="2">제작</option>
+                                            <option value="3ㄴ">출고</option>
                                         </select>
                                     </div>
                                 </dd>
@@ -316,15 +316,127 @@
         </div>
     </div>
 
+    <!-- 옵션 및 요청사항 모달 -->
+    <!--<div class="modal">
+        <div class="popup-wrapper w700" id="OrdtextModal" style="display: none; min-width: 1050px;">
+            <div class="popup-title">
+                <h3>옵션 및 요청사항</h3>
+                <a title="팝업닫기" onclick="closePopup('OrdtextModal')" class="btn-popup-close">
+                    <img src="/images/icon/btn-popup-close.svg" alt="닫기" style="float: right; right: 30px;">
+                </a>
+            </div>
+            <div class="popup-contents">
+                <div class="table-wrap">
+                    <table class="write-table" style="border-top: 0px;">
+                        <caption>주문의뢰 요청사항</caption>
+                        <colgroup>
+                            <col class="wp20">
+                            <col class="wp80">
+                        </colgroup>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div class="table-wrap">
+                                    <table class="write-table">
+                                        <caption>요청사항</caption>
+                                        <tbody>
+                                        <tr style="align-items: center">
+                                            <th>
+                                                <label for="ordtext">내용</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <div class="textarea-box">
+                                                    &lt;!&ndash; textarea를 읽기 전용으로 설정 &ndash;&gt;
+                                                    <textarea id="ordtext" readonly></textarea>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>-->
+    <div class="modal">
+        <div class="popup-wrapper w700" id="OrdtextModal" style="display: none; min-width: 1050px;">
+            <div class="popup-title">
+                <h3>옵션 및 요청사항</h3>
+                <a title="팝업닫기" onclick="closePopup('OrdtextModal')" class="btn-popup-close">
+                    <img src="/images/icon/btn-popup-close.svg" alt="닫기" style="float: right; right: 30px;">
+                </a>
+            </div>
+            <div class="popup-contents">
+                <div class="table-wrap">
+                    <table class="write-table" style="border-top: 0px;">
+                        <caption>주문의뢰 요청사항</caption>
+                        <colgroup>
+                            <col class="wp20">
+                            <col class="wp80">
+                        </colgroup>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div class="table-wrap">
+                                    <table class="write-table">
+                                        <caption>요청사항</caption>
+                                        <tbody>
+                                        <tr style="align-items: center">
+                                            <th>
+                                                <label for="ordtext">내용</label>
+                                            </th>
+                                            <td colspan="3">
+                                                <div class="textarea-box">
+                                                    <textarea id="ordtext"></textarea>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </th:block>
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <script src="https://cdn.tiny.cloud/1/vz0rv2lnngp83gy5arhr4hzhqyr3z08rnj8zq7mx8c0otwi7/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+
+    <!-- TinyMCE 초기화 코드 -->
+    <script>
+        tinymce.init({
+            language: "ko_KR",
+            selector: "#ordtext",
+            plugins: "paste image imagetools",
+            height: 500,
+            width: 900,
+            toolbar: false,       // 툴바 비활성화
+            menubar: false,       // 상단 메뉴 비활성화
+            readonly: 1,          // 읽기 전용 모드 활성화
+            paste_data_images: true,
+            file_picker_types: 'image',
+            automatic_uploads: false // 자동 업로드 비활성화
+        });
+
+    </script>
+
     <script type="text/javascript">
 
         let theGrid;
         let theGrid2;
         let calendar;
         let modalGrid;
+        let selectedId;
 
         document.readyState === 'complete' ? init() : window.onload = init;
 
@@ -503,10 +615,17 @@
                     // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
                     if (response && Array.isArray(response.data)) {
                         data2 = response.data;
-                        // 날짜 형식 변환
+                        // 날짜 형식 변환 및 ordflag 변환
                         data2.forEach(item => {
                             item.reqdate = formatDateString(item.reqdate);
                             item.deldate = formatDateString(item.deldate);
+                            item.ordflag = getOrdflagText(parseInt(item.ordflag, 10));
+
+                            // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
+                            if (item.ordtext) {
+                                item.originalOrdtext = item.ordtext;// 실제 ordtext 데이터 보존
+                                item.ordtext = "옵션 및 요청사항";
+                            }
                         });
                     }
                 },
@@ -540,7 +659,7 @@
                         infmtypedv: '',
                         stframedv: '',
                         stexplydv: '',
-                        remark: ''
+                        ordtext: ''
                     });
                 }
             }
@@ -569,12 +688,21 @@
                         {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
                         {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
                         {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'remark', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'}
+                        {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'}
                     ],
-                    itemsSource: viewdata // 서버에서 가져온 데이터를 바인딩
+                    itemsSource: viewdata, // 서버에서 가져온 데이터를 바인딩
+                    formatItem: function(s, e) {
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            const col = s.columns[e.col];
+                            const item = s.rows[e.row].dataItem;
+                            // ordtext 셀에 데이터가 있는 경우 링크처럼 표시
+                            if (col.binding === 'ordtext' && item.ordtext === "옵션 및 요청사항") {
+                                e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="showPopupById('OrdtextModal')">옵션 및 요청사항</a>`;
+                            }
+                        }
+                    }
                 });
 
-                // 선택이 변경될 때, 현재 항목 업데이트
                 theGrid2.rowHeaders.columns.splice(0, 1); // 맨 앞에 헤더 부분 없애기
                 new FlexGridContextMenu(theGrid2);
                 window.downloadFileName = '진행 현황';
@@ -584,12 +712,30 @@
                 theGrid2.itemsSource = viewdata;
             }
         }
+
+        //날짜 포맷
         function formatDateString(dateString) {
             if (!dateString || dateString.length !== 8) return dateString; // 유효성 검사
             const year = dateString.substring(0, 4);
             const month = dateString.substring(4, 6);
             const day = dateString.substring(6, 8);
             return `${year}-${month}-${day}`;
+        }
+
+        // ordflag 값을 텍스트로 변환하는 함수
+        function getOrdflagText(ordflag) {
+            switch (parseInt(ordflag, 10)) { // ordflag를 숫자로 변환
+                case 0:
+                    return "주문의뢰";
+                case 1:
+                    return "견적진행";
+                case 2:
+                    return "제작";
+                case 3:
+                    return "출고";
+                default:
+                    return "알 수 없는 상태";
+            }
         }
 
         //검색
@@ -622,6 +768,13 @@
                         data2.forEach(item => {
                             item.reqdate = formatDateString(item.reqdate);
                             item.deldate = formatDateString(item.deldate);
+                            item.ordflag = getOrdflagText(item.ordflag); // ordflag 숫자값을 텍스트로 변환
+
+                            // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
+                            if (item.ordtext) {
+                                item.originalordtext = item.ordtext;// 실제 ordtext 데이터 보존
+                                item.ordtext = "옵션 및 요청사항";
+                            }
                         });
 
                         // 순번을 추가하고, 데이터가 10개 미만일 경우 빈 행을 추가
@@ -649,7 +802,7 @@
                                     infmtypedv: '',
                                     stframedv: '',
                                     stexplydv: '',
-                                    remark: ''
+                                    ordtext: ''
                                 });
                             }
                         }
@@ -676,9 +829,19 @@
                                     {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
                                     {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
                                     {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-                                    {binding: 'remark', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'}
+                                    {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'}
                                 ],
-                                itemsSource: viewdata // 데이터 바인딩
+                                itemsSource: viewdata, // 데이터 바인딩
+                                formatItem: function(s, e) {
+                                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                                        const col = s.columns[e.col];
+                                        const item = s.rows[e.row].dataItem;
+                                        // ordtext 셀에 데이터가 있는 경우 링크처럼 표시
+                                        if (col.binding === 'ordtext' && item.ordtext === "옵션 및 요청사항") {
+                                            e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="openOrdtextModal(${e.row})">옵션 및 요청사항</a>`;
+                                        }
+                                    }
+                                }
                             });
                             new FlexGridContextMenu(theGrid2);
                             window.downloadFileName = '진행 현황';
@@ -708,7 +871,7 @@
             }
         });
 
-        // 모달을 보여주는 함수
+       /* // 모달을 보여주는 함수
         function showPopupById(popupId) {
             const popup = document.getElementById(popupId);
             if (popup) {
@@ -733,6 +896,42 @@
             } else {
                 console.warn(`Popup with ID '${popupId}' not found.`);
             }
+        }*/
+
+        // 모달 ID와 데이터 로드 함수를 매핑하는 객체
+        const modalDataLoaders = {
+            'CltnmModal': modalDeta,
+            'OrdtextModal':loadOrdtextData(),
+        };
+
+        // 모달을 보여주는 함수
+        function showPopupById(popupId) {
+            const popup = document.getElementById(popupId);
+            if (popup) {
+                const modal = popup.closest('.modal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    requestAnimationFrame(() => modal.classList.add('show'));
+                }
+                popup.style.display = 'block';
+                requestAnimationFrame(() => popup.classList.add('show'));
+
+                // 모달이 열리면서 해당 모달의 데이터 로드 함수 호출
+                const loadDataFunction = modalDataLoaders[popupId];
+                if (typeof loadDataFunction === 'function') {
+                    try {
+                        loadDataFunction();  // popupId에 맞는 로드 함수 실행
+                    } catch (error) {
+                        console.error(`Error loading data for modal '${popupId}':`, error);
+                    }
+                } else {
+                    console.log(`No data load function defined for modal with ID: ${popupId}`);
+                }
+
+                console.log(`Showing modal with ID: ${popupId}`);
+            } else {
+                console.warn(`Popup with ID '${popupId}' not found.`);
+            }
         }
 
         // 모달을 닫는 함수
@@ -750,7 +949,45 @@
             }
         }
 
-        /*모달 끝 ============================================================*/
+       /*모달 끝 ============================================================*/
+
+        // 클릭된 셀에 대해 모달을 여는 함수
+        function loadOrdtextData() {
+            console.log("Loading data with selectedId:", selectedId);
+
+            if (!selectedId || !selectedId.reqdate || !selectedId.remark) {
+                console.error("selectedId is not properly set:", selectedId);
+                return;
+            }
+            const editor = tinymce.get("ordtext");
+            if (!editor) {
+                console.error("TinyMCE editor instance not found for 'ordtext'");
+                return;
+            }
+
+            $.ajax({
+                url: '/api/order_status/getOrdtext',
+                type: 'POST',
+                data: {
+                    reqdate: selectedId.reqdate,
+                    remark: selectedId.remark
+                },
+                success: function(response) {
+                    console.log("Server response:", response); // 서버 응답 데이터 확인
+
+                    if (response && response.data) {
+                        console.log("Setting content in TinyMCE editor");
+                        editor.setContent(response.data);  // TinyMCE 에디터에 데이터 설정
+                    } else {
+                        console.warn("No ordtext data found in the response.");
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("Failed to load ordtext data:", error);
+                }
+            });
+        }
+
         function modalDeta() {
             console.log('Initializing modal grid...');
             const Modaldata = [];
@@ -808,12 +1045,24 @@
                     });
                     modalGrid.rowHeaders.columns.splice(0, 1);
                     console.log('Modal grid initialized and data loaded.');
+
+                    // 그리드의 더블 클릭 이벤트 추가
+                    let lastClickTime = 0;
+                    modalGrid.hostElement.addEventListener('click', function (e) {
+                        const now = new Date().getTime();
+                        if (now - lastClickTime < 300) { // 300ms 이내의 두 번 클릭은 더블 클릭으로 인식
+                            searchData(); // 더블클릭 시 modifyData 함수 실행
+                            closePopup('CltnmModal'); // 모달 창 닫기
+                        }
+                        lastClickTime = now;
+                    });
                 },
                 error: function() {
                     console.error("Error fetching modal data.");
                 }
             });
         }
+
 
         function resetForm() {
             // 검색 관련 필드 초기화 (일반 텍스트 입력 필드)

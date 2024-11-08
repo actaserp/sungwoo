@@ -130,4 +130,40 @@ public class OrderStatusService {
         // 쿼리 실행 및 결과 반환
         return sqlRunner.getRows(sql, params);
     }
+
+    public String getOrdtextByParams(String reqdate, String remark) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("reqdate", reqdate);
+        params.addValue("remark", remark);
+
+        // ordtext를 가져오는 SQL 쿼리 작성
+        String sql = """  
+        SELECT
+            tb007.ordtext,
+            tb007.*,
+            tb006.*
+        FROM
+            TB_DA007W tb007
+        JOIN
+            TB_DA006W tb006
+        ON
+            tb007.custcd = tb006.custcd
+            AND tb007.spjangcd = tb006.spjangcd
+            AND tb007.reqdate = tb006.reqdate
+            AND tb007.reqnum = tb006.reqnum
+        WHERE
+            tb006.reqdate = :reqdate
+            AND tb006.remark = :remark
+        """;
+
+        // 쿼리 실행 및 결과 반환
+        List<Map<String, Object>> result = sqlRunner.getRows(sql, params);
+
+        // 결과에서 ordtext 값을 추출
+        if (!result.isEmpty() && result.get(0).get("ordtext") != null) {
+            return result.get(0).get("ordtext").toString();
+        }
+        return null; // 데이터가 없을 경우 null 반환
+    }
 }
+
