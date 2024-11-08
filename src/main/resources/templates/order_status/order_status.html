@@ -705,7 +705,6 @@
                             }
                         }
                     }
-
                 });
 
                 theGrid2.rowHeaders.columns.splice(0, 1); // 맨 앞에 헤더 부분 없애기
@@ -876,41 +875,13 @@
             }
         });
 
-       /* // 모달을 보여주는 함수
-        function showPopupById(popupId) {
-            const popup = document.getElementById(popupId);
-            if (popup) {
-                const modal = popup.closest('.modal');
-                if (modal) {
-                    modal.style.display = 'block';
-                    requestAnimationFrame(() => {
-                        modal.classList.add('show');
-                    });
-                }
-                popup.style.display = 'block';
-                requestAnimationFrame(() => {
-                    popup.classList.add('show');
-                });
-
-                // 모달이 열리면서 데이터 로드
-                if (popupId === 'CltnmModal') {
-                    modalDeta();  // 모달에 데이터 로드
-                }
-
-                console.log(`Showing modal with ID: ${popupId}`);
-            } else {
-                console.warn(`Popup with ID '${popupId}' not found.`);
-            }
-        }*/
-
         // 모달 ID와 데이터 로드 함수를 매핑하는 객체
         const modalDataLoaders = {
             'CltnmModal': modalDeta,
             'OrdtextModal':showOrdtextModal,
         };
 
-        // 모달을 보여주는 함수
-        function showPopupById(popupId) {
+        function showPopupById(popupId, rowIndex = null) {
             const popup = document.getElementById(popupId);
             if (popup) {
                 const modal = popup.closest('.modal');
@@ -925,7 +896,12 @@
                 const loadDataFunction = modalDataLoaders[popupId];
                 if (typeof loadDataFunction === 'function') {
                     try {
-                        loadDataFunction();  // popupId에 맞는 로드 함수 실행
+                        // rowIndex가 필요할 경우에만 전달
+                        if (popupId === 'OrdtextModal' && rowIndex !== null) {
+                            loadDataFunction(rowIndex);
+                        } else {
+                            loadDataFunction();
+                        }
                     } catch (error) {
                         console.error(`Error loading data for modal '${popupId}':`, error);
                     }
@@ -936,6 +912,26 @@
                 console.log(`Showing modal with ID: ${popupId}`);
             } else {
                 console.warn(`Popup with ID '${popupId}' not found.`);
+            }
+        }
+
+        function showOrdtextModal(rowIndex) {
+            console.log("showOrdtextModal called with rowIndex:", rowIndex);
+
+            // rowIndex가 유효한지 검증
+            if (rowIndex === undefined || rowIndex === null || !theGrid2 || !theGrid2.rows[rowIndex]) {
+                console.error("Invalid rowIndex or theGrid2 is not defined:", rowIndex);
+                return;
+            }
+
+            const selectedData = theGrid2.rows[rowIndex].dataItem;
+            console.log("Selected data from grid:", selectedData);
+
+            if (selectedData && selectedData.originalOrdtext) {
+                tinymce.get("ordtext").setContent(selectedData.originalOrdtext);
+                console.log("Ordtext loaded into TinyMCE editor");
+            } else {
+                console.error("선택한 행에 대해 원본 주문 텍스트 데이터가 발견되지 않았습니다");
             }
         }
 
@@ -955,58 +951,6 @@
         }
 
        /*모달 끝 ============================================================*/
-
-        function showPopupById(popupId, rowIndex = null) { // rowIndex를 선택적으로 받음
-            const popup = document.getElementById(popupId);
-            if (popup) {
-                const modal = popup.closest('.modal');
-                if (modal) {
-                    modal.style.display = 'block';
-                    requestAnimationFrame(() => modal.classList.add('show'));
-                }
-                popup.style.display = 'block';
-                requestAnimationFrame(() => popup.classList.add('show'));
-
-                // 모달이 열리면서 해당 모달의 데이터 로드 함수 호출
-                const loadDataFunction = modalDataLoaders[popupId];
-                if (typeof loadDataFunction === 'function') {
-                    try {
-                        if (popupId === 'OrdtextModal' && rowIndex !== null) {
-                            loadDataFunction(rowIndex); // rowIndex가 있는 경우 전달
-                        } else {
-                            loadDataFunction(); // 일반 호출
-                        }
-                    } catch (error) {
-                        console.error(`Error loading data for modal '${popupId}':`, error);
-                    }
-                } else {
-                    console.log(`No data load function defined for modal with ID: ${popupId}`);
-                }
-
-                console.log(`Showing modal with ID: ${popupId}`);
-            } else {
-                console.warn(`Popup with ID '${popupId}' not found.`);
-            }
-        }
-
-        function showOrdtextModal(rowIndex) {
-            console.log("showOrdtextModal called with rowIndex:", rowIndex);
-
-            if (!theGrid2 || !theGrid2.rows[rowIndex]) {
-                console.error("theGrid2 is not defined or rowIndex is out of range:", rowIndex);
-                return;
-            }
-
-            const selectedData = theGrid2.rows[rowIndex].dataItem;
-            console.log("Selected data from grid:", selectedData);
-
-            if (selectedData && selectedData.originalOrdtext) {
-                tinymce.get("ordtext").setContent(selectedData.originalOrdtext); // 실제 데이터를 설정
-                showPopupById('OrdtextModal'); // 모달 열기
-            } else {
-                console.error("originalOrdtext 데이터가 없습니다.");
-            }
-        }
 
         function modalDeta() {
             console.log('Initializing modal grid...');
@@ -1082,7 +1026,6 @@
                 }
             });
         }
-
 
         function resetForm() {
             // 검색 관련 필드 초기화 (일반 텍스트 입력 필드)
