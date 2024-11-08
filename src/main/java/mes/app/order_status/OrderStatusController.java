@@ -49,14 +49,14 @@ public class OrderStatusController {
 
         return result;
     }
-    @GetMapping("/ModalRead")
-    public AjaxResult ModalRead(Authentication auth) {
-        AjaxResult result = new AjaxResult();
-        try {
-            User user = (User) auth.getPrincipal();
-            String saupnum = user.getUsername();    //id= 사업자번호
 
-            List<Map<String, Object>> modalList = orderStatusService.getModalList(saupnum);
+    @GetMapping("/ModalRead")
+    public AjaxResult ModalRead(@RequestParam(required = false) String searchTerm) {
+        AjaxResult result = new AjaxResult();
+        System.out.println("팝업 정보 요청");
+
+        try {
+            List<Map<String, Object>> modalList = orderStatusService.getModalListByClientName(searchTerm);
 
             result.success = true;
             result.data = modalList;
@@ -70,7 +70,6 @@ public class OrderStatusController {
 
         return result;
     }
-
 
     @GetMapping("/searchData")
     public ResponseEntity<Map<String, Object>> searchData(
