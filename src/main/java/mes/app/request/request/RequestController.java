@@ -122,27 +122,42 @@ public class RequestController {
                     item.put("deldate", formattedDate);
                 }
             }
-//            if(item.get("hd_files")!=null){
-//                // 파일 이름과 경로를 리스트로 변환
-//                List<Map<String, Object>> fileitems = (List<Map<String, Object>>) item.get("hd_files");
-//                for (Map<String, Object> fileitem : fileitems){
-//                    if (fileitem.containsKey("fileornm") && fileitem.containsKey("filepath")) {
-//                        String filenames = (String) fileitem.get("fileornm");
-//                        String filepaths = (String) fileitem.get("filepath");
-//
-//                        List<String> filenameList = filenames != null ? Arrays.asList(filenames.split(",")) : Collections.emptyList();
-//                        List<String> filepathList = filepaths != null ? Arrays.asList(filepaths.split(",")) : Collections.emptyList();
-//
-//                        fileitem.put("filenameList", filenameList);
-//                        fileitem.put("filepathList", filepathList);
-//                        fileitem.put("isdownload", !filenameList.isEmpty() && !filepathList.isEmpty());
-//                    } else {
-//                        fileitem.put("filenameList", Collections.emptyList());
-//                        fileitem.put("filepathList", Collections.emptyList());
-//                        fileitem.put("isdownload", false);
-//                    }
-//                }
-//            }
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            if (item.get("hd_files") != null) {
+                try {
+                    // JSON 문자열을 List<Map<String, Object>>로 변환
+                    List<Map<String, Object>> fileitems = objectMapper.readValue((String) item.get("hd_files"), new TypeReference<List<Map<String, Object>>>() {});
+
+                    for (Map<String, Object> fileitem : fileitems) {
+                        if (fileitem.get("filepath") != null && fileitem.get("fileornm") != null) {
+                            String filenames = (String) fileitem.get("fileornm");
+                            String filepaths = (String) fileitem.get("filepath");
+                            String filesvnms = (String) fileitem.get("filesvnm");
+
+                            List<String> fileornmList = filenames != null ? Arrays.asList(filenames.split(",")) : Collections.emptyList();
+                            List<String> filepathList = filepaths != null ? Arrays.asList(filepaths.split(",")) : Collections.emptyList();
+                            List<String> filesvnmList = filesvnms != null ? Arrays.asList(filesvnms.split(",")) : Collections.emptyList();
+
+//                            fileitem.put("fileornmList", fileornmList);
+//                            fileitem.put("filepathList", filepathList);
+//                            fileitem.put("filesvnmList", filesvnmList);
+                            item.put("isdownload", !fileornmList.isEmpty() && !filepathList.isEmpty());
+                        } else {
+//                            fileitem.put("fileornmList", Collections.emptyList());
+//                            fileitem.put("filepathList", Collections.emptyList());
+//                            fileitem.put("filesvnmList", Collections.emptyList());
+                            item.put("isdownload", false);
+                        }
+                    }
+
+                    // fileitems를 다시 item에 넣어 업데이트
+                    item.remove("hd_files");
+                    item.put("hd_files", fileitems);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         AjaxResult result = new AjaxResult();
@@ -357,10 +372,10 @@ public class RequestController {
                 String originFileName = (String) fileInfo.get("fileornm");  //파일 원본이름(origin Name)
 
                 if (tketcrdtm == null) {
-                    tketcrdtm = (String) fileInfo.get("tketcrdtm");
+                    tketcrdtm = (String) fileInfo.get("reqdate");
                 }
                 if (tketnm == null) {
-                    tketnm = (String) fileInfo.get("tketnm");
+                    tketnm = "주문등록";
                 }
 
                 File file = new File(filePath + File.separator + fileName);
@@ -402,9 +417,21 @@ public class RequestController {
         ByteArrayOutputStream zipBaos = new ByteArrayOutputStream();
         try (ZipOutputStream zipOut = new ZipOutputStream(zipBaos)) {
 
+            Set<String> addedFileNames = new HashSet<>(); // 이미 추가된 파일 이름을 저장할 Set
+            int fileCount = 1;
+
             for (int i = 0; i < filesToDownload.size(); i++) {
                 File file = filesToDownload.get(i);
                 String originFileName = fileNames.get(i); // originFileName 가져오기
+
+                // 파일 이름이 중복될 경우 숫자를 붙여 고유한 이름으로 만듦
+                String uniqueFileName = originFileName;
+                while (addedFileNames.contains(uniqueFileName)) {
+                    uniqueFileName = originFileName.replace(".", "_" + fileCount++ + ".");
+                }
+
+                // 고유한 파일 이름을 Set에 추가
+                addedFileNames.add(uniqueFileName);
 
                 try (FileInputStream fis = new FileInputStream(file)) {
                     ZipEntry zipEntry = new ZipEntry(originFileName);

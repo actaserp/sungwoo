@@ -74,7 +74,7 @@
                   </a>
                 </li>
                 <li>
-                  <a class="btn btn-file" title="파일 첨부" data-popup="popup1"
+                  <a class="btn btn-file2" title="파일 첨부" data-popup="popup1"
                      onclick="showPopup(this)">
                     파일 첨부<span>(0)</span>
                   </a>
@@ -427,20 +427,20 @@
                 첨부파일
               </th>
               <td>
-                <div id="uploadComponent1" class="upload-component">
-                  <div class="upload-filebox">
+                <div id="uploadComponent2" class="upload-component2">
+                  <div class="upload-filebox2">
                     <img src="/images/icon/ico-fileupload.svg" alt="업로드아이콘">
                     <a class="btn" title="파일업로드">파일 업로드</a>
-                    <input type="file" id="fileInput1" class="fileInput" multiple>
+                    <input type="file" id="fileInput2" class="fileInput2" multiple>
                     <p>Maximun upload file size <span>1GiB</span></p>
                   </div>
 
-                  <div class="upload-filelist">
+                  <div class="upload-filelist2">
                     <div class="title">
                       <h5>Files (0)</h5>
-                      <a title="Delete all" class="btn-file-deleteall">Delete all</a>
+                      <a title="Delete all" class="btn-file-deleteall2">Delete all</a>
                     </div>
-                    <ul class="filelist" id="filelist">
+                    <ul class="filelist2" id="filelist2">
                     </ul>
                   </div>
                 </div>
@@ -579,6 +579,7 @@
       }
     });
   </script>
+
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
     //본 예제에서는 도로명 주소 표기 방식에 대한 법령에 따라, 내려오는 데이터를 조합하여 올바른 주소를 구성하는 방법을 설명합니다.
@@ -694,6 +695,8 @@
           remark: item.remark,
           downloads: item.downloads,
           reqnum: item.reqnum,
+          isdownload: item.isdownload,
+          files: item.hd_files,
           hgrb: bdDetailsArray[0]?.hgrb || '',
           qty: bdDetailsArray[0]?.qty || '',
           panel_t: bdDetailsArray[0]?.panel_t || '',
@@ -703,7 +706,8 @@
           infmtypedv: bdDetailsArray[0]?.infmtypedv || '',
           stframedv: bdDetailsArray[0]?.stframedv || '',
           stexplydv: bdDetailsArray[0]?.stexplydv || '',
-          ordtext: bdDetailsArray[0]?.ordtext || ''
+          ordtext: bdDetailsArray[0]?.ordtext || '',
+          originOrdtext: bdDetailsArray[0]?.ordtext || ''
         });
 
         // 이후 행: hd 정보는 빈 값으로 설정, bd_details의 나머지 데이터 추가
@@ -733,7 +737,8 @@
             infmtypedv: detail.infmtypedv || '',
             stframedv: detail.stframedv || '',
             stexplydv: detail.stexplydv || '',
-            ordtext: detail.ordtext || ''
+            ordtext: detail.ordtext || '',
+            originOrdtext: detail.ordtext || ''
           });
         }
       });
@@ -782,6 +787,9 @@
             {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'},
 
             {binding: 'reqnum', visible: false},  // 숨길 컬럼
+            {binding: 'isdownload', visible: false},
+            {binding: 'files', visible: false},
+            {binding: 'originOrdtext', visible: false},
           ],
           itemsSource: gridData,
           itemFormatter: function (panel, r, c, cell) {
@@ -791,6 +799,11 @@
                 cell.innerHTML = ''; // 셀 내용 초기화
                 if (item.isdownload) {
                   cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order()">다운로드</a>';
+                }
+              }
+              if (panel.columns[c].binding === 'ordtext') {
+                if (item.ordtext) {
+                  cell.innerHTML = '<a title="수정팝업" class="" onclick="showPopup2(\'popup2\')" style="color: #03428E">요청사항 확인</a>';
                 }
               }
             }
@@ -819,6 +832,7 @@
                 document.getElementById('panel_hl').value = hdRow.panel_hl;
                 document.getElementById('panel_hh').value = hdRow.panel_hh;
                 document.getElementById('remark').value = hdRow.remark;
+                document.getElementById('ordtext').value = hdRow.ordtext;
               }
             }else {
               document.getElementById('reqdate').value = item.reqdate;
@@ -832,7 +846,29 @@
               document.getElementById('panel_hl').value = item.panel_hl;
               document.getElementById('panel_hh').value = item.panel_hh;
               document.getElementById('remark').value = item.remark;
+              document.getElementById('ordtext').value = item.ordtext;
             }
+            let fileList = Array.isArray(item.files) ? item.files : [];
+
+            deletedFiles2 = [];
+            uploadedFiles2 = [];
+
+            console.log("fileList2222222222 : ", fileList)
+            fileList.forEach(file => {
+              let newFile = {
+                name: file.fileornm,
+                type: file.fileextns,
+                size: file.size,
+                reqseq: item.reqseq,
+                lastModified: new Date().getTime(),
+              };
+              uploadedFiles2.push(newFile); // 파일 리스트에 추가
+            });
+
+
+            $('.filelist2').empty(); // 파일 리스트 초기화
+            updateFileCount2();
+            updateFileListUI2();
 
             // document.getElementById('qty').value = item.bd_details.qty;
             // document.getElementById('panel_t').value = item.bd_details.panel_t;
@@ -853,7 +889,7 @@
             // setSelectedIndex(selectInfmtypedv, selectedItem.bd_details.infmtypedv);
             // setSelectedIndex(selectStframedv, selectedItem.bd_details.stframedv);
             // setSelectedIndex(selectStexplydv, selectedItem.bd_details.stexplydv);
-
+            document.getElementById('btnSave').title = "수정";
             document.getElementById('reqnum').value = item.reqnum;
             const tab1Link = document.getElementById('listTabLink');
             tab1Link.click();
@@ -919,6 +955,18 @@
             {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'left'}
           ],
           itemsSource: viewdata2,
+          itemFormatter: function (panel, r, c, cell) {
+            if (panel.cellType === wijmo.grid.CellType.Cell) {
+              var item = panel.rows[r].dataItem; // 현재 행의 데이터 항목
+              if (panel.columns[c].binding === 'ordtext') {
+                var originOrdText = cell.innerHTML;
+                cell.innerHTML = ''; // 셀 내용 초기화
+                if (item.ordtext) {
+                  cell.innerHTML = '<a title="수정팝업" class="" onclick="showPopup2(\'popup2\')" style="color: #03428E">요청사항 확인</a>';
+                }
+              }
+            }
+          }
         });
         // 첫열에 selectBox 추가
         let selector = new wijmo.grid.selector.Selector(theGrid2, {
@@ -935,6 +983,7 @@
             // 행(row), 행의 데이터(item) 정보 가져오기
             let row = hitTest.row;
             let item = theGrid2.rows[row].dataItem;
+            console.log('item', item);
 
             document.getElementById('qty').value = item.qty;
             document.getElementById('panel_t').value = item.panel_t;
@@ -1085,13 +1134,13 @@
         extractGridData();
         formData.append('bodyData', JSON.stringify(bodyForms));
         // 새로 추가된 파일만 폼 데이터에 추가
-        uploadedFiles.forEach((file, index) => {
+        uploadedFiles2.forEach((file, index) => {
           formData.append('filelist', file);
         });
 
         // 삭제된 파일 목록 추가
-        deletedFiles.forEach((file, index) => {
-          formData.append('deletedFiles', new Blob([JSON.stringify(file)], {type: 'application/json'}));
+        deletedFiles2.forEach((file, index) => {
+          formData.append('deletedFiles2', new Blob([JSON.stringify(file)], {type: 'application/json'}));
         });
 
         function sendAjaxRequest(url) {
@@ -1304,12 +1353,12 @@
         document.getElementById(fieldId).value = '';
         document.getElementById('reqdate').value = today;
       });
-      $('.filelist').empty(); // 파일 리스트 초기화
-      uploadedFiles = []; // 업로드된 파일 리스트 초기화
-      deletedFiles = [];
+      $('.filelist2').empty(); // 파일 리스트 초기화
+      uploadedFiles2 = []; // 업로드된 파일 리스트 초기화
+      deletedFiles2 = [];
       // 초기화된 파일 개수 업데이트
       updateFileCount();
-      resetFileInput($('.fileInput'));
+      resetFileInput($('.fileInput2'));
       $('.text-count').text('0/100'); // 글자 수 0으로 초기화
       // 특정 필드에 대한 btn-clear 숨김 처리
       $('#doctitle').each(function () {
@@ -1321,8 +1370,8 @@
 
     // 파일 개수 업데이트 함수
     function updateFileCount() {
-      const fileCount = uploadedFiles.length;
-      $('.upload-filelist .title h5').text(`Files (${fileCount})`);
+      const fileCount = uploadedFiles2.length;
+      $('.upload-filelist2 .title h5').text(`Files (${fileCount})`);
       $('.btn-file span').text(`(${fileCount})`);
     }
 
@@ -1361,6 +1410,40 @@
         }
       });
     }
+    function showPopup2(documnetId) {
+      let selectedItems = theGrid.selectedItems;
+      console.log("selectedItems : ", selectedItems);
+      console.log("selectedItems[0].originOrdtext : ", selectedItems[0].originOrdtext);
+
+      // 해당 ID의 팝업 요소를 찾음
+      const popup = document.getElementById(documnetId);
+
+      if (popup) {
+        // 팝업을 포함한 모달을 표시
+        const modal = popup.closest('.modal');
+        if (modal) {
+          modal.style.display = 'block';
+        }
+
+        // TinyMCE 에디터에 ordtext 값을 그대로 사용하여 넣기
+        const ordtext = selectedItems[0].originOrdtext;
+
+        // TinyMCE 에디터에 HTML로 content 설정
+        tinymce.get('ordtext').setContent(ordtext);  // 'ordtext'는 TinyMCE가 적용된 요소의 id
+
+        // 팝업을 표시
+        popup.style.display = 'block';
+
+        // 애니메이션을 위한 클래스 추가
+        requestAnimationFrame(() => {
+          popup.classList.add('show');
+          if (modal) {
+            modal.classList.add('show');
+          }
+        });
+      }
+    }
+
   </script>
 
 </th:block>

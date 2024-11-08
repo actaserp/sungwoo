@@ -217,6 +217,7 @@ function updateFileListUI2() {
 
     uploadedFiles2.forEach(file => {
         const fileSize = (file.size / 1024).toFixed(2) + ' KiB';
+        console.log('uploadedFiles222222222222222',uploadedFiles2);
         const li = $('<li>').html(`
                     <p>${file.name} <span>(${fileSize})</span></p>
                     <a href="#" title="삭제" class="btn-file-delete2">
@@ -225,6 +226,7 @@ function updateFileListUI2() {
                 `);
         $fileList.append(li);
     });
+    console.log('uploadedFiles222222222222222',uploadedFiles2);
 }
 
 // 날짜 형식을 변환하는 함수
@@ -463,6 +465,7 @@ function hideLoader() {
 let uploadedFiles2 = [];
 // 삭제할 파일 목록
 let deletedFiles2 = [];
+
 $(document).ready(function () {
     function initializeUploadComponent2(component) {
 
@@ -507,6 +510,7 @@ $(document).ready(function () {
                     resetFileInput($fileInput);
                 } else if(!uploadedFiles2.some(f => f.name === file.name && f.size === file.size)) {
                     uploadedFiles2.push(file);
+                    console.log('uploadedFiles2',uploadedFiles2);
                     const fileSize = (file.size / 1024).toFixed(2) + ' KiB';
                     const li = $('<li>').html(`
                     <p>${file.name} <span>(${fileSize})</span></p>
@@ -528,7 +532,7 @@ $(document).ready(function () {
             // 파일 이름과 일치하지 않는 파일들로 필터링하여 uploadedFiles 업데이트
             const removedFile = uploadedFiles2.find(file => file.name === fileName);
             uploadedFiles2 = uploadedFiles2.filter(file => file.name !== fileName);
-
+            console.log('uploadedFiles2',uploadedFiles2);
             // 삭제된 파일을 deletedFiles에 추가
             if (removedFile) {
                 deletedFiles2.push(removedFile);

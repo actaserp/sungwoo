@@ -126,7 +126,7 @@ public class RequestService {
                         FOR JSON PATH
                     ) AS bd_details,
                     (
-                        SELECT bd.filepath, bd.filesvnm, bd.fileextns, bd.fileurl, bd.fileornm
+                        SELECT bd.filepath, bd.filesvnm, bd.fileextns, bd.fileurl, bd.fileornm, bd.filesize
                         FROM ERP_SWSPANEL1.dbo.tb_DA006WFILE bd
                         WHERE bd.custcd = hd.custcd
                           AND bd.spjangcd = hd.spjangcd
@@ -219,16 +219,17 @@ public class RequestService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
         StringBuilder sql = new StringBuilder();
-        dicParam.addValue("uniqcode", reqnum.get("uniqcode"));
+        dicParam.addValue("reqnum", reqnum.get("reqnum"));
 
         sql.append("""
-                select 
+                select
                         filepath,
+                        reqdate,
                         filesvnm,
                         fileornm
                 from tb_DA006WFILE
-                where 
-                    uniqcode = :uniqcode
+                where
+                    reqnum = :reqnum
                 """);
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
