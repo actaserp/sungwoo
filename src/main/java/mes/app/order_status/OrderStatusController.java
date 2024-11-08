@@ -49,14 +49,31 @@ public class OrderStatusController {
 
         return result;
     }
+
+    @GetMapping("/searchData")
+    public ResponseEntity<Map<String, Object>> searchData(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String searchCltnm,
+            @RequestParam(required = false) String searchtketnm,
+            @RequestParam(required = false) String searchstate) {
+
+        // 검색 결과를 서비스에서 가져오기
+        List<Map<String, Object>> result = orderStatusService.searchData(startDate, endDate, searchCltnm, searchtketnm, searchstate);
+
+        // 응답 데이터를 "data" 키로 래핑하여 JSON 형식으로 반환
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", result);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/ModalRead")
-    public AjaxResult ModalRead(Authentication auth) {
+    public AjaxResult ModalRead(@RequestParam(required = false) String searchTerm) {
+
         AjaxResult result = new AjaxResult();
         try {
-            User user = (User) auth.getPrincipal();
-            String saupnum = user.getUsername();    //id= 사업자번호
 
-            List<Map<String, Object>> modalList = orderStatusService.getModalList(saupnum);
+            List<Map<String, Object>> modalList = orderStatusService.getModalListByClientName(searchTerm);
 
             result.success = true;
             result.data = modalList;
@@ -69,26 +86,6 @@ public class OrderStatusController {
         }
 
         return result;
-    }
-
-
-    @GetMapping("/searchData")
-    public ResponseEntity<Map<String, Object>> searchData(
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
-            @RequestParam(required = false) String searchCltnm,
-            @RequestParam(required = false) String searchtketnm,
-            @RequestParam(required = false) String searchstate) {
-
-        System.out.println("검색요청 들어옴");
-
-        // 검색 결과를 서비스에서 가져오기
-        List<Map<String, Object>> result = orderStatusService.searchData(startDate, endDate, searchCltnm, searchtketnm, searchstate);
-
-        // 응답 데이터를 "data" 키로 래핑하여 JSON 형식으로 반환
-        Map<String, Object> response = new HashMap<>();
-        response.put("data", result);
-        return ResponseEntity.ok(response);
     }
 
 }

@@ -6,7 +6,7 @@
     .modal {
         display: none;
         position: fixed;
-        z-index: 9999; /* z-index를 더 높임 */
+        z-index: 1000;
         left: 0;
         top: 0;
         width: 100%;
@@ -14,8 +14,6 @@
         overflow: auto;
         background-color: rgba(0, 0, 0, 0.5);
     }
-
-    /* 공통 Modal 컨텐츠 스타일 */
     .modal-content {
         background: white;
         border-radius: 8px;
@@ -25,6 +23,16 @@
         box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
         position: relative;
         top: 15%;
+    }
+    #modalGrid {
+        height: 200px;
+        width: 100%;
+        border: 1px solid #ccc;
+        margin-top: 15px;
+    }
+    .btn-popup-close img {
+        position: absolute;
+        right: 30px;
     }
 </style>
 <th:block layout:fragment="content">
@@ -297,18 +305,24 @@
         <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
     </footer>
     <div style="height: 10px"></div>
-
-    <!-- 모달 HTML 구조 -->
-        <div id="CltnmModal" class="modal" style="display: none;">
+    <!--업체 모달-->
+    <div class="modal">
+        <div id="CltnmModal" style="display: none;">
             <div class="modal-content">
-                <span class="close" onclick="closeCltnmModal()">&times;</span>
-                <div id="modalGrid" style="height: 400px; width: 100%;"></div>
+                <h2 style="text-align: center;">거래처 정보 상세</h2>
+                <a title="팝업닫기" onclick="closePopup('CltnmModal')" class="btn-popup-close">
+                    <img src="/images/icon/btn-popup-close.svg" style=" float: right; right: 30px;" alt="닫기">
+                </a>
+                <form id="CltnmFindForm">
+                    <div id="modalGrid" style="height: 250px;width: 100%; margin-right:0px;  margin-top: 20px;"></div>
+                </form>
             </div>
         </div>
-
+    </div>
 </th:block>
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript">
 
         let theGrid;
@@ -385,7 +399,7 @@
                 theGrid.itemsSource = data2; // 빈 객체가 추가된 배열 사용
             }
         }
-
+        /* 캘린더 ==========================================================================================================================*/
         function initCalendar() {
             var calendarEl = document.getElementById('calendar');
             if (calendarEl) {
@@ -480,7 +494,7 @@
                 xhr.send();
             });
         }
-
+/*===========================================================================================================================*/
         function fetchListData2() {
             let data2 = []; // 데이터를 담을 기본 배열 초기화
 
@@ -582,6 +596,7 @@
             return `${year}-${month}-${day}`;
         }
 
+        //검색
         function searchData() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
@@ -642,7 +657,7 @@
                                 });
                             }
                         }
-                        
+
                         // 그리드 업데이트
                         const viewdata = new wijmo.collections.CollectionView(data2);
                         if (!theGrid2) {
@@ -685,119 +700,125 @@
             });
         }//검색
 
-        /*모달창*/
-        document.addEventListener("DOMContentLoaded", function() {
-            let modalGrid = null; // FlexGrid 인스턴스 초기화
+        /*모달창=====================================================*/
 
-            // Enter 키를 눌렀을 때 실행할 함수 정의
-            function handleEnterKey() {
-                const inputValue = document.getElementById("searchCltnm").value;
-                console.log("입력된 업체명:", inputValue);
-                openModal(); // 모달 열기
-            }
-
-            function createModalGrid() {
-                const Modaldata = []; // 서버로부터 받은 데이터를 저장할 배열
-                const minimumRows = 10; // 최소 행 개수 설정
-
-                // 서버에서 데이터 가져오기
-                $.ajax({
-                    url: '/api/order_status/ModalRead',
-                    type: 'GET',
-                    async: true,
-                    success: function(response) {
-                        if (response && Array.isArray(response.data)) {
-                            Modaldata.push(...response.data); // 데이터가 있을 경우 추가
-                        }
-
-                        // 최소 행 개수보다 데이터가 적을 경우 빈 행을 추가
-                        if (Modaldata.length < minimumRows) {
-                            const additionalRows = minimumRows - Modaldata.length;
-                            for (let i = 0; i < additionalRows; i++) {
-                                Modaldata.push({
-                                    cltcd: '',
-                                    cltnm: '',
-                                    telnum: '',
-                                    cltadres: ''
-                                });
-                            }
-                        }
-
-                        // CollectionView 생성
-                        const viewdata = new wijmo.collections.CollectionView(Modaldata);
-
-                        // FlexGrid 초기화 또는 업데이트
-                        if (!modalGrid) {
-                            // FlexGrid를 처음 생성하는 경우
-                            modalGrid = new wijmo.grid.FlexGrid('#modalGrid', {
-                                autoGenerateColumns: false,
-                                columns: [
-                                    { binding: 'cltcd', header: '코드', width: '*', minWidth: 100, align: 'center' },
-                                    { binding: 'cltnm', header: '거래처명', width: '*' },
-                                    { binding: 'telnum', header: '전화', width: '*' },
-                                    { binding: 'cltadres', header: '주소', width: '*' }
-                                ],
-                                itemsSource: viewdata // CollectionView를 데이터 소스로 설정
-                            });
-                        } else {
-                            // 이미 FlexGrid가 존재하는 경우, 데이터만 업데이트
-                            modalGrid.itemsSource = viewdata;
-                        }
-                    },
-                    error: function() {
-                        console.error("데이터를 가져오는 중 오류가 발생했습니다.");
-                    }
-                });
-            }
-
-            function openModal() {
-                // 모달 요소를 가져옵니다.
-                const modalElement = document.getElementById('CltnmModal');
-                const wrapper = document.getElementById('wrapper1');
-
-                if (modalElement) {
-                    modalElement.style.display = 'block';  // 모달을 화면에 표시합니다.
-                    console.log("모달이 열립니다"); // 콘솔에서 확인용
-                    if (wrapper) {
-                        wrapper.style.display = 'block';
-                    }
-
-                    createModalGrid(); // 그리드 생성
-                } else {
-                    console.error("모달 요소를 찾을 수 없습니다.");
-                }
-            }
-
-
-            // 모달 닫기 함수
-            function closeCltnmModal() {
-                const modalElement = document.getElementById('CltnmModal');
-                if (modalElement) {
-                    modalElement.style.display = 'none';
-                }
-            }
-
-            // 모달 외부 클릭 시 닫기
-            window.onclick = function(event) {
-                const modalElement = document.getElementById('CltnmModal');
-                if (event.target === modalElement) {
-                    closeCltnmModal();
-                }
-            };
-
-            // Enter 키 입력 감지 및 모달 열기 이벤트 추가
-            const searchCltnmInput = document.getElementById("searchCltnm");
-            if (searchCltnmInput) {
-                searchCltnmInput.addEventListener("keydown", function(event) {
-                    if (event.key === "Enter") {
-                        event.preventDefault(); // 기본 폼 제출 방지
-                        handleEnterKey();       // 함수 호출
-                    }
-                });
-            } else {
-                console.error("ID가 'searchCltnm'인 요소를 찾을 수 없습니다.");
+        // 엔터 키를 눌렀을 때 모달을 여는 이벤트 리스너 추가
+        document.getElementById('searchCltnm').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                console.log('Enter key pressed, showing CltnmModal...');
+                showPopupById('CltnmModal');  // 모달 열기 함수 호출
+                // modalGrid();  // 모달 그리드 초기화 및 데이터 로드
             }
         });
+
+        // 모달을 보여주는 함수
+        function showPopupById(popupId) {
+            const popup = document.getElementById(popupId);
+            if (popup) {
+                const modal = popup.closest('.modal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    requestAnimationFrame(() => {
+                        modal.classList.add('show');
+                    });
+                }
+                popup.style.display = 'block';
+                requestAnimationFrame(() => {
+                    popup.classList.add('show');
+                });
+
+                // 모달이 열리면서 데이터 로드
+                if (popupId === 'CltnmModal') {
+                    modalDeta();  // 모달에 데이터 로드
+                }
+
+                console.log(`Showing modal with ID: ${popupId}`);
+            } else {
+                console.warn(`Popup with ID '${popupId}' not found.`);
+            }
+        }
+
+        // 모달을 닫는 함수
+        function closePopup(popupId) {
+            const popup = document.getElementById(popupId);
+            if (popup) {
+                const modal = popup.closest('.modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    modal.classList.remove('show');
+                }
+                popup.style.display = 'none';
+                popup.classList.remove('show');
+                console.log(`Closing modal with ID: ${popupId}`);
+            }
+        }
+
+        /*모달 끝 ============================================================*/
+        function modalDeta() {
+            console.log('Initializing modal grid...');
+            const Modaldata = [];
+            const minimumRows = 13;
+
+            // searchTerm을 입력 필드에서 가져옵니다 (예: #searchCltnm)
+            const searchTerm = $('#searchCltnm').val();
+
+            $.ajax({
+                url: '/api/order_status/ModalRead',
+                type: 'GET',
+                data: { searchTerm: searchTerm }, // searchTerm을 쿼리 파라미터로 추가
+                async: true,
+                success: function(response) {
+                    if (response && Array.isArray(response.data)) {
+                        response.data.forEach((item, index) => {
+                            Modaldata.push({
+                                rownum: index + 1,  // 순번을 추가
+                                ...item
+                            });
+                        });
+                    }
+
+                    // 최소 행 수 채우기
+                    if (Modaldata.length < minimumRows) {
+                        for (let i = 0; i < minimumRows - Modaldata.length; i++) {
+                            Modaldata.push({
+                                rownum: Modaldata.length + 1,
+                                cltcd: '',
+                                cltnm: '',
+                                telnum: '',
+                                cltadres: ''
+                            });
+                        }
+                    }
+
+                    // 데이터를 CollectionView에 바인딩
+                    const viewdata = new wijmo.collections.CollectionView(Modaldata);
+
+                    // 기존 그리드 제거 후 새로 생성
+                    if (modalGrid) {
+                        modalGrid.dispose();
+                    }
+
+                    modalGrid = new wijmo.grid.FlexGrid('#modalGrid', {
+                        autoGenerateColumns: false,
+                        columns: [
+                            {binding: 'rownum', header: '순번', width: 50, align: 'center'},
+                            { binding: 'cltcd', header: '코드', width: '*', minWidth: 80, align: 'center' },
+                            { binding: 'cltnm', header: '거래처명', width: '*' },
+                            { binding: 'telnum', header: '전화', width: '*' },
+                            { binding: 'cltadres', header: '주소', width: '*' }
+                        ],
+                        itemsSource: viewdata
+                    });
+                    modalGrid.rowHeaders.columns.splice(0, 1);
+                    console.log('Modal grid initialized and data loaded.');
+                },
+                error: function() {
+                    console.error("Error fetching modal data.");
+                }
+            });
+        }
+
         function resetForm() {
             // 검색 관련 필드 초기화 (일반 텍스트 입력 필드)
             const searchInputIds = [

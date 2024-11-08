@@ -54,13 +54,20 @@ public class OrderStatusService {
         return sqlRunner.getRows(sql, params);
     }
 
-    public List<Map<String, Object>> getModalList(String saupnum) {
+    public List<Map<String, Object>> getModalListByClientName(String searchTerm) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("saupnum", saupnum);
+
+        // searchTerm이 있을 때만 LIKE 조건 추가
         String sql = """
-                SELECT * 
-                FROM TB_XCLIENT tx;
-                """;
+        SELECT * 
+        FROM ERP_SWSPANEL1.dbo.TB_XCLIENT
+        """ + (searchTerm != null && !searchTerm.isEmpty() ? " WHERE cltnm LIKE :searchTerm" : "");
+
+        // searchTerm이 비어 있지 않을 때만 파라미터에 추가
+        if (searchTerm != null && !searchTerm.isEmpty()) {
+            params.addValue("searchTerm", "%" + searchTerm + "%");
+        }
+
         return sqlRunner.getRows(sql, params);
     }
 
