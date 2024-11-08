@@ -637,7 +637,6 @@
     var viewdata1;
     var viewdata2;
     let SelectItem;
-    let delBodyList = [];
     let csrfToken = $("[name=_csrf]").val();
 
     document.readyState === 'complete' ? init() : window.onload = init;
@@ -669,16 +668,86 @@
         async: false,
         success: function (data) {
           data2 = data.data;
+          console.log("data2",data2)
         }
       })
+      // bd_details를 파싱하여 배열로 변환
+      // bd_details가 유효한 JSON 문자열일 때만 파싱
+      const bdDetailsArray = [];
+      const gridData = [];
+      data2.forEach(item => {
+        const bdDetailsArray = item.bd_details ? JSON.parse(item.bd_details.replace(/\\"/g, '"')) : [];
+
+        // 첫 번째 행: hd 정보 + bd 정보의 첫 번째 항목
+        gridData.push({
+          ordflag: item.ordflag,
+          reqdate: item.reqdate,
+          deldate: item.deldate,
+          telno: item.telno,
+          perid: item.perid,
+          cltzipcd: item.cltzipcd,
+          cltaddr: item.cltaddr,
+          panel_ht: item.panel_ht,
+          panel_hw: item.panel_hw,
+          panel_hl: item.panel_hl,
+          panel_hh: item.panel_hh,
+          remark: item.remark,
+          downloads: item.downloads,
+          reqnum: item.reqnum,
+          hgrb: bdDetailsArray[0]?.hgrb || '',
+          qty: bdDetailsArray[0]?.qty || '',
+          panel_t: bdDetailsArray[0]?.panel_t || '',
+          panel_w: bdDetailsArray[0]?.panel_w || '',
+          panel_l: bdDetailsArray[0]?.panel_l || '',
+          exfmtypedv: bdDetailsArray[0]?.exfmtypedv || '',
+          infmtypedv: bdDetailsArray[0]?.infmtypedv || '',
+          stframedv: bdDetailsArray[0]?.stframedv || '',
+          stexplydv: bdDetailsArray[0]?.stexplydv || '',
+          ordtext: bdDetailsArray[0]?.ordtext || ''
+        });
+
+        // 이후 행: hd 정보는 빈 값으로 설정, bd_details의 나머지 데이터 추가
+        for (let i = 1; i < bdDetailsArray.length; i++) {
+          const detail = bdDetailsArray[i];
+          gridData.push({
+            ordflag: '',
+            reqdate: '',
+            deldate: '',
+            telno: '',
+            perid: '',
+            cltzipcd: '',
+            cltaddr: '',
+            panel_ht: '',
+            panel_hw: '',
+            panel_hl: '',
+            panel_hh: '',
+            remark: '',
+            downloads: '',
+            reqnum: item.reqnum,
+            hgrb: detail.hgrb || '',
+            qty: detail.qty || '',
+            panel_t: detail.panel_t || '',
+            panel_w: detail.panel_w || '',
+            panel_l: detail.panel_l || '',
+            exfmtypedv: detail.exfmtypedv || '',
+            infmtypedv: detail.infmtypedv || '',
+            stframedv: detail.stframedv || '',
+            stexplydv: detail.stexplydv || '',
+            ordtext: detail.ordtext || ''
+          });
+        }
+      });
+
+
+
       // 최소 5개의 행을 만들기 위해 빈 객체 추가
       const minRows = 12;
-      while (data2.length < minRows) {
-        data2.push({}); // 빈 객체를 추가하여 빈 행을 생성
+      while (gridData.length < minRows) {
+        gridData.push({}); // 빈 객체를 추가하여 빈 행을 생성
       }
 
       viewdata1 = new wijmo.collections.CollectionView(data2);
-
+      console.log("gridData : ", gridData)
       if (!theGrid) {
         // 데이터 그리드에 바인딩
         theGrid = new wijmo.grid.FlexGrid('#theGrid', {
@@ -687,7 +756,7 @@
           isReadOnly: true,
           selectionMode: wijmo.grid.SelectionMode.Row,
           columns: [
-            {binding: 'ordfalg', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
             {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
             {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 100, align: 'center'},
             {binding: 'telno', header: '연락처', width: '*', minWidth: 100, align: 'center'},
@@ -700,18 +769,21 @@
             {binding: 'panel_hh', header: '높이', width: '*', minWidth: 100, align: 'center'},
             {binding: 'remark', header: '제목', width: '*', minWidth: 100, align: 'center'},
             {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 100, align: 'center'},
-            // {binding: 'cltnm', header: '제품구성', width: '*', minWidth: 100, align: 'left'},
-            // {binding: 'remark', header: '제목', width: '*', minWidth: 100, align: 'left'},
-            // {binding: 'reservatedate', header: '출하예정일', width: '*', minWidth: 100, align: 'center'},
-            // {binding: 'category', header: '제품유형', width: '*', minWidth: 100, align: 'center'},
-            // {binding: 'touse', header: '용도별', width: '*', minWidth: 100, align: 'center'},
-            // {binding: 'ton', header: '톤별', width: '*', minWidth: 100, align: 'center'},
-            // {binding: 'site', header: '시트별', width: '*', minWidth: 100, align: 'center'},
-            // {binding: 'price', header: '금액', width: '*', minWidth: 100, align: 'right'},
-            // {binding: 'other', header: '비고', width: '*', minWidth: 100, align: 'center'},
-            // {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 100, align: 'center'}
+
+            {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'left'},
+            {binding: 'qty', header: '수량', width: '*', minWidth: 100, align: 'left'},
+            {binding: 'panel_t', header: 'T', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'panel_w', header: 'W/H', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'panel_l', header: 'L', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'},
+
+            {binding: 'reqnum', visible: false},  // 숨길 컬럼
           ],
-          itemsSource: viewdata1,
+          itemsSource: gridData,
           itemFormatter: function (panel, r, c, cell) {
             if (panel.cellType === wijmo.grid.CellType.Cell) {
               var item = panel.rows[r].dataItem; // 현재 행의 데이터 항목
@@ -732,41 +804,60 @@
             // 행(row), 행의 데이터(item) 정보 가져오기
             let row = hitTest.row;
             let item = theGrid.rows[row].dataItem;
-            console.log("click data : ", item)
+            if (!item.ordflag && item.reqnum) {
+              let hdRow = gridData.find(data => data.reqnum === item.reqnum && data.ordflag);
+              if (hdRow) {
+                console.log('hd 정보가 있는 행을 참조:', hdRow);
+                document.getElementById('reqdate').value = hdRow.reqdate;
+                document.getElementById('deldate').value = hdRow.deldate;
+                document.getElementById('telno').value = hdRow.telno;
+                document.getElementById('perid').value = hdRow.perid;
+                document.getElementById('postno').value = hdRow.cltzipcd;
+                document.getElementById('address1').value = hdRow.cltaddr;
+                document.getElementById('panel_ht').value = hdRow.panel_ht;
+                document.getElementById('panel_hw').value = hdRow.panel_hw;
+                document.getElementById('panel_hl').value = hdRow.panel_hl;
+                document.getElementById('panel_hh').value = hdRow.panel_hh;
+                document.getElementById('remark').value = hdRow.remark;
+              }
+            }else {
+              document.getElementById('reqdate').value = item.reqdate;
+              document.getElementById('deldate').value = item.deldate;
+              document.getElementById('telno').value = item.telno;
+              document.getElementById('perid').value = item.perid;
+              document.getElementById('postno').value = item.cltzipcd;
+              document.getElementById('address1').value = item.cltaddr;
+              document.getElementById('panel_ht').value = item.panel_ht;
+              document.getElementById('panel_hw').value = item.panel_hw;
+              document.getElementById('panel_hl').value = item.panel_hl;
+              document.getElementById('panel_hh').value = item.panel_hh;
+              document.getElementById('remark').value = item.remark;
+            }
 
-            document.getElementById('reqdate').value = item.reqdate;
-            document.getElementById('deldate').value = item.deldate;
-            document.getElementById('telno').value = item.telno;
-            document.getElementById('perid').value = item.perid;
-            document.getElementById('postno').value = item.cltzipcd;
-            document.getElementById('address1').value = item.cltaddr;
-            document.getElementById('panel_ht').value = item.panel_ht;
-            document.getElementById('panel_hw').value = item.panel_hw;
-            document.getElementById('panel_hl').value = item.panel_hl;
-            document.getElementById('panel_hh').value = item.panel_hh;
-            document.getElementById('remark').value = item.remark;
-            document.getElementById('qty').value = item.bd_details.qty;
-            document.getElementById('panel_t').value = item.bd_details.panel_t;
-            document.getElementById('panel_w').value = item.bd_details.panel_w;
-            document.getElementById('panel_l').value = item.bd_details.panel_l;
-            document.getElementById('ordtext').value = item.bd_details.ordtext;
+            // document.getElementById('qty').value = item.bd_details.qty;
+            // document.getElementById('panel_t').value = item.bd_details.panel_t;
+            // document.getElementById('panel_w').value = item.bd_details.panel_w;
+            // document.getElementById('panel_l').value = item.bd_details.panel_l;
+            // document.getElementById('ordtext').value = item.bd_details.ordtext;
+            //
+            // const selectHgrb = document.getElementById('hgrb');
+            // const selectExfmtypedv = document.getElementById('exfmtypedv');
+            // const selectInfmtypedv = document.getElementById('infmtypedv');
+            // const selectStframedv = document.getElementById('stframedv');
+            // const selectStexplydv = document.getElementById('stexplydv');
+            //
+            // const selectedItem = item;
+            //
+            // setSelectedIndex(selectHgrb, selectedItem.bd_details.hgrb);
+            // setSelectedIndex(selectExfmtypedv, selectedItem.bd_details.exfmtypedv);
+            // setSelectedIndex(selectInfmtypedv, selectedItem.bd_details.infmtypedv);
+            // setSelectedIndex(selectStframedv, selectedItem.bd_details.stframedv);
+            // setSelectedIndex(selectStexplydv, selectedItem.bd_details.stexplydv);
 
-            const selectHgrb = document.getElementById('hgrb');
-            const selectExfmtypedv = document.getElementById('exfmtypedv');
-            const selectInfmtypedv = document.getElementById('infmtypedv');
-            const selectStframedv = document.getElementById('stframedv');
-            const selectStexplydv = document.getElementById('stexplydv');
-
-            const selectedItem = item;
-
-            setSelectedIndex(selectHgrb, selectedItem.bd_details.hgrb);
-            setSelectedIndex(selectExfmtypedv, selectedItem.bd_details.exfmtypedv);
-            setSelectedIndex(selectInfmtypedv, selectedItem.bd_details.infmtypedv);
-            setSelectedIndex(selectStframedv, selectedItem.bd_details.stframedv);
-            setSelectedIndex(selectStexplydv, selectedItem.bd_details.stexplydv);
-
+            document.getElementById('reqnum').value = item.reqnum;
             const tab1Link = document.getElementById('listTabLink');
             tab1Link.click();
+            fetchListData2();
           }
         })
         // 선택이 변경될 때, 현재 항목 업데이트
@@ -1165,7 +1256,7 @@
             viewdata2.push({});
           }
           if(selectedData.reqseq !== ""){
-            delBodyList.push(selectedData.reqseq);
+            AjaxUtil.postAsyncData('/api/request/request/bodyDelete', selectedData.reqseq, fnSuccess);
           }
         });
         viewdata2.refresh();
@@ -1193,6 +1284,7 @@
           if (res.success) {
             Alert.alert('', '삭제되었습니다.');
             fetchListData();
+            resetFormFields();
           }
         }
         AjaxUtil.postAsyncData('/api/request/request/delete', data, fnSuccess);
@@ -1201,11 +1293,11 @@
     // 필드값 초기화
     function resetFormFields() {
       const fieldsToReset = [
-        'deldate', 'panel_ht',
+        'panel_ht',
         'panel_hw', 'panel_hl', 'panel_hh', 'remark', 'hgrb',
         'qty', 'panel_t', 'panel_w', 'panel_l',
         'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv', 'ordtext'
-        // 'remark'  // Uncomment if needed
+        ,'reqnum'
       ];
 
       fieldsToReset.forEach(fieldId => {

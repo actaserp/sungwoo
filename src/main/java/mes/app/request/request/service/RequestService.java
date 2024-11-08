@@ -388,4 +388,19 @@ public class RequestService {
             e.printStackTrace();
         }
     }
+    @Transactional
+    public boolean deleteBody(String reqseq) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        try {
+            String sql = """
+                DELETE FROM TB_DA007W
+                WHERE reqseq = :reqseq
+            """;
+            dicParam.addValue("reqseq", reqseq);
+            this.sqlRunner.queryForObject(sql, dicParam, (rs, rowNum) -> rs.getString("dtl_cd"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
 }

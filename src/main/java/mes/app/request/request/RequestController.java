@@ -93,18 +93,34 @@ public class RequestController {
 //        Map<String, Object> headitem = this.requestService.getHeadList(tbDa006WPk);
 //        items.add(headitem);
         for (Map<String, Object> item : items) {
-            if (item.get("orgflag") == "0") {
-                item.remove("orgflag");
-                item.put("orgflag", "주문의뢰");
-            }else if (item.get("orgflag") == "1") {
-                item.remove("orgflag");
-                item.put("orgflag", "견적작성");
-            }else if (item.get("orgflag") == "2") {
-                item.remove("orgflag");
-                item.put("orgflag", "제작");
-            }else if (item.get("orgflag") == "3") {
-                item.remove("orgflag");
-                item.put("orgflag", "출고");
+            if (item.get("ordflag").equals("0")) {
+                item.remove("ordflag");
+                item.put("ordflag", "주문의뢰");
+            }else if (item.get("ordflag").equals("1")) {
+                item.remove("ordflag");
+                item.put("ordflag", "견적작성");
+            }else if (item.get("ordflag").equals("2")) {
+                item.remove("ordflag");
+                item.put("ordflag", "제작");
+            }else if (item.get("ordflag").equals("3")) {
+                item.remove("ordflag");
+                item.put("ordflag", "출고");
+            }
+            // 날짜 형식 변환 (reqdate)
+            if (item.containsKey("reqdate")) {
+                String setupdt = (String) item.get("reqdate");
+                if (setupdt != null && setupdt.length() == 8) {
+                    String formattedDate = setupdt.substring(0, 4) + "-" + setupdt.substring(4, 6) + "-" + setupdt.substring(6, 8);
+                    item.put("reqdate", formattedDate);
+                }
+            }
+            // 날짜 형식 변환 (deldate)
+            if (item.containsKey("deldate")) {
+                String setupdt = (String) item.get("deldate");
+                if (setupdt != null && setupdt.length() == 8) {
+                    String formattedDate = setupdt.substring(0, 4) + "-" + setupdt.substring(4, 6) + "-" + setupdt.substring(6, 8);
+                    item.put("deldate", formattedDate);
+                }
             }
 //            if(item.get("hd_files")!=null){
 //                // 파일 이름과 경로를 리스트로 변환
@@ -560,7 +576,7 @@ public class RequestController {
 //    }
     // 삭제 메서드
     @DeleteMapping("/delete")
-    public AjaxResult deleteElecSafe(@RequestParam String reqnum) {
+    public AjaxResult deleteHead(@RequestParam String reqnum) {
         AjaxResult result = new AjaxResult();
 
             boolean success = requestService.delete(reqnum);
@@ -572,6 +588,22 @@ public class RequestController {
                 result.success = false;
                 result.message = "삭제에 실패하였습니다.";
             }
+        return result;
+    }
+    // body 삭제 메서드
+    @DeleteMapping("/bodyDelete")
+    public AjaxResult deleteBody(@RequestParam String reqseq) {
+        AjaxResult result = new AjaxResult();
+
+        boolean success = requestService.deleteBody(reqseq);
+
+        if (success) {
+            result.success = true;
+            result.message = "삭제하였습니다.";
+        } else {
+            result.success = false;
+            result.message = "삭제에 실패하였습니다.";
+        }
         return result;
     }
 }
