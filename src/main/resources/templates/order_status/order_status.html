@@ -623,8 +623,8 @@
 
                             // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
                             if (item.ordtext) {
-                                item.originalOrdtext = item.ordtext;// 실제 ordtext 데이터 보존
-                                item.ordtext = "옵션 및 요청사항";
+                                item.originalOrdtext = item.ordtext; // 실제 데이터를 보존
+                                item.ordtext = "옵션 및 요청사항"; // 링크 표시용 텍스트
                             }
                         });
                     }
@@ -694,13 +694,18 @@
                     formatItem: function(s, e) {
                         if (e.panel.cellType === wijmo.grid.CellType.Cell) {
                             const col = s.columns[e.col];
-                            const item = s.rows[e.row].dataItem;
+                            const item = s.rows[e.row]?.dataItem;
+
                             // ordtext 셀에 데이터가 있는 경우 링크처럼 표시
-                            if (col.binding === 'ordtext' && item.ordtext === "옵션 및 요청사항") {
-                                e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="showPopupById('OrdtextModal')">옵션 및 요청사항</a>`;
+                            if (col.binding === 'ordtext' && item && item.ordtext === "옵션 및 요청사항") {
+                                console.log("Creating link for ordtext at row:", e.row); // e.row 값 확인
+                                e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="showPopupById('OrdtextModal', ${e.row})">옵션 및 요청사항</a>`;
+                            } else {
+                                console.warn("No ordtext data found or invalid row:", e.row);
                             }
                         }
                     }
+
                 });
 
                 theGrid2.rowHeaders.columns.splice(0, 1); // 맨 앞에 헤더 부분 없애기
@@ -901,7 +906,7 @@
         // 모달 ID와 데이터 로드 함수를 매핑하는 객체
         const modalDataLoaders = {
             'CltnmModal': modalDeta,
-            'OrdtextModal':loadOrdtextData(),
+            'OrdtextModal':showOrdtextModal,
         };
 
         // 모달을 보여주는 함수
@@ -951,41 +956,56 @@
 
        /*모달 끝 ============================================================*/
 
-        // 클릭된 셀에 대해 모달을 여는 함수
-        function loadOrdtextData() {
-            console.log("Loading data with selectedId:", selectedId);
-
-            if (!selectedId || !selectedId.reqdate || !selectedId.remark) {
-                console.error("selectedId is not properly set:", selectedId);
-                return;
-            }
-            const editor = tinymce.get("ordtext");
-            if (!editor) {
-                console.error("TinyMCE editor instance not found for 'ordtext'");
-                return;
-            }
-
-            $.ajax({
-                url: '/api/order_status/getOrdtext',
-                type: 'POST',
-                data: {
-                    reqdate: selectedId.reqdate,
-                    remark: selectedId.remark
-                },
-                success: function(response) {
-                    console.log("Server response:", response); // 서버 응답 데이터 확인
-
-                    if (response && response.data) {
-                        console.log("Setting content in TinyMCE editor");
-                        editor.setContent(response.data);  // TinyMCE 에디터에 데이터 설정
-                    } else {
-                        console.warn("No ordtext data found in the response.");
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error("Failed to load ordtext data:", error);
+        function showPopupById(popupId, rowIndex = null) { // rowIndex를 선택적으로 받음
+            const popup = document.getElementById(popupId);
+            if (popup) {
+                const modal = popup.closest('.modal');
+                if (modal) {
+                    modal.style.display = 'block';
+                    requestAnimationFrame(() => modal.classList.add('show'));
                 }
-            });
+                popup.style.display = 'block';
+                requestAnimationFrame(() => popup.classList.add('show'));
+
+                // 모달이 열리면서 해당 모달의 데이터 로드 함수 호출
+                const loadDataFunction = modalDataLoaders[popupId];
+                if (typeof loadDataFunction === 'function') {
+                    try {
+                        if (popupId === 'OrdtextModal' && rowIndex !== null) {
+                            loadDataFunction(rowIndex); // rowIndex가 있는 경우 전달
+                        } else {
+                            loadDataFunction(); // 일반 호출
+                        }
+                    } catch (error) {
+                        console.error(`Error loading data for modal '${popupId}':`, error);
+                    }
+                } else {
+                    console.log(`No data load function defined for modal with ID: ${popupId}`);
+                }
+
+                console.log(`Showing modal with ID: ${popupId}`);
+            } else {
+                console.warn(`Popup with ID '${popupId}' not found.`);
+            }
+        }
+
+        function showOrdtextModal(rowIndex) {
+            console.log("showOrdtextModal called with rowIndex:", rowIndex);
+
+            if (!theGrid2 || !theGrid2.rows[rowIndex]) {
+                console.error("theGrid2 is not defined or rowIndex is out of range:", rowIndex);
+                return;
+            }
+
+            const selectedData = theGrid2.rows[rowIndex].dataItem;
+            console.log("Selected data from grid:", selectedData);
+
+            if (selectedData && selectedData.originalOrdtext) {
+                tinymce.get("ordtext").setContent(selectedData.originalOrdtext); // 실제 데이터를 설정
+                showPopupById('OrdtextModal'); // 모달 열기
+            } else {
+                console.error("originalOrdtext 데이터가 없습니다.");
+            }
         }
 
         function modalDeta() {
