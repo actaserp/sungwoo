@@ -110,16 +110,15 @@
                         </table>
                     </div>
 
-
                     <div class="section-top" style="float: right; margin-top: 24px;">
                         <div class="button-wrap">
                             <ul>
-                                <li>
+                                <!--<li>
                                     <a  class="btn btn-edit" title="수정" onclick="modifyData()">
                                         <img src="/images/icon/ico-edit.svg" alt="엑셀 아이콘">
                                         수정
                                     </a>
-                                </li>
+                                </li>-->
                                 <li>
                                     <a  class="btn btn-delete" title="삭제" id="btnDelete">
                                         <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
@@ -134,84 +133,6 @@
                         <div id="theGrid" style="max-height: 700px"></div>
                     </div>
                 </section>
-                <!-- Section -->
-               <!-- <section class="tab-item" id="tab2">
-                    <div class="section-top">
-                        <div class="title-wrap">
-                            <h3>사용자 등록</h3>
-                        </div>
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <a class="btn btn-excell" title="엑셀다운로드" onclick="clearForm()">
-                                        <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                        신규등록
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="btn btn-edit" id="btnSave" title="저장">
-                                        <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                                        저장
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="table-wrap">
-                        <table class="write-table">
-                            <caption>점검등록 테이블</caption>
-                            <colgroup>
-                                <col class="wp12">
-                                <col class="wp40">
-                                <col class="wp12">
-                                <col class="wp40">
-                            </colgroup>
-                            <tbody>
-                            <tr>
-                                <th>
-                                    <label for="code">
-                                        코드
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="code" name="code" class="wp100" maxlength="30" placeholder="코드">
-                                    <input type="hidden" id="id" name="id" class="wp100" maxlength="30" placeholder="id">
-                                </td>
-                                <th>
-                                    <label for="name">
-                                        그룹명
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="name" name="name" class="wp100" maxlength="50" placeholder="그룹명">
-                                </td>
-
-                            </tr>
-                            <tr>
-                                <th>
-                                    설명
-                                </th>
-                                <td>
-                                    <input type="text" id="description" name="description" maxlength="100" class="wp100" placeholder="설명">
-                                </td>
-                                <th>
-                                    <label for="name">
-                                        기본화면
-                                    </label>
-                                </th>
-                                <td>
-                                    <select class="mg-r5" id="gmenu" name="gmenu" style="width: 100%">
-                                        <option></option>
-                                    </select>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>-->
-
-                <!--section 3-->
-
                 <section class="tab-item" id="tab2">
                     <div class="section-top">
                         <form id="searchForm" autocomplete="off">
@@ -320,26 +241,27 @@
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
         function init() {
             let data2 = [];
-
-
             $.ajax({
                 url: '/api/system/usergroup/read',
                 type: 'GET',
-                data: {
-
-                },
                 async: false,
                 success: function(data){
-                    let DataLength = 10 - data.data.length;
-
-                    if(data.data.length < 10){
-                        for(let i=0; i < DataLength; i++){
-                            data.data.push('empty');
+                    if (data.data && data.data.length > 0) {
+                        data2 = data.data;
+                    } else {
+                        // 데이터가 없을 경우 빈 데이터를 10개 추가
+                        for (let i = 0; i < 10; i++) {
+                            data2.push({ code: '', name: '', id: '', description: '', gmenu: '' });
                         }
                     }
-                    data2 = data.data;
+                },
+                error: function() {
+                    // 에러 발생 시에도 기본 행 추가
+                    for (let i = 0; i < 10; i++) {
+                        data2.push({ code: '', name: '', id: '', description: '', gmenu: '' });
+                    }
                 }
-            })
+            });
 
             viewdata = new wijmo.collections.CollectionView(data2);
             // 데이터 그리드에 바인딩
@@ -637,38 +559,51 @@
         let menuGroupName = new wijmo.collections.PropertyGroupDescription('메뉴명', function (item) {
             return item.gpname;
         })
-        function grid_binding2(data){
-            console.log("바인딩 데이터:",data);
 
-            let UserMenuData = data.map(item=>({
+        function grid_binding2(data){
+            console.log("바인딩 데이터:", data);
+
+            // 데이터가 없을 경우, 3개의 빈 객체를 추가
+            let UserMenuData = data.map(item => ({
                 name: item.name,
                 r: item.r,
                 w: item.w,
-                gpname: item.gpname,  // 그룹화를 위한 속성 추가
-                menu_code: item.menu_code, // 추가: menu_code 필드 포함
-                ugm_id: item.ugm_id // 추가: ugm_id 필드 포함
+                gpname: item.gpname,
+                menu_code: item.menu_code,
+                ugm_id: item.ugm_id
             }));
 
-            console.log("UserMenuData:",UserMenuData);
-            console.log("바인딩 이후 데이터");
+            // 데이터가 없을 경우 3개의 빈 행 추가
+            if (UserMenuData.length === 0) {
+                for (let i = 0; i < 3; i++) {
+                    UserMenuData.push({
+                        name: '', // 빈 값
+                        r: false, // 기본값으로 읽기 비활성
+                        w: false, // 기본값으로 쓰기 비활성
+                        gpname: '', // 빈 값
+                        menu_code: '', // 빈 값
+                        ugm_id: null // 빈 값
+                    });
+                }
+            }
 
+            console.log("UserMenuData:", UserMenuData);
+            console.log("바인딩 이후 데이터");
 
             theGrid2.columns.clear();
             theGrid2.autoGenerateColumns = false;
 
             var columns = [
-                {binding: 'name',header: '코드명',width: 250,align: 'center',},
-                {binding: 'r',header: '읽기',width: 200,align: 'center',dataType: wijmo.DataType.Boolean,isReadOnly: false,},
-                {binding: 'w',header: '쓰기',width: 200,align: 'center',dataType: wijmo.DataType.Boolean,isReadOnly: false,},
-                {binding: '', header: '', width: "*", align: 'center'},
+                {binding: 'name', header: '코드명', width: 250, align: 'center'},
+                {binding: 'r', header: '읽기', width: 200, align: 'center', dataType: wijmo.DataType.Boolean, isReadOnly: false},
+                {binding: 'w', header: '쓰기', width: 200, align: 'center', dataType: wijmo.DataType.Boolean, isReadOnly: false},
+                {binding: '', header: '', width: "*", align: 'center'}
             ];
-
 
             columns.forEach(colDef => {
                 let col = new wijmo.grid.Column(colDef);
                 theGrid2.columns.push(col);
             });
-
 
             // CollectionView를 생성하여 그리드에 설정
             viewdata2 = new wijmo.collections.CollectionView(UserMenuData);
@@ -678,9 +613,7 @@
 
             // 그리드에 바인딩
             theGrid2.itemsSource = viewdata2;
-
         }
-
 
         function saveUserGroupMenu() {
 

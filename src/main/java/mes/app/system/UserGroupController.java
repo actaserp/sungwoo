@@ -139,9 +139,7 @@ public class UserGroupController{
 
 	@GetMapping("/defaultMenu")
 	public List<MenuItem> getMenuItem(){
-		List<MenuItem> defaultList = menuItemRepository.findByMenuFolderId(1);
+		List<MenuItem> defaultList = menuItemRepository.findByMenuFolderId(54);
 		return defaultList;
 	}
-	
-	
 }

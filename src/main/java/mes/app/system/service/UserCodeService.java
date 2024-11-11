@@ -36,7 +36,7 @@ public class UserCodeService {
 	@Autowired
 	private TB_RP980Repository tbRp980Repository;
 
-	public List<Map<String, Object>> getCodeList(String txtCode){
+	/*public List<Map<String, Object>> getCodeList(String txtCode){
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("txtCode", txtCode);
@@ -76,6 +76,49 @@ public class UserCodeService {
 					where A."Value" ilike concat('%', :txtCode, '%')
 					ORDER BY A.id, A."Code", B."Code", C."Code"
 				""";
+		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+		return items;
+	}*/
+	public List<Map<String, Object>> getCodeList(String txtCode){
+
+		MapSqlParameterSource dicParam = new MapSqlParameterSource();
+		dicParam.addValue("txtCode", "%" + txtCode + "%"); // 파라미터를 미리 와일드카드와 함께 설정
+
+		String sql = """
+            WITH AGroupTB AS(
+                SELECT *
+                FROM user_code A
+                WHERE A.Parent_id IS NULL
+            ),
+            
+            BGroupTB AS(
+                SELECT A.*
+                FROM user_code A
+                JOIN AGroupTB B ON A.Parent_id = B.id
+            ),
+            
+            CGroupTB AS(
+                SELECT A.*
+                FROM user_code A
+                JOIN BGroupTB B ON A.Parent_id = B.id
+            )
+            
+            SELECT A.id AS AID,
+                A.Code AS Agropcd,
+                A.Value AS Agroupnm,
+                B.id AS BID,
+                B.Code AS Bgropcd,
+                B.Value AS Bgroupnm,
+                C.id AS CID,
+                C.Code AS Cgropcd,
+                C.Value AS Cgroupnm,
+                A.Description
+            FROM AGroupTB A
+            LEFT JOIN BGroupTB B ON A.id = B.Parent_id
+            LEFT JOIN CGroupTB C ON B.id = C.Parent_id
+            WHERE A.Value LIKE :txtCode
+            ORDER BY A.id, A.Code, B.Code, C.Code
+            """;
 		List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 		return items;
 	}

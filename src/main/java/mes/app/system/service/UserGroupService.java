@@ -17,17 +17,17 @@ public class UserGroupService {
 
 	public List<Map<String,Object>> getUserGroupList(Boolean super_user) {
 		String sql = """
-			select id, "Code" as code 
-            , "Name" as name 
-            , "Description" as description 
-            , "Disabled" as disabled
-            , "gmenu" as gmenu 
-            , mi."MenuName" as gmenuname
-            , to_char(ug."_created" ,'yyyy-mm-dd hh24:mi:ss') as created
-            from user_group ug 
-            left join menu_item mi
-			on mi."MenuCode" = ug.gmenu
-            where 1 = 1
+				SELECT ug.id,\s
+				       ug.Code AS code,\s
+				       ug.Name AS name,\s
+				       ug.Description AS description,\s
+				       ug.Disabled AS disabled,\s
+				       ug.gmenu AS gmenu,\s
+				       mi.MenuName AS gmenuname,
+				       FORMAT(ug._created, 'yyyy-MM-dd HH:mm:ss') AS created
+				FROM ERP_SWSPANEL1.dbo.user_group AS ug
+				LEFT JOIN ERP_SWSPANEL1.dbo.menu_item AS mi ON mi.MenuCode = ug.gmenu
+				WHERE 1 = 1
 			""";
 
 

@@ -27,7 +27,7 @@ public class UserService {
     private UserGroupRepository userGroupRepository;
 
     // 사용자 리스트 조회
-    public List<Map<String, Object>> getUserList(boolean superUser, Integer group, String keyword, String username, Integer departId, String divinm){
+    /*public List<Map<String, Object>> getUserList(boolean superUser, Integer group, String keyword, String username, Integer departId, String divinm){
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("group", group);
@@ -87,6 +87,80 @@ public class UserService {
 
         sql += "order by au.date_joined desc";
 
+
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+        return items;
+    }*/
+
+    // 사용자 리스트 조회
+    public List<Map<String, Object>> getUserList(boolean superUser, Integer group, String keyword, String username, Integer departId, String divinm){
+
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("group", group);
+        dicParam.addValue("keyword", keyword);
+        dicParam.addValue("username", username);
+        dicParam.addValue("departId", departId);
+        dicParam.addValue("divinm", divinm);
+
+        String sql = """
+        SELECT 
+            au.id,
+            up.[Name],
+            au.username AS login_id,
+            up.[UserGroup_id],
+            ug.[id] AS group_id,
+            au.email,
+            au.tel,
+            au.agencycd,
+            ug.[Name] AS group_name,
+            up.[Factory_id],
+            uc.[Value],
+            au.divinm,
+            rp.[ranknm],
+            up.[Depart_id],
+            up.lang_code,
+            au.is_active,
+            FORMAT(au.date_joined, 'yyyy-MM-dd HH:mm') AS date_joined
+        FROM 
+            auth_user au 
+        LEFT JOIN 
+            user_profile up ON up.[User_id] = au.id
+        LEFT JOIN 
+            user_group ug ON ug.id = up.[UserGroup_id]
+        LEFT JOIN 
+            user_code uc ON CAST(au.agencycd AS INT) = uc.id
+        LEFT JOIN 
+            tb_rp940 rp ON rp.userid = au.username
+        WHERE 
+            au.is_superuser = 0
+        """;
+
+        if (!superUser) {
+            sql += " AND ug.[Code] <> 'dev' ";
+        }
+
+        if (group != null) {
+            sql += " AND ug.[id] = :group ";
+        }
+
+        if (!StringUtils.isEmpty(keyword)) {
+            sql += " AND up.[Name] LIKE '%' + :keyword + '%' ";
+        }
+
+        if (!StringUtils.isEmpty(username)) {
+            sql += " AND au.[username] LIKE '%' + :username + '%' ";
+        }
+
+        if (!StringUtils.isEmpty(divinm)) {
+            sql += " AND rp.[divinm] LIKE '%' + :divinm + '%' ";
+        }
+
+        if (departId != null) {
+            sql += " AND up.[Depart_id] = :departId ";
+        }
+
+        sql += " ORDER BY au.date_joined DESC";
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
 

@@ -151,7 +151,8 @@ public class SystemService {
      * @param folderId
      * @return
      */
-    public List<Map<String, Object>> getUserGroupMenuList(Integer userGroupId, Integer folderId) {
+
+    /*public List<Map<String, Object>> getUserGroupMenuList(Integer userGroupId, Integer folderId) {
 
         String sql = """
                 with recursive tree as (  
@@ -217,7 +218,85 @@ public class SystemService {
         dicParam.addValue("folder_id", folderId);
         dicParam.addValue("group_id", userGroupId);
         return this.sqlRunner.getRows(sql, dicParam);
+    }*/
+
+    public List<Map<String, Object>> getUserGroupMenuList(Integer userGroupId, Integer folderId) {
+
+        String sql = """
+        WITH tree AS (
+            SELECT 
+                a.id,
+                a.Parent_id AS pid,
+                CAST('' AS NVARCHAR(MAX)) AS menu_code,
+                a.FolderName AS gpname,
+                a.FolderName AS name,
+                1 AS depth,
+                CAST(a.id AS NVARCHAR(MAX)) AS path,
+                0 AS cycle,
+                a._order AS ord,
+                CAST('folder' AS NVARCHAR(10)) AS data_div,
+                a.id AS folder_id,
+                1 AS is_folder
+            FROM menu_folder a
+            WHERE a.Parent_id IS NULL
+              AND a.FrontFolder_id IS NOT NULL
+    """;
+
+        // Optional folder ID filtering
+        if (folderId != null) {
+            sql += " AND a.id = :folder_id";
+        }
+
+        sql += """
+            UNION ALL
+            SELECT 
+                NULL AS id,
+                mi.MenuFolder_id AS pid,
+                CAST(mi.MenuCode AS NVARCHAR(MAX)) AS menu_code,
+                tree.gpname AS gpname,
+                mi.MenuName AS name,
+                tree.depth + 1,
+                tree.path + '/' + CAST(mi.MenuFolder_id AS NVARCHAR(MAX)) AS path,
+                CASE WHEN CHARINDEX(CAST(mi.MenuFolder_id AS NVARCHAR(MAX)), tree.path) > 0 THEN 1 ELSE 0 END AS cycle,
+                mi._order AS ord,
+                CAST('menu' AS NVARCHAR(10)) AS data_div,
+                mi.MenuFolder_id AS folder_id,
+                0 AS is_folder
+            FROM menu_item mi
+            INNER JOIN tree ON mi.MenuFolder_id = tree.id
+            WHERE mi.MenuCode NOT IN ('wm_user_group', 'wm_user', 'wm_user_group_menu')
+        )
+        SELECT 
+            tree.pid,
+            tree.id,
+            tree.menu_code,
+            tree.gpname,
+            tree.name,
+            tree.depth,
+            tree.ord,
+            ugm.UserGroup_id,
+            ugm.AuthCode,
+            CASE WHEN tree.is_folder = 1 THEN NULL ELSE IIF(CHARINDEX('R', ugm.AuthCode) > 0, 1, 0) END AS r,
+            CASE WHEN tree.is_folder = 1 THEN NULL ELSE IIF(CHARINDEX('W', ugm.AuthCode) > 0, 1, 0) END AS w,
+            CASE WHEN tree.is_folder = 1 THEN NULL ELSE IIF(CHARINDEX('X', ugm.AuthCode) > 0, 1, 0) END AS x,
+            tree.is_folder,
+            ugm.id AS ugm_id
+        FROM tree 
+        LEFT JOIN user_group_menu ugm 
+            ON ugm.MenuCode = tree.menu_code 
+            AND ugm.UserGroup_id = :group_id
+        ORDER BY tree.path, tree.ord
+    """;
+
+        // Set up parameters for SQL query
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("folder_id", folderId);
+        dicParam.addValue("group_id", userGroupId);
+
+        // Execute and return the result
+        return this.sqlRunner.getRows(sql, dicParam);
     }
+
 
     public List<Map<String, Object>> getBookmarkList(int userId) {
 
