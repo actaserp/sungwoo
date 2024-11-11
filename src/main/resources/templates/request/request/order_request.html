@@ -917,6 +917,9 @@
             fetchListData2();
           }
         })
+        // FlexGrid의 최대 높이를 제한하여 스크롤바를 활성화
+        theGrid.hostElement.style.maxHeight = '650px'; // 약 12개의 행 높이에 맞게 설정
+        theGrid.hostElement.style.overflowY = 'auto';
         // 선택이 변경될 때, 현재 항목 업데이트
         theGrid.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
         new FlexGridContextMenu(theGrid);
@@ -1289,7 +1292,7 @@
     function addBody(){
       const newRowData = {
         hgrb: getHgrb(document.getElementById("hgrb").value),
-        qty: document.getElementById("qty").value,
+        qty: Number(document.getElementById("qty").value),
         panel_t: document.getElementById("panel_t").value,
         panel_w: document.getElementById("panel_w").value,
         panel_l: document.getElementById("panel_l").value,
@@ -1306,7 +1309,7 @@
       let isUpdated = false;  // 업데이트 여부를 확인할 변수
       for (let i = 0; i < sourceCollection.length; i++) {
         // reqseq가 겹치는 데이터가 있다면 덮어쓰기
-        if (newRowData.reqseq === sourceCollection[i].reqseq && newRowData.reqseq.equals("")) {
+        if (newRowData.reqseq === sourceCollection[i].reqseq && newRowData.reqseq !== "") {
           sourceCollection[i] = newRowData;  // 덮어쓰기
           isUpdated = true;  // 업데이트 되었다고 표시
           break;  // 첫 번째로 겹치는 데이터만 덮어씌우고 종료
