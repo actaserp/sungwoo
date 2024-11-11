@@ -918,6 +918,10 @@
                             item.deldate = formatDateString(item.deldate);
                             item.ordflag = getOrdflagText(item.ordflag); // ordflag 숫자값을 텍스트로 변환
                             item.hgrb = getHgrb((item.hgrb));
+                            item.exfmtypedv = getListCgrb(item.exfmtypedv);
+                            item.infmtypedv = getListCgrb(item.infmtypedv);
+                            item.stframedv = getListCgrb(item.stframedv);
+                            item.stexplydv = getListCgrb(item.stexplydv);
 
                             // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
                             if (item.ordtext) {
