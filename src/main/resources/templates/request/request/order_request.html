@@ -855,7 +855,6 @@
                 document.getElementById('panel_hl').value = hdRow.panel_hl;
                 document.getElementById('panel_hh').value = hdRow.panel_hh;
                 document.getElementById('remark').value = hdRow.remark;
-                document.getElementById('ordtext').value = hdRow.ordtext;
               }
             }else {
               document.getElementById('reqdate').value = item.reqdate;
@@ -869,7 +868,6 @@
               document.getElementById('panel_hl').value = item.panel_hl;
               document.getElementById('panel_hh').value = item.panel_hh;
               document.getElementById('remark').value = item.remark;
-              document.getElementById('ordtext').value = item.ordtext;
             }
             let fileList = Array.isArray(item.files) ? item.files : [];
 
@@ -941,6 +939,14 @@
         async: false,
         success: function (data) {
           data2 = data.data;
+          data2.forEach(item =>{
+            console.log("getHgrb : ", item.hgrb)
+            item.hgrb = getHgrb((item.hgrb));
+            item.exfmtypedv = getListCgrb2(item.exfmtypedv);
+            item.infmtypedv = getListCgrb2(item.infmtypedv);
+            item.stframedv = getListCgrb2(item.stframedv);
+            item.stexplydv = getListCgrb2(item.stexplydv);
+          })
         }
       })
       // 최소 5개의 행을 만들기 위해 빈 객체 추가
@@ -948,6 +954,7 @@
       if(data2 == null){
         for(i = 1 ; i ; 5){
           data2.push({});
+
         }
       }else {
         while (data2.length < minRows) {
@@ -1011,8 +1018,8 @@
             document.getElementById('panel_t').value = item.panel_t;
             document.getElementById('panel_w').value = item.panel_w;
             document.getElementById('panel_l').value = item.panel_l;
-            document.getElementById('ordtext').value = item.ordtext;
             document.getElementById('reqseq').value = item.reqseq;
+            tinymce.get('ordtext').setContent(item.ordtext);  // 'ordtext'는 TinyMCE가 적용된 요소의 id
 
             const selectHgrb = document.getElementById('hgrb');
             const selectExfmtypedv = document.getElementById('exfmtypedv');
@@ -1379,7 +1386,7 @@
         document.getElementById(fieldId).value = '';
 
       });
-      document.getElementById('ordtext').value = '';
+      tinymce.get('ordtext').setContent("");
       document.getElementById('reqdate').value = today;
       document.getElementById('deldate').value = today;
       $('.filelist2').empty(); // 파일 리스트 초기화
@@ -1422,7 +1429,7 @@
       fieldsToReset.forEach(fieldId => {
         document.getElementById(fieldId).value = '';
       });
-      document.getElementById('ordtext').value = '';
+      tinymce.get('ordtext').setContent("");
     }
     // 파일 개수 업데이트 함수
     function updateFileCount() {
