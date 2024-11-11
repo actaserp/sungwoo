@@ -202,9 +202,46 @@ public class RequestService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         try {
             String sql = """
-                    update set
+                    UPDATE ERP_SWSPANEL1.dbo.TB_DA007W
+                    SET
+                        hgrb = :hgrb,
+                        panel_t = :panel_t,
+                        panel_w = :panel_w,
+                        panel_l = :panel_l,
+                        panel_h = :panel_h,
+                        qty = :qty,
+                        exfmtypedv = :exfmtypedv,
+                        infmtypedv = :infmtypedv,
+                        stframedv = :stframedv,
+                        stexplydv = :stexplydv,
+                        indate = :indate,
+                        inperid = :inperid,
+                        ordtext = :ordtext
+                    WHERE
+                        custcd = :custcd
+                        AND spjangcd = :spjangcd
+                        AND reqnum = :reqnum
+                        AND reqseq = :reqseq
                     """;
-            dicParam.addValue("spworknm", tbDa007W.getPk().getCustcd());
+            dicParam.addValue("hgrb", tbDa007W.getHgrb());
+            dicParam.addValue("panel_t", tbDa007W.getPanel_t());
+            dicParam.addValue("panel_w", tbDa007W.getPanel_w());
+            dicParam.addValue("panel_l", tbDa007W.getPanel_l());
+            dicParam.addValue("panel_h", tbDa007W.getPanel_h());
+            dicParam.addValue("qty", tbDa007W.getQty());
+            dicParam.addValue("exfmtypedv", tbDa007W.getExfmtypedv());
+            dicParam.addValue("infmtypedv", tbDa007W.getInfmtypedv());
+            dicParam.addValue("stframedv", tbDa007W.getStframedv());
+            dicParam.addValue("stexplydv", tbDa007W.getStexplydv());
+            dicParam.addValue("indate", tbDa007W.getIndate());
+            dicParam.addValue("inperid", tbDa007W.getInperid());
+            dicParam.addValue("ordtext", tbDa007W.getOrdtext());
+
+            dicParam.addValue("custcd", tbDa007W.getPk().getCustcd());
+            dicParam.addValue("spjangcd", tbDa007W.getPk().getSpjangcd());
+            dicParam.addValue("reqnum", tbDa007W.getPk().getReqnum());
+            dicParam.addValue("reqseq", tbDa007W.getPk().getReqseq());
+
 
             this.sqlRunner.execute(sql, dicParam);
         }catch(Exception e){

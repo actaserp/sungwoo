@@ -693,7 +693,6 @@
             sanitizedBdDetails = sanitizedBdDetails.replace(/\"/g, '"'); // 잘못된 이스케이프 문자 제거
             bdDetailsArray = JSON.parse(sanitizedBdDetails);
             bdDetailsArray.forEach(body =>{
-              console.log("getHgrb : ", body.hgrb)
               body.hgrb = getHgrb((body.hgrb));
               body.exfmtypedv = getListCgrb2(body.exfmtypedv);
               body.infmtypedv = getListCgrb2(body.infmtypedv);
@@ -706,7 +705,6 @@
             console.log("문제가 발생한 데이터:", item.bd_details);
           }
         }
-        console.log("bdDetailsArray",bdDetailsArray)
         // 첫 번째 행: hd 정보 + bd 정보의 첫 번째 항목
         gridData.push({
           ordflag: item.ordflag,
@@ -1429,13 +1427,12 @@
       document.getElementById('btnSave').title = "저장";
     }
     // 세부사항 제품구성 onchange 메서드
-    function changeHgrb(){
-      if (document.getElementById("reqseq").value !== "") { // equals 대신 !== 사용
+    function changeHgrb() {
+      const reqseqElement = document.getElementById("reqseq");
+      if (reqseqElement && reqseqElement.value !== "") { // reqseq가 존재하고 값이 비어있지 않다면
         Alert.confirm('', '새로 세부사항을 추가하시겠습니까?\n\'취소\'선택시 선택된 구성을 수정합니다.', function () {
           resetBodyField();
         });
-      } else {
-        resetBodyField();
       }
     }
     // body 필드값 초기화
