@@ -1,13 +1,10 @@
 package mes.app.order_status.service;
 
-import mes.domain.entity.actasEntity.TB_DA006W;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -166,4 +163,3 @@ public class OrderStatusService {
         return null; // 데이터가 없을 경우 null 반환
     }
 }
-

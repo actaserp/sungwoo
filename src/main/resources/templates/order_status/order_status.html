@@ -30,6 +30,12 @@
         float: right;
     }
 
+    #modalGrid {
+        height: auto;        /* 높이를 자동으로 조정 */
+        max-height: 500px;   /* 필요에 따라 최대 높이를 지정 */
+        overflow-y: auto;    /* 스크롤 활성화 */
+    }
+
 </style>
 <th:block layout:fragment="content">
 
@@ -310,7 +316,7 @@
                     <img src="/images/icon/btn-popup-close.svg" style=" float: right; right: 30px;" alt="닫기">
                 </a>
                 <form id="CltnmFindForm">
-                    <div id="modalGrid" style="height: 250px;width: 100%; margin-right:0px;  margin-top: 20px;"></div>
+                    <div id="modalGrid" style="height: 350px;width: 100%; margin-right:0px;  margin-top: 20px;"></div>
                 </form>
             </div>
         </div>
@@ -602,7 +608,7 @@
                 xhr.send();
             });
         }
-        /*===========================================================================================================================*/
+        /*==============캘린더 끝=============================================================================================================*/
         function fetchListData2() {
             let data2 = []; // 데이터를 담을 기본 배열 초기화
 
@@ -620,6 +626,11 @@
                             item.reqdate = formatDateString(item.reqdate);
                             item.deldate = formatDateString(item.deldate);
                             item.ordflag = getOrdflagText(parseInt(item.ordflag, 10));
+                            item.hgrb = getHgrb((item.hgrb));
+                            item.exfmtypedv = getListCgrb(item.exfmtypedv);
+                            item.infmtypedv = getListCgrb(item.infmtypedv);
+                            item.stframedv = getListCgrb(item.stframedv);
+                            item.stexplydv = getListCgrb(item.stexplydv);
 
                             // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
                             if (item.ordtext) {
@@ -634,8 +645,8 @@
                 }
             });
 
-            // 순번을 추가하고, 데이터가 10개 미만일 경우 빈 행을 추가
-            const minimumRows = 12;
+            // 순번을 추가하고, 데이터가 5개 미만일 경우 빈 행을 추가
+            const minimumRows = 5;
             data2.forEach((item, index) => {
                 item.rownum = index + 1; // 순번 추가
             });
@@ -742,6 +753,139 @@
             }
         }
 
+        function getHgrb(hgrb) {
+            switch (hgrb) {
+                case 'A0': return "지붕";
+                case 'AA': return "지붕1";
+                case 'AB': return "지붕2";
+                case 'AC': return "지붕3";
+                case 'AD': return "지붕4";
+                case 'AE': return "지붕5";
+                case 'AF': return "지붕6";
+                case 'B0': return "바닥";
+                case 'BA': return "바닥1";
+                case 'BB': return "바닥2";
+                case 'BC': return "바닥3";
+                case 'BD': return "바닥4";
+                case 'BE': return "바닥5";
+                case 'BF': return "바닥6";
+                case 'C0': return "옆장";
+                case 'C1': return "옆장1";
+                case 'C2': return "옆장2";
+                case 'C3': return "옆장3";
+                case 'C4': return "옆장4";
+                case 'C5': return "옆장5";
+                case 'C6': return "옆장6";
+                case 'CA': return "운전석";
+                case 'CB': return "운전석1";
+                case 'CC': return "운전석2";
+                case 'CD': return "운전석3";
+                case 'CE': return "운전석4";
+                case 'CF': return "운전석5";
+                case 'CG': return "운전석6";
+                case 'CN': return "조수석";
+                case 'CO': return "조수석1";
+                case 'CP': return "조수석2";
+                case 'CQ': return "조수석3";
+                case 'CR': return "조수석4";
+                case 'CS': return "조수석5";
+                case 'CT': return "조수석6";
+                case 'D0': return "앞장";
+                case 'DA': return "앞장1";
+                case 'DB': return "앞장2";
+                case 'DC': return "앞장3";
+                case 'DD': return "앞장4";
+                case 'DE': return "앞장5";
+                case 'DF': return "앞장6";
+                case 'E0': return "뒷장";
+                case 'EA': return "뒷장1";
+                case 'EB': return "뒷장2";
+                case 'EC': return "뒷장3";
+                case 'ED': return "뒷장4";
+                case 'EE': return "뒷장5";
+                case 'EF': return "뒷장6";
+                case 'F0': return "칸막이";
+                case 'FA': return "칸막이1";
+                case 'FB': return "칸막이2";
+                case 'FC': return "칸막이3";
+                case 'FD': return "칸막이4";
+                case 'FE': return "칸막이5";
+                case 'FF': return "칸막이6";
+                case 'G0': return "도어";
+                case 'GA': return "도어1";
+                case 'GB': return "도어2";
+                case 'GC': return "도어3";
+                case 'GD': return "도어4";
+                case 'GE': return "도어5";
+                case 'GF': return "도어6";
+                case 'H0': return "미닫이";
+                case 'HA': return "미닫이1";
+                case 'HB': return "미닫이2";
+                case 'HC': return "미닫이3";
+                case 'HD': return "미닫이4";
+                case 'HE': return "미닫이5";
+                case 'HF': return "미닫이6";
+                case 'I0': return "벙커";
+                case 'IA': return "벙커1";
+                case 'IB': return "벙커2";
+                case 'IC': return "벙커3";
+                case 'ID': return "벙커4";
+                case 'IE': return "벙커5";
+                case 'IF': return "벙커6";
+                case 'Z0': return "기타";
+                case 'Z1': return "기타1";
+                case 'Z2': return "기타2";
+                case 'Z3': return "기타3";
+                case 'Z4': return "기타4";
+                case 'Z5': return "기타5";
+                case 'Z6': return "기타6";
+                default: return "알 수 없음"; // 매칭되지 않는 경우 기본값
+            }
+        }
+
+        //`cgrb` 코드별로 이름만 매핑한 객체
+        const cgrbMapping = {
+            "MAA": "AL",
+            "MAB": "GI",
+            "MAC": "GRP",
+            "MAD": "GFGW",
+            "MAE": "GFGW(B)",
+            "MAF": "H-GRO",
+            "MAG": "Anti-Bac",
+            "MAH": "Anti-Slip",
+            "MAI": "SUS",
+            "MAZ": "기타",
+            "MBA": "골드폼",
+            "MCA": "합판",
+            "MCB": "코어매트",
+            "MDA": "주제",
+            "MDB": "경화제",
+            "MAK": "Super Plus",
+            "MCF": "WPC",
+            "MBB": "PU보드",
+            "MAJ": "GI(B)",
+            "MAS": "Super Lite",
+            "MCG": "허니컴",
+            "MCC": "아마셀",
+            "MCD": "LTP보드",
+            "MCE": "기타",
+            "MBI": "아이소핑크",
+            "MAM": "CFRT",
+            "MAL": "WR-Impact",
+            "ZZ01": "샷시",
+            "ZZ02": "캐스팅",
+            "ZZ03": "앵글",
+            "ZZ04": "원자재",
+            "ZZ05": "CKD",
+            "ZZ06": "기타",
+            "ZZ07": "코일"
+        };
+
+        // `getListCgrb` 함수에서 `cgrb` 코드에 따라 이름을 반환
+        function getListCgrb(cgrb) {
+            return cgrbMapping[cgrb] || " "; // 매칭되지 않는 경우 기본값 반환
+        }
+
         //검색
         function searchData() {
             const startDate = document.getElementById('startDate').value;
@@ -773,16 +917,17 @@
                             item.reqdate = formatDateString(item.reqdate);
                             item.deldate = formatDateString(item.deldate);
                             item.ordflag = getOrdflagText(item.ordflag); // ordflag 숫자값을 텍스트로 변환
+                            item.hgrb = getHgrb((item.hgrb));
 
                             // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
                             if (item.ordtext) {
-                                item.originalordtext = item.ordtext;// 실제 ordtext 데이터 보존
-                                item.ordtext = "옵션 및 요청사항";
+                                item.originalOrdtext = item.ordtext; // 실제 데이터를 보존
+                                item.ordtext = "옵션 및 요청사항"; // 링크 표시용 텍스트
                             }
                         });
 
                         // 순번을 추가하고, 데이터가 10개 미만일 경우 빈 행을 추가
-                        const minimumRows = 12;
+                        const minimumRows = 5;
                         data2.forEach((item, index) => {
                             item.rownum = index + 1; // 순번 추가
                         });
@@ -839,10 +984,14 @@
                                 formatItem: function(s, e) {
                                     if (e.panel.cellType === wijmo.grid.CellType.Cell) {
                                         const col = s.columns[e.col];
-                                        const item = s.rows[e.row].dataItem;
+                                        const item = s.rows[e.row]?.dataItem;
+
                                         // ordtext 셀에 데이터가 있는 경우 링크처럼 표시
-                                        if (col.binding === 'ordtext' && item.ordtext === "옵션 및 요청사항") {
-                                            e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="openOrdtextModal(${e.row})">옵션 및 요청사항</a>`;
+                                        if (col.binding === 'ordtext' && item && item.ordtext === "옵션 및 요청사항") {
+                                            console.log("Creating link for ordtext at row:", e.row); // e.row 값 확인
+                                            e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="showPopupById('OrdtextModal', ${e.row})">옵션 및 요청사항</a>`;
+                                        } else {
+                                            console.warn("ordtext 데이터가 없거나 잘못된 행입니다:", e.row);
                                         }
                                     }
                                 }
@@ -871,7 +1020,7 @@
                 event.preventDefault();
                 console.log('Enter key pressed, showing CltnmModal...');
                 showPopupById('CltnmModal');  // 모달 열기 함수 호출
-                // modalGrid();  // 모달 그리드 초기화 및 데이터 로드
+                modalGrid();  // 모달 그리드 초기화 및 데이터 로드
             }
         });
 
@@ -977,9 +1126,9 @@
 
                     // 최소 행 수 채우기
                     if (Modaldata.length < minimumRows) {
-                        for (let i = 0; i < minimumRows - Modaldata.length; i++) {
+                        for (let i = Modaldata.length; i < minimumRows; i++) {
                             Modaldata.push({
-                                rownum: Modaldata.length + 1,
+                                rownum: i + 1,
                                 cltcd: '',
                                 cltnm: '',
                                 telnum: '',
@@ -987,6 +1136,9 @@
                             });
                         }
                     }
+
+                    // 디버깅: 데이터 확인
+                    console.log("Data length after adding empty rows:", Modaldata.length);
 
                     // 데이터를 CollectionView에 바인딩
                     const viewdata = new wijmo.collections.CollectionView(Modaldata);
@@ -1000,10 +1152,10 @@
                         autoGenerateColumns: false,
                         columns: [
                             {binding: 'rownum', header: '순번', width: 50, align: 'center'},
-                            { binding: 'cltcd', header: '코드', width: '*', minWidth: 80, align: 'center' },
-                            { binding: 'cltnm', header: '거래처명', width: '*' },
-                            { binding: 'telnum', header: '전화', width: '*' },
-                            { binding: 'cltadres', header: '주소', width: '*' }
+                            {binding: 'cltcd', header: '코드', width: 140, minWidth: 80, align: 'center'},
+                            {binding: 'cltnm', header: '거래처명', width: 250 },
+                            {binding: 'telnum', header: '전화', width: 250},
+                            {binding: 'cltadres', header: '주소', width: 600}
                         ],
                         itemsSource: viewdata
                     });
@@ -1014,10 +1166,24 @@
                     let lastClickTime = 0;
                     modalGrid.hostElement.addEventListener('click', function (e) {
                         const now = new Date().getTime();
+
                         if (now - lastClickTime < 300) { // 300ms 이내의 두 번 클릭은 더블 클릭으로 인식
-                            searchData(); // 더블클릭 시 modifyData 함수 실행
-                            closePopup('CltnmModal'); // 모달 창 닫기
+                            // 클릭된 위치의 행 데이터를 가져오기
+                            const ht = modalGrid.hitTest(e);
+
+                            if (ht.cellType === wijmo.grid.CellType.Cell) {
+                                const clickedItem = modalGrid.rows[ht.row].dataItem;
+
+                                if (clickedItem && clickedItem.cltnm) { // 클릭된 행에 'cltnm' 데이터가 있는지 확인
+                                    $('#searchCltnm').val(clickedItem.cltnm); // 검색 필드에 업체 이름 설정
+                                }
+
+                                // 원하는 기능 실행
+                                searchData(); // 더블 클릭 시 원하는 함수 실행
+                                closePopup('CltnmModal'); // 모달 창 닫기
+                            }
                         }
+
                         lastClickTime = now;
                     });
                 },

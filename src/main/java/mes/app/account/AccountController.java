@@ -327,7 +327,7 @@ public class AccountController {
 						user.getId(), // User_id (저장할 사용자 ID)
 						"ko-KR", // lang_code (예: 한국어)
 						prenm, // Name (사용자 이름)
-						7 // UserGroup_id (저장할 사용자 그룹 ID: 7)
+						1 // UserGroup_id (저장할 사용자 그룹 ID: 1)
 				);
 
 
@@ -360,6 +360,18 @@ public class AccountController {
 						.hptelnum(phone) // 핸드폰번호
 						.agneremail(email) // 담당자 email
 						.id(new TB_XCLIENTId(custcd, newCltcd))
+
+						// 기본값 설정된 필드들
+						.rnumchk(String.valueOf(0))                 // rnumchk = 0
+						.corpperclafi(String.valueOf(1))            // corpperclafi = 1 (법인구분)
+						.cltdv(String.valueOf(1))                   // cltdv = 1 (거래처구분)
+						.prtcltnm(cltnm) 							   // prtcltnm = "인쇄 거래처명 - 거래처명"
+						.foreyn(String.valueOf(0))                  // foreyn = 0
+						.relyn(String.valueOf(1))                   // relyn = 1
+						.bonddv(String.valueOf(0))                  // bonddv = 0
+						/*.nation("KR")               // nation = "KR"*/
+						.clttype(String.valueOf(2))                 // clttype = 2 (거래구분)
+						.cltynm(String.valueOf(0))                  // cltynm = 0 (약명)
 						.build();
 
 				tbXClientService.save(tbXClient); // TB_XCLIENT 저장
