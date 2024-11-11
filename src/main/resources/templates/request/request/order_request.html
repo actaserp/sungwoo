@@ -1052,7 +1052,7 @@
     }
     // option값 value bind
     function setSelectedIndex(selectElement, selectedValue, selectedIndex) {
-      for (let i = 1; i < selectElement.options.length; i++) {
+      for (let i = 0; i < selectElement.options.length; i++) {
         // 트림(공백 제거), 대소문자 무시, 타입 일치시키기
         if (selectElement.options[i].text.trim().toLowerCase() === String(selectedValue).trim().toLowerCase()) {
           selectElement.selectedIndex = i;
@@ -1441,7 +1441,7 @@
     // body 필드값 초기화
     function resetBodyField() {
       const fieldsToReset = [
-        'qty', 'panel_t', 'panel_w', 'panel_l', 'reqseq',
+        'hgrb', 'qty', 'panel_t', 'panel_w', 'panel_l', 'reqseq',
         'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv'
       ];
       fieldsToReset.forEach(fieldId => {
