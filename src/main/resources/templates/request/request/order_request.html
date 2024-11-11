@@ -219,6 +219,7 @@
           <div class="table-wrap">
             <table class="write-table">
               <caption>세부사항 테이블</caption>
+              <input type="hidden" id="reqseq" name="reqseq">
               <tbody>
               <tr>
                 <th style="text-align: center">
@@ -227,7 +228,7 @@
                   </label>
                 </th>
                 <td>
-                  <select id="hgrb" name="hgrb" style="width: 100px">
+                  <select id="hgrb" name="hgrb" style="width: 100px" onchange="resetBodyField()">
                     <option value="" selected disabled>선택</option>
                   </select>
                 </td>
@@ -273,7 +274,7 @@
                 </th>
                 <td>
                   <select id="exfmtypedv" name="exfmtypedv" style="width: 100px">
-                    <option value="" selected disabled>선택</option>
+                    <option value="" selected>선택</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -283,7 +284,7 @@
                 </th>
                 <td>
                   <select id="infmtypedv" name="infmtypedv" style="width: 100px">
-                    <option value="" selected disabled>선택</option>
+                    <option value="" selected>선택</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -293,7 +294,7 @@
                 </th>
                 <td>
                   <select id="stframedv" name="stframedv" style="width: 100px">
-                    <option value="" selected disabled>선택</option>
+                    <option value="" selected>선택</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -303,7 +304,7 @@
                 </th>
                 <td>
                   <select id="stexplydv" name="stexplydv" style="width: 100px">
-                    <option value="" selected disabled>선택</option>
+                    <option value="" selected>선택</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -674,11 +675,38 @@
       })
       // bd_details를 파싱하여 배열로 변환
       // bd_details가 유효한 JSON 문자열일 때만 파싱
-      const bdDetailsArray = [];
+      console.log("")
       const gridData = [];
       data2.forEach(item => {
-        const bdDetailsArray = item.bd_details ? JSON.parse(item.bd_details.replace(/\\"/g, '"')) : [];
+        let bdDetailsArray = [];
+        // JSON 파싱 전에 유효성 검사를 추가
+        if (item.bd_details && typeof item.bd_details === 'string') {
+          try {
+            // JSON 파싱 시 불필요한 이스케이프 문자 제거
+            let sanitizedBdDetails = item.bd_details.trim();
 
+            // JSON 문자열이 잘못된 경우 처리
+            if (sanitizedBdDetails.startsWith('"') && sanitizedBdDetails.endsWith('"')) {
+              sanitizedBdDetails = sanitizedBdDetails.slice(1, -1); // 양 끝 따옴표 제거
+            }
+
+            sanitizedBdDetails = sanitizedBdDetails.replace(/\"/g, '"'); // 잘못된 이스케이프 문자 제거
+            bdDetailsArray = JSON.parse(sanitizedBdDetails);
+            bdDetailsArray.forEach(body =>{
+              console.log("getHgrb : ", body.hgrb)
+              body.hgrb = getHgrb((body.hgrb));
+              body.exfmtypedv = getListCgrb2(body.exfmtypedv);
+              body.infmtypedv = getListCgrb2(body.infmtypedv);
+              body.stframedv = getListCgrb2(body.stframedv);
+              body.stexplydv = getListCgrb2(body.stexplydv);
+            })
+
+          } catch (e) {
+            console.error("JSON 파싱 오류:", e);
+            console.log("문제가 발생한 데이터:", item.bd_details);
+          }
+        }
+        console.log("bdDetailsArray",bdDetailsArray)
         // 첫 번째 행: hd 정보 + bd 정보의 첫 번째 항목
         gridData.push({
           ordflag: item.ordflag,
@@ -742,15 +770,10 @@
           });
         }
       });
-
-
-
-      // 최소 5개의 행을 만들기 위해 빈 객체 추가
       const minRows = 12;
       while (gridData.length < minRows) {
         gridData.push({}); // 빈 객체를 추가하여 빈 행을 생성
       }
-
       viewdata1 = new wijmo.collections.CollectionView(data2);
       console.log("gridData : ", gridData)
       if (!theGrid) {
@@ -853,7 +876,6 @@
             deletedFiles2 = [];
             uploadedFiles2 = [];
 
-            console.log("fileList2222222222 : ", fileList)
             fileList.forEach(file => {
               let newFile = {
                 name: file.fileornm,
@@ -902,7 +924,7 @@
         window.downloadFileName = '티켓현황';
       } else {
         // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-        theGrid.itemsSource = viewdata1;
+        theGrid.itemsSource = gridData;
       }
     }
 
@@ -990,6 +1012,7 @@
             document.getElementById('panel_w').value = item.panel_w;
             document.getElementById('panel_l').value = item.panel_l;
             document.getElementById('ordtext').value = item.ordtext;
+            document.getElementById('reqseq').value = item.reqseq;
 
             const selectHgrb = document.getElementById('hgrb');
             const selectExfmtypedv = document.getElementById('exfmtypedv');
@@ -1027,18 +1050,6 @@
         }
       }
     }
-    // 초기화
-    function clearForm() {
-      const date = new Date();
-      const today = date.toISOString().split('T')[0];
-      document.getElementById('tketcrdtm').value = today;
-
-      document.getElementById('requester').value = '[[${username}]]';
-
-      ['tketrem'].forEach(id => {
-        document.getElementById(id).value = '';
-      });
-    }
     // 주문등록
     function saveOrder(){
       // 필수 입력 필드 검사
@@ -1048,10 +1059,6 @@
         {id: '#telno', label: '연락처를 작성해주세요'},
         {id: '#perid', label: '담당자명을 작성해주세요'},
         {id: '#postno', label: '주소를 작성해주세요'},
-        {id: '#panel_ht', label: '두께를 작성해주세요'},
-        {id: '#panel_hw', label: '폭을 작성해주세요'},
-        {id: '#panel_hl', label: '길이를 작성해주세요'},
-        {id: '#panel_hh', label: '높이를 작성해주세요'},
         {id: '#remark', label: '제목을 작성해주세요'}
       ];
       // 세부항목 행 추가 여부 검사
@@ -1098,6 +1105,7 @@
         formData.append('panel_hl', $('#panel_hl').val());
         formData.append('panel_hh', $('#panel_hh').val());
         formData.append('remark', $('#remark').val());
+        formData.append('reqnum', $('#reqnum').val());
 
         let bodyForms = [];
         // 그리드 행의 데이터를 detailForm 객체에 저장하는 함수
@@ -1219,6 +1227,10 @@
           console.error('Error fetching options:', error);
         });
     }
+    // `getListCgrb` 함수에서 `cgrb` 코드에 따라 이름을 반환
+    function getListCgrb2(cgrb) {
+      return cgrbMapping[cgrb] || " "; // 매칭되지 않는 경우 기본값 반환
+    }
     // 보강재,마감재 리스트 불러오는 function
     function getListCgrb(selectElementId){
       fetch(`/api/request/request/getListCgrb`)
@@ -1274,17 +1286,32 @@
         infmtypedv: document.getElementById("infmtypedv").value,
         stframedv: document.getElementById("stframedv").value,
         stexplydv: document.getElementById("stexplydv").value,
+        reqseq: document.getElementById("reqseq").value,
         ordtext: tinymce.get('ordtext').getContent()
       };
+      // 수정사항일 경우 기존 seq찾아 update
       // 빈 데이터가 있다면 순차적으로 최신화 (덮어쓰기 방식)
       const sourceCollection = viewdata2.sourceCollection;
       for (let i = 0; i < sourceCollection.length; i++) {
-        if (!sourceCollection[i].hgrb || sourceCollection[i].hgrb === '') { // 빈 데이터를 찾으면
-          sourceCollection[i] = newRowData; // 새 데이터를 덮어쓰기
-          break; // 첫 번째 빈 데이터만 덮어쓰기
-        }else if(i === 5){
-          viewdata2.push(newRowData);
+        // reqseq가 겹치는 데이터가 있다면 덮어쓰기
+        if (newRowData.reqseq === sourceCollection[i].reqseq) {
+          sourceCollection[i] = newRowData;  // 덮어쓰기
+          isUpdated = true;  // 업데이트 되었다고 표시
+          break;  // 첫 번째로 겹치는 데이터만 덮어씌우고 종료
+        } else {
+          // 빈 데이터가 있으면 덮어쓰기
+          if (!sourceCollection[i].hgrb || sourceCollection[i].hgrb === '') {
+            sourceCollection[i] = newRowData;  // 빈 데이터에 덮어쓰기
+            break;  // 첫 번째 빈 데이터만 덮어쓰고 종료
+          } else if (i === sourceCollection.length - 1) {
+            // 모든 행에 데이터가 있고, 빈 데이터가 없으면 새로 추가
+            viewdata2.push(newRowData);
+          }
         }
+      }
+      if (!isUpdated && !sourceCollection.some(item => !item.hgrb || item.hgrb === '')) {
+        // reqseq가 겹치는 데이터가 없고, 빈 데이터도 없다면 새로 추가된 데이터로 덮어쓰지 않음
+        viewdata2.push(newRowData);  // 새로 데이터를 추가
       }
       // CollectionView 갱신
       viewdata2.refresh();
@@ -1345,29 +1372,58 @@
         'panel_ht',
         'panel_hw', 'panel_hl', 'panel_hh', 'remark', 'hgrb',
         'qty', 'panel_t', 'panel_w', 'panel_l',
-        'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv', 'ordtext'
-        ,'reqnum'
+        'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv', 'reqnum'
       ];
 
       fieldsToReset.forEach(fieldId => {
         document.getElementById(fieldId).value = '';
-        document.getElementById('reqdate').value = today;
+
       });
+      document.getElementById('ordtext').value = '';
+      document.getElementById('reqdate').value = today;
+      document.getElementById('deldate').value = today;
       $('.filelist2').empty(); // 파일 리스트 초기화
       uploadedFiles2 = []; // 업로드된 파일 리스트 초기화
       deletedFiles2 = [];
       // 초기화된 파일 개수 업데이트
-      updateFileCount();
+      updateFileCount2();
       resetFileInput($('.fileInput2'));
       $('.text-count').text('0/100'); // 글자 수 0으로 초기화
       // 특정 필드에 대한 btn-clear 숨김 처리
       $('#doctitle').each(function () {
         $(this).siblings('.btn-clear').hide();
       });
+      // 최소 5개의 빈 행으로 초기화
+      let data2 = [];
+      for (let i = 0; i < 5; i++) {
+        data2.push({});
+      }
+
+      // 기존 CollectionView를 초기화하기 위해 sourceCollection을 빈 배열로 설정 후 새 데이터 할당
+      if (viewdata2) {
+        viewdata2.sourceCollection = data2;
+        viewdata2.refresh();
+      } else {
+        viewdata2 = new wijmo.collections.CollectionView(data2);
+      }
+
+      // 그리드도 갱신
+      theGrid2.itemsSource = viewdata2;
+      theGrid2.refresh();
 
       document.getElementById('btnSave').title = "저장";
     }
-
+    // body 필드값 초기화
+    function resetBodyField() {
+      const fieldsToReset = [
+        'qty', 'panel_t', 'panel_w', 'panel_l',
+        'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv'
+      ];
+      fieldsToReset.forEach(fieldId => {
+        document.getElementById(fieldId).value = '';
+      });
+      document.getElementById('ordtext').value = '';
+    }
     // 파일 개수 업데이트 함수
     function updateFileCount() {
       const fileCount = uploadedFiles2.length;
@@ -1412,9 +1468,6 @@
     }
     function showPopup2(documnetId) {
       let selectedItems = theGrid.selectedItems;
-      console.log("selectedItems : ", selectedItems);
-      console.log("selectedItems[0].originOrdtext : ", selectedItems[0].originOrdtext);
-
       // 해당 ID의 팝업 요소를 찾음
       const popup = document.getElementById(documnetId);
 
@@ -1444,6 +1497,134 @@
       }
     }
 
+
+    function getHgrb(hgrb) {
+      switch (hgrb) {
+        case 'A0': return "지붕";
+        case 'AA': return "지붕1";
+        case 'AB': return "지붕2";
+        case 'AC': return "지붕3";
+        case 'AD': return "지붕4";
+        case 'AE': return "지붕5";
+        case 'AF': return "지붕6";
+        case 'B0': return "바닥";
+        case 'BA': return "바닥1";
+        case 'BB': return "바닥2";
+        case 'BC': return "바닥3";
+        case 'BD': return "바닥4";
+        case 'BE': return "바닥5";
+        case 'BF': return "바닥6";
+        case 'C0': return "옆장";
+        case 'C1': return "옆장1";
+        case 'C2': return "옆장2";
+        case 'C3': return "옆장3";
+        case 'C4': return "옆장4";
+        case 'C5': return "옆장5";
+        case 'C6': return "옆장6";
+        case 'CA': return "운전석";
+        case 'CB': return "운전석1";
+        case 'CC': return "운전석2";
+        case 'CD': return "운전석3";
+        case 'CE': return "운전석4";
+        case 'CF': return "운전석5";
+        case 'CG': return "운전석6";
+        case 'CN': return "조수석";
+        case 'CO': return "조수석1";
+        case 'CP': return "조수석2";
+        case 'CQ': return "조수석3";
+        case 'CR': return "조수석4";
+        case 'CS': return "조수석5";
+        case 'CT': return "조수석6";
+        case 'D0': return "앞장";
+        case 'DA': return "앞장1";
+        case 'DB': return "앞장2";
+        case 'DC': return "앞장3";
+        case 'DD': return "앞장4";
+        case 'DE': return "앞장5";
+        case 'DF': return "앞장6";
+        case 'E0': return "뒷장";
+        case 'EA': return "뒷장1";
+        case 'EB': return "뒷장2";
+        case 'EC': return "뒷장3";
+        case 'ED': return "뒷장4";
+        case 'EE': return "뒷장5";
+        case 'EF': return "뒷장6";
+        case 'F0': return "칸막이";
+        case 'FA': return "칸막이1";
+        case 'FB': return "칸막이2";
+        case 'FC': return "칸막이3";
+        case 'FD': return "칸막이4";
+        case 'FE': return "칸막이5";
+        case 'FF': return "칸막이6";
+        case 'G0': return "도어";
+        case 'GA': return "도어1";
+        case 'GB': return "도어2";
+        case 'GC': return "도어3";
+        case 'GD': return "도어4";
+        case 'GE': return "도어5";
+        case 'GF': return "도어6";
+        case 'H0': return "미닫이";
+        case 'HA': return "미닫이1";
+        case 'HB': return "미닫이2";
+        case 'HC': return "미닫이3";
+        case 'HD': return "미닫이4";
+        case 'HE': return "미닫이5";
+        case 'HF': return "미닫이6";
+        case 'I0': return "벙커";
+        case 'IA': return "벙커1";
+        case 'IB': return "벙커2";
+        case 'IC': return "벙커3";
+        case 'ID': return "벙커4";
+        case 'IE': return "벙커5";
+        case 'IF': return "벙커6";
+        case 'Z0': return "기타";
+        case 'Z1': return "기타1";
+        case 'Z2': return "기타2";
+        case 'Z3': return "기타3";
+        case 'Z4': return "기타4";
+        case 'Z5': return "기타5";
+        case 'Z6': return "기타6";
+        default: return "알 수 없음"; // 매칭되지 않는 경우 기본값
+      }
+    }
+
+    //`cgrb` 코드별로 이름만 매핑한 객체
+    const cgrbMapping = {
+      "MAA": "AL",
+      "MAB": "GI",
+      "MAC": "GRP",
+      "MAD": "GFGW",
+      "MAE": "GFGW(B)",
+      "MAF": "H-GRO",
+      "MAG": "Anti-Bac",
+      "MAH": "Anti-Slip",
+      "MAI": "SUS",
+      "MAZ": "기타",
+      "MBA": "골드폼",
+      "MCA": "합판",
+      "MCB": "코어매트",
+      "MDA": "주제",
+      "MDB": "경화제",
+      "MAK": "Super Plus",
+      "MCF": "WPC",
+      "MBB": "PU보드",
+      "MAJ": "GI(B)",
+      "MAS": "Super Lite",
+      "MCG": "허니컴",
+      "MCC": "아마셀",
+      "MCD": "LTP보드",
+      "MCE": "기타",
+      "MBI": "아이소핑크",
+      "MAM": "CFRT",
+      "MAL": "WR-Impact",
+      "ZZ01": "샷시",
+      "ZZ02": "캐스팅",
+      "ZZ03": "앵글",
+      "ZZ04": "원자재",
+      "ZZ05": "CKD",
+      "ZZ06": "기타",
+      "ZZ07": "코일"
+    };
   </script>
 
 </th:block>

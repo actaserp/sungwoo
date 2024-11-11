@@ -182,7 +182,12 @@ public class RequestController {
         headpk.setCustcd((String) userInfo.get("custcd"));
         headpk.setSpjangcd("ZZ");
         headpk.setReqdate(params.get("reqdate").replaceAll("-",""));
-        String reqnum = String.valueOf(tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"),"ZZ",params.get("reqdate")) + 1);
+        String reqnum;
+        if(params.get("reqnum").equals("")) {
+            reqnum = String.valueOf(tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"), "ZZ", params.get("reqdate")) + 1);
+        }else{
+            reqnum = params.get("reqnum");
+        }
         headpk.setReqnum(reqnum);
 
         TB_DA006W tbDa006 = new TB_DA006W();
@@ -302,23 +307,24 @@ public class RequestController {
                 bodypk.setReqnum(reqnum);
                 List<String> reqseqList = tbda007WRepository.findReqseq(reqnum, (String) userInfo.get("custcd"),"ZZ",params.get("reqdate").replaceAll("-",""));
                 for (Map<String, Object> jsonData : jsonDataList) {
-                    if (!reqseqList.contains((String) jsonData.get("reqseq"))) {
-                        String reqseq = String.valueOf(tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ", params.get("reqdate").replaceAll("-","")) + 1);
-                        bodypk.setReqseq(reqseq);
 
+                    tbDa007.setHgrb((String) jsonData.get("hgrb"));
+                    tbDa007.setPanel_t((String) jsonData.get("panel_t"));
+                    tbDa007.setPanel_w((String) jsonData.get("panel_w"));
+                    tbDa007.setPanel_l((String) jsonData.get("panel_l"));
+                    tbDa007.setQty((Integer) jsonData.get("qty"));
+                    tbDa007.setExfmtypedv((String) jsonData.get("exfmtypedv"));
+                    tbDa007.setInfmtypedv((String) jsonData.get("infmtypedv"));
+                    tbDa007.setStframedv((String) jsonData.get("stframedv"));
+                    tbDa007.setStexplydv((String) jsonData.get("stexplydv"));
+                    tbDa007.setOrdtext((String) jsonData.get("ordtext"));
+                    tbDa007.setIndate(params.get("deldate").replaceAll("-",""));
+                    tbDa007.setInperid(String.valueOf(user.getId()));
+
+                    if (!reqseqList.contains((String) jsonData.get("reqseq"))) {
+                        String reqseq = String.valueOf(tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ", params.get("reqdate").replaceAll("-", "")) + 1);
+                        bodypk.setReqseq(reqseq);
                         tbDa007.setPk(bodypk);
-                        tbDa007.setHgrb((String) jsonData.get("hgrb"));
-                        tbDa007.setPanel_t((String) jsonData.get("panel_t"));
-                        tbDa007.setPanel_w((String) jsonData.get("panel_w"));
-                        tbDa007.setPanel_l((String) jsonData.get("panel_l"));
-                        tbDa007.setQty((String) jsonData.get("qty"));
-                        tbDa007.setExfmtypedv((String) jsonData.get("exfmtypedv"));
-                        tbDa007.setInfmtypedv((String) jsonData.get("infmtypedv"));
-                        tbDa007.setStframedv((String) jsonData.get("stframedv"));
-                        tbDa007.setStexplydv((String) jsonData.get("stexplydv"));
-                        tbDa007.setOrdtext((String) jsonData.get("ordtext"));
-                        tbDa007.setIndate(params.get("deldate").replaceAll("-",""));
-                        tbDa007.setInperid(String.valueOf(user.getId()));
 
                         boolean successcodebody = requestService.saveBody(tbDa007);
                         if (successcodebody) {
@@ -328,7 +334,11 @@ public class RequestController {
                             result.success = false;
                             result.message = "세부사항 저장에 실패하였습니다.";
                         }
-                    } else {
+                    }else {
+                        String reqseq = (String) jsonData.get("reqseq");
+                        bodypk.setReqseq(reqseq);
+                        tbDa007.setPk(bodypk);
+
                         boolean successcodebody = requestService.updateBody(tbDa007);
                         if (successcodebody) {
                             result.success = true;

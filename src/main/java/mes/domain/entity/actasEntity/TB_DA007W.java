@@ -39,7 +39,7 @@ public class TB_DA007W {
     String panel_h;
 
     @Column(name = "\"qty\"")  // 수량
-    String qty;
+    int qty;
 
     @Column(name = "\"exfmtypedv\"")  // 외부마감재
     String exfmtypedv;

@@ -217,7 +217,6 @@ function updateFileListUI2() {
 
     uploadedFiles2.forEach(file => {
         const fileSize = (file.size / 1024).toFixed(2) + ' KiB';
-        console.log('uploadedFiles222222222222222',uploadedFiles2);
         const li = $('<li>').html(`
                     <p>${file.name} <span>(${fileSize})</span></p>
                     <a href="#" title="삭제" class="btn-file-delete2">
@@ -226,7 +225,6 @@ function updateFileListUI2() {
                 `);
         $fileList.append(li);
     });
-    console.log('uploadedFiles222222222222222',uploadedFiles2);
 }
 
 // 날짜 형식을 변환하는 함수
