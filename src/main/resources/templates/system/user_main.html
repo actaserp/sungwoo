@@ -1,0 +1,794 @@
+<html layout:decorate="~{layout_page}" xmlns:layout="http://www.w3.org/1999/xhtml">
+<style>
+
+</style>
+
+<th:block layout:fragment="content">
+  <div class="layout-contents">
+    <!-- Page Title -->
+    <div class="page-title-wrap">
+      <div class="left">
+        <h2>사용자 관리</h2>
+        <!--                <a title="북마크" class="bookmark toggle">-->
+        <!--                    내메뉴-->
+        <!--                </a>-->
+      </div>
+      <ul class="page-navi">
+        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+        <li>시스템설정</li>
+        <li>사용자관리</li>
+      </ul>
+    </div>
+    <!-- Select -->
+
+    <div class="tab-wrap">
+      <!--            <ul class="tab-links">-->
+      <!--                <li>-->
+      <!--                    <a href="#tab1" title="목록" id="listTabLink">목록</a>-->
+      <!--                </li>-->
+      <!--                <li>-->
+      <!--                    <a href="#tab2" title="등록" id="inputTabLink">등록</a>-->
+      <!--                </li>-->
+      <!--            </ul>-->
+      <div class="tab-contents">
+        <!-- Section -->
+        <section class="tab-item" id="tab1">
+
+          <div class="section-top">
+            <div class="title-wrap">
+              <h3>사용자 등록</h3>
+            </div>
+            <div class="button-wrap">
+              <ul>
+                <li>
+                  <a class="btn btn-excell" title="신규등록" onclick="clearForm()">
+                    <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                    신규등록
+                  </a>
+                </li>
+                <!--<li>
+                    <a  class="btn btn-delete" title="삭제" id="btnDelete2">
+                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                        삭제
+                    </a>
+                </li>-->
+                <li>
+                  <a class="btn btn-edit" id="btnSave" title="저장">
+                    <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                    저장
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="write-table">
+              <caption>사용자등록 테이블</caption>
+              <colgroup>
+                <col class="wp20">
+                <col class="wp30">
+                <col class="wp20">
+                <col class="wp30">
+              </colgroup>
+              <tbody>
+              <tr>
+                <th>
+                  <label for="">
+                    업체명
+                  </label>
+                </th>
+                <td>
+                  <div class="input-clear">
+                    <input type="text" id="cltnm" name="cltnm" style="width: 400px !important;">
+                  </div>
+                </td>
+                <th>
+                  <label for="">
+                    대표자
+                  </label>
+                </th>
+                <td>
+                  <div class="input-clear">
+                    <input type="text" id="prenm" name="prenm"style="width: 400px !important;" >
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <label for="">
+                    업태
+                  </label>
+                </th>
+                <td>
+                  <div class="input-clear">
+                    <input type="text" id="biztypenm" name="biztypenm" style="width: 400px !important;">
+                  </div>
+                </td>
+                <th>
+                  <label for="">
+                    종목
+                  </label>
+                </th>
+                <td>
+                  <div class="input-clear">
+                    <input type="text" id="bizitemnm" name="bizitemnm" style="width: 400px !important;">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <label for="">
+                    전화번호
+                  </label>
+                </th>
+                <td>
+                  <div class="input-clear">
+                    <input type="text" id="tel" name="tel" style="width: 400px !important;">
+                  </div>
+                </td>
+                <th>
+                  <label for="">
+                    핸드폰
+                  </label>
+                </th>
+                <td>
+                  <div class="input-clear">
+                    <input type="text" id="Phone" name="Phone" style="width: 400px !important;">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <label for="id">
+                    사업자 번호 (아이디)
+                  </label>
+                </th>
+                <td>
+                  <div class="input-clear">
+                    <input type="text" id="login_id" name="login_id" class="wp50" style="width: 400px !important;">
+                  </div>
+                </td>
+                <th>
+                  <label for="email">
+                    이메일
+                  </label>
+                </th>
+                <td>
+                  <div class="input-clear">
+                    <input type="text" id="email" name="email" style="width: 400px !important;">
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  사용자그룹
+                </th>
+                <td>
+                  <select id="authType" name="authType" class="wp30">
+                    <option></option>
+                  </select>
+                </td>
+                <th><label for="is_active">사용여부</label></th>
+                <td style="text-align: center; vertical-align: middle;">
+                  <input type="checkbox" id="is_active" name="is_active" style="display: block; margin: auto;">
+                </td>
+              </tr>
+              <th>
+                <label for="postno">
+                  주 소
+                </label>
+              </th>
+              <td colspan="5">
+                <input type="text" id="postno" placeholder="우편번호"
+                       onclick="sample4_execDaumPostcode()"
+                       style="width: 100px; margin-bottom: 3px;">
+                <input type="text" id="address1" placeholder="도로명주소" style="width: 48%">
+                <input type="hidden" id="placeAddress" placeholder="지번주소">
+                <span id="guide" style="color:#999;display:none"></span>
+              </td>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="section-top" style="margin-top: 24px;">
+            <div class="search-wrap">
+              <dl>
+                <dt>
+                  사용자그룹
+                </dt>
+                <dd>
+                  <select class="mg-r5" id="cboUserGroup" name="cboUserGroup" style="width: 100%">
+                    <option></option>
+                  </select>
+                </dd>
+              </dl>
+              <dl>
+                <dt>
+                  <label for="select1">
+                    이름</label></dt>
+                <dd>
+                  <div class="input-clear"><input type="text" id="keyword" name="keyword" class="wp100" maxlength="50" placeholder=""></div>
+                </dd>
+              </dl>
+              <dl>
+                <dt>
+                  <label>
+                    사용자ID</label></dt>
+
+                <dd>
+                  <div class="input-clear"><input type="text" id="username" name="username" class="wp100" maxlength="50" autocomplete="off"></div>
+                </dd>
+              </dl>
+              <dl>
+                <dt>
+                  <label>
+                  </label>
+                </dt>
+                <dd>
+                  <div class="srch-box">
+                    <div class="input-clear"></div>
+                    <a style="margin-left: 10px" class="btn btn-delete" title="검색" id="searchgrid" onclick="searchData()" onkeyup="searchData()">
+                      <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                      <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                      검색
+                    </a>
+                  </div>
+                </dd>
+              </dl>
+            </div>
+            <div class="button-wrap">
+              <ul>
+                <li>
+                  <a  class="btn btn-delete" title="삭제" id="btnDelete">
+                    <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
+                    삭제
+                  </a>
+                </li>
+                <!--<li>
+                    <a  class="btn btn-edit" title="수정" onclick="modifyData()">
+                        <img src="/images/icon/ico-edit.svg" alt="엑셀 아이콘">
+                        수정
+                    </a>
+                </li>-->
+
+              </ul>
+            </div>
+
+          </div>
+          <!--//section-top end -->
+          <div class="container-fluid">
+            <p id="selectedItem"></p>
+            <div id="theGrid" style="max-height: 450px;"></div>
+          </div>
+          <div class="btn-wrap">
+          </div>
+        </section>
+      </div> <!--//tab-contens end-->
+    </div> <!--//tab-wrap end-->
+  </div> <!--//layout-contents end -->
+
+  <!-- smtp 모달창 -->
+  <div class="modal3">
+    <div class="popup-wrapper3 w800" id="popup2">
+      <div class="popup-title">
+        <a title="팝업닫기" onclick="closeFilePopup()" class="btn-popup-close">
+          <img src="/images/icon/btn-popup-close.svg" alt="닫기">
+        </a>
+      </div>
+      <div class="popup-contents">
+        <div class="table-wrap">
+          <table class="write-table">
+            <caption>점검등록 테이블</caption>
+            <colgroup>
+              <col class="wp20">
+              <col class="wp80">
+            </colgroup>
+            <input type="hidden" id="popup-spuncode">
+            <tbody>
+            <tr>
+              <th>
+                <label>SMTP 아이디</label>
+              </th>
+              <td>
+                <div class="input-clear">
+                  <input type="text" id="smtpid" maxlength="30" class="wp60">
+                  <span class="btn-clear">×</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <label>SMTP 비밀번호</label>
+              </th>
+              <td>
+                <div class="input-clear">
+                  <input type="password" id="smtppw" maxlength="30" class="wp60">
+                  <span class="btn-clear">×</span>
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="popup-button">
+        <button onclick="closeFilePopup()" style="border: 1px solid #03428E !important; font-size: 15px !important;">닫기</button>
+        <button onclick="saveSMTP()" style="border: 1px solid #03428E !important;color: white;background: #03428E !important;font-size: 15px !important;">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
+  </footer>
+
+</th:block>
+<th:block layout:fragment="scripts">
+  <th:block th:replace="/common/approve_box :: approve_box"></th:block>
+  <th:block th:replace="/common/ax5_uploader :: ax5_uploader" ></th:block>
+  <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box" ></th:block>
+  <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+
+  <script type="text/javascript">
+
+    var theGrid;
+    var viewdata;
+    let csrfToken = $("[name=_csrf]").val();
+
+    //유효성 검사
+    const requiredFields = [
+      {id: 'login_id', name: '사용자ID'},
+      {id: 'prenm', name: '사용자명'},
+      {id: 'cltnm', name: '업체명'},
+      {id: 'authType', name: '사용자그룹'},
+      {id:'biztypenm',name:'업태'},
+      {id:'bizitemnm',name:'종목'},
+      {id:'tel', name: '전화번호'},
+      {id:'Phone', name: '핸드폰'},
+      {id: 'email', name: '이메일'},
+    ]
+
+    document.readyState === 'complete' ? init() : window.onload = init;
+
+    <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
+    function init() {
+      fetchListData();
+    }
+
+    function fetchListData(){
+      let data2 = [];
+
+      $.ajax({
+        url: '/api/system/user/read',
+        type: 'GET',
+        async: false,
+        success: function (response) {
+          // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
+          if (response && Array.isArray(response.data)) {
+            data2 = response.data;
+           /*data2.forEach(item => {
+
+            });*/
+          }
+        },
+        error: function () {
+          console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+        }
+      });
+          // 순번을 추가하고, 데이터가 5개 미만일 경우 빈 행을 추가
+          const minimumRows = 5;
+          data2.forEach((item, index) => {
+            item.rownum = index + 1; // 순번 추가
+          });
+
+      if (data2.length < minimumRows) {
+        const additionalRows = minimumRows - data2.length;
+        for (let i = 0; i < additionalRows; i++) {
+          data2.push({
+            id: null,                    // 사용자 ID
+            login_id: '',                // 사용자ID
+            prenm: '',                   // 대표자
+            cltnm: '',                   // 업체명
+            group_name: '',              // 사용자그룹 이름
+            group_id: null,              // 사용자그룹 ID
+            biztypenm: '',               // 업태
+            bizitemnm: '',               // 종목
+            tel: '',                     // 전화번호
+            Phone: '',                   // 핸드폰
+            email: '',                   // 이메일
+            date_joined: '',             // 생성일
+          });
+        }
+      }
+      let viewdata = new wijmo.collections.CollectionView(data2);
+
+      if(!theGrid){
+        theGrid = new wijmo.grid.FlexGrid('#theGrid',{
+          autoGenerateColumns: false,
+          showMarquee: true,
+          allowSorting: 'MultiColumn',
+          selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
+          columns : [
+            {binding: 'id', header: 'id', width: '*', align: 'center', visible: false, isReadOnly: true},
+            {binding: 'login_id', header: '사용자ID', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'prenm', header: '대표자', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'cltnm', header: '업체명', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'group_name', header: '사용자그룹', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'group_id', header: '사용자그룹', width: '*', align: 'center', visible: false},
+            {binding: 'biztypenm', header: '업태', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'bizitemnm', header: '종목', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'tel', header: '전화번호', width: '*', align: 'center', visible: false},
+            {binding: 'Phone', header: '핸드폰', width: '*', align: 'center', visible: true},
+            {binding: 'email', header: '이메일', width: '*', align: 'center', visible: false},
+            {binding: 'date_joined', header: '생성일', width: '*', align: 'center', isReadOnly: true},
+          ],
+          itemsSource: viewdata,
+        });
+        theGrid.rowHeaders.columns.splice(0, 1); // 맨 앞에 헤더 부분 없애기
+        new FlexGridContextMenu(theGrid);
+      }
+
+    }//fetchListData
+
+    <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
+    //검색
+    function searchData() {
+      let data = {
+        'group': $('#cboUserGroup').val(),
+        'keyword': $('#keyword').val(),
+        'username': $('#username').val(),
+        'divinm': $('#divinm').val()
+      }
+
+      let data2 = [];
+      $.ajax({
+        url: '/api/system/user/read',
+        type: 'GET',
+        data: data,
+        success: function (data) {
+          data2 = data.data;
+          viewdata = new wijmo.collections.CollectionView(data2);
+          theGrid.itemsSource = viewdata;
+        },
+        error: function (xhr, status, error) {
+          console.error('AJAX request error:', error);
+        }
+      });
+
+      //grid_binding(result.data);
+    }
+
+    function showPopup2(){
+
+      let selectedItems = theGrid.selectedItems;
+
+
+
+      document.getElementById('smtpid').value = selectedItems[0].smtpid;
+      document.getElementById('smtppw').value = selectedItems[0].smtppassword;
+
+      const modal = document.querySelector('.modal3');
+      const modalContent = document.querySelector('.popup-wrapper3');
+
+      // 모달과 콘텐츠를 표시
+      modal.style.display = 'block';
+      modalContent.style.display = 'block';
+
+      // 애니메이션을 위한 클래스 추가
+      requestAnimationFrame(() => {
+        modal.classList.add('show');
+        modalContent.classList.add('show');
+      });
+    }
+
+    function closeFilePopup(){
+      const modal = document.querySelector('.modal3');
+
+      modal.style.display = 'none';
+
+    }
+
+    const Filemodal = document.querySelector('.modal3');
+
+
+    const modalFileOpen = document.querySelector('.file_btn');
+    modalFileOpen.addEventListener('click', function(){
+      Filemodal.style.display = 'block';
+    });
+
+    function grid_binding(data) {
+      var inspecDto = data;
+      var inspecData = [];
+      var cnt = 1;
+      for (let i = 0; i < inspecDto.length; i++) {
+        inspecData.push({
+          id: inspecDto[i]["id"],
+          login_id: inspecDto[i]["login_id"],
+          Name: inspecDto[i]["Name"],
+          group_name: inspecDto[i]["group_name"],
+          group_id: inspecDto[i]["group_id"],
+          Value: inspecDto[i]["Value"],
+          divinm: inspecDto[i]["divinm"],
+          ranknm: inspecDto[i]["ranknm"],
+          is_active: inspecDto[i]["is_active"],
+          date_joined: inspecDto[i]["date_joined"],
+          email: inspecDto[i]["email"],
+          tel: inspecDto[i]["tel"],
+          agencycd: inspecDto[i]["agencycd"],
+          is_superuser: inspecDto[i]["is_superuser"],
+        });
+        cnt++;
+      }
+
+      theGrid.columns.clear();
+      theGrid.autoGenerateColumns = false;
+      viewdata.sourceCollection = inspecData;
+
+      for (var i = 0; i < columns.length; i++) {
+        var col = new wijmo.grid.Column(columns[i]);
+        theGrid.columns.push(col);
+      }
+    }
+
+    function createSelectElement(id, name, onChange, margin) {
+      return $('<select>', {
+        class: 'wp25 mg-r5',
+        id: id,
+        name: name,
+        onchange: onChange
+      }).append('<option></option>')
+              .attr('style', `margin-right: ${margin}px !important;`);
+    }
+
+    function createButtonElement(name, text, color, width, onClick) {
+      return $('<button>', {
+
+        name: name,
+        text: text,
+        css: {
+          color: color,
+          width: width
+        },
+        onclick: onClick
+      });
+    }
+
+    function saveSMTP(){
+
+      let smtpid = document.getElementById('smtpid').value;
+      let smtppw = document.getElementById('smtppw').value;
+
+      if(smtpid.trim().length === 0){
+        Alert.alert('', 'SMTP 아이디를 입력해주세요');
+        return;
+      }
+
+      if(smtppw.trim().length === 0){
+        Alert.alert('', 'SMTP 비밀번호를 입력해주세요');
+        return;
+      }
+
+      let data = {
+        id: $('#id').val(),
+        smtpid: $('#smtpid').val(),
+        smtppw: $('#smtppw').val()
+      };
+
+      AjaxUtil.postAsyncData('/api/system/user/smtp', data, function(res){
+        Alert.alert('', res.message);
+      });
+
+    }
+
+    function clearForm(){
+      ['id', 'userid', 'usernm', 'authType', 'email','password', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'secondSelect', 'thirdSelect'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      let smtpLabel = document.getElementById('smtpLabel');
+      let smtpBox = document.getElementById('smtpbox');
+
+      smtpLabel.style.display = 'none';
+      smtpBox.style.display = 'none';
+
+      $('#password').prop('readonly', false);
+      $('.new-fl-ac').remove();
+    }
+
+    /*function updateNextSelect(param) {
+        let code = param.value;
+
+        // param의 다음 형제 요소를 찾습니다.
+        let nextSelect = $(param).next('select');
+
+
+
+        if (nextSelect.length) {
+            $.ajax({
+                url: '/user-codes/code_spcompcd',
+                type: 'GET',
+                async: false,
+                data: { code: code },
+                success: function (data) {
+                    nextSelect.empty();
+                    nextSelect.append('<option value="">선택하세요</option>');
+                    data.forEach(function (item) {
+                        nextSelect.append('<option value="' + item.dtlcd + '">' + item.spcompnm + '</option>');
+                    });
+                },
+                error: function (xhr, status, error) {
+                    // 통신 실패 시 처리
+
+
+                    // 선택 옵션을 비우거나 기본 옵션을 설정할 수 있습니다.
+                    nextSelect.empty();
+                    nextSelect.append('<option value=""></option>');
+                }
+            });
+        } else {
+            console.error('다음 select 요소를 찾을 수 없습니다.');
+        }
+    }
+
+    function updateNextSelect2(param) {
+        let code = param.value;
+
+        // param의 다음 형제 요소를 찾습니다.
+        let nextSelect = $(param).next('select');
+
+        if (nextSelect.length) {
+
+            $.ajax({
+                url: '/user-codes/code_spplancd',
+                type: 'GET',
+                data: { code: code },
+                async: false,
+                success: function(data) {
+                    nextSelect.empty();
+                    nextSelect.append('<option value="">선택하세요</option>');
+
+
+
+
+                    data.forEach(function(item) {
+                        nextSelect.append('<option value="' + item.spplancd + '">' + item.spplannm + '</option>');
+                    });
+                },
+                error: function(xhr, status, error) {
+                    // 통신 실패 시 처리
+
+
+                    // 선택 옵션을 비우거나 기본 옵션을 설정할 수 있습니다.
+                    nextSelect.empty();
+                    nextSelect.append('<option value=""></option>');
+                }
+            });
+        } else {
+            console.error('다음 select 요소를 찾을 수 없습니다.');
+        }
+    }*/
+
+    $(document).ready(function (e) {
+
+      initializeSelect({
+        url: '/user-auth/type',
+        params: {},
+        elementId: 'cboUserGroup',
+        valueField: "id",
+        textField: "name"
+      })
+      initializeSelect({
+        url: '/user-auth/type',
+        params: {},
+        elementId: 'authType',
+        valueField: "id",
+        textField: "name"
+      })
+      initializeSelect({
+        url: '/user-codes/parent',
+        params: {parentId: 110},
+        elementId: 'firstSelect',
+        valueField: "code"
+      })
+
+      //저장
+      $('#btnSave').click(function () {
+        if (!validateFields()) {
+          return false;
+        }
+        const emailInput = document.getElementById('email');
+        const emailValue = emailInput.value.trim();
+
+        if (!emailValidate(emailValue.trim())) {
+          Alert.alert('', '유효한 이메일 형식을 입력하세요.');
+          return false;
+        }
+
+        let id = document.getElementById('id').value.trim();
+        let password = document.getElementById('password');
+        let pwd = password.value.trim();
+        if (id === undefined || id === '') {  //신규등록이므로 비밀번호 입력 체크
+          if (pwd === undefined || pwd === '') {
+            Alert.alert('', '비밀번호를 입력해주세요', function () {
+              password.focus();
+            })
+            return;
+          }
+        }
+
+        let formData = new FormData();
+
+        formData.append('id', id);
+        formData.append('login_id', $('#userid').val());
+        formData.append('Name', $('#usernm').val());
+        formData.append('UserGroup_id', $('#authType').val());
+        formData.append('password', pwd);
+        formData.append('email', emailValue);
+        formData.append('tel', $('#tel').val());
+        formData.append('divinm', $('#divinm2').val());
+        formData.append('agencycd', $('#agencycd').val());
+        formData.append('_csrf', $('[name=_csrf]').val());
+        formData.append('spworkcd', spworkcdString);
+        formData.append('spcompcd', spcompcdString);
+        formData.append('spplancd', spplancdString);
+        formData.append('spworknm', spworknm);
+        formData.append('spcompnm', spcompnm);
+        formData.append('spplannm', spplannm);
+
+        let bindingList = ['id', 'userid', 'usernm', 'authType', 'password', 'email', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'secondSelect', 'thirdSelect'];
+        AjaxFunction.PostAjaxRequest('/api/system/user/save', true, false, false, formData, function (response) {
+                  if (response.success) {
+                    Alert.alert('', response.message, function () {
+                      $('#listTabLink').click();
+                      searchData();
+                    });
+                    clearForm();
+
+                  } else {
+                    Alert.alert('', response.message);
+                  }
+                },
+                function (res){
+                  Alert.alert('', '에러가 발생하였습니다.');
+
+                })
+      });
+
+      $('#btnDelete').click(function () {
+        let selectedItems = theGrid.selectedItems;
+        let auth = selectedItems[0].is_superuser;
+
+
+        if(auth === true){
+          Alert.alert('', '슈퍼유저 계정은 수정 및 삭제가 불가합니다.');
+          return false;
+        }
+
+        if (selectedItems[0].id === undefined || selectedItems.length === 0) {
+          Alert.alert('', '삭제할 항목을 선택하세요.');
+          return;
+        }
+        console.log('zz', selectedItems)
+        let delList = SelectItemPush(selectedItems, 'id');
+        let del940List = SelectItemPush(selectedItems, 'login_id');
+        console.log('삭제확인2', del940List);
+        console.log('삭제확인', delList);
+        Alert.confirm('', '삭제하시겠습니까?', function () {
+          let data = {
+            'id': JSON.stringify(delList),
+            'username': JSON.stringify(del940List),
+            '_csrf': csrfToken,
+            'auth' : auth
+          }
+          let fnSuccess = function (res) {
+            if (res.success) {
+              Alert.alert('', '삭제되었습니다.');
+              searchData();
+            }
+          }
+          AjaxUtil.postAsyncData('/api/system/user/delete', data, fnSuccess);
+        })
+      });
+    });
+  </script>
+</th:block>
+</html>

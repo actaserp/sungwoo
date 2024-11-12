@@ -46,7 +46,7 @@
   "wm_safety_health":       { "name": "안전보건교육 일지", "templates": { "default": "inspec/list/safety_health.html" }},
 
   "wm_user_group":          { "name": "사용자 그룹", "templates": { "default": "system/usergroup.html" }  },
-  "wm_user":                { "name": "사용자 관리", "templates": { "default": "system/user.html" } },
+  "wm_user":                { "name": "사용자 관리", "templates": { "default": "system/user_main.html" }},
 
   "wm_menu_log":            { "name": "로그 현황", "templates": { "default": "system/menu_log.html" } },
 

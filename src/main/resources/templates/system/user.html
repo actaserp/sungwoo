@@ -4,16 +4,14 @@
 </style>
 
 <th:block layout:fragment="content">
-
-
     <div class="layout-contents">
         <!-- Page Title -->
         <div class="page-title-wrap">
             <div class="left">
                 <h2>사용자 관리</h2>
-<!--                <a title="북마크" class="bookmark toggle">-->
-<!--                    내메뉴-->
-<!--                </a>-->
+                <!--                <a title="북마크" class="bookmark toggle">-->
+                <!--                    내메뉴-->
+                <!--                </a>-->
             </div>
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
@@ -24,14 +22,14 @@
         <!-- Select -->
 
         <div class="tab-wrap">
-<!--            <ul class="tab-links">-->
-<!--                <li>-->
-<!--                    <a href="#tab1" title="목록" id="listTabLink">목록</a>-->
-<!--                </li>-->
-<!--                <li>-->
-<!--                    <a href="#tab2" title="등록" id="inputTabLink">등록</a>-->
-<!--                </li>-->
-<!--            </ul>-->
+            <!--            <ul class="tab-links">-->
+            <!--                <li>-->
+            <!--                    <a href="#tab1" title="목록" id="listTabLink">목록</a>-->
+            <!--                </li>-->
+            <!--                <li>-->
+            <!--                    <a href="#tab2" title="등록" id="inputTabLink">등록</a>-->
+            <!--                </li>-->
+            <!--            </ul>-->
             <div class="tab-contents">
                 <!-- Section -->
                 <section class="tab-item" id="tab1">
@@ -43,17 +41,17 @@
                         <div class="button-wrap">
                             <ul>
                                 <li>
-                                    <a class="btn btn-excell" title="엑셀다운로드" onclick="clearForm()">
+                                    <a class="btn btn-excell" title="신규등록" onclick="clearForm()">
                                         <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
                                         신규등록
                                     </a>
                                 </li>
-                                <li>
+                                <!--<li>
                                     <a  class="btn btn-delete" title="삭제" id="btnDelete2">
                                         <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
                                         삭제
                                     </a>
-                                </li>
+                                </li>-->
                                 <li>
                                     <a class="btn btn-edit" id="btnSave" title="저장">
                                         <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
@@ -65,31 +63,100 @@
                     </div>
                     <div class="table-wrap">
                         <table class="write-table">
-                            <caption>점검등록 테이블</caption>
+                            <caption>사용자등록 테이블</caption>
                             <colgroup>
-                                <col class="wp12">
-                                <col class="wp40">
-                                <col class="wp12">
-                                <col class="wp40">
+                                <col class="wp20">
+                                <col class="wp30">
+                                <col class="wp20">
+                                <col class="wp30">
                             </colgroup>
                             <tbody>
                             <tr>
                                 <th>
-                                    <label for="supplier">
-                                        사용자ID
+                                    <label for="">
+                                        업체명
                                     </label>
                                 </th>
                                 <td>
-                                    <input type="text" id="userid" name="userid" class="wp100" maxlength="50" placeholder="사용자ID">
-                                    <input type="hidden" id="id" name="id" />
+                                    <div class="input-clear">
+                                        <input type="text" id="cltnm" name="cltnm" style="width: 400px !important;">
+                                    </div>
                                 </td>
                                 <th>
-                                    <label for="supplier2">
-                                        사용자명
+                                    <label for="">
+                                        대표자
                                     </label>
                                 </th>
                                 <td>
-                                    <input type="text" id="usernm" name="usernm" class="wp100" maxlength="50" placeholder="사용자명">
+                                    <div class="input-clear">
+                                        <input type="text" id="prenm" name="prenm"style="width: 400px !important;" >
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="">
+                                        업태
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="biztypenm" name="biztypenm" style="width: 400px !important;">
+                                    </div>
+                                </td>
+                                <th>
+                                    <label for="">
+                                        종목
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="bizitemnm" name="bizitemnm" style="width: 400px !important;">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="">
+                                        전화번호
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="tel" name="tel" style="width: 400px !important;">
+                                    </div>
+                                </td>
+                                <th>
+                                    <label for="">
+                                        핸드폰
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="phone" name="phone" style="width: 400px !important;">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="id">
+                                        사업자 번호 (아이디)
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="login_id" name="login_id" class="wp50" style="width: 400px !important;">
+                                    </div>
+                                </td>
+                                <th>
+                                    <label for="email">
+                                        이메일
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="email" name="email" style="width: 400px !important;">
+                                    </div>
                                 </td>
                             </tr>
                             <tr>
@@ -98,91 +165,30 @@
                                 </th>
                                 <td>
                                     <select id="authType" name="authType" class="wp30">
-
+                                        <option></option>
                                     </select>
                                 </td>
-                                <th>
-                                    산단
-                                </th>
-                                <td>
-                                    <ul id="dataList">
-                                        <li>
-                                            <select class="wp25 mg-r5" id="firstSelect" name="spworkcd" onchange="updateNextSelect(this)">
-
-                                                <option></option>
-                                            </select>
-                                            <select class="wp25 mg-r5" id="secondSelect" name="spcompcd" onchange="updateNextSelect(this)">
-                                                <option></option>
-                                            </select>
-                                            <select class="wp25 mg-r5" id="thirdSelect" name="spplancd">
-                                                <option></option>
-                                            </select>
-                                            <button type="button" onclick="addselectField(this)" class="btn" style="width: 107px">발전시설 추가</button>
-                                        </li>
-                                    </ul>
+                                <th><label for="is_active">사용여부</label></th>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <input type="checkbox" id="is_active" name="is_active" style="display: block; margin: auto;">
                                 </td>
                             </tr>
-                            <tr>
-                                <th>
-                                    <label for="supplier">
-                                        비밀번호
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="password" id="password" name="password" class="wp100" maxlength="50" autocomplete="new-password" placeholder="비밀번호">
-                                </td>
-                                <th>
-                                    <label for="supplier2">
-                                        이메일
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="email" id="email" name="email" class="wp100" maxlength="30" autocomplete="off" placeholder="이메일">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="supplier">
-                                        휴대전화
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="tel" name="tel" class="wp100" maxlength="50" placeholder="휴대전화">
-                                </td>
-                                <th>
-                                    <label for="supplier2">
-                                        부서명
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="divinm2" name="divinm2" class="wp100" maxlength="30" placeholder="부서명">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="agencycd">
-                                        소속사
-                                    </label>
-                                </th>
-                                <td>
-                                    <div class="input-clear">
-                                        <select class="mg-r5 wp30" id="agencycd" name="agencycd">
-                                            <option></option>
-                                        </select>
-                                    </div>
-                                </td>
-
-                                <th></th>
-                                <td></td>
-                            </tr>
+                            <th>
+                                <label for="postno">
+                                    주 소
+                                </label>
+                            </th>
+                            <td colspan="5">
+                                <input type="text" id="postno" placeholder="우편번호"
+                                       onclick="sample4_execDaumPostcode()"
+                                       style="width: 100px; margin-bottom: 3px;">
+                                <input type="text" id="address1" placeholder="도로명주소" style="width: 48%">
+                                <input type="hidden" id="placeAddress" placeholder="지번주소">
+                                <span id="guide" style="color:#999;display:none"></span>
+                            </td>
                             </tbody>
                         </table>
                     </div>
-
-
-
-
-
 
                     <div class="section-top" style="margin-top: 24px;">
                         <div class="search-wrap">
@@ -200,14 +206,13 @@
                                 <dt>
                                     <label for="select1">
                                         이름</label></dt>
-
                                 <dd>
                                     <div class="input-clear"><input type="text" id="keyword" name="keyword" class="wp100" maxlength="50" placeholder=""></div>
                                 </dd>
                             </dl>
                             <dl>
                                 <dt>
-                                    <label for="select1">
+                                    <label>
                                         사용자ID</label></dt>
 
                                 <dd>
@@ -216,22 +221,17 @@
                             </dl>
                             <dl>
                                 <dt>
-                                    <label for="divinm">
-                                        부서</label></dt>
-
-                                <dd>
-                                    <div class="input-clear"><input type="text" id="divinm" name="divinm" class="wp100" maxlength="50" placeholder=""></div>
-                                </dd>
-                            </dl>
-                            <dl>
-                                <dt>
-                                    <label for="text1">
+                                    <label>
                                     </label>
                                 </dt>
                                 <dd>
                                     <div class="srch-box">
                                         <div class="input-clear"></div>
-                                        <a href="#a" class="btn-srch" id="searchgrid" title="검색" onclick="searchData()" onkeyup="searchData()" style="border-radius: 7px;"></a>
+                                        <a style="margin-left: 10px" class="btn btn-delete" title="검색" id="searchgrid" onclick="searchData()" onkeyup="searchData()">
+                                            <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
                                     </div>
                                 </dd>
                             </dl>
@@ -244,12 +244,12 @@
                                         삭제
                                     </a>
                                 </li>
-                                <li>
+                                <!--<li>
                                     <a  class="btn btn-edit" title="수정" onclick="modifyData()">
                                         <img src="/images/icon/ico-edit.svg" alt="엑셀 아이콘">
                                         수정
                                     </a>
-                                </li>
+                                </li>-->
 
                             </ul>
                         </div>
@@ -263,153 +263,60 @@
                     <div class="btn-wrap">
                     </div>
                 </section>
-                <!-- Section -->
-               <!-- <section class="tab-item" id="tab2">
-                    <div class="section-top">
-                        <div class="title-wrap">
-                            <h3>사용자 등록</h3>
-                        </div>
-                        <div class="button-wrap">
-                            <ul>
-                                <li>
-                                    <a class="btn btn-excell" title="엑셀다운로드" onclick="clearForm()">
-                                        <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                        신규등록
-                                    </a>
-                                </li>
-                                <li>
-                                    <a  class="btn btn-delete" title="삭제" id="btnDelete2">
-                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                        삭제
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="btn btn-edit" id="btnSave" title="저장">
-                                        <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                                        저장
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="table-wrap">
-                        <table class="write-table">
-                            <caption>점검등록 테이블</caption>
-                            <colgroup>
-                                <col class="wp12">
-                                <col class="wp40">
-                                <col class="wp12">
-                                <col class="wp40">
-                            </colgroup>
-                            <tbody>
-                            <tr>
-                                <th>
-                                    <label for="supplier">
-                                        사용자ID
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="userid" name="userid" class="wp100" maxlength="50" placeholder="사용자ID">
-                                    <input type="hidden" id="id" name="id" />
-                                </td>
-                                <th>
-                                    <label for="supplier2">
-                                        사용자명
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="usernm" name="usernm" class="wp100" maxlength="50" placeholder="사용자명">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    사용자그룹
-                                </th>
-                                <td>
-                                    <select id="authType" name="authType">
-
-                                    </select>
-                                </td>
-                                <th>
-                                    산단
-                                </th>
-                                <td>
-                                    <ul id="dataList">
-                                        <li>
-                                            <select class="wp25 mg-r5" id="firstSelect" name="spworkcd" onchange="updateNextSelect(this)">
-
-                                                <option></option>
-                                            </select>
-                                            <select class="wp25 mg-r5" id="secondSelect" name="spcompcd" onchange="updateNextSelect(this)">
-                                                <option></option>
-                                            </select>
-                                            <select class="wp25 mg-r5" id="thirdSelect" name="spplancd">
-                                                <option></option>
-                                            </select>
-                                            <button type="button" onclick="addselectField(this)" class="btn" style="width: 107px">발전시설 추가</button>
-                                        </li>
-                                    </ul>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="supplier">
-                                        비밀번호
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="password" id="password" name="password" class="wp100" maxlength="50" autocomplete="new-password" placeholder="비밀번호">
-                                </td>
-                                <th>
-                                    <label for="supplier2">
-                                        이메일
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="email" id="email" name="email" class="wp100" maxlength="30" autocomplete="off" placeholder="이메일">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="supplier">
-                                        휴대전화
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="tel" name="tel" class="wp100" maxlength="50" placeholder="휴대전화">
-                                </td>
-                                <th>
-                                    <label for="supplier2">
-                                        부서명
-                                    </label>
-                                </th>
-                                <td>
-                                    <input type="text" id="divinm2" name="divinm2" class="wp100" maxlength="30" placeholder="부서명">
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label for="agencycd">
-                                        소속사
-                                    </label>
-                                </th>
-                                <td colspan="3">
-                                    <div class="input-clear">
-                                        <select class="mg-r5" id="agencycd" name="agencycd" style="width: 100%">
-                                            <option></option>
-                                        </select>
-                                    </div>
-                                </td>
-
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>-->
-
             </div> <!--//tab-contens end-->
         </div> <!--//tab-wrap end-->
     </div> <!--//layout-contents end -->
+
+    <!-- smtp 모달창 -->
+    <div class="modal3">
+        <div class="popup-wrapper3 w800" id="popup2">
+            <div class="popup-title">
+                <a title="팝업닫기" onclick="closeFilePopup()" class="btn-popup-close">
+                    <img src="/images/icon/btn-popup-close.svg" alt="닫기">
+                </a>
+            </div>
+            <div class="popup-contents">
+                <div class="table-wrap">
+                    <table class="write-table">
+                        <caption>점검등록 테이블</caption>
+                        <colgroup>
+                            <col class="wp20">
+                            <col class="wp80">
+                        </colgroup>
+                        <input type="hidden" id="popup-spuncode">
+                        <tbody>
+                        <tr>
+                            <th>
+                                <label>SMTP 아이디</label>
+                            </th>
+                            <td>
+                                <div class="input-clear">
+                                    <input type="text" id="smtpid" maxlength="30" class="wp60">
+                                    <span class="btn-clear">×</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <label>SMTP 비밀번호</label>
+                            </th>
+                            <td>
+                                <div class="input-clear">
+                                    <input type="password" id="smtppw" maxlength="30" class="wp60">
+                                    <span class="btn-clear">×</span>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="popup-button">
+                <button onclick="closeFilePopup()" style="border: 1px solid #03428E !important; font-size: 15px !important;">닫기</button>
+                <button onclick="saveSMTP()" style="border: 1px solid #03428E !important;color: white;background: #03428E !important;font-size: 15px !important;">저장</button>
+            </div>
+        </div>
+    </div>
 
     <footer>
         <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
@@ -424,43 +331,38 @@
 
     <script type="text/javascript">
 
-
         var theGrid;
         var viewdata;
-        let selectedFiles = [];
         let csrfToken = $("[name=_csrf]").val();
 
-
         let columns = [
-            {binding: 'id', header: 'id', width: '*', align: 'center', visible: false},
-            {binding: 'login_id', header: '사용자ID', width: '*', align: 'center'},
-            {binding: 'Name', header: '사용자명', width: '*', align: 'center'},
-            {binding: 'group_name', header: '사용자그룹', width: '*', align: 'center'},
+            {binding: 'id', header: 'id', width: '*', align: 'center', visible: false, isReadOnly: true},
+            {binding: 'login_id', header: '사용자ID', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'prenm', header: '대표자', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'cltnm', header: '업체명', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'group_name', header: '사용자그룹', width: '*', align: 'center', isReadOnly: true},
             {binding: 'group_id', header: '사용자그룹', width: '*', align: 'center', visible: false},
-            {binding: 'Value', header: '소속사', width: '*', align: 'center'},
-            {binding: 'divinm', header: '부서', width: '*', align: 'center'},
-            {binding: 'ranknm', header: '직급', width: '*', align: 'center'},
-            {binding: 'is_active', header: '활성화', width: '*', align: 'center'},
-            {binding: 'date_joined', header: '생성일', width: '*', align: 'center'},
+            {binding: 'biztypenm', header: '업태', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'bizitemnm', header: '종목', width: '*', align: 'center', isReadOnly: true},
+            {binding: 'tel', header: '전화번호', width: '*', align: 'center', visible: false},
+            {binding: 'phone', header: '핸드폰', width: '*', align: 'center', visible: true},
             {binding: 'email', header: '이메일', width: '*', align: 'center', visible: false},
-            {binding: 'tel', header: '휴대전화', width: '*', align: 'center', visible: false},
-            {binding: 'agencycd', header: '소속사코드', width: '*', align: 'center', visible: false},
+            {binding: 'date_joined', header: '생성일', width: '*', align: 'center', isReadOnly: true},
         ];
 
-        const requiredFields = [{id: 'userid', name: '사용자ID'}, {id: 'usernm', name: '사용자명'}, {
-            id: 'authType',
-            name: '사용자그룹'
-        },
-            {id: 'email', name: '이메일'}, {id: 'agencycd', name: '소속사'},]
-
-        const nameBasedFields = [
-            {name: 'spworkcd', displayName: '관할지역'},
-            {name: 'spcompcd', displayName: '발전산단'},
-            {name: 'spplancd', displayName: '발전소'}
-        ];
+        const requiredFields = [
+            {id: 'login_id', name: '사용자ID'},
+            {id: 'prenm', name: '사용자명'},
+            {id: 'cltnm', name: '업체명'},
+            {id: 'authType', name: '사용자그룹'},
+            {id:'biztypenm',name:'업태'},
+            {id:'bizitemnm',name:'종목'},
+            {id:'tel', name: '전화번호'},
+            {id:'phone', name: '핸드폰'},
+            {id: 'email', name: '이메일'},
+        ]
 
         document.readyState === 'complete' ? init() : window.onload = init;
-
 
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
         function init() {
@@ -473,11 +375,6 @@
                 success: function (data) {
                     let DataLength = 10 - data.data.length;
 
-                    if(data.data.length < 10){
-                        for(let i=0; i < DataLength; i++){
-                            data.data.push('empty');
-                        }
-                    }
                     data2 = data.data;
                 }
             })
@@ -486,7 +383,6 @@
             // 데이터 그리드에 바인딩
             theGrid = new wijmo.grid.FlexGrid('#theGrid', {
                 autoGenerateColumns: false,
-                isReadOnly: true,
                 showMarquee: true,
                 allowSorting: 'MultiColumn',
                 columns: columns,  //홀짝 로우 음영주기
@@ -497,16 +393,48 @@
                         var col = s.columns[e.col];
                         var item = s.rows[e.row].dataItem;
                         if (col.binding === 'is_active') {
-                            if(item && item === 'empty'){
-                                e.cell.innerHTML = '';
-                            }
-                            /*if (item && item.downloads) {
-                                e.cell.innerHTML = '<a class="btn-filedown" onclick="FileDownload(' + e.row + ')">다운로드</a>';
-                            } else {
-                                e.cell.innerHTML = ''; // 다운로드 버튼이 표시되지 않도록 빈 문자열 설정
+                            /*// 셀이 렌더링된 후 기존 checkbox를 찾음
+                            var checkbox = e.cell.querySelector('input[type="checkbox"]');
+
+                            // 슈퍼유저일 경우 체크박스를 비활성화
+                            if (item && item.is_superuser === true) {
+                                checkbox.disabled = true;
                             }*/
                         }
                     }
+                }
+            });
+
+            // 체크박스 클릭 후 값이 변경될 때 함수 실행
+            theGrid.cellEditEnded.addHandler(function(s, e) {
+                var col = s.columns[e.col];
+                var item = s.rows[e.row].dataItem;
+
+                // is_active 컬럼일 경우 처리
+                if (col.binding === 'is_active' && !item.is_superuser) {
+                    var newValue = item.is_active;
+
+                    var IdValue = item.id;
+
+                    console.log('item23', item);
+
+                    console.log('idvalue: ', IdValue);
+
+
+                    let data = {
+                        is_active: newValue,
+                        id : IdValue
+                    }
+
+                    let fnSuccess = function (res){
+                        if(res.success){
+                            Alert.alert('', res.message);
+                        }else{
+                            Alert.alert('', res.message);
+                        }
+                    }
+
+                    AjaxUtil.postAsyncData('/api/system/user/activate', data, fnSuccess);
                 }
             });
 
@@ -522,13 +450,18 @@
                     let row = hitTest.row;
                     let item = theGrid.rows[row].dataItem;
 
-                    if(item === 'empty'){
-                        return;
-                    }
                     console.log('Row double-clicked:', item);
 
                     let userid = item.login_id;
-
+                    let smtpLabel = document.getElementById('smtpLabel');
+                    let smtpBox = document.getElementById('smtpbox');
+                    if(item.is_superuser){
+                        smtpLabel.style.display = 'block';
+                        smtpBox.style.display = 'block';
+                    }else{
+                        smtpLabel.style.display = 'none';
+                        smtpBox.style.display = 'none';
+                    }
                     document.getElementById('id').value = item.id;
                     document.getElementById('userid').value =   item.login_id;
                     document.getElementById('usernm').value =   item.Name;
@@ -538,10 +471,8 @@
                     document.getElementById('divinm2').value =  item.divinm;
                     document.getElementById('agencycd').value = item.agencycd;
 
-                    AjaxFunction.PostAjaxRequest('/api/system/user/modfind', true, 'application/json', true, userid, function (data) {
+                    AjaxFunction.PostAjaxRequest('/api/system/user/modfind', false, 'application/json', true, userid, function (data) {
                         if (data.success) {
-
-                            console.log('data.data', data.data);
 
 
                             $('#password').prop('readonly', true);
@@ -561,23 +492,6 @@
 
                                 li.css('marginTop', '2px');
 
-
-                                const firstSelectId = i === 0 ? 'firstSelect' : `firstSelect${i}`;
-                                const secondSelectId = i === 0 ? 'secondSelect' : `secondSelect${i}`;
-                                const thirdSelectId = i === 0 ? 'thirdSelect' : `thirdSelect${i}`;
-
-                                const filrstSelect = createSelectElement(firstSelectId, 'spworkcd', 'updateNextSelect(this)', '8');
-                                const secondSelect = createSelectElement(secondSelectId, 'spcompcd', 'updateNextSelect(this)', '9');
-                                const thirdSelect = createSelectElement(thirdSelectId, 'spplancd', null, '7');
-
-                                if (i === 0) {
-                                    const button = createButtonElement('test', '발전시설 추가', 'black', '107px', 'addselectField(this)');
-                                    li.append(filrstSelect).append(secondSelect).append(thirdSelect).append(button);
-                                } else {
-                                    const button = createButtonElement('test', '발전시설 삭제', 'red', '107px', 'deleteSelectField(this)');
-                                    li.append(filrstSelect).append(secondSelect).append(thirdSelect).append(button);
-                                }
-
                                 parent.append(li);
                                 $.ajax({
                                     url: '/user-codes/parent',
@@ -590,15 +504,13 @@
                                         selectElement.empty(); // 이전 옵션 제거
 
                                         $.each(response, function (index, item) {
-
-
-
                                             selectElement.append($('<option>', {
-                                                value: item.id,
+                                                value: item.code,
                                                 text: item.value
                                             }));
 
-                                            selectElement.val()
+                                            selectElement.val();
+
                                         });
                                     },
                                     error: function (jqXHR, textStatus, errorThrown) {
@@ -606,38 +518,26 @@
                                     }
                                 });
 
-                                console.log('ahahah: ', data.data[i]);
-                                $('#' + firstSelectId).val(data.data[i].spworkid);
+                                $('#' + firstSelectId).val(data.data[i].spworkcd);
                                 $('#' + firstSelectId).trigger('change');
-                                $('#' + secondSelectId).val(data.data[i].spcompid);
+                                $('#' + secondSelectId).val(data.data[i].spcompcd);
                                 $('#' + secondSelectId).trigger('change');
-                                $('#' + thirdSelectId).val(data.data[i].spplanid);
+//                                console.log('thirdSelectId', thirdSelectId);
+                                console.log('dsaa', data.data[i].spplancd);
+
+                                $('#' + thirdSelectId).val(data.data[i].spplancd);
+
                             }
-
-
                         } else {
                             Alert.alert('', data.message, function(){ $('#listTabLink').click()});
 
                         }
                     })
-
-                  /*  //탭 수정으로 업더이트
-                    updateTabLink('id');
-                    let tabIds = '#tab2';
-                    $(".tab-item").hide();
-                    $(tabIds).show();
-
-                    $("#listTabLink").parent().removeClass("active");
-                    $("#inputTabLink").parent().addClass("active");*/
                 }
             });
-
-
-
         }
 
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
-
         //검색
         function searchData() {
             let data = {
@@ -653,14 +553,6 @@
                 type: 'GET',
                 data: data,
                 success: function (data) {
-
-                    let DataLength = 10 - data.data.length;
-                    if(data.data.length < 10){
-                        for(let i=0; i < DataLength; i++){
-                            data.data.push('empty');
-                        }
-                    }
-
                     data2 = data.data;
                     viewdata = new wijmo.collections.CollectionView(data2);
                     theGrid.itemsSource = viewdata;
@@ -672,6 +564,44 @@
 
             //grid_binding(result.data);
         }
+
+        function showPopup2(){
+
+            let selectedItems = theGrid.selectedItems;
+
+
+
+            document.getElementById('smtpid').value = selectedItems[0].smtpid;
+            document.getElementById('smtppw').value = selectedItems[0].smtppassword;
+
+            const modal = document.querySelector('.modal3');
+            const modalContent = document.querySelector('.popup-wrapper3');
+
+            // 모달과 콘텐츠를 표시
+            modal.style.display = 'block';
+            modalContent.style.display = 'block';
+
+            // 애니메이션을 위한 클래스 추가
+            requestAnimationFrame(() => {
+                modal.classList.add('show');
+                modalContent.classList.add('show');
+            });
+        }
+
+        function closeFilePopup(){
+            const modal = document.querySelector('.modal3');
+
+            modal.style.display = 'none';
+
+        }
+
+        const Filemodal = document.querySelector('.modal3');
+
+
+        const modalFileOpen = document.querySelector('.file_btn');
+        modalFileOpen.addEventListener('click', function(){
+            Filemodal.style.display = 'block';
+        });
 
         function grid_binding(data) {
             var inspecDto = data;
@@ -692,6 +622,7 @@
                     email: inspecDto[i]["email"],
                     tel: inspecDto[i]["tel"],
                     agencycd: inspecDto[i]["agencycd"],
+                    is_superuser: inspecDto[i]["is_superuser"],
                 });
                 cnt++;
             }
@@ -729,93 +660,58 @@
             });
         }
 
-        <!-- 점검자 추가 버튼 이벤트-->
-        function addselectField(button) {
-            // 새로운 td 요소를 생성합니다.
-            var newTd = document.createElement('li');
-            newTd.className = 'new-fl-ac';
+        function saveSMTP(){
 
-            if (!window.cloneCounter) {
-                window.cloneCounter = 1;
-            } else {
-                window.cloneCounter++;
+            let smtpid = document.getElementById('smtpid').value;
+            let smtppw = document.getElementById('smtppw').value;
+
+            if(smtpid.trim().length === 0){
+                Alert.alert('', 'SMTP 아이디를 입력해주세요');
+                return;
             }
 
-            // 새로운 input 요소를 생성합니다.
-            var originalSelect1 = document.getElementById('firstSelect');
-            var newInput = originalSelect1.cloneNode(true);
-            newInput.name = 'spworkcd';
-            newInput.id = originalSelect1.id + window.cloneCounter;
-            newInput.style.setProperty('margin-right', '8px', 'important');
-            newInput.type = 'select';
+            if(smtppw.trim().length === 0){
+                Alert.alert('', 'SMTP 비밀번호를 입력해주세요');
+                return;
+            }
 
-            var originalSelect2 = document.getElementById('secondSelect');
-            var newInput2 = originalSelect2.cloneNode(true);
-            newInput2.name = 'spcompcd';
-            newInput2.style.setProperty('margin-right', '10px', 'important');
-            newInput2.type = 'select';
-            newInput2.id = originalSelect2.id + window.cloneCounter;
-
-            var originalSelect3 = document.getElementById('thirdSelect');
-            var newInput3 = originalSelect3.cloneNode(true);
-            newInput3.name = 'spplancd';
-            newInput3.style.setProperty('margin-right', '7px', 'important');
-            // newInput2.className = 'wp100';
-            newInput3.type = 'select';
-            newInput3.id = originalSelect3.id + window.cloneCounter;
-
-            // 삭제 버튼을 생성합니다.
-            var deleteButton = document.createElement('button');
-            deleteButton.textContent = '발전시설 삭제';
-            deleteButton.onclick = function () {
-                deleteSelectField(newInput); // 삭제 버튼을 클릭하면 해당 입력 필드를 삭제하는 함수 호출
-                deleteSelectField(newInput2);
-                deleteSelectField(newInput3);
+            let data = {
+                id: $('#id').val(),
+                smtpid: $('#smtpid').val(),
+                smtppw: $('#smtppw').val()
             };
-            deleteButton.className = 'btn';
-            deleteButton.style.width = '107px';
-            deleteButton.style.color = 'red';
-            deleteButton.style.marginTop = '5px';
-            // 새로운 td에 input 요소와 삭제 버튼을 추가합니다.
-            newTd.appendChild(newInput);
-            newTd.appendChild(newInput2);
-            newTd.appendChild(newInput3);
-            newTd.appendChild(deleteButton);
 
-            // 클릭된 버튼의 부모 td 요소를 찾습니다.
-            var parentTd = button.parentElement;
+            AjaxUtil.postAsyncData('/api/system/user/smtp', data, function(res){
+                Alert.alert('', res.message);
+            });
 
-            // 부모 td 요소 다음에 새로운 td 요소를 추가합니다.
-            parentTd.parentElement.insertBefore(newTd, parentTd.nextSibling);
-        }
-
-        function deleteSelectField(inputField) {
-            // 입력 필드의 부모 요소(td)를 찾아서 삭제합니다.
-            var tdToDelete = inputField.parentElement;
-            tdToDelete.parentElement.removeChild(tdToDelete);
         }
 
         function clearForm(){
-            ['id', 'userid', 'usernm', 'authType', 'email', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'secondSelect', 'thirdSelect'].forEach(id => {
+            ['id', 'userid', 'usernm', 'authType', 'email','password', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'secondSelect', 'thirdSelect'].forEach(id => {
                 document.getElementById(id).value = '';
             });
+            let smtpLabel = document.getElementById('smtpLabel');
+            let smtpBox = document.getElementById('smtpbox');
 
-            updateTabLink('id');
+            smtpLabel.style.display = 'none';
+            smtpBox.style.display = 'none';
+
             $('#password').prop('readonly', false);
             $('.new-fl-ac').remove();
         }
 
-        function updateNextSelect(param) {
+        /*function updateNextSelect(param) {
             let code = param.value;
 
             // param의 다음 형제 요소를 찾습니다.
             let nextSelect = $(param).next('select');
 
-            console.log('code: ', code);
+
 
             if (nextSelect.length) {
                 $.ajax({
-                    url: '/user-codes/code',
+                    url: '/user-codes/code_spcompcd',
                     type: 'GET',
                     async: false,
                     data: { code: code },
@@ -823,7 +719,7 @@
                         nextSelect.empty();
                         nextSelect.append('<option value="">선택하세요</option>');
                         data.forEach(function (item) {
-                            nextSelect.append('<option value="' + item.id + '">' + item.value + '</option>');
+                            nextSelect.append('<option value="' + item.dtlcd + '">' + item.spcompnm + '</option>');
                         });
                     },
                     error: function (xhr, status, error) {
@@ -840,126 +736,43 @@
             }
         }
 
-        //수정 (동기로 작업해서 화면을 다시 그려줘야 해서 소스가 길다)
-        function modifyData() {
-            let selectedItems = theGrid.selectedItems;
-            console.log('selected: ', selectedItems);
-            if (selectedItems[0] === 'empty' || selectedItems.length === 0) {
-                Alert.alert('', '수정할 항목을 선택하세요.');
-                return;
-            }
+        function updateNextSelect2(param) {
+            let code = param.value;
 
-            let userid = selectedItems[0].login_id;
+            // param의 다음 형제 요소를 찾습니다.
+            let nextSelect = $(param).next('select');
 
-            const selectedItem = selectedItems[0];
-            document.getElementById('id').value = selectedItem.id;
-            document.getElementById('userid').value = selectedItem.login_id;
-            document.getElementById('usernm').value = selectedItem.Name;
-            document.getElementById('authType').value = selectedItem.group_id;
-            document.getElementById('email').value = selectedItem.email;
-            document.getElementById('tel').value = selectedItem.tel;
-            document.getElementById('divinm2').value = selectedItem.divinm;
-            document.getElementById('agencycd').value = selectedItem.agencycd;
+            if (nextSelect.length) {
 
-          /*  //탭 수정으로 업더이트
-            updateTabLink('id');
-
-            let tabIds = '#tab2';
-            $(".tab-item").hide();
-            $(tabIds).show();
-
-            $("#listTabLink").parent().removeClass("active");
-            $("#inputTabLink").parent().addClass("active");*/
-
-            AjaxFunction.PostAjaxRequest('/api/system/user/modfind', true, 'application/json', true, userid, function (data) {
-                if (data.success) {
-
-                    console.log('data.data', data.data);
-
-                  /*  let tabIds = '#tab2';
-                    $(".tab-item").hide();
-                    $(tabIds).show();
-
-                    $("#listTabLink").parent().removeClass("active");
-                    $("#inputTabLink").parent().addClass("active");
-*/
-
-                    $('#password').prop('readonly', true);
-
-                    const parent = $('#dataList');
-                    parent.empty();
-
-                    const listLen = data.data.length;
+                $.ajax({
+                    url: '/user-codes/code_spplancd',
+                    type: 'GET',
+                    data: { code: code },
+                    async: false,
+                    success: function(data) {
+                        nextSelect.empty();
+                        nextSelect.append('<option value="">선택하세요</option>');
 
 
-                    for (let i = 0; i < listLen; i++) {
-                        const li = $('<li>');
-
-                        if (i !== 0) {
-                            li.addClass('new-fl-ac');
-                        }
-
-                        li.css('marginTop', '2px');
 
 
-                        const firstSelectId = i === 0 ? 'firstSelect' : `firstSelect${i}`;
-                        const secondSelectId = i === 0 ? 'secondSelect' : `secondSelect${i}`;
-                        const thirdSelectId = i === 0 ? 'thirdSelect' : `thirdSelect${i}`;
-
-                        const filrstSelect = createSelectElement(firstSelectId, 'spworkcd', 'updateNextSelect(this)', '8');
-                        const secondSelect = createSelectElement(secondSelectId, 'spcompcd', 'updateNextSelect(this)', '9');
-                        const thirdSelect = createSelectElement(thirdSelectId, 'spplancd', null, '7');
-
-                        if (i === 0) {
-                            const button = createButtonElement('test', '발전시설 추가', 'black', '107px', 'addselectField(this)');
-                            li.append(filrstSelect).append(secondSelect).append(thirdSelect).append(button);
-                        } else {
-                            const button = createButtonElement('test', '발전시설 삭제', 'red', '107px', 'deleteSelectField(this)');
-                            li.append(filrstSelect).append(secondSelect).append(thirdSelect).append(button);
-                        }
-
-                        parent.append(li);
-                        $.ajax({
-                            url: '/user-codes/parent',
-                            type: 'GET',
-                            async: false,   // 기본값: true
-                            data: {parentId: 110},
-                            success: function (response) {
-                                console.log('Response from /user-codes/parent:', response);
-                                let selectElement = $('#' + firstSelectId);
-                                selectElement.empty(); // 이전 옵션 제거
-
-                                $.each(response, function (index, item) {
-
-                                    selectElement.append($('<option>', {
-                                        value: item.id,
-                                        text: item.value
-                                    }));
-
-                                    selectElement.val()
-                                });
-                            },
-                            error: function (jqXHR, textStatus, errorThrown) {
-                                console.error('Error:', textStatus, errorThrown);
-                            }
+                        data.forEach(function(item) {
+                            nextSelect.append('<option value="' + item.spplancd + '">' + item.spplannm + '</option>');
                         });
+                    },
+                    error: function(xhr, status, error) {
+                        // 통신 실패 시 처리
 
-                        console.log('ahahah: ', data.data[i]);
-                        $('#' + firstSelectId).val(data.data[i].spworkid).trigger('change');
-                        $('#' + secondSelectId).val(data.data[i].spcompid).trigger('change');
-                        $('#' + thirdSelectId).val(data.data[i].spplanid);
 
+                        // 선택 옵션을 비우거나 기본 옵션을 설정할 수 있습니다.
+                        nextSelect.empty();
+                        nextSelect.append('<option value=""></option>');
                     }
-
-
-                } else {
-                    Alert.alert('', data.message);
-
-                }
-            })
-
-        }
-
+                });
+            } else {
+                console.error('다음 select 요소를 찾을 수 없습니다.');
+            }
+        }*/
 
         $(document).ready(function (e) {
 
@@ -977,14 +790,12 @@
                 valueField: "id",
                 textField: "name"
             })
-            initializeSelect({url: '/user-codes/parent', params: {parentId: 110}, elementId: 'firstSelect', valueField: "id"})
             initializeSelect({
                 url: '/user-codes/parent',
-                params: {parentId: 154},
-                elementId: 'agencycd',
-                valueField: "id"
+                params: {parentId: 110},
+                elementId: 'firstSelect',
+                valueField: "code"
             })
-
 
             //저장
             $('#btnSave').click(function () {
@@ -1011,16 +822,6 @@
                     }
                 }
 
-                let spworkcdString = extractSelectValues('spworkcd');
-                let spcompcdString = extractSelectValues('spcompcd');
-                let spplancdString = extractSelectValues('spplancd');
-
-                let spworknm = extractSelectTexts('spworkcd');
-                let spcompnm = extractSelectTexts('spcompcd');
-                let spplannm = extractSelectTexts('spplancd');
-
-
-
                 let formData = new FormData();
 
                 formData.append('id', id);
@@ -1042,171 +843,32 @@
 
                 let bindingList = ['id', 'userid', 'usernm', 'authType', 'password', 'email', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'secondSelect', 'thirdSelect'];
                 AjaxFunction.PostAjaxRequest('/api/system/user/save', true, false, false, formData, function (response) {
-                    if (response.success) {
-                        Alert.alert('', response.message, function () {
-                            $('#listTabLink').click();
-                            searchData();
-                        });
-                        clearForm();
+                        if (response.success) {
+                            Alert.alert('', response.message, function () {
+                                $('#listTabLink').click();
+                                searchData();
+                            });
+                            clearForm();
 
-                    } else {
-                        Alert.alert('', response.message);
-                    }
-                })
-            });
-
-            /*$('#inputTabLink').click(function(){
-                let selectedItems = theGrid.selectedItems;
-                if(selectedItems.length > 1){
-
-                    Alert.alert('', '하나의 항목만 선택해주세요', function(){
-                        $('#listTabLink').click();
-                    });
-
-                    return false;
-                }
-                const inputTabLink = document.getElementById('inputTabLink');
-                if(selectedItems.length > 0) {
-
-                    inputTabLink.textContent = '수정';
-                    inputTabLink.title = '수정';
-
-                    let userid = selectedItems[0].login_id;
-
-                    function createSelectElement(id, name, onChange, margin) {
-                        return $('<select>', {
-                            class: 'wp25 mg-r5',
-                            id: id,
-                            name: name,
-                            onchange: onChange
-                        }).append('<option></option>')
-                            .attr('style', `margin-right: ${margin}px !important;`);
-                    }
-
-                    function createButtonElement(name, text, color, width, onClick) {
-                        return $('<button>', {
-
-                            name: name,
-                            text: text,
-                            css: {
-                                color: color,
-                                width: width
-                            },
-                            onclick: onClick
-                        });
-                    }
-
-                    AjaxFunction.PostAjaxRequest('/api/system/user/modfind', true, 'application/json', true, userid, function (data) {
-                        if (data.success) {
-
-                            console.log('data.data', data.data);
-
-                            let tabIds = '#tab2';
-                            $(".tab-item").hide();
-                            $(tabIds).show();
-
-                            $("#listTabLink").parent().removeClass("active");
-                            $("#inputTabLink").parent().addClass("active");
-
-
-                            document.getElementById('id').value = selectedItems[0].id;
-                            document.getElementById('userid').value = selectedItems[0].login_id;
-                            document.getElementById('usernm').value = selectedItems[0].Name;
-                            document.getElementById('authType').value = selectedItems[0].group_id;
-                            document.getElementById('email').value = selectedItems[0].email;
-                            document.getElementById('tel').value = selectedItems[0].tel;
-                            document.getElementById('divinm2').value = selectedItems[0].divinm;
-                            document.getElementById('agencycd').value = selectedItems[0].agencycd;
-
-                            $('#password').prop('readonly', true);
-
-                            const parent = $('#dataList');
-                            parent.empty();
-
-                            const listLen = data.data.length;
-
-
-                            for (let i = 0; i < listLen; i++) {
-                                const li = $('<li>');
-
-                                if (i !== 0) {
-                                    li.addClass('new-fl-ac');
-                                }
-
-                                li.css('marginTop', '2px');
-
-
-                                const firstSelectId = i === 0 ? 'firstSelect' : `firstSelect${i}`;
-                                const secondSelectId = i === 0 ? 'secondSelect' : `secondSelect${i}`;
-                                const thirdSelectId = i === 0 ? 'thirdSelect' : `thirdSelect${i}`;
-
-                                const filrstSelect = createSelectElement(firstSelectId, 'spworkcd', 'updateNextSelect(this)', '8');
-                                const secondSelect = createSelectElement(secondSelectId, 'spcompcd', 'updateNextSelect(this)', '9');
-                                const thirdSelect = createSelectElement(thirdSelectId, 'spplancd', null, '7');
-
-                                if (i === 0) {
-                                    const button = createButtonElement('test', '발전시설 추가', 'black', '107px', 'addselectField(this)');
-                                    li.append(filrstSelect).append(secondSelect).append(thirdSelect).append(button);
-                                } else {
-                                    const button = createButtonElement('test', '발전시설 삭제', 'red', '107px', 'deleteSelectField(this)');
-                                    li.append(filrstSelect).append(secondSelect).append(thirdSelect).append(button);
-                                }
-
-                                parent.append(li);
-                                $.ajax({
-                                    url: '/user-codes/parent',
-                                    type: 'GET',
-                                    async: false,   // 기본값: true
-                                    data: {parentId: 110},
-                                    success: function (response) {
-                                        console.log('Response from /user-codes/parent:', response);
-                                        let selectElement = $('#' + firstSelectId);
-                                        selectElement.empty(); // 이전 옵션 제거
-                                        console.log('suucc', response);
-                                        $.each(response, function (index, item) {
-
-                                            console.log('화긴', item.code);
-
-                                            selectElement.append($('<option>', {
-                                                value: item.id,
-                                                text: item.value
-                                            }));
-
-                                            selectElement.val()
-                                        });
-                                    },
-                                    error: function (jqXHR, textStatus, errorThrown) {
-                                        console.error('Error:', textStatus, errorThrown);
-                                    }
-                                });
-
-                                $('#' + firstSelectId).val(data.data[i].spworkid);
-                                $('#' + firstSelectId).trigger('change');
-                                $('#' + secondSelectId).val(data.data[i].spcompid);
-                                $('#' + secondSelectId).trigger('change');
-                                $('#' + thirdSelectId).val(data.data[i].spplanid);
-                            }
-
-                            //탭 수정으로 업더이트
-                            updateTabLink('id');
                         } else {
-                            Alert.alert('', data.message);
-
+                            Alert.alert('', response.message);
                         }
+                    },
+                    function (res){
+                        Alert.alert('', '에러가 발생하였습니다.');
+
                     })
-
-
-                }else{
-                    inputTabLink.textContent = '등록';
-                    inputTabLink.title = '등록';
-                }
-            })*/
-
+            });
 
             $('#btnDelete').click(function () {
                 let selectedItems = theGrid.selectedItems;
+                let auth = selectedItems[0].is_superuser;
 
 
+                if(auth === true){
+                    Alert.alert('', '슈퍼유저 계정은 수정 및 삭제가 불가합니다.');
+                    return false;
+                }
 
                 if (selectedItems[0].id === undefined || selectedItems.length === 0) {
                     Alert.alert('', '삭제할 항목을 선택하세요.');
@@ -1221,7 +883,8 @@
                     let data = {
                         'id': JSON.stringify(delList),
                         'username': JSON.stringify(del940List),
-                        '_csrf': csrfToken
+                        '_csrf': csrfToken,
+                        'auth' : auth
                     }
                     let fnSuccess = function (res) {
                         if (res.success) {
@@ -1233,7 +896,10 @@
                 })
             });
 
-            $('#btnDelete2').click(function(){
+            /*$('#btnDelete2').click(function(){
+
+
+
                 Alert.confirm('', '삭제하시겠습니까?', function () {
                     let data = {
                         'id': JSON.stringify($('#id').val()),
@@ -1250,9 +916,8 @@
                     }
                     AjaxUtil.postAsyncData('/api/system/user/delete', data, fnSuccess);
                 })
-            })
+            })*/
         });
     </script>
 </th:block>
-
 </html>
