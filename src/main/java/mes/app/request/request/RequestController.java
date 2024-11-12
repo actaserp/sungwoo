@@ -7,6 +7,7 @@ import mes.config.Settings;
 import mes.domain.entity.User;
 import mes.domain.entity.actasEntity.*;
 import mes.domain.model.AjaxResult;
+import mes.domain.repository.actasRepository.TB_DA006WFILERepository;
 import mes.domain.repository.actasRepository.TB_DA006WRepository;
 import mes.domain.repository.actasRepository.TB_DA007WRepository;
 import org.apache.commons.io.FilenameUtils;
@@ -54,6 +55,9 @@ public class RequestController {
 
     @Autowired
     private TB_DA006WRepository tbda006WRepository;
+
+    @Autowired
+    private TB_DA006WFILERepository tbDa006WFILERepository;
 
     @Autowired
     Settings settings;
@@ -170,7 +174,7 @@ public class RequestController {
     @PostMapping("/save")
     public AjaxResult saveOrder(@RequestParam Map<String, String> params,
                                 @RequestParam(value = "filelist", required = false) MultipartFile[] files,
-                                @RequestPart(value = "deletedFiles", required = false) MultipartFile[] deletedFiles,
+                                @RequestPart(value = "deletedFiles2", required = false) MultipartFile[] deletedFiles,
                                 Authentication auth) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         User user = (User) auth.getPrincipal();
@@ -236,24 +240,28 @@ public class RequestController {
         }
         // 삭제된 파일 처리
         if (deletedFiles != null && deletedFiles.length > 0) {
-            List<TB_RP760> tbRp760List = new ArrayList<>();
+            List<TB_DA006WFile> tbDa006WFileList = new ArrayList<>();
+
             for (MultipartFile deletedFile : deletedFiles) {
                 String content = new String(deletedFile.getBytes(), StandardCharsets.UTF_8);
-                Map<String, String> deletedFileMap = new ObjectMapper().readValue(content, Map.class);
+                Map<String, Object> deletedFileMap = new ObjectMapper().readValue(content, new TypeReference<Map<String, Object>>() {});
 
-                //TB_RP760 tbRp760 =
-//                if (tbRp760 != null) {
-//                    // 파일 삭제
-//                    String filePath = tbRp760.getFilepath();
-//                    String fileName = tbRp760.getFilesvnm();
-//                    File file = new File(filePath, fileName);
-//                    if (file.exists()) {
-//                        file.delete();
-//                    }
-//                    tbRp760List.add(tbRp760);
-//                }
+                Integer fileid = (Integer) deletedFileMap.get("fileid");
+
+                TB_DA006WFile tbDa006WFile = tbDa006WFILERepository.findById(fileid).orElse(null);
+                // id : fileid
+                if (tbDa006WFile != null) {
+                    // 파일 삭제
+                    String filePath = tbDa006WFile.getFilepath();
+                    String fileName = tbDa006WFile.getFilesvnm();
+                    File file = new File(filePath, fileName);
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                    tbDa006WFileList.add(tbDa006WFile);
+                }
             }
-            //TBRP760Repository.deleteAll(tbRp760List);
+            tbDa006WFILERepository.deleteAll(tbDa006WFileList);
         }
         TB_DA006W tbDa006 = new TB_DA006W();
 
@@ -336,7 +344,7 @@ public class RequestController {
                 }
 
                 result.success = allSuccessful;
-                result.message = "저장성공";
+                result.message = "주문등록 되었습니다.";
             }
         } catch (Exception e) {
             e.printStackTrace();

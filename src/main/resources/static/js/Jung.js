@@ -534,6 +534,7 @@ $(document).ready(function () {
             // 삭제된 파일을 deletedFiles에 추가
             if (removedFile) {
                 deletedFiles2.push(removedFile);
+                console.log("deletedFiles2", deletedFiles2);
             }
             li.remove();
             updateFileCount2();

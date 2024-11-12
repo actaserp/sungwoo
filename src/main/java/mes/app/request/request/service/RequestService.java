@@ -126,7 +126,7 @@ public class RequestService {
                         FOR JSON PATH
                     ) AS bd_details,
                     (
-                        SELECT bd.filepath, bd.filesvnm, bd.fileextns, bd.fileurl, bd.fileornm, bd.filesize
+                        SELECT bd.filepath, bd.filesvnm, bd.fileextns, bd.fileurl, bd.fileornm, bd.filesize, bd.fileid
                         FROM ERP_SWSPANEL1.dbo.tb_DA006WFILE bd
                         WHERE bd.custcd = hd.custcd
                           AND bd.spjangcd = hd.spjangcd

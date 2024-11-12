@@ -675,7 +675,6 @@
       })
       // bd_details를 파싱하여 배열로 변환
       // bd_details가 유효한 JSON 문자열일 때만 파싱
-      console.log("")
       const gridData = [];
       data2.forEach(item => {
         let bdDetailsArray = [];
@@ -876,7 +875,8 @@
               let newFile = {
                 name: file.fileornm,
                 type: file.fileextns,
-                size: file.size,
+                size: file.filesize,
+                fileid: file.fileid,
                 reqseq: item.reqseq,
                 lastModified: new Date().getTime(),
               };
