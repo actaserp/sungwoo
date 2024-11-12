@@ -44,13 +44,14 @@ public class UserGroupService {
 	
 	public Map<String, Object> getUserGroup(int id) {
 		String sql = """
-			select id, "Code" as code 
-            ,"Name" as name 
-            ,"Description" as description 
-            ,"Disabled" as disabled 
-            ,to_char("_created" ,'yyyy-mm-dd hh24:mi:ss') as created
-            from user_group 
-            where id = :group_id
+				SELECT id,\s
+				       [Code] AS code,
+				       [Name] AS name,
+				       [Description] AS description,
+				       [Disabled] AS disabled,
+				       CONVERT(VARCHAR, [_created], 120) AS created
+				FROM user_group;
+				WHERE id = :group_id;
 				""";
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("group_id", id);

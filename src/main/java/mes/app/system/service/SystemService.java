@@ -288,12 +288,9 @@ public class SystemService {
         ORDER BY tree.path, tree.ord
     """;
 
-        // Set up parameters for SQL query
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("folder_id", folderId);
         dicParam.addValue("group_id", userGroupId);
-
-        // Execute and return the result
         return this.sqlRunner.getRows(sql, dicParam);
     }
 

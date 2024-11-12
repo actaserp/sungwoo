@@ -98,6 +98,14 @@ public class UserCodeController {
         return result;
     }
 
+/*    @GetMapping("/checkDuplicate")
+    public ResponseEntity<Map<String, Boolean>> checkDuplicate(@RequestParam String code) {
+        boolean exists = codeService.existsByCode(code);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("exists", exists);
+        return ResponseEntity.ok(response);
+    }*/
+
     @GetMapping("/checkDuplicate")
     public ResponseEntity<Map<String, Boolean>> checkDuplicate(@RequestParam String code) {
         boolean exists = codeService.existsByCode(code);
@@ -105,6 +113,5 @@ public class UserCodeController {
         response.put("exists", exists);
         return ResponseEntity.ok(response);
     }
-
 
 }

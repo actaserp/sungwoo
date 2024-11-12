@@ -244,24 +244,21 @@
             $.ajax({
                 url: '/api/system/usergroup/read',
                 type: 'GET',
+                data: {
+
+                },
                 async: false,
                 success: function(data){
-                    if (data.data && data.data.length > 0) {
-                        data2 = data.data;
-                    } else {
-                        // 데이터가 없을 경우 빈 데이터를 10개 추가
-                        for (let i = 0; i < 10; i++) {
-                            data2.push({ code: '', name: '', id: '', description: '', gmenu: '' });
+                    let DataLength = 10 - data.data.length;
+
+                    if(data.data.length < 10){
+                        for(let i=0; i < DataLength; i++){
+                            data.data.push('empty');
                         }
                     }
-                },
-                error: function() {
-                    // 에러 발생 시에도 기본 행 추가
-                    for (let i = 0; i < 10; i++) {
-                        data2.push({ code: '', name: '', id: '', description: '', gmenu: '' });
-                    }
+                    data2 = data.data;
                 }
-            });
+            })
 
             viewdata = new wijmo.collections.CollectionView(data2);
             // 데이터 그리드에 바인딩
@@ -279,6 +276,7 @@
 
                 }
             })
+
 
             // 더블클릭 이벤트 추가
             theGrid.hostElement.addEventListener('dblclick', function(e) {
@@ -299,14 +297,14 @@
                     document.getElementById('description').value = item.description;
                     document.getElementById('gmenu').value = item.gmenu;
 
-                  /*  updateTabLink('id');
+                    /*  updateTabLink('id');
 
-                    let tabIds = '#tab2';
-                    $(".tab-item").hide();
-                    $(tabIds).show();
+                      let tabIds = '#tab2';
+                      $(".tab-item").hide();
+                      $(tabIds).show();
 
-                    $("#listTabLink").parent().removeClass("active");
-                    $("#inputTabLink").parent().addClass("active");*/
+                      $("#listTabLink").parent().removeClass("active");
+                      $("#inputTabLink").parent().addClass("active");*/
                 }
             });
 
@@ -326,6 +324,9 @@
                 success: function (data) {
                     console.log('wijmo', data.data);
                     data3 = data.data;
+
+                    // 중분류 메뉴를 제외한 데이터 필터링
+                    data3 = data.data.filter(item => item.r !== null || item.w !== null);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     console.error('Error fetching log_list data:', textStatus, errorThrown);
@@ -411,7 +412,6 @@
         }
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
 
-
         function searchData(){
 
             let result =  AjaxUtil.getSyncData('/api/system/usergroup/read', {});
@@ -419,36 +419,28 @@
             if(result.success){
                 console.log(result.data);
 
-                let DataLength = 10 - result.data.length;
-
-                if(result.data.length < 10){
-                    for(let i=0; i < DataLength; i++){
-                        result.data.push('empty');
-                    }
-                }
                 grid_binding(result.data);
             }
         }
 
-        function grid_binding(data){
+        function grid_binding(data) {
             var inspecDto = data;
             var inspecData = [];
-            var cnt = 1;
             for (let i = 0; i < inspecDto.length; i++) {
                 inspecData.push({
                     id: inspecDto[i]["id"],
                     code: inspecDto[i]["code"],
                     name: inspecDto[i]["name"],
                     description: inspecDto[i]["description"],
-                    gmenu: inspecDto[i]["gmenu"]
+                    gmenu: inspecDto[i]["gmenu"],
+                    gmenuname: inspecDto[i]["gmenuname"],
+                    flag: inspecDto[i]["flag"]
                 });
-                cnt++;
             }
 
             theGrid.columns.clear();
             theGrid.autoGenerateColumns = false;
             viewdata.sourceCollection = inspecData;
-
 
             for (let i = 0; i < columns.length; i++) {
                 let col = new wijmo.grid.Column(columns[i]);
@@ -456,6 +448,7 @@
             }
             SelectItem = undefined;
         }
+
 
         function checkAndAlert(){
             for (let i = 0; i < SelectItem.length; i++) {
@@ -513,7 +506,6 @@
         /*    updateTabLink('id');*/
 
         }
-
 
         // 초기 콤보박스 채우기
         AjaxUtil.fillSelectOptions($('#cboUserGroup2'), 'user_group', '', '');
@@ -649,7 +641,6 @@
             // 데이터 확인을 위한 콘솔 출력
             console.log("Items to be sent:", JSON.stringify(items, null, 2)); // 전송할 데이터 출력
 
-
             data.Q = JSON.stringify(items);
             console.log("Final data object:", JSON.stringify(data, null, 2)); // 최종 데이터 객체 출력
             //데이터입력체크루틴 누락
@@ -674,8 +665,6 @@
             // 값이 변경되었을 때 searchData 함수를 호출
             searchData2();
         });
-
-
 
 
         $(document).ready(function (e) {
@@ -710,7 +699,7 @@
                     const data = { code: code, name: name, description: description, id: id, gmenu: gmenu };
                     const fnSuccess = function (res) {
                         Alert.alert('', res.message);
-                        $('#listTabLink').click();
+                        AjaxUtil.fillSelectOptions($('#cboUserGroup2'), 'user_group', '', '');
                         searchData();
                         clearForm();
                     };
@@ -780,15 +769,14 @@
                     return false;
                 }
                 let bindingList = ['id', 'code', 'name', 'description', 'gmenu'];
-                let valueList = [ selectedItem._data.id ,selectedItem._data.code, selectedItem._data.name, selectedItem._data.description, selectedItem._data.gmenu ];
+                let valueList = [ selectedItem._data.id , selectedItem._data.code, selectedItem._data.name, selectedItem._data.description, selectedItem._data.gmenu ];
 
-                for(let i=0; i < bindingList.length; i++){
-                    console.log(bindingList[i], valueList[i]);
-                    ElementBinding(bindingList[i], valueList[i]);
+                for (let i = 0; i < bindingList.length; i++) {
+                    if (valueList[i] !== undefined) {
+                        ElementBinding(bindingList[i], valueList[i]);
+                    }
                 }
-
                 updateTabLink('id');
-
             })
 
         });

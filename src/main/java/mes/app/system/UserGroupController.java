@@ -1,5 +1,6 @@
 package mes.app.system;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -82,10 +83,7 @@ public class UserGroupController{
 		result.data = item;
 		return result;
 	}
-	
-	
-	
-	
+
 	@PostMapping("/save")
 	public AjaxResult saveUserGroup(
 			@RequestParam(value="id", required= false) Integer id,
@@ -95,33 +93,43 @@ public class UserGroupController{
 			@RequestParam("gmenu") String gmenu,
 			HttpServletRequest request,
 			Authentication auth) {
-			User user = (User)auth.getPrincipal();
-			
-			UserGroup ug=null;
-			
-			if(id == null) {
-				ug = new UserGroup();
-			} else {
-				ug = this.userGroupRepository.getUserGrpById(id);
-			}
-			
-			ug.setName(name);
-			ug.setCode(code);
-			ug.setDescription(description);
-			ug.set_audit(user);
-			ug.setGmenu(gmenu);
-			
-			ug = this.userGroupRepository.save(ug);
-			
-			AjaxResult result = new AjaxResult();
-			result.data = ug;
+		User user = (User)auth.getPrincipal();
 
-			result.success = true;
-			result.message = "저장완료하였습니다.";
-			return result;
-			
+		UserGroup ug=null;
+		AjaxResult result = new AjaxResult();
+
+		if(id == null) {
+			ug = new UserGroup();
+
+			UserGroup byCode = userGroupRepository.findByCode(code);
+			if(byCode != null){
+				result.success = false;
+				result.message = "중복된 코드가 존재합니다.";
+				return result;
+			}
+
+		} else {
+			ug = this.userGroupRepository.getUserGrpById(id);
+		}
+
+		ug.setName(name);
+		ug.setCode(code);
+		ug.setDescription(description);
+		ug.set_audit(user);
+		ug.setGmenu(gmenu);
+
+		ug = this.userGroupRepository.save(ug);
+
+
+		result.data = ug;
+
+		result.success = true;
+		result.message = "저장완료하였습니다.";
+		return result;
+
 	}
-	
+
+
 	@PostMapping("/delete")
 	public AjaxResult deleteUserGroup(@RequestParam("id") String id) {
 
@@ -138,8 +146,10 @@ public class UserGroupController{
 	}
 
 	@GetMapping("/defaultMenu")
-	public List<MenuItem> getMenuItem(){
-		List<MenuItem> defaultList = menuItemRepository.findByMenuFolderId(54);
+	public List<MenuItem> getMenuItem() {
+		List<Integer> folderIds = Arrays.asList(54, 53);
+		List<MenuItem> defaultList = menuItemRepository.findByMenuFolderIdIn(folderIds);
 		return defaultList;
 	}
+
 }

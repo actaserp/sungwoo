@@ -31,7 +31,7 @@ public class UserGroup extends AbstractAuditModel implements Serializable {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	int id;
-	
+
 	@Column(name = "\"Code\"")
 	String code;
 	

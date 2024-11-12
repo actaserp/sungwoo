@@ -82,7 +82,7 @@
             <!--            </ul>-->
             <div class="tab-contents">
                 <!-- Section -->
-                <section class="tab-item" id="tab1">
+                <section class="tab-item" style="border-radius: 15px;" id="tab1">
                     <div class="section-top">
                         <div class="search-wrap">
                             <dl>
@@ -264,24 +264,23 @@
 
         // wijmo grid에서 hidden 사용할려면 visible 사용해야함
         var columns = [
-            {binding: 'aid', header: 'AID', align: 'left', width: "*", visible: false},
-            {binding: 'agropcd', header: '상위코드', align: 'left', width: "*", isReadOnly: true},
-            {binding: 'agroupnm', header: '상위분류명', align: 'left', width: "*"},
-            {binding: 'Astatus', header: 'A 사용여부', align: 'left', width: "*", visible: false},
+            { binding: 'aid', header: 'AID', align: 'left', width: "*", visible: false},
+            { binding: 'agropcd', header: '상위코드', align: 'left', width: "*", isReadOnly: true },
+            { binding: 'agroupnm', header: '상위분류명', align: 'left', width: "*" },
+            { binding: 'Astatus', header: 'A 사용여부', align: 'left', width: "*", visible: false },
             /*   { binding: 'ADescription', header: 'A설명', align: 'left', width: 100, visible: false },*/
-            {binding: 'bid', header: 'BID', align: 'left', width: "*", visible: false, isReadOnly: true},
-            {binding: 'bgropcd', header: '중위코드', align: 'left', width: "*", isReadOnly: true},
-            {binding: 'bgroupnm', header: '중분류명', align: 'left', width: "*"},
-            {binding: 'Bstatus', header: 'B 사용여부', align: 'left', width: "*", visible: false},
-            {binding: 'bdescription', header: '중분류 설명', align: 'left', width: 185},
-            {binding: 'cid', header: 'CID', align: 'left', width: "*", visible: false, isReadOnly: true},
-            {binding: 'cgropcd', header: '하위코드', align: 'left', width: "*", isReadOnly: true},
-            {binding: 'cgroupnm', header: '하위분류명', align: 'left', width: "*"},
-            {binding: 'Cstatus', header: 'C 사용여부', align: 'left', width: "*", visible: false},
-            {binding: 'cdescription', header: '하위분류 설명', align: 'left', width: "*"},
+            { binding: 'bid', header: 'BID', align: 'left', width: "*", visible: false, isReadOnly: true },
+            { binding: 'bgropcd', header: '중위코드', align: 'left', width: "*", isReadOnly: true  },
+            { binding: 'bgroupnm', header: '중분류명', align: 'left', width: "*" },
+            { binding: 'Bstatus', header: 'B 사용여부', align: 'left', width: "*", visible: false },
+            { binding: 'bdescription', header: '중분류 설명', align: 'left', width: 185},
+            { binding: 'cid', header: 'CID', align: 'left', width: "*", visible: false, isReadOnly: true },
+            { binding: 'cgropcd', header: '하위코드', align: 'left', width: "*", isReadOnly: true  },
+            { binding: 'cgroupnm', header: '하위분류명', align: 'left', width: "*" },
+            { binding: 'Cstatus', header: 'C 사용여부', align: 'left', width: "*", visible: false },
+            { binding: 'cdescription', header: '하위분류 설명', align: 'left', width: "*" },
             /*   { binding: 'adescription', header: '설명', align: 'left', width: '*' }*/
         ];
-
 
         document.readyState === 'complete' ? init() : window.onload = init;
 
@@ -508,17 +507,17 @@
                 agropcd: item.agropcd,
                 agroupnm: item.agroupnm,
                 astatus: item.astatus,
-                adescription: item.adescription,
+                adescription:item.adescription,
                 bid: item.bid,
                 bgropcd: item.bgropcd,
                 bgroupnm: item.bgroupnm,
                 bstatus: item.bstatus,
-                bdescription: item.bdescription,
+                bdescription:item.bdescription,
                 cid: item.cid,
                 cgropcd: item.cgropcd,
                 cgroupnm: item.cgroupnm,
                 cstatus: item.cstatus,
-                cdescription: item.cdescription
+                cdescription:item.cdescription
             }));
 
             console.log("Formatted data:", formattedData);
@@ -550,13 +549,11 @@
 
             // 체크박스 상태 업데이트
             if (formattedData.length > 0) {
-                // 첫 번째 항목의 상태를 체크박스에 반영
-                $('#status').prop('checked', formattedData[0].a_status === 'y');
-                $('#b_status').prop('checked', formattedData[0].b_status === 'y');
-                $('#c_status').prop('checked', formattedData[0].c_status === 'y');
+                $('#status').prop('checked', formattedData[0].Astatus === 'y');
+                $('#b_status').prop('checked', formattedData[0].Bstatus === 'y');
+                $('#c_status').prop('checked', formattedData[0].Cstatus === 'y');
             }
         }
-
 
         function deleteCode() {
             // 그리드에서 선택된 항목과 열 정보를 가져옵니다
@@ -711,4 +708,3 @@
 
 </th:block>
 </html>
-

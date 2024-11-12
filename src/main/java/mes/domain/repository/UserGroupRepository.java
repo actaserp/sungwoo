@@ -15,4 +15,6 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Integer> {
 	UserGroup getUserGrpById(Integer id);
 
 	List<UserGroup> findByCodeAndName(String code, String name);
+
+    UserGroup findByCode(String code);
 }
