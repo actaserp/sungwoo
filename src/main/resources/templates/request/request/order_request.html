@@ -646,6 +646,11 @@
     const date = new Date();
     date.setHours(date.getHours() + 9); // UTC+9로 한국 시간 설정
     const today = date.toISOString().split('T')[0];
+    // 현재 년도를 가져옵니다
+    const currentYear = new Date().getFullYear();
+    // 시작일 input에 올해 1월 1일을 설정합니다
+    document.getElementById('startDate').value = `${currentYear}-01-01`;
+    document.getElementById('endDate').value = today;
     document.getElementById('reqdate').value = today;
     document.getElementById('deldate').value = today;
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
@@ -657,7 +662,7 @@
     // 주문의뢰현황 그리드
     function fetchListData() {
       let data2 = [];
-
+      const transformedData = []; // 변환된 데이터를 저장할 배열
       $.ajax({
         url: '/api/request/request/order_read',
         type: 'GET',
@@ -675,104 +680,36 @@
       })
       // bd_details를 파싱하여 배열로 변환
       // bd_details가 유효한 JSON 문자열일 때만 파싱
-      const gridData = [];
+
+      const seenReqnum = new Set(); // reqnum을 기준으로 중복을 확인
       data2.forEach(item => {
-        let bdDetailsArray = [];
-        // JSON 파싱 전에 유효성 검사를 추가
-        if (item.bd_details && typeof item.bd_details === 'string') {
-          try {
-            // JSON 파싱 시 불필요한 이스케이프 문자 제거
-            let sanitizedBdDetails = item.bd_details.trim();
-
-            // JSON 문자열이 잘못된 경우 처리
-            if (sanitizedBdDetails.startsWith('"') && sanitizedBdDetails.endsWith('"')) {
-              sanitizedBdDetails = sanitizedBdDetails.slice(1, -1); // 양 끝 따옴표 제거
-            }
-
-            sanitizedBdDetails = sanitizedBdDetails.replace(/\"/g, '"'); // 잘못된 이스케이프 문자 제거
-            bdDetailsArray = JSON.parse(sanitizedBdDetails);
-            bdDetailsArray.forEach(body =>{
-              body.hgrb = getHgrb((body.hgrb));
-              body.exfmtypedv = getListCgrb2(body.exfmtypedv);
-              body.infmtypedv = getListCgrb2(body.infmtypedv);
-              body.stframedv = getListCgrb2(body.stframedv);
-              body.stexplydv = getListCgrb2(body.stexplydv);
-            })
-
-          } catch (e) {
-            console.error("JSON 파싱 오류:", e);
-            console.log("문제가 발생한 데이터:", item.bd_details);
-          }
-        }
-        // 첫 번째 행: hd 정보 + bd 정보의 첫 번째 항목
-        gridData.push({
-          ordflag: item.ordflag,
-          reqdate: item.reqdate,
-          deldate: item.deldate,
-          telno: item.telno,
-          perid: item.perid,
-          cltzipcd: item.cltzipcd,
-          cltaddr: item.cltaddr,
-          panel_ht: item.panel_ht,
-          panel_hw: item.panel_hw,
-          panel_hl: item.panel_hl,
-          panel_hh: item.panel_hh,
-          remark: item.remark,
-          downloads: item.downloads,
-          reqnum: item.reqnum,
-          isdownload: item.isdownload,
-          files: item.hd_files,
-          hgrb: bdDetailsArray[0]?.hgrb || '',
-          qty: bdDetailsArray[0]?.qty || '',
-          panel_t: bdDetailsArray[0]?.panel_t || '',
-          panel_w: bdDetailsArray[0]?.panel_w || '',
-          panel_l: bdDetailsArray[0]?.panel_l || '',
-          exfmtypedv: bdDetailsArray[0]?.exfmtypedv || '',
-          infmtypedv: bdDetailsArray[0]?.infmtypedv || '',
-          stframedv: bdDetailsArray[0]?.stframedv || '',
-          stexplydv: bdDetailsArray[0]?.stexplydv || '',
-          ordtext: bdDetailsArray[0]?.ordtext || '',
-          originOrdtext: bdDetailsArray[0]?.ordtext || ''
-        });
-
-        // 이후 행: hd 정보는 빈 값으로 설정, bd_details의 나머지 데이터 추가
-        for (let i = 1; i < bdDetailsArray.length; i++) {
-          const detail = bdDetailsArray[i];
-          gridData.push({
-            ordflag: '',
-            reqdate: '',
-            deldate: '',
-            telno: '',
-            perid: '',
-            cltzipcd: '',
-            cltaddr: '',
-            panel_ht: '',
-            panel_hw: '',
-            panel_hl: '',
-            panel_hh: '',
-            remark: '',
-            downloads: '',
-            reqnum: item.reqnum,
-            hgrb: detail.hgrb || '',
-            qty: detail.qty || '',
-            panel_t: detail.panel_t || '',
-            panel_w: detail.panel_w || '',
-            panel_l: detail.panel_l || '',
-            exfmtypedv: detail.exfmtypedv || '',
-            infmtypedv: detail.infmtypedv || '',
-            stframedv: detail.stframedv || '',
-            stexplydv: detail.stexplydv || '',
-            ordtext: detail.ordtext || '',
-            originOrdtext: detail.ordtext || ''
-          });
+        // reqnum이 이미 본 값인지 확인
+        if (!seenReqnum.has(item.reqnum)) {
+          // 처음 보는 경우, 값을 추가하고 Set에 추가
+          transformedData.push(item);
+          seenReqnum.add(item.reqnum);
+        } else {
+          // 이미 본 경우, 특정 필드를 숨기기 위해 복사하되 해당 필드를 null로 설정
+          const newItem = {
+            ...item,
+            ordflag: null,
+            reqdate: null,
+            deldate: null,
+            panel_ht: null,
+            panel_hw: null,
+            panel_hl: null,
+            panel_hh: null,
+            remark: null,
+            isdownload: false
+          };
+          transformedData.push(newItem);
         }
       });
+      viewdata1 = new wijmo.collections.CollectionView(transformedData); // 변환된 데이터를 CollectionView로 변환
       const minRows = 12;
-      while (gridData.length < minRows) {
-        gridData.push({}); // 빈 객체를 추가하여 빈 행을 생성
+      while (viewdata1.length < minRows) {
+        transformedData.push({}); // 빈 객체를 추가하여 빈 행을 생성
       }
-      viewdata1 = new wijmo.collections.CollectionView(data2);
-      console.log("gridData : ", gridData)
       if (!theGrid) {
         // 데이터 그리드에 바인딩
         theGrid = new wijmo.grid.FlexGrid('#theGrid', {
@@ -784,10 +721,6 @@
             {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
             {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 110, align: 'center'},
             {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 110, align: 'center'},
-            {binding: 'telno', header: '연락처', width: '*', minWidth: 140, align: 'center'},
-            {binding: 'perid', header: '담당자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'cltzipcd', header: '우편번호', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'cltaddr', header: '상세주소', width: '*', minWidth: 100, align: 'center'},
             {binding: 'panel_ht', header: '두께', width: '*', minWidth: 100, align: 'center'},
             {binding: 'panel_hw', header: '폭', width: '*', minWidth: 100, align: 'center'},
             {binding: 'panel_hl', header: '길이', width: '*', minWidth: 100, align: 'center'},
@@ -795,23 +728,26 @@
             {binding: 'remark', header: '제목', width: '*', minWidth: 100, align: 'center'},
             {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 100, align: 'center'},
 
-            {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'left'},
-            {binding: 'qty', header: '수량', width: '*', minWidth: 100, align: 'left'},
-            {binding: 'panel_t', header: 'T', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'panel_w', header: 'W/H', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'panel_l', header: 'L', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'right'},
-            {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'bd_hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'left'},
+            {binding: 'bd_qty', header: '수량', width: '*', minWidth: 100, align: 'left'},
+            {binding: 'bd_panel_t', header: 'T', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'bd_panel_w', header: 'W/H', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'bd_panel_l', header: 'L', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'bd_exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'bd_infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'bd_stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'bd_stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'bd_ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'telno', header: '연락처', width: '*', minWidth: 140, align: 'center'},
+            {binding: 'perid', header: '담당자', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'cltaddr', header: '상세주소', width: '*', minWidth: 100, align: 'center'},
 
             {binding: 'reqnum', visible: false},  // 숨길 컬럼
             {binding: 'isdownload', visible: false},
             {binding: 'files', visible: false},
             {binding: 'originOrdtext', visible: false},
           ],
-          itemsSource: gridData,
+          itemsSource: viewdata1,
           itemFormatter: function (panel, r, c, cell) {
             if (panel.cellType === wijmo.grid.CellType.Cell) {
               var item = panel.rows[r].dataItem; // 현재 행의 데이터 항목
@@ -838,7 +774,7 @@
             let row = hitTest.row;
             let item = theGrid.rows[row].dataItem;
             if (!item.ordflag && item.reqnum) {
-              let hdRow = gridData.find(data => data.reqnum === item.reqnum && data.ordflag);
+              let hdRow = viewdata1.items.find(data => data.reqnum === item.reqnum && data.ordflag);
               if (hdRow) {
                 console.log('hd 정보가 있는 행을 참조:', hdRow);
                 document.getElementById('reqdate').value = hdRow.reqdate;
@@ -924,7 +860,7 @@
         window.downloadFileName = '티켓현황';
       } else {
         // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-        theGrid.itemsSource = gridData;
+        theGrid.itemsSource = viewdata1;
       }
     }
 

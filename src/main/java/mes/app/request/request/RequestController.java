@@ -143,14 +143,8 @@ public class RequestController {
                             List<String> filepathList = filepaths != null ? Arrays.asList(filepaths.split(",")) : Collections.emptyList();
                             List<String> filesvnmList = filesvnms != null ? Arrays.asList(filesvnms.split(",")) : Collections.emptyList();
 
-//                            fileitem.put("fileornmList", fileornmList);
-//                            fileitem.put("filepathList", filepathList);
-//                            fileitem.put("filesvnmList", filesvnmList);
                             item.put("isdownload", !fileornmList.isEmpty() && !filepathList.isEmpty());
                         } else {
-//                            fileitem.put("fileornmList", Collections.emptyList());
-//                            fileitem.put("filepathList", Collections.emptyList());
-//                            fileitem.put("filesvnmList", Collections.emptyList());
                             item.put("isdownload", false);
                         }
                     }

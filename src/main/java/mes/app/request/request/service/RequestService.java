@@ -92,7 +92,7 @@ public class RequestService {
                     hd.custcd AS hd_custcd,
                     hd.spjangcd AS hd_spjangcd,
                     hd.reqnum,
-                    hd.reqdate,          -- GROUP BY에 추가해야 하는 컬럼
+                    hd.reqdate,
                     hd.indate AS hd_indate,
                     hd.ordflag,
                     hd.deldate,
@@ -105,49 +105,50 @@ public class RequestService {
                     hd.panel_hl,
                     hd.panel_hh,
                     hd.remark,
+                
                     (
-                        SELECT bd.reqseq,
-                         bd.panel_t,
-                         bd.panel_w,
-                         bd.panel_l,
-                         bd.hgrb,
-                         bd.qty,
-                         bd.exfmtypedv,
-                         bd.infmtypedv,
-                         bd.stframedv,
-                         bd.stexplydv,
-                         bd.ordtext
-                        FROM ERP_SWSPANEL1.dbo.TB_DA007W bd
-                        WHERE bd.custcd = hd.custcd
-                          AND bd.spjangcd = hd.spjangcd
-                          AND bd.reqdate = hd.reqdate
-                          AND bd.reqnum = hd.reqnum
-                        ORDER BY bd.indate DESC
-                        FOR JSON PATH
-                    ) AS bd_details,
-                    (
-                        SELECT bd.filepath, bd.filesvnm, bd.fileextns, bd.fileurl, bd.fileornm, bd.filesize, bd.fileid
-                        FROM ERP_SWSPANEL1.dbo.tb_DA006WFILE bd
-                        WHERE bd.custcd = hd.custcd
-                          AND bd.spjangcd = hd.spjangcd
-                          AND bd.reqdate = hd.reqdate
-                          AND bd.reqnum = hd.reqnum
-                        ORDER BY bd.indatem DESC
-                        FOR JSON PATH
-                    ) AS hd_files
+                         SELECT bd.filepath, bd.filesvnm, bd.fileextns, bd.fileurl, bd.fileornm, bd.filesize, bd.fileid
+                         FROM ERP_SWSPANEL1.dbo.tb_DA006WFILE bd
+                         WHERE bd.custcd = hd.custcd
+                           AND bd.spjangcd = hd.spjangcd
+                           AND bd.reqdate = hd.reqdate
+                           AND bd.reqnum = hd.reqnum
+                         ORDER BY bd.indatem DESC
+                         FOR JSON PATH
+                     ) AS hd_files,
+                
+                    bd.reqseq AS bd_reqseq,
+                    bd.panel_t AS bd_panel_t,
+                    bd.panel_w AS bd_panel_w,
+                    bd.panel_l AS bd_panel_l,
+                    bd.hgrb AS bd_hgrb,
+                    bd.qty AS bd_qty,
+                    bd.exfmtypedv AS bd_exfmtypedv,
+                    bd.infmtypedv AS bd_infmtypedv,
+                    bd.stframedv AS bd_stframedv,
+                    bd.stexplydv AS bd_stexplydv,
+                    bd.ordtext AS bd_ordtext
+                
                 FROM
-                    ERP_SWSPANEL1.dbo.TB_DA006W hd
+                    TB_DA006W hd
+                
+                LEFT JOIN TB_DA007W bd
+                    ON bd.custcd = hd.custcd
+                    AND bd.spjangcd = hd.spjangcd
+                    AND bd.reqdate = hd.reqdate
+                    AND bd.reqnum = hd.reqnum
+                
                 WHERE
-                    hd.custcd = 'SWSPANEL'
-                    AND hd.spjangcd = 'ZZ'
+                    hd.custcd = :custcd
+                    AND hd.spjangcd = :spjangcd
                 """);
         // 날짜 필터
         if (searchStartDate != null && !searchStartDate.isEmpty()) {
-            sql.append(" AND hd.indate >= :searchStartDate");
+            sql.append(" AND hd.reqdate >= :searchStartDate");
         }
         //
         if (searchEndDate != null && !searchEndDate.isEmpty()) {
-            sql.append(" AND hd.indate <= :searchEndDate");
+            sql.append(" AND hd.reqdate <= :searchEndDate");
         }
         // 제목필터
         if (searchRemark != null && !searchRemark.isEmpty()) {
@@ -158,24 +159,7 @@ public class RequestService {
             sql.append(" AND ordflag LIKE :searchOrdflag");
         }
         // 정렬 조건 추가
-        sql.append(" GROUP BY" +
-                " hd.custcd," +
-                " hd.spjangcd," +
-                " hd.reqnum," +
-                " hd.reqdate," +
-                " hd.indate," +
-                " hd.ordflag," +
-                " hd.deldate," +
-                " hd.telno," +
-                " hd.perid," +
-                " hd.cltzipcd," +
-                " hd.cltaddr," +
-                " hd.panel_ht," +
-                " hd.panel_hw," +
-                " hd.panel_hl," +
-                " hd.panel_hh," +
-                " hd.remark" +
-                " ORDER BY hd.indate DESC");
+        sql.append(" ORDER BY hd.reqdate ASC");
 
         dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
         dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
