@@ -389,43 +389,46 @@ public class RequestService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         try {
             String sql = """
-                    DELETE FROM TB_DA006W
-                    WHERE reqnum = :reqnum
-                """;
+                DELETE FROM TB_DA006W
+                WHERE reqnum = :reqnum
+            """;
             dicParam.addValue("reqnum", reqnum);
-            this.sqlRunner.queryForObject(sql, dicParam, (rs, rowNum) -> rs.getString("dtl_cd"));
+            this.sqlRunner.execute(sql, dicParam); // update 메서드로 변경
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     // TB_DA007W 삭제
     public void bodyDelete(String reqnum){
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         try {
             String sql = """
-                    DELETE FROM TB_DA007W
-                    WHERE reqnum = :reqnum
-                """;
+                DELETE FROM TB_DA007W
+                WHERE reqnum = :reqnum
+            """;
             dicParam.addValue("reqnum", reqnum);
-            this.sqlRunner.queryForObject(sql, dicParam, (rs, rowNum) -> rs.getString("dtl_cd"));
+            this.sqlRunner.execute(sql, dicParam); // update 메서드로 변경
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     // TB_DA006Wfile 삭제
     public void fileDelete(String reqnum){
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         try {
             String sql = """
-                    DELETE FROM tb_DA006WFILE
-                    WHERE reqnum = :reqnum
-                """;
+                DELETE FROM tb_DA006WFILE
+                WHERE reqnum = :reqnum
+            """;
             dicParam.addValue("reqnum", reqnum);
-            this.sqlRunner.queryForObject(sql, dicParam, (rs, rowNum) -> rs.getString("dtl_cd"));
+            this.sqlRunner.execute(sql, dicParam); // update 메서드로 변경
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     @Transactional
     public boolean deleteBody(String reqseq) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();

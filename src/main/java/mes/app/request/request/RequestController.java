@@ -182,15 +182,10 @@ public class RequestController {
         headpk.setCustcd((String) userInfo.get("custcd"));
         headpk.setSpjangcd("ZZ");
         headpk.setReqdate(params.get("reqdate").replaceAll("-",""));
-        String reqnum;
-        if(params.get("reqnum").equals("")) {
-            reqnum = String.valueOf(tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"), "ZZ", params.get("reqdate")) + 1);
-        }else{
-            reqnum = params.get("reqnum");
-        }
+        String reqnum = params.get("reqnum").equals("") ?
+                String.valueOf(tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"), "ZZ", params.get("reqdate")) + 1) :
+                params.get("reqnum");
         headpk.setReqnum(reqnum);
-
-        TB_DA006W tbDa006 = new TB_DA006W();
 
         if(files != null){
             for (MultipartFile multipartFile : files) {
@@ -260,6 +255,7 @@ public class RequestController {
             }
             //TBRP760Repository.deleteAll(tbRp760List);
         }
+        TB_DA006W tbDa006 = new TB_DA006W();
 
         tbDa006.setPk(headpk);
         tbDa006.setCltcd((String) userInfo.get("cltcd"));
@@ -280,17 +276,11 @@ public class RequestController {
         tbDa006.setRemark(params.get("remark"));
         //tbDa006.setOrdtext(now);
 
-        boolean successcode = requestService.save(tbDa006);
-        if (successcode) {
-            result.success = true;
-            result.message = "저장하였습니다.";
-        } else {
-            result.success = false;
-            result.message = "저장에 실패하였습니다.";
-        }
-        TB_DA007W_PK bodypk = new TB_DA007W_PK();
+        boolean mainSaveSuccess = requestService.save(tbDa006);
+        result.success = mainSaveSuccess;
+        result.message = mainSaveSuccess ? "주문 정보 저장 성공" : "주문 정보 저장 실패";
 
-        TB_DA007W tbDa007 = new TB_DA007W();
+        if (!mainSaveSuccess) return result; // 주문 정보 저장 실패 시 조기 종료
 
         // 'bodyData' 필드를 JSON 문자열로 받아오기
         try {
@@ -300,13 +290,17 @@ public class RequestController {
                 List<Map<String, Object>> jsonDataList = objectMapper.readValue(
                         bodyDataJson, new TypeReference<List<Map<String, Object>>>() {}
                 );
-                // Map을 통해 필드에 접근
-                bodypk.setCustcd((String) userInfo.get("custcd"));
-                bodypk.setSpjangcd("ZZ");
-                bodypk.setReqdate(params.get("reqdate").replaceAll("-",""));
-                bodypk.setReqnum(reqnum);
+
                 List<String> reqseqList = tbda007WRepository.findReqseq(reqnum, (String) userInfo.get("custcd"),"ZZ",params.get("reqdate").replaceAll("-",""));
+                boolean allSuccessful = true;
                 for (Map<String, Object> jsonData : jsonDataList) {
+                    TB_DA007W tbDa007 = new TB_DA007W();
+                    TB_DA007W_PK bodypk = new TB_DA007W_PK();
+                    // Map을 통해 필드에 접근
+                    bodypk.setCustcd((String) userInfo.get("custcd"));
+                    bodypk.setSpjangcd("ZZ");
+                    bodypk.setReqdate(params.get("reqdate").replaceAll("-",""));
+                    bodypk.setReqnum(reqnum);
 
                     tbDa007.setHgrb((String) jsonData.get("hgrb"));
                     tbDa007.setPanel_t((String) jsonData.get("panel_t"));
@@ -321,34 +315,28 @@ public class RequestController {
                     tbDa007.setIndate(params.get("deldate").replaceAll("-",""));
                     tbDa007.setInperid(String.valueOf(user.getId()));
 
-                    if (!reqseqList.contains((String) jsonData.get("reqseq"))) {
-                        String reqseq = String.valueOf(tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ", params.get("reqdate").replaceAll("-", "")) + 1);
+                    // 기존 항목인지 확인하고 삽입 또는 업데이트
+                    String reqseq = (String) jsonData.get("reqseq");
+                    if (reqseqList.contains(reqseq)) {
                         bodypk.setReqseq(reqseq);
                         tbDa007.setPk(bodypk);
 
-                        boolean successcodebody = requestService.saveBody(tbDa007);
-                        if (successcodebody) {
-                            result.success = true;
-                            result.message = "저장하였습니다.";
-                        } else {
-                            result.success = false;
-                            result.message = "세부사항 저장에 실패하였습니다.";
-                        }
-                    }else {
-                        String reqseq = (String) jsonData.get("reqseq");
+                        boolean successUpdate = requestService.updateBody(tbDa007);
+                        allSuccessful &= successUpdate;
+                        result.message += successUpdate ? " | 세부사항 업데이트 성공" : " | 세부사항 업데이트 실패";
+                    } else {
+                        reqseq = String.valueOf(tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ", params.get("reqdate").replaceAll("-", "")) + 1);
                         bodypk.setReqseq(reqseq);
                         tbDa007.setPk(bodypk);
 
-                        boolean successcodebody = requestService.updateBody(tbDa007);
-                        if (successcodebody) {
-                            result.success = true;
-                            result.message = "수정하였습니다.";
-                        } else {
-                            result.success = false;
-                            result.message = "세부사항 수정에 실패하였습니다.";
-                        }
+                        boolean successInsert = requestService.saveBody(tbDa007);
+                        allSuccessful &= successInsert;
+                        result.message += successInsert ? " | 세부사항 저장 성공" : " | 세부사항 저장 실패";
                     }
                 }
+
+                result.success = allSuccessful;
+                result.message = "저장성공";
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -612,7 +600,7 @@ public class RequestController {
 //    //        utils.showMessageWithRedirect("게시글 등록이 완료되었습니다", "/app05/App05list/", Method.GET, model);
 //    }
     // 삭제 메서드
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public AjaxResult deleteHead(@RequestParam String reqnum) {
         AjaxResult result = new AjaxResult();
 
@@ -628,7 +616,7 @@ public class RequestController {
         return result;
     }
     // body 삭제 메서드
-    @DeleteMapping("/bodyDelete")
+    @PostMapping("/bodyDelete")
     public AjaxResult deleteBody(@RequestParam String reqseq) {
         AjaxResult result = new AjaxResult();
 
