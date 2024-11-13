@@ -61,7 +61,7 @@ public class UserController {
 
 
 	// 사용자 리스트 조회
-	@GetMapping("/read")
+	/*@GetMapping("/read")
 	public AjaxResult getUserList(
 			@RequestParam(value="group", required=false) Integer group,
 			@RequestParam(value="keyword", required=false) String keyword,
@@ -84,6 +84,28 @@ public class UserController {
 		List<Map<String, Object>> items = this.userService.getUserList(superUser, group, keyword, username, departId, divinm);
 
 		result.data = items;
+		return result;
+	}*/
+
+	@GetMapping("/read")
+	public AjaxResult getUserList(@RequestParam(value = "cltnm", required = false) String cltnm, // 업체명
+								  @RequestParam(value = "prenm", required = false) String prenm, // 대표자
+								  @RequestParam(value = "biztypenm", required = false) String biztypenm, // 업태
+								  @RequestParam(value = "bizitemnm", required = false) String bizitemnm, // 종목
+								  @RequestParam(value = "email", required = false) String email,
+								  Authentication auth){
+		AjaxResult result = new AjaxResult();
+		User user = (User)auth.getPrincipal();
+		boolean superUser = user.getSuperUser();
+
+		if (!superUser) {
+			superUser = user.getUserProfile().getUserGroup().getCode().equals("dev");
+		}
+
+		List<Map<String, Object>> items = this.userService.getUserList(superUser, cltnm, prenm, biztypenm, bizitemnm, email);
+
+		result.data = items;
+
 		return result;
 	}
 
