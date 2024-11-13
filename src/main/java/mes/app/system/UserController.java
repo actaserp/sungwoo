@@ -5,18 +5,23 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import mes.app.UtilClass;
+import mes.app.account.service.TB_RP945_Service;
+import mes.app.account.service.TB_XClientService;
 import mes.domain.DTO.TB_RP945Dto;
-import mes.domain.entity.TB_RP945;
-import mes.domain.entity.UserCode;
+import mes.domain.entity.*;
+import mes.domain.entity.actasEntity.TB_XA012;
+import mes.domain.entity.actasEntity.TB_XCLIENT;
+import mes.domain.entity.actasEntity.TB_XCLIENTId;
 import mes.domain.repository.*;
+import mes.domain.repository.actasRepository.TB_XA012Repository;
+import mes.domain.repository.actasRepository.TB_XClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.MultiValueMap;
@@ -29,8 +34,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import mes.app.system.service.UserService;
-import mes.domain.entity.RelationData;
-import mes.domain.entity.User;
 import mes.domain.model.AjaxResult;
 import mes.domain.security.Pbkdf2Sha256;
 import mes.domain.services.CommonUtil;
@@ -59,33 +62,16 @@ public class UserController {
 	@Autowired
 	private UserCodeRepository userCodeRepository;
 
+	@Autowired
+	TB_XClientService tbXClientService;
 
-	// 사용자 리스트 조회
-	/*@GetMapping("/read")
-	public AjaxResult getUserList(
-			@RequestParam(value="group", required=false) Integer group,
-			@RequestParam(value="keyword", required=false) String keyword,
-			@RequestParam(value="depart_id", required=false) Integer departId,
-			@RequestParam(value="username", required=false) String username,
-			@RequestParam(value="divinm", required=false) String divinm,
+	@Autowired
+	TB_XClientRepository tbXClientRepository;
+	@Autowired
+	TB_RP945_Service tbRp945Service;
 
-			HttpServletRequest request,
-			Authentication auth) {
-
-		AjaxResult result = new AjaxResult();
-
-		User user = (User)auth.getPrincipal();
-		boolean superUser = user.getSuperUser();
-
-		if (!superUser) {
-			superUser = user.getUserProfile().getUserGroup().getCode().equals("dev");
-		}
-
-		List<Map<String, Object>> items = this.userService.getUserList(superUser, group, keyword, username, departId, divinm);
-
-		result.data = items;
-		return result;
-	}*/
+	@Autowired
+	TB_XA012Repository tbXA012Repository;
 
 	@GetMapping("/read")
 	public AjaxResult getUserList(@RequestParam(value = "cltnm", required = false) String cltnm, // 업체명
@@ -109,15 +95,26 @@ public class UserController {
 		return result;
 	}
 
-	// 사용자 상세정보 조회
 	@GetMapping("/detail")
-	public AjaxResult getUserDetail(
-			@RequestParam(value="id") Integer id,
-			HttpServletRequest request) {
-
-		Map<String, Object> item = this.userService.getUserDetail(id);
+	public AjaxResult getUserDetail(@RequestParam(value = "id", required = false) String id) {
 		AjaxResult result = new AjaxResult();
-		result.data = item;
+
+		try {
+			if (id != null && !id.isEmpty()) {
+				// id로 특정 사용자 정보 조회
+				Map<String, Object> userDetail = userService.getUserDetailById(id);
+				result.success = true;
+				result.data = userDetail;
+				result.message = "데이터 조회 성공";
+			} else {
+				result.success = false;
+				result.message = "유효한 ID가 제공되지 않았습니다.";
+			}
+		} catch (Exception e) {
+			result.success = false;
+			result.message = "데이터를 가져오는 중 오류가 발생했습니다.";
+		}
+
 		return result;
 	}
 
@@ -133,223 +130,189 @@ public class UserController {
 		return result;
 	}
 
-	/*@PostMapping("/save")
-	@Transactional
-	public AjaxResult saveUser(){
-
-	}*/
-
-
 	@PostMapping("/save")
 	@Transactional
 	public AjaxResult saveUser(
 			@RequestParam(value = "id", required = false) Integer id,
-			@RequestParam(value = "login_id") String login_id,
-			@RequestParam(value = "Name") String Name,
+			@RequestParam(value = "cltnm") String cltnm,
+			@RequestParam(value = "prenm") String prenm,
+			@RequestParam(value = "biztypenm") String biztypenm,
+			@RequestParam(value = "bizitemnm") String bizitemnm,
+			@RequestParam(value = "tel") String tel,
+			@RequestParam(value = "Phone") String phone,
+			@RequestParam(value = "userid") String userid,
 			@RequestParam(value = "email") String email,
-			@RequestParam(value="UserGroup_id") Integer UserGroup_id,
-			@RequestParam(value="password", required = false) String password,
-			@RequestParam(value="tel", required = false) String tel,
-			@RequestParam(value="divinm", required = false) String divinm,
 			@RequestParam(value="agencycd", required = false) String agencycd,
-			@RequestParam(value="spworkcd") String spworkcd,
-			@RequestParam(value="spcompcd") String spcompcd,
-			@RequestParam(value="spplancd") String spplancd,
-			@RequestParam(value="spworknm") String spworknm,
-			@RequestParam(value="spcompnm") String spcompnm,
-			@RequestParam(value="spplannm") String spplannm,
+			@RequestParam(value = "is_active") boolean isActive,
+			@RequestParam(value = "postno") String postno,
+			@RequestParam(value = "address1") String address1,
+			@RequestParam(value = "placeAddress") String placeAddress,
+			@RequestParam(value="UserGroup_id", required = false) Integer UserGroup_id,
 			Authentication auth
-	){
-
-		//산단 발전소 지역 코드를 공통코드 id로 받지않고 텍스트와 코드값으로 받는이유(spworkcd 등등) --> id로 받으면 공통코드테이블에서 호출해야한다. DB호출은 부담 차라리 값을 많이 넘기자
+	) {
 		AjaxResult result = new AjaxResult();
+		System.out.println("저장들어옴");
+		try {
+			// 데이터 저장 로직
+			String sql = null;
+			User user = null;
+			User loginUser = (User)auth.getPrincipal();
+			Timestamp today = new Timestamp(System.currentTimeMillis());
+			MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
-		UtilClass util = new UtilClass();
-		List<Integer> spworkidList = util.parseUserIdsToInt(spworkcd);
-		List<Integer> spcompidList = util.parseUserIdsToInt(spcompcd);
-		List<Integer> spplanidList = util.parseUserIdsToInt(spplancd);
+			if(id==null){
 
-		List<String> spworknmList = Arrays.asList(spworknm.split(","));
-		List<String> spcompnmList = Arrays.asList(spcompnm.split(","));
-		List<String> spplannmList = Arrays.asList(spplannm.split(","));
+				Optional<User> u1 = this.userRepository.findByUsername(userid);
 
-		String sql = null;
-		User user = null;
-		User loginUser = (User)auth.getPrincipal();
-		Timestamp today = new Timestamp(System.currentTimeMillis());
-		MapSqlParameterSource dicParam = new MapSqlParameterSource();
-		boolean username_chk = this.userRepository.findByUsername(login_id).isEmpty();
+				boolean username_chk = u1.isEmpty();
 
-		if(id==null){
-			if (username_chk == false){
-				result.success = false;
-				result.message = "중복된 사번이 존재합니다.";
-				return result;
-			}
-			user = new User();
-			user.setPassword(Pbkdf2Sha256.encode(password));
-			user.setSuperUser(false);
-			user.setLast_name("");
-			user.setIs_staff(false);
+				if (username_chk == false){
+					result.success = false;
+					result.message = "중복된 아이디가 존재합니다.";
+					return result;
+				}
+				user = new User();
 
-			dicParam.addValue("loginUser", loginUser.getId());
+				user.setSuperUser(false);
+				user.setLast_name("");
+				user.setIs_staff(false);
 
-			sql = """
-		        	INSERT INTO user_profile 
-		        	("_created", "_creater_id", "User_id", "lang_code", "Name", "UserGroup_id" ) 
-		        	VALUES (now(), :loginUser, :User_id, :lang_code, :name, :UserGroup_id )
-		        """;
-		}else {
+				dicParam.addValue("loginUser", loginUser.getId());
 
+				sql = """
+						INSERT INTO ERP_SWSPANEL1.dbo.user_profile
+							(_created, _creater_id, User_id, lang_code, Name, UserGroup_id)
+						VALUES 
+							(GETDATE(), :loginUser, :User_id, :lang_code, :name, :UserGroup_id)
+					""";
+			}else {
 
+				user = this.userRepository.getUserById(id);
+				boolean superchk =  user.getSuperUser();
+				if(superchk){
+					result.success = false;
+					result.message = "슈퍼유저 계정은 수정이 불가합니다.";
+					return result;
+				}
 
-			user = this.userRepository.getUserById(id);
-
-			//만약 있으면 수정, pk2개라서 관리하기 불편, 다 지우고 새로추가, 위치가 왜 여기냐 --> user객체 저장 혹은 수정전에 username을 가져와야함
-			List<TB_RP945> rp945List = tB_RP945Repository.findByUserid(user.getUsername());
-			if(!rp945List.isEmpty()){
-				tB_RP945Repository.deleteByUserid(user.getUsername());
-			}
-
-			sql = """
+				sql = """
 					update user_profile set
 					     	"lang_code" = :lang_code, "Name" = :name
 					     	,   "UserGroup_id" = :UserGroup_id
 					where "User_id" = :User_id
 		        """;
+			}
+
+			user.setUsername(userid);
+			user.setFirst_name(prenm);
+			user.setEmail(email);
+			user.setDate_joined(today);
+			user.setActive(true);
+			user.setTel(tel);
+			user.setPhone(phone);
+			user.setActive(isActive);
+			user.setAgencycd(agencycd);
+
+
+			user = this.userRepository.save(user);
+			System.out.println("user 저장 완료");
+
+			dicParam.addValue("name", prenm);
+			dicParam.addValue("UserGroup_id", UserGroup_id);
+			dicParam.addValue("lang_code", "ko-KR");
+			dicParam.addValue("User_id", user.getId());
+
+
+			this.sqlRunner.execute(sql, dicParam);
+			System.out.println("user_profile 저장 완료");
+
+			// TB_XA012에서 custcd와 spjangcd로 조회
+			String custcd = "SWSPANEL";
+			List<String> spjangcds = Arrays.asList("ZZ", "YY");
+
+			List<TB_XA012> tbX_A012List = tbXA012Repository.findByCustcdAndSpjangcds(custcd, spjangcds);
+			if (tbX_A012List.isEmpty()) {
+				result.success = false;
+				result.message = "custcd 및 spjangcd에 해당하는 데이터를 찾을 수 없습니다.";
+				return result;
+			}
+
+			// TB_XCLIENT 저장
+			String maxCltcd = tbXClientRepository.findMaxCltcd(); // 최대 cltcd 조회
+			String newCltcd = generateNewCltcd(maxCltcd); // 새로운 cltcd 생성
+
+			// 도로명 주소 또는 지번 주소 중 하나만 설정
+			String finalAddress = (address1 != null && !address1.isEmpty()) ? address1 : placeAddress;
+
+			// 기존 TB_XCLIENT 데이터가 있는지 확인
+			Optional<TB_XCLIENT> existingClientOpt = tbXClientRepository.findBySaupnum(userid);
+
+			TB_XCLIENT tbXClient;
+			if (existingClientOpt.isPresent()) {
+				// 기존 데이터가 있을 경우 업데이트
+				tbXClient = existingClientOpt.get();
+				tbXClient.setPrenm(prenm);
+				tbXClient.setCltnm(cltnm);
+				tbXClient.setBiztypenm(biztypenm);
+				tbXClient.setBizitemnm(bizitemnm);
+				tbXClient.setZipcd(postno);
+				tbXClient.setCltadres(finalAddress);
+				tbXClient.setTelnum(tel);
+				tbXClient.setHptelnum(phone);
+				tbXClient.setAgneremail(email);
+			} else {
+				// 새로운 TB_XCLIENT 객체 생성
+				tbXClient = TB_XCLIENT.builder()
+						.saupnum(userid) // 사업자번호
+						.prenm(prenm) // 대표자명
+						.cltnm(cltnm) // 업체명
+						.biztypenm(biztypenm) // 업태명
+						.bizitemnm(bizitemnm) // 종목명
+						.zipcd(postno) // 우편번호
+						.cltadres(finalAddress) // 주소
+						.telnum(tel) // 전화번호
+						.hptelnum(phone) // 핸드폰번호
+						.agneremail(email) // 담당자 email
+						.id(new TB_XCLIENTId(custcd, newCltcd))
+
+						// 기본값 설정된 필드들
+						.rnumchk(String.valueOf(0))                 // rnumchk = 0
+						.corpperclafi(String.valueOf(1))            // corpperclafi = 1 (법인구분)
+						.cltdv(String.valueOf(1))                   // cltdv = 1 (거래처구분)
+						.prtcltnm(cltnm) 							   // prtcltnm = "인쇄 거래처명 - 거래처명"
+						.foreyn(String.valueOf(0))                  // foreyn = 0
+						.relyn(String.valueOf(1))                   // relyn = 1
+						.bonddv(String.valueOf(0))                  // bonddv = 0
+						/*.nation("KR")               				   // nation = "KR"*/
+						.clttype(String.valueOf(2))                 // clttype = 2 (거래구분)
+						.cltynm(String.valueOf(0))                  // cltynm = 0 (약명)
+						.build();
+			}
+
+			System.out.println("TB_XCLIENT 저장 시작");
+			tbXClientService.save(tbXClient);// TB_XCLIENT 저장
+			System.out.println("TB_XCLIENT 저장 완료");
+
+			result.success = true;
+			result.message = "사용자 정보가 성공적으로 저장되었습니다.";
+		} catch (Exception e) {
+			result.success = false;
+			result.message = "사용자 정보를 저장하는 중 오류가 발생했습니다.";
 		}
-
-		user.setUsername(login_id);
-		user.setFirst_name(Name);
-		user.setEmail(email);
-		user.setDate_joined(today);
-		user.setActive(true);
-		user.setDivinm(divinm);
-		user.setTel(tel);
-		user.setAgencycd(agencycd);
-
-		user = this.userRepository.save(user);
-
-		dicParam.addValue("name", Name);
-		dicParam.addValue("UserGroup_id", UserGroup_id);
-		dicParam.addValue("lang_code", "ko-KR");
-		dicParam.addValue("User_id", user.getId());
-
-		this.sqlRunner.execute(sql, dicParam);
-
-		result.data = user;
-
-
-		//신청순번의 최대값을 구한후 +1을 하고 문자열로 바꿔줌
-		//이거 반복문 안에 넣으면 db호출이 너무 많다.
-		String RawAskSeq = tB_RP945Repository.findMaxAskSeq();
-		RawAskSeq = (RawAskSeq != null) ? RawAskSeq : "0";
-
-		int AskSeqInt = Integer.parseInt(RawAskSeq) + 1;
-
-
-		Map<Integer, UserCode> spworkCodes = userCodeRepository.findAllById(spworkidList)
-				.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
-		Map<Integer, UserCode> spcompCodes = userCodeRepository.findAllById(spcompidList)
-				.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
-		Map<Integer, UserCode> spplanCodes = userCodeRepository.findAllById(spplanidList)
-				.stream().collect(Collectors.toMap(UserCode::getId, Function.identity()));
-
-		result.success = true;
-		result.message = "저장되었습니다.";
-
 		return result;
 	}
-	/*@PostMapping("/save")
-	@Transactional
-	public AjaxResult saveUser(
-			@RequestParam(value="id", required = false) Integer id,
-			@RequestParam(value="Name") String Name,		//이름 (user_profile.Name)
-			@RequestParam(value="login_id") String login_id, //사번 (auth_user.username)
-			@RequestParam(value="email", required = false, defaultValue = "") String email,
-			@RequestParam(value="Factory_id", required = false) Integer Factory_id,
-			@RequestParam(value="Depart_id", required = false) Integer Depart_id,
-			@RequestParam(value="UserGroup_id", required = false) Integer UserGroup_id,
-			@RequestParam(value="lang_code", required = false) String lang_code,
-			@RequestParam(value="is_active", required = false) Boolean is_active,
-			HttpServletRequest request,
-			Authentication auth
-			) {
 
-		AjaxResult result = new AjaxResult();
-
-		String sql = null;
-		User user = null;
-		User loginUser = (User)auth.getPrincipal();
-		Timestamp today = new Timestamp(System.currentTimeMillis());
-		MapSqlParameterSource dicParam = new MapSqlParameterSource();
-		boolean username_chk = this.userRepository.findByUsername(login_id).isEmpty();
-
-		if(is_active == null) {
-			is_active = false;
+	// 새로운 cltcd 생성 메서드
+	private String generateNewCltcd(String maxCltcd) {
+		int newNumber = 1; // 기본값
+		// 최대 cltcd 값이 null이 아니고 "SW"로 시작하는 경우
+		if (maxCltcd != null && maxCltcd.startsWith("SW")) {
+			String numberPart = maxCltcd.substring(2); // "SW"를 제외한 부분
+			newNumber = Integer.parseInt(numberPart) + 1; // 숫자 증가
 		}
-
-
-		// new data일 경우
-		if (id==null) {
-			if (username_chk == false) {
-				result.success = false;
-				result.message="중복된 사번이 존재합니다.";
-				return result;
-			}
-			user = new User();
-			user.setPassword(Pbkdf2Sha256.encode("1"));
-			user.setSuperUser(false);
-			user.setLast_name("");
-			user.setIs_staff(false);
-
-			dicParam.addValue("loginUser", loginUser.getId());
-
-			sql = """
-		        	INSERT INTO user_profile
-		        	("_created", "_creater_id", "User_id", "lang_code", "Name", "Factory_id" , "Depart_id", "UserGroup_id" )
-		        	VALUES (now(), :loginUser, :User_id, :lang_code, :name, :Factory_id, :Depart_id, :UserGroup_id )
-		        """;
-		// 기존 user 수정일 경우
-		} else {
-			user = this.userRepository.getUserById(id);
-
-			if (login_id.equals(user.getUsername())==false && username_chk == false) {
-				result.success = false;
-				result.message="중복된 사번이 존재합니다.";
-				return result;
-			}
-
-			sql = """
-					update user_profile set
-					     	"lang_code" = :lang_code, "Name" = :name
-					     	, "Factory_id" = :Factory_id, "Depart_id"= :Depart_id, "UserGroup_id" = :UserGroup_id
-					where "User_id" = :User_id
-		        """;
-
-		}
-
-        user.setUsername(login_id);
-        user.setFirst_name(Name);
-        user.setEmail(email);
-        user.setDate_joined(today);
-        user.setActive(is_active);
-
-		user = this.userRepository.save(user);
-
-		dicParam.addValue("name", Name);
-		dicParam.addValue("UserGroup_id", UserGroup_id);
-		dicParam.addValue("Factory_id", Factory_id);
-		dicParam.addValue("Depart_id", Depart_id);
-		dicParam.addValue("lang_code", lang_code);
-        dicParam.addValue("User_id", user.getId());
-
-        this.sqlRunner.execute(sql, dicParam);
-
-		result.data = user;
-
-		return result;
-	}*/
+		// 새로운 cltcd 생성: "SW" 접두사와 5자리 숫자로 포맷
+		return String.format("SW%05d", newNumber);
+	}
 
 	// user 삭제
 	@Transactional
@@ -472,7 +435,6 @@ public class UserController {
 				this.relationDataRepository.save(rd);
 			}
 		}
-
 
 		return result;
 	}

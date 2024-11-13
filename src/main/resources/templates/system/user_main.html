@@ -79,7 +79,7 @@
                 </th>
                 <td>
                   <div class="input-clear">
-                    <input type="text" id="cltnm" name="cltnm" style="width: 400px !important;">
+                    <input type="text" id="cltnm" name="cltnm" placeholder="업체명" style="width: 400px !important;">
                   </div>
                 </td>
                 <th>
@@ -89,7 +89,7 @@
                 </th>
                 <td>
                   <div class="input-clear">
-                    <input type="text" id="prenm" name="prenm"style="width: 400px !important;" >
+                    <input type="text" id="prenm" name="prenm" placeholder="대표자" style="width: 400px !important;" >
                   </div>
                 </td>
               </tr>
@@ -101,7 +101,7 @@
                 </th>
                 <td>
                   <div class="input-clear">
-                    <input type="text" id="biztypenm" name="biztypenm" style="width: 400px !important;">
+                    <input type="text" id="biztypenm" name="biztypenm" placeholder="업태" style="width: 400px !important;">
                   </div>
                 </td>
                 <th>
@@ -111,7 +111,7 @@
                 </th>
                 <td>
                   <div class="input-clear">
-                    <input type="text" id="bizitemnm" name="bizitemnm" style="width: 400px !important;">
+                    <input type="text" id="bizitemnm" name="bizitemnm" placeholder="종목" style="width: 400px !important;">
                   </div>
                 </td>
               </tr>
@@ -123,7 +123,7 @@
                 </th>
                 <td>
                   <div class="input-clear">
-                    <input type="text" id="tel" name="tel" style="width: 400px !important;">
+                    <input type="text" id="tel" name="tel" placeholder="전화번호" style="width: 400px !important;">
                   </div>
                 </td>
                 <th>
@@ -133,7 +133,7 @@
                 </th>
                 <td>
                   <div class="input-clear">
-                    <input type="text" id="Phone" name="Phone" style="width: 400px !important;">
+                    <input type="text" id="Phone" name="Phone" placeholder="핸드폰 번호 " style="width: 400px !important;">
                   </div>
                 </td>
               </tr>
@@ -145,7 +145,8 @@
                 </th>
                 <td>
                   <div class="input-clear">
-                    <input type="text" id="login_id" name="login_id" class="wp50" style="width: 400px !important;">
+                    <input type="text" id="userid" name="userid" class="wp100" maxlength="50" placeholder="사업자 번호" style="width: 400px !important;" readonly>
+                    <input type="hidden" id="id" name="id" />
                   </div>
                 </td>
                 <th>
@@ -155,7 +156,7 @@
                 </th>
                 <td>
                   <div class="input-clear">
-                    <input type="text" id="email" name="email" style="width: 400px !important;">
+                    <input type="text" id="email" name="email" placeholder="이메일"style="width: 400px !important;">
                   </div>
                 </td>
               </tr>
@@ -267,57 +268,6 @@
     </div> <!--//tab-wrap end-->
   </div> <!--//layout-contents end -->
 
-  <!-- smtp 모달창 -->
-  <div class="modal3">
-    <div class="popup-wrapper3 w800" id="popup2">
-      <div class="popup-title">
-        <a title="팝업닫기" onclick="closeFilePopup()" class="btn-popup-close">
-          <img src="/images/icon/btn-popup-close.svg" alt="닫기">
-        </a>
-      </div>
-      <div class="popup-contents">
-        <div class="table-wrap">
-          <table class="write-table">
-            <caption>점검등록 테이블</caption>
-            <colgroup>
-              <col class="wp20">
-              <col class="wp80">
-            </colgroup>
-            <input type="hidden" id="popup-spuncode">
-            <tbody>
-            <tr>
-              <th>
-                <label>SMTP 아이디</label>
-              </th>
-              <td>
-                <div class="input-clear">
-                  <input type="text" id="smtpid" maxlength="30" class="wp60">
-                  <span class="btn-clear">×</span>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <th>
-                <label>SMTP 비밀번호</label>
-              </th>
-              <td>
-                <div class="input-clear">
-                  <input type="password" id="smtppw" maxlength="30" class="wp60">
-                  <span class="btn-clear">×</span>
-                </div>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="popup-button">
-        <button onclick="closeFilePopup()" style="border: 1px solid #03428E !important; font-size: 15px !important;">닫기</button>
-        <button onclick="saveSMTP()" style="border: 1px solid #03428E !important;color: white;background: #03428E !important;font-size: 15px !important;">저장</button>
-      </div>
-    </div>
-  </div>
-
   <footer>
     <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
   </footer>
@@ -337,7 +287,7 @@
 
     //유효성 검사
     const requiredFields = [
-      {id: 'login_id', name: '사용자ID'},
+      {id: 'userid', name: '사용자ID'},
       {id: 'prenm', name: '사용자명'},
       {id: 'cltnm', name: '업체명'},
       {id: 'authType', name: '사용자그룹'},
@@ -366,135 +316,147 @@
           // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
           if (response && Array.isArray(response.data)) {
             data2 = response.data;
-           /*data2.forEach(item => {
-
-            });*/
           }
         },
         error: function () {
           console.error("데이터를 가져오는 중 오류가 발생했습니다.");
         }
       });
-          // 순번을 추가하고, 데이터가 5개 미만일 경우 빈 행을 추가
-          const minimumRows = 5;
-          data2.forEach((item, index) => {
-            item.rownum = index + 1; // 순번 추가
-          });
+
+      // 순번을 추가하고, 데이터가 5개 미만일 경우 빈 행을 추가
+      const minimumRows = 5;
+      data2.forEach((item, index) => {
+        item.rownum = index + 1; // 순번 추가
+      });
 
       if (data2.length < minimumRows) {
         const additionalRows = minimumRows - data2.length;
         for (let i = 0; i < additionalRows; i++) {
           data2.push({
-            id: null,                    // 사용자 ID
-            login_id: '',                // 사용자ID
-            prenm: '',                   // 대표자
-            cltnm: '',                   // 업체명
-            group_name: '',              // 사용자그룹 이름
-            group_id: null,              // 사용자그룹 ID
-            biztypenm: '',               // 업태
-            bizitemnm: '',               // 종목
-            tel: '',                     // 전화번호
-            Phone: '',                   // 핸드폰
-            email: '',                   // 이메일
-            date_joined: '',             // 생성일
+            id: '',
+            userid: '',
+            prenm: '',
+            cltnm: '',
+            group_name: '',
+            group_id: '',
+            biztypenm: '',
+            bizitemnm: '',
+            tel: '',
+            Phone: '',
+            email: '',
+            date_joined: '',
           });
         }
       }
-      let viewdata = new wijmo.collections.CollectionView(data2);
 
-      if(!theGrid){
-        theGrid = new wijmo.grid.FlexGrid('#theGrid',{
+      // 기존 CollectionView를 재사용하여 데이터 업데이트
+      if (viewdata) {
+        viewdata.sourceCollection = data2;
+        viewdata.refresh(); // CollectionView 새로고침
+      } else {
+        viewdata = new wijmo.collections.CollectionView(data2);
+      }
+
+      if (!theGrid) {
+        theGrid = new wijmo.grid.FlexGrid('#theGrid', {
           autoGenerateColumns: false,
           showMarquee: true,
           allowSorting: 'MultiColumn',
-          selectionMode: wijmo.grid.SelectionMode.Row, // 행 단위 선택
-          columns : [
-            {binding: 'id', header: 'id', width: '*', align: 'center', visible: false, isReadOnly: true},
-            {binding: 'login_id', header: '사용자ID', width: '*', align: 'center', isReadOnly: true},
-            {binding: 'prenm', header: '대표자', width: '*', align: 'center', isReadOnly: true},
-            {binding: 'cltnm', header: '업체명', width: '*', align: 'center', isReadOnly: true},
-            {binding: 'group_name', header: '사용자그룹', width: '*', align: 'center', isReadOnly: true},
-            {binding: 'group_id', header: '사용자그룹', width: '*', align: 'center', visible: false},
-            {binding: 'biztypenm', header: '업태', width: '*', align: 'center', isReadOnly: true},
-            {binding: 'bizitemnm', header: '종목', width: '*', align: 'center', isReadOnly: true},
-            {binding: 'tel', header: '전화번호', width: '*', align: 'center', visible: false},
-            {binding: 'Phone', header: '핸드폰', width: '*', align: 'center', visible: true},
-            {binding: 'email', header: '이메일', width: '*', align: 'center', visible: false},
-            {binding: 'date_joined', header: '생성일', width: '*', align: 'center', isReadOnly: true},
+          selectionMode: wijmo.grid.SelectionMode.Row,
+          columns: [
+            { binding: 'id', header: 'id', width: '*', align: 'center', visible: false, isReadOnly: false },
+            { binding: 'userid', header: '사용자ID', width: '*', align: 'center', isReadOnly: true },
+            { binding: 'prenm', header: '대표자', width: '*', align: 'center', isReadOnly: true },
+            { binding: 'cltnm', header: '업체명', width: '*', align: 'center', isReadOnly: true },
+            { binding: 'group_name', header: '사용자그룹', width: '*', align: 'center', isReadOnly: true },
+            { binding: 'group_id', header: '사용자그룹', width: '*', align: 'center', visible: false },
+            { binding: 'biztypenm', header: '업태', width: '*', align: 'center', isReadOnly: true },
+            { binding: 'bizitemnm', header: '종목', width: '*', align: 'center', isReadOnly: true },
+            { binding: 'tel', header: '전화번호', width: '*', align: 'center', visible: false },
+            { binding: 'Phone', header: '핸드폰', width: '*', align: 'center', visible: true },
+            { binding: 'email', header: '이메일', width: '*', align: 'center', visible: false },
+            { binding: 'date_joined', header: '생성일', width: '*', align: 'center', isReadOnly: true },
           ],
           itemsSource: viewdata,
         });
-        theGrid.rowHeaders.columns.splice(0, 1); // 맨 앞에 헤더 부분 없애기
+        theGrid.rowHeaders.columns.splice(0, 1);
         new FlexGridContextMenu(theGrid);
+      } else {
+        theGrid.itemsSource = viewdata; // 갱신된 CollectionView로 업데이트
+        theGrid.refresh(); // 그리드 새로고침
       }
 
+      // 그리드의 더블 클릭 이벤트 추가
+      let lastClickTime = 0;
+      theGrid.hostElement.addEventListener('click', function (e) {
+        const now = new Date().getTime();
+
+        if (now - lastClickTime < 300) {
+          const ht = theGrid.hitTest(e);
+
+          if (ht.cellType === wijmo.grid.CellType.Cell) {
+            const rowData = theGrid.rows[ht.row].dataItem;
+            showUserInfo(rowData);
+          }
+        }
+        lastClickTime = now;
+      });
     }//fetchListData
 
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
+    function showUserInfo(rowData) {
+      // 필드 중 하나라도 비어있는지 확인하여 추가 데이터를 가져올지 결정
+      const hasMissingFields = !rowData || !rowData.cltnm || !rowData.prenm || !rowData.biztypenm || !rowData.bizitemnm || !rowData.tel || !rowData.Phone || !rowData.userid || !rowData.email;
+
+      if (hasMissingFields) {
+        // 데이터가 불완전한 경우 AJAX 요청으로 추가 데이터 가져오기
+        $.ajax({
+          url: '/api/system/user/detail',  // 상세 정보 API 엔드포인트
+          type: 'GET',
+          data: { id: rowData ? rowData.id : null }, // rowData에 id가 있는 경우 사용
+          success: function(response) {
+            if (response && response.data) {
+              populateFields(response.data); // 서버에서 가져온 데이터로 폼 채우기
+            }
+          },
+          error: function() {
+            console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+          }
+        });
+      } else {
+        // 데이터가 완전한 경우 바로 폼에 채우기
+        populateFields(rowData);
+      }
+    }
+
+    function populateFields(data) {
+      // 각 필드에 데이터를 채움
+      document.getElementById("id").value = data.id || '';
+      document.getElementById("userid").value = data.userid || '';
+      document.getElementById("cltnm").value = data.cltnm || '';
+      document.getElementById("prenm").value = data.prenm || '';
+      document.getElementById("biztypenm").value = data.biztypenm || '';
+      document.getElementById("bizitemnm").value = data.bizitemnm || '';
+      document.getElementById("tel").value = data.tel || '';
+      document.getElementById("Phone").value = data.Phone || '';
+      document.getElementById("email").value = data.email || '';
+
+      // authType(사용자 그룹) 설정
+      document.getElementById('authType').value = data.group_id;
+
+      // 체크박스 설정
+      document.getElementById("is_active").checked = data.is_active || false;
+
+      // 주소 관련 필드 설정
+      document.getElementById("postno").value = data.zipcd || '';
+      document.getElementById("address1").value = data.cltadres || '';
+      document.getElementById("placeAddress").value = data.cltadres || '';
+    }
+
     //검색
     function searchData() {
-      let data = {
-        'group': $('#cboUserGroup').val(),
-        'keyword': $('#keyword').val(),
-        'username': $('#username').val(),
-        'divinm': $('#divinm').val()
-      }
-
-      let data2 = [];
-      $.ajax({
-        url: '/api/system/user/read',
-        type: 'GET',
-        data: data,
-        success: function (data) {
-          data2 = data.data;
-          viewdata = new wijmo.collections.CollectionView(data2);
-          theGrid.itemsSource = viewdata;
-        },
-        error: function (xhr, status, error) {
-          console.error('AJAX request error:', error);
-        }
-      });
-
-      //grid_binding(result.data);
-    }
-
-    function showPopup2(){
-
-      let selectedItems = theGrid.selectedItems;
-
-
-
-      document.getElementById('smtpid').value = selectedItems[0].smtpid;
-      document.getElementById('smtppw').value = selectedItems[0].smtppassword;
-
-      const modal = document.querySelector('.modal3');
-      const modalContent = document.querySelector('.popup-wrapper3');
-
-      // 모달과 콘텐츠를 표시
-      modal.style.display = 'block';
-      modalContent.style.display = 'block';
-
-      // 애니메이션을 위한 클래스 추가
-      requestAnimationFrame(() => {
-        modal.classList.add('show');
-        modalContent.classList.add('show');
-      });
-    }
-
-    function closeFilePopup(){
-      const modal = document.querySelector('.modal3');
-
-      modal.style.display = 'none';
 
     }
-
-    const Filemodal = document.querySelector('.modal3');
-
-
-    const modalFileOpen = document.querySelector('.file_btn');
-    modalFileOpen.addEventListener('click', function(){
-      Filemodal.style.display = 'block';
-    });
 
     function grid_binding(data) {
       var inspecDto = data;
@@ -503,7 +465,7 @@
       for (let i = 0; i < inspecDto.length; i++) {
         inspecData.push({
           id: inspecDto[i]["id"],
-          login_id: inspecDto[i]["login_id"],
+          id: inspecDto[i]["id"],
           Name: inspecDto[i]["Name"],
           group_name: inspecDto[i]["group_name"],
           group_id: inspecDto[i]["group_id"],
@@ -530,145 +492,27 @@
       }
     }
 
-    function createSelectElement(id, name, onChange, margin) {
-      return $('<select>', {
-        class: 'wp25 mg-r5',
-        id: id,
-        name: name,
-        onchange: onChange
-      }).append('<option></option>')
-              .attr('style', `margin-right: ${margin}px !important;`);
-    }
-
-    function createButtonElement(name, text, color, width, onClick) {
-      return $('<button>', {
-
-        name: name,
-        text: text,
-        css: {
-          color: color,
-          width: width
-        },
-        onclick: onClick
+    function clearForm() {
+      ['id', 'userid', 'prenm', 'cltnm', 'authType', 'email',
+        'Phone', 'tel', 'divinm2', 'agencycd', 'firstSelect','placeAddress',
+        'biztypenm', 'bizitemnm', 'postno','address1','username'].forEach(id => {
+        const element = document.getElementById(id);
+        if (element) { // 요소가 존재하는 경우에만 실행
+          element.value = '';
+        }
       });
-    }
-
-    function saveSMTP(){
-
-      let smtpid = document.getElementById('smtpid').value;
-      let smtppw = document.getElementById('smtppw').value;
-
-      if(smtpid.trim().length === 0){
-        Alert.alert('', 'SMTP 아이디를 입력해주세요');
-        return;
+      // 체크박스 초기화 (체크 해제)
+      const isActiveCheckbox = document.getElementById('is_active');
+      if (isActiveCheckbox) {
+        isActiveCheckbox.checked = false;
       }
 
-      if(smtppw.trim().length === 0){
-        Alert.alert('', 'SMTP 비밀번호를 입력해주세요');
-        return;
-      }
-
-      let data = {
-        id: $('#id').val(),
-        smtpid: $('#smtpid').val(),
-        smtppw: $('#smtppw').val()
-      };
-
-      AjaxUtil.postAsyncData('/api/system/user/smtp', data, function(res){
-        Alert.alert('', res.message);
-      });
-
-    }
-
-    function clearForm(){
-      ['id', 'userid', 'usernm', 'authType', 'email','password', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'secondSelect', 'thirdSelect'].forEach(id => {
-        document.getElementById(id).value = '';
-      });
-      let smtpLabel = document.getElementById('smtpLabel');
-      let smtpBox = document.getElementById('smtpbox');
-
-      smtpLabel.style.display = 'none';
-      smtpBox.style.display = 'none';
-
-      $('#password').prop('readonly', false);
       $('.new-fl-ac').remove();
     }
 
-    /*function updateNextSelect(param) {
-        let code = param.value;
-
-        // param의 다음 형제 요소를 찾습니다.
-        let nextSelect = $(param).next('select');
-
-
-
-        if (nextSelect.length) {
-            $.ajax({
-                url: '/user-codes/code_spcompcd',
-                type: 'GET',
-                async: false,
-                data: { code: code },
-                success: function (data) {
-                    nextSelect.empty();
-                    nextSelect.append('<option value="">선택하세요</option>');
-                    data.forEach(function (item) {
-                        nextSelect.append('<option value="' + item.dtlcd + '">' + item.spcompnm + '</option>');
-                    });
-                },
-                error: function (xhr, status, error) {
-                    // 통신 실패 시 처리
-
-
-                    // 선택 옵션을 비우거나 기본 옵션을 설정할 수 있습니다.
-                    nextSelect.empty();
-                    nextSelect.append('<option value=""></option>');
-                }
-            });
-        } else {
-            console.error('다음 select 요소를 찾을 수 없습니다.');
-        }
-    }
-
-    function updateNextSelect2(param) {
-        let code = param.value;
-
-        // param의 다음 형제 요소를 찾습니다.
-        let nextSelect = $(param).next('select');
-
-        if (nextSelect.length) {
-
-            $.ajax({
-                url: '/user-codes/code_spplancd',
-                type: 'GET',
-                data: { code: code },
-                async: false,
-                success: function(data) {
-                    nextSelect.empty();
-                    nextSelect.append('<option value="">선택하세요</option>');
-
-
-
-
-                    data.forEach(function(item) {
-                        nextSelect.append('<option value="' + item.spplancd + '">' + item.spplannm + '</option>');
-                    });
-                },
-                error: function(xhr, status, error) {
-                    // 통신 실패 시 처리
-
-
-                    // 선택 옵션을 비우거나 기본 옵션을 설정할 수 있습니다.
-                    nextSelect.empty();
-                    nextSelect.append('<option value=""></option>');
-                }
-            });
-        } else {
-            console.error('다음 select 요소를 찾을 수 없습니다.');
-        }
-    }*/
-
     $(document).ready(function (e) {
 
+      //검색 사용자 그룹
       initializeSelect({
         url: '/user-auth/type',
         params: {},
@@ -683,75 +527,70 @@
         valueField: "id",
         textField: "name"
       })
+
       initializeSelect({
         url: '/user-codes/parent',
-        params: {parentId: 110},
-        elementId: 'firstSelect',
-        valueField: "code"
+        params: {parentId: 154},
+        elementId: 'agencycd',
+        valueField: "id"
       })
+    });
 
-      //저장
-      $('#btnSave').click(function () {
-        if (!validateFields()) {
-          return false;
-        }
-        const emailInput = document.getElementById('email');
-        const emailValue = emailInput.value.trim();
-
-        if (!emailValidate(emailValue.trim())) {
-          Alert.alert('', '유효한 이메일 형식을 입력하세요.');
-          return false;
-        }
-
-        let id = document.getElementById('id').value.trim();
-        let password = document.getElementById('password');
-        let pwd = password.value.trim();
-        if (id === undefined || id === '') {  //신규등록이므로 비밀번호 입력 체크
-          if (pwd === undefined || pwd === '') {
-            Alert.alert('', '비밀번호를 입력해주세요', function () {
-              password.focus();
-            })
-            return;
-          }
-        }
-
+    // 저장
+    $('#btnSave').click(function (e) {
+      Alert.confirm('', '저장을 하시겠습니까?', function () {
         let formData = new FormData();
 
-        formData.append('id', id);
-        formData.append('login_id', $('#userid').val());
-        formData.append('Name', $('#usernm').val());
-        formData.append('UserGroup_id', $('#authType').val());
-        formData.append('password', pwd);
-        formData.append('email', emailValue);
-        formData.append('tel', $('#tel').val());
-        formData.append('divinm', $('#divinm2').val());
-        formData.append('agencycd', $('#agencycd').val());
+        // 입력 필드 값을 formData에 추가
+        formData.append("cltnm", $('#cltnm').val() || '');
+        formData.append("prenm", $('#prenm').val() || '');
+        formData.append("biztypenm", $('#biztypenm').val() || '');
+        formData.append("bizitemnm", $('#bizitemnm').val() || '');
+        formData.append("tel", $('#tel').val() || '');
+        formData.append("Phone", $('#Phone').val() || '');
+        formData.append("userid", $('#userid').val() || '');
+        formData.append("UserGroup_id", $('#authType').val() || '');
+
+        // id 값 추가 (존재 유무로 등록/업데이트를 구분)
+        let id = $('#id').val().trim();
+        formData.append("id", id);
+
+        formData.append("email", $('#email').val() || '');
+        formData.append("authType", $('#authType').val() || '');
+        formData.append("agencycd", $('#agencycd').val() || '');
         formData.append('_csrf', $('[name=_csrf]').val());
-        formData.append('spworkcd', spworkcdString);
-        formData.append('spcompcd', spcompcdString);
-        formData.append('spplancd', spplancdString);
-        formData.append('spworknm', spworknm);
-        formData.append('spcompnm', spcompnm);
-        formData.append('spplannm', spplannm);
 
-        let bindingList = ['id', 'userid', 'usernm', 'authType', 'password', 'email', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'secondSelect', 'thirdSelect'];
-        AjaxFunction.PostAjaxRequest('/api/system/user/save', true, false, false, formData, function (response) {
-                  if (response.success) {
-                    Alert.alert('', response.message, function () {
-                      $('#listTabLink').click();
-                      searchData();
-                    });
-                    clearForm();
+        // 체크박스 값 추가
+        const isActiveCheckbox = document.getElementById("is_active");
+        formData.append("is_active", isActiveCheckbox ? isActiveCheckbox.checked : false);
 
-                  } else {
-                    Alert.alert('', response.message);
-                  }
-                },
-                function (res){
-                  Alert.alert('', '에러가 발생하였습니다.');
+        // 주소 관련 필드 추가
+        formData.append("postno", $('#postno').val() || '');
+        formData.append("address1", $('#address1').val() || '');
+        formData.append("placeAddress", $('#placeAddress').val() || '');
 
-                })
+        // 서버로 formData 전송
+        $.ajax({
+          url: '/api/system/user/save',
+          type: 'POST',
+          data: formData,
+          processData: false,
+          contentType: false,
+          headers: { 'X-CSRF-TOKEN': csrfToken }, // CSRF 토큰을 헤더에 추가
+          success: function(response) {
+            console.log("저장 성공:", response);
+            fetchListData(); // 목록 갱신
+            clearForm();     // 폼 초기화
+          },
+          error: function(xhr, status, error) {
+            console.error("저장 실패:", response.message);
+            console.error("저장 중 오류가 발생했습니다.");
+            console.log("오류가 발생했습니다. 상태 코드: " + xhr.status + "\n오류 메시지: " + xhr.responseText);
+            console.log(status,error);
+          }
+        });
       });
+    });//저장
 
       $('#btnDelete').click(function () {
         let selectedItems = theGrid.selectedItems;
@@ -788,7 +627,7 @@
           AjaxUtil.postAsyncData('/api/system/user/delete', data, fnSuccess);
         })
       });
-    });
+
   </script>
 </th:block>
 </html>

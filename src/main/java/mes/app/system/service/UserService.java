@@ -2,6 +2,7 @@ package mes.app.system.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import mes.domain.entity.User;
 import mes.domain.entity.UserGroup;
@@ -26,147 +27,6 @@ public class UserService {
     @Autowired
     private UserGroupRepository userGroupRepository;
 
-    // 사용자 리스트 조회
-    /*public List<Map<String, Object>> getUserList(boolean superUser, Integer group, String keyword, String username, Integer departId, String divinm){
-
-        MapSqlParameterSource dicParam = new MapSqlParameterSource();
-        dicParam.addValue("group", group);
-        dicParam.addValue("keyword", keyword);
-        dicParam.addValue("username", username);
-        dicParam.addValue("departId", departId);
-        dicParam.addValue("divinm", divinm);
-
-
-        String sql = """
-			select au.id
-              , up."Name"
-              , au.username as login_id
-              , up."UserGroup_id"
-              , ug."id" as group_id
-              , au.email
-              , au.tel
-              , au.agencycd
-              , ug."Name" as group_name
-              , up."Factory_id"
-              , uc."Value"
-			  , au.divinm
-			  , rp."ranknm"
-              , up."Depart_id"
-              , up.lang_code
-              , au.is_active
-              , to_char(au.date_joined ,'yyyy-mm-dd hh24:mi') as date_joined
-            from auth_user au 
-            left join user_profile up on up."User_id" = au.id
-            left join user_group ug on ug.id = up."UserGroup_id"
-            left join user_code uc on au.agencycd::Integer = uc.id
-			left join tb_rp940 rp on rp.userid = au.username
-            where is_superuser = false
-		    """;
-
-        if (superUser != true) {
-            sql += "  and ug.\"Code\" <> 'dev' ";
-        }
-
-        if (group!=null){
-            sql+= " and ug.\"id\" = :group ";
-        }
-
-        if (!StringUtils.isEmpty(keyword)) {
-            sql += " and up.\"Name\" like concat('%%', :keyword, '%%') ";
-        }
-
-        if (!StringUtils.isEmpty(username)) {
-            sql += " and au.\"username\" like concat('%%', :username, '%%') ";
-        }
-        if (!StringUtils.isEmpty(divinm)) {
-            sql += " and rp.\"divinm\" like concat('%%', :divinm, '%%') ";
-        }
-        if (departId != null) {
-            sql += " and up.\"Depart_id\" = :departId ";
-        }
-
-        sql += "order by au.date_joined desc";
-
-
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
-
-        return items;
-    }*/
-
-    // 사용자 리스트 조회
-    /*public List<Map<String, Object>> getUserList(boolean superUser, Integer group, String keyword, String username, Integer departId, String divinm){
-
-        MapSqlParameterSource dicParam = new MapSqlParameterSource();
-        dicParam.addValue("group", group);
-        dicParam.addValue("keyword", keyword);
-        dicParam.addValue("username", username);
-        dicParam.addValue("departId", departId);
-        dicParam.addValue("divinm", divinm);
-
-        String sql = """
-        SELECT 
-            au.id,
-            up.[Name],
-            au.username AS login_id,
-            up.[UserGroup_id],
-            ug.[id] AS group_id,
-            au.email,
-            au.tel,
-            au.agencycd,
-            ug.[Name] AS group_name,
-            up.[Factory_id],
-            uc.[Value],
-            au.divinm,
-            rp.[ranknm],
-            up.[Depart_id],
-            up.lang_code,
-            au.is_active,
-            FORMAT(au.date_joined, 'yyyy-MM-dd HH:mm') AS date_joined
-        FROM 
-            auth_user au 
-        LEFT JOIN 
-            user_profile up ON up.[User_id] = au.id
-        LEFT JOIN 
-            user_group ug ON ug.id = up.[UserGroup_id]
-        LEFT JOIN 
-            user_code uc ON CAST(au.agencycd AS INT) = uc.id
-        LEFT JOIN 
-            tb_rp940 rp ON rp.userid = au.username
-        WHERE 
-            au.is_superuser = 0
-        """;
-
-        if (!superUser) {
-            sql += " AND ug.[Code] <> 'dev' ";
-        }
-
-        if (group != null) {
-            sql += " AND ug.[id] = :group ";
-        }
-
-        if (!StringUtils.isEmpty(keyword)) {
-            sql += " AND up.[Name] LIKE '%' + :keyword + '%' ";
-        }
-
-        if (!StringUtils.isEmpty(username)) {
-            sql += " AND au.[username] LIKE '%' + :username + '%' ";
-        }
-
-        if (!StringUtils.isEmpty(divinm)) {
-            sql += " AND rp.[divinm] LIKE '%' + :divinm + '%' ";
-        }
-
-        if (departId != null) {
-            sql += " AND up.[Depart_id] = :departId ";
-        }
-
-        sql += " ORDER BY au.date_joined DESC";
-
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
-
-        return items;
-    }*/
-
     // 사용자 리스트
     public List<Map<String, Object>> getUserList(boolean superUser, String cltnm, String prenm, String biztypenm, String bizitemnm, String email) {
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -181,7 +41,7 @@ public class UserService {
         SELECT
             au.id,
             up.Name,
-            au.username AS login_id,
+            au.username AS  userid,
             up.UserGroup_id,
             ug.id AS group_id,
             au.email,
@@ -200,8 +60,6 @@ public class UserService {
         LEFT JOIN 
             user_group ug ON ug.id = up.UserGroup_id
         LEFT JOIN 
-            tb_rp940 rp ON rp.userid = au.username
-        Left join 
             TB_XCLIENT txc on	up.Name = txc.prenm
         WHERE 
             au.is_superuser = 0   
@@ -365,5 +223,21 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public Map<String, Object> getUserDetailById(String id) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("id", id);
+
+        String sql = """
+        select
+            *
+        from
+            TB_XCLIENT tx 
+        LEFT JOIN 
+            auth_user au on tx.prenm = au.first_name
+        where 
+            au.id = :id;                
+                """;
+        return sqlRunner.getRow(sql, params);
+    }
 
 }
