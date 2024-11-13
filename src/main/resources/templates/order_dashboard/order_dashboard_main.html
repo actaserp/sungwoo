@@ -77,47 +77,37 @@
                                 <div class="tab-contents">
                                     <div class="row">
                                         <div class="section-card-wrap">
-                                            <section style="flex: 0.5; margin-right: 5px;">
+                                            <section style="flex: 0.5; margin-right: 5px;" class="fetchCard" data-search-type="0">
                                                 <div class="title">
-                                                    <h3>주문</h3>
+                                                    <h3>주문의뢰</h3>
                                                 </div>
                                                 <div class="data">
                                                     4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
-                                                <dl>
-                                                    <dt>전일대비</dt>
-                                                    <dd>
-                                                        <span class="down"></span> 1.20 <span class="unit">%</span>
-                                                    </dd>
-                                                </dl>
                                             </section>
-                                            <section style="flex: 0.5; margin-right: 5px;">
+                                            <section style="flex: 0.5; margin-right: 5px;" class="fetchCard" data-search-type="1">
                                                 <div class="title">
-                                                    <h3>진행</h3>
+                                                    <h3>견적작성</h3>
                                                 </div>
                                                 <div class="data">
                                                     0<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
-                                                <dl>
-                                                    <dt>전일대비</dt>
-                                                    <dd>
-                                                        <span class="up"></span> 1.20 <span class="unit">%</span>
-                                                    </dd>
-                                                </dl>
                                             </section>
-                                            <section style="flex: 0.5; margin-right: 5px;">
+                                            <section style="flex: 0.5; margin-right: 5px;" class="fetchCard" data-search-type="2">
+                                                <div class="title">
+                                                    <h3>제작</h3>
+                                                </div>
+                                                <div class="data">
+                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
+                                            </section>
+                                            <section style="flex: 0.5; margin-right: 5px;" class="fetchCard" data-search-type="3">
                                                 <div class="title">
                                                     <h3>출고</h3>
                                                 </div>
                                                 <div class="data">
                                                     4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
-                                                <dl>
-                                                    <dt>전일대비</dt>
-                                                    <dd>
-                                                        <span class="down"></span> 1.20 <span class="unit">%</span>
-                                                    </dd>
-                                                </dl>
                                             </section>
                                         </div> <!--//main-card-wrap end -->
                                     </div>
@@ -136,16 +126,16 @@
                                                 <dd>
                                                     <ul class="date-box">
                                                         <li>
-                                                            <input type="date" id="" name="startDate"
-                                                                   value="2024-08-01">
-                                                            <label for="date1" class="hide">시작일</label>
+                                                            <input type="date" id="startDate" name="startDate"
+                                                                   value="">
+                                                            <label for="startDate" class="hide">시작일</label>
                                                         </li>
                                                         <li>
-                                                            <input type="date" id="" name="endDate" value="2024-08-31">
-                                                            <label for="date2" class="hide">종료일</label>
+                                                            <input type="date" id="endDate" name="endDate" value="">
+                                                            <label for="endDate" class="hide">종료일</label>
                                                         </li>
                                                         <li>
-                                                            <a class="btn btn-delete" title="검색" id="btn-srch">
+                                                            <a class="btn btn-delete" title="검색" id="btn-srch" onclick="fetchListData()">
                                                                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                                                 검색
                                                             </a>
@@ -185,18 +175,46 @@
         let theGrid;
         let calendar; // 전역으로 calendar 변수 선언
 
+        // 오늘 날짜 설정
+        const date = new Date();
+        date.setHours(date.getHours() + 9); // UTC+9로 한국 시간 설정
+        const today = date.toISOString().split('T')[0];
+        // 현재 년도를 가져옵니다
+        const currentYear = new Date().getFullYear();
+        // 시작일 input에 올해 1월 1일을 설정합니다
+        document.getElementById('startDate').value = `${currentYear}-01-01`;
+        document.getElementById('endDate').value = today;
+
         document.readyState === 'complete' ? init() : window.onload = init;
 
-        // 초기화 함수
+        // 초반 페이지 진입시 그리드 바인딩 시작
         function init() {
             initCalendar();
             fetchListData();
         }
-
-        function fetchListData() {
+        // '.fetchCard' 클래스를 가진 모든 요소에 대해 클릭 이벤트 설정
+        $('.fetchCard').click(function() {
+            // 클릭된 카드의 data-search-type 속성 값 가져오기
+            const searchTypeValue = $(this).data('search-type');
+            fetchListData(searchTypeValue);  // 해당 값을 fetchListData 함수로 전달
+        });
+        function fetchListData(searchTypeValue) {
             let data2 = []; // 데이터를 담을 배열
             let emptyRowsCount = 10;
-
+            $.ajax({
+                url: '/api/orderDashboard/read',
+                type: 'GET',
+                data: {
+                    'search_startDate': $('#startDate').val(),
+                    'search_endDate': $('#endDate').val(),
+                    'search_type': searchTypeValue
+                },
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                    console.log("data2",data2)
+                }
+            })
             // 빈 객체를 emptyRowsCount만큼 추가
             for (let i = 0; i < emptyRowsCount; i++) {
                 data2.push({
@@ -264,11 +282,10 @@
                 // 공휴일 데이터 가져오기
                 fetchHolidays().then(holidays => {
                     holidays.forEach(holiday => {
-                        console.log('Adding holiday:', holiday); // 공휴일 추가 확인
                         calendar.addEvent({
                             title: holiday.name, // 공휴일 이름
                             start: holiday.date,  // 공휴일 날짜
-                            backgroundColor: '#EC193A',
+                            backgroundColor: '#ec193a',
                             borderColor: '#EC193A',
                             textColor: 'white'
                         });

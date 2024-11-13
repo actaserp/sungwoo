@@ -84,31 +84,27 @@
                                         <div class="section-card-wrap">
                                             <section style="flex: 0.5; margin-right: 5px;">
                                                 <div class="title">
-                                                    <h3>주문</h3>
+                                                    <h3>주문의뢰</h3>
                                                 </div>
                                                 <div class="data">
                                                     4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
-                                                <dl>
-                                                    <dt>전일대비</dt>
-                                                    <dd>
-                                                        <span class="down"></span> 1.20 <span class="unit">%</span>
-                                                    </dd>
-                                                </dl>
                                             </section>
                                             <section style="flex: 0.5; margin-right: 5px;">
                                                 <div class="title">
-                                                    <h3>진행</h3>
+                                                    <h3>견적작성</h3>
                                                 </div>
                                                 <div class="data">
                                                     0<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
-                                                <dl>
-                                                    <dt>전일대비</dt>
-                                                    <dd>
-                                                        <span class="up"></span> 1.20 <span class="unit">%</span>
-                                                    </dd>
-                                                </dl>
+                                            </section>
+                                            <section style="flex: 0.5; margin-right: 5px;">
+                                                <div class="title">
+                                                    <h3>제작</h3>
+                                                </div>
+                                                <div class="data">
+                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
                                             </section>
                                             <section style="flex: 0.5; margin-right: 5px;">
                                                 <div class="title">
@@ -117,12 +113,6 @@
                                                 <div class="data">
                                                     4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
-                                                <dl>
-                                                    <dt>전일대비</dt>
-                                                    <dd>
-                                                        <span class="down"></span> 1.20 <span class="unit">%</span>
-                                                    </dd>
-                                                </dl>
                                             </section>
                                         </div> <!--//main-card-wrap end -->
                                     </div>
@@ -141,16 +131,16 @@
                                                 <dd>
                                                     <ul class="date-box">
                                                         <li>
-                                                            <input type="date" id="" name="startDate"
-                                                                   value="2024-08-01">
-                                                            <label for="date1" class="hide">시작일</label>
+                                                            <input type="date" id="startDate" name="startDate"
+                                                                   value="">
+                                                            <label for="startDate" class="hide">시작일</label>
                                                         </li>
                                                         <li>
-                                                            <input type="date" id="" name="endDate" value="2024-08-31">
-                                                            <label for="date2" class="hide">종료일</label>
+                                                            <input type="date" id="endDate" name="endDate" value="">
+                                                            <label for="endDate" class="hide">종료일</label>
                                                         </li>
                                                         <li>
-                                                            <a class="btn btn-delete" title="검색" id="btn-srch">
+                                                            <a class="btn btn-delete" title="검색" id="btn-srch" onclick="fetchListData()">
                                                                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                                                 검색
                                                             </a>
@@ -184,8 +174,17 @@
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <script type="text/javascript">
-
         let theGrid;
+
+        // 오늘 날짜 설정
+        const date = new Date();
+        date.setHours(date.getHours() + 9); // UTC+9로 한국 시간 설정
+        const today = date.toISOString().split('T')[0];
+        // 현재 년도를 가져옵니다
+        const currentYear = new Date().getFullYear();
+        // 시작일 input에 올해 1월 1일을 설정합니다
+        document.getElementById('startDate').value = `${currentYear}-01-01`;
+        document.getElementById('endDate').value = today;
 
         document.readyState === 'complete' ? init() : window.onload = init;
 
@@ -199,6 +198,21 @@
         function fetchListData() {
           let data2 = []; // 데이터를 담을 배열
           let emptyRowsCount = 8;
+            $.ajax({
+                url: '/api/request/request/order_read',
+                type: 'GET',
+                data: {
+                    'search_startDate': $('#startDate').val(),
+                    'search_endDate': $('#endDate').val(),
+                    'search_type': ''
+                },
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                    console.log("data2",data2)
+                }
+            })
+
 
           // 빈 객체를 emptyRowsCount만큼 추가
           for (let i = 0; i < emptyRowsCount; i++) {
@@ -217,7 +231,6 @@
               autoGenerateColumns: false,
               showMarquee: true,
               columns: [
-                { binding: 'rownum', header: 'No', align: 'center', width: 100 },
                 { binding: 'standdt', header: '의뢰일자', align: 'center', width: 250 },
                 { binding: 'title', header: '제목', align: 'center', width: 250 },
                 { binding: 'smpcost', header: '납품희망일', align: 'center', width: 250 },

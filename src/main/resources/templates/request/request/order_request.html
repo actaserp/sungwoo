@@ -683,6 +683,13 @@
 
       const seenReqnum = new Set(); // reqnum을 기준으로 중복을 확인
       data2.forEach(item => {
+        console.log("getHgrb : ", item.hgrb)
+        item.bd_hgrb = getHgrb((item.bd_hgrb));
+        item.bd_exfmtypedv = getListCgrb2(item.bd_exfmtypedv);
+        item.bd_infmtypedv = getListCgrb2(item.bd_infmtypedv);
+        item.bd_stframedv = getListCgrb2(item.bd_stframedv);
+        item.bd_stexplydv = getListCgrb2(item.bd_stexplydv);
+        item.originOrdtext = item.bd_ordtext;
         // reqnum이 이미 본 값인지 확인
         if (!seenReqnum.has(item.reqnum)) {
           // 처음 보는 경우, 값을 추가하고 Set에 추가
@@ -700,6 +707,9 @@
             panel_hl: null,
             panel_hh: null,
             remark: null,
+            telno : null,
+            perid : null,
+            cltaddr : null,
             isdownload: false
           };
           transformedData.push(newItem);
@@ -721,26 +731,26 @@
             {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
             {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 110, align: 'center'},
             {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 110, align: 'center'},
-            {binding: 'panel_ht', header: '두께', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'panel_hw', header: '폭', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'panel_hl', header: '길이', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'panel_hh', header: '높이', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'remark', header: '제목', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'panel_ht', header: '두께', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'panel_hw', header: '폭', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'panel_hl', header: '길이', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'panel_hh', header: '높이', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'remark', header: '제목', width: '*', minWidth: 160, align: 'left'},
+            {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 105, align: 'center'},
 
             {binding: 'bd_hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'left'},
-            {binding: 'bd_qty', header: '수량', width: '*', minWidth: 100, align: 'left'},
-            {binding: 'bd_panel_t', header: 'T', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'bd_panel_w', header: 'W/H', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'bd_panel_l', header: 'L', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'bd_qty', header: '수량', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'bd_panel_t', header: 'T', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'bd_panel_w', header: 'W/H', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'bd_panel_l', header: 'L', width: '*', minWidth: 100, align: 'right'},
             {binding: 'bd_exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'bd_infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'bd_stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'right'},
+            {binding: 'bd_stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'bd_stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'bd_ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'bd_ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 130, align: 'center'},
             {binding: 'telno', header: '연락처', width: '*', minWidth: 140, align: 'center'},
             {binding: 'perid', header: '담당자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'cltaddr', header: '상세주소', width: '*', minWidth: 100, align: 'center'},
+            {binding: 'cltaddr', header: '상세주소', width: '*', minWidth: 300, align: 'center'},
 
             {binding: 'reqnum', visible: false},  // 숨길 컬럼
             {binding: 'isdownload', visible: false},
@@ -757,12 +767,18 @@
                   cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order()">다운로드</a>';
                 }
               }
-              if (panel.columns[c].binding === 'ordtext') {
-                if (item.ordtext) {
+              if (panel.columns[c].binding === 'bd_ordtext') {
+                if (item.bd_ordtext) {
                   cell.innerHTML = '<a title="수정팝업" class="" onclick="showPopup2(\'popup2\')" style="color: #03428E">요청사항 확인</a>';
                 }
               }
             }
+          }
+        });
+        // 헤더를 중앙 정렬하는 이벤트 핸들러
+        theGrid.formatItem.addHandler(function (s, e) {
+          if (e.panel === s.columnHeaders) {
+            e.cell.style.textAlign = 'center';
           }
         });
         // 더블클릭 이벤트
@@ -932,6 +948,12 @@
                 }
               }
             }
+          }
+        });
+        // 헤더를 중앙 정렬하는 이벤트 핸들러
+        theGrid2.formatItem.addHandler(function (s, e) {
+          if (e.panel === s.columnHeaders) {
+            e.cell.style.textAlign = 'center';
           }
         });
         // 첫열에 selectBox 추가
