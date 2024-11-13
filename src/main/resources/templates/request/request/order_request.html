@@ -744,7 +744,7 @@
 
             {binding: 'reqnum', visible: false},  // 숨길 컬럼
             {binding: 'isdownload', visible: false},
-            {binding: 'files', visible: false},
+            {binding: 'hd_files', visible: false},
             {binding: 'originOrdtext', visible: false},
           ],
           itemsSource: viewdata1,
@@ -802,7 +802,7 @@
               document.getElementById('panel_hh').value = item.panel_hh;
               document.getElementById('remark').value = item.remark;
             }
-            let fileList = Array.isArray(item.files) ? item.files : [];
+            let fileList = Array.isArray(item.hd_files) ? item.hd_files : [];
 
             deletedFiles2 = [];
             uploadedFiles2 = [];
