@@ -451,11 +451,50 @@
       document.getElementById("postno").value = data.zipcd || '';
       document.getElementById("address1").value = data.cltadres || '';
       document.getElementById("placeAddress").value = data.cltadres || '';
+
+      $('#userid').prop('readonly', true);
     }
 
     //검색
     function searchData() {
+      // 검색 조건 수집
+      const userGroup = document.getElementById('cboUserGroup').value;
+      const name = document.getElementById('keyword').value.trim();
+      const username = document.getElementById('username').value.trim();
 
+      // 검색 조건을 객체로 정리
+      const searchParams = {
+        userGroup: userGroup,
+        name: name,
+        username: username
+      };
+
+      // 서버로 AJAX 요청 전송
+      $.ajax({
+        url: '/api/system/user/search', // 서버 API 엔드포인트 설정
+        type: 'GET',
+        data: searchParams, // 검색 조건 전달
+        success: function(response) {
+          // 성공적으로 데이터가 반환되면 그리드에 표시
+          updateGrid(response.data); // 데이터를 업데이트하는 함수 호출
+        },
+        error: function() {
+          console.error("검색 중 오류가 발생했습니다.");
+          alert("검색에 실패했습니다. 다시 시도해주세요.");
+        }
+      });
+    }
+
+    // 검색 결과를 그리드에 업데이트하는 함수
+    function updateGrid(data) {
+      // 그리드 데이터 초기화 후, 새 데이터로 설정
+      if (viewdata) {
+        viewdata.sourceCollection = data;
+        viewdata.refresh(); // CollectionView 새로고침
+      } else {
+        viewdata = new wijmo.collections.CollectionView(data);
+        theGrid.itemsSource = viewdata; // 데이터 그리드에 반영
+      }
     }
 
     function grid_binding(data) {
@@ -506,6 +545,7 @@
       if (isActiveCheckbox) {
         isActiveCheckbox.checked = false;
       }
+      $('#userid').prop('readonly', false);
 
       $('.new-fl-ac').remove();
     }
@@ -621,13 +661,57 @@
           let fnSuccess = function (res) {
             if (res.success) {
               Alert.alert('', '삭제되었습니다.');
-              searchData();
+              fetchListData(); // 목록 갱신
+              clearForm();     // 폼 초기화
             }
           }
           AjaxUtil.postAsyncData('/api/system/user/delete', data, fnSuccess);
         })
       });
 
+
+   /* var popupWindow;
+
+    function sample4_execDaumPostcode() {
+      popupWindow = window.open('', 'postcodePopup', 'width=530,height=530');
+      new daum.Postcode({
+        oncomplete: function(data) {
+          // 검색 결과 선택 시 실행할 코드
+          var roadAddr = data.roadAddress;
+          var extraRoadAddr = '';
+
+          if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+            extraRoadAddr += data.bname;
+          }
+          if (data.buildingName !== '' && data.apartment === 'Y') {
+            extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+          }
+          if (extraRoadAddr !== '') {
+            extraRoadAddr = ' (' + extraRoadAddr + ')';
+          }
+
+          document.getElementById('postno').value = data.zonecode;
+          document.getElementById('address1').value = roadAddr;
+
+          var guideTextBox = document.getElementById("guide");
+          if (data.autoRoadAddress) {
+            var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
+            guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
+            guideTextBox.style.display = 'block';
+          } else if (data.autoJibunAddress) {
+            var expJibunAddr = data.autoJibunAddress;
+            guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
+            guideTextBox.style.display = 'block';
+          } else {
+            guideTextBox.innerHTML = '';
+            guideTextBox.style.display = 'none';
+          }
+
+          // 검색 완료 후 팝업 닫기
+          popupWindow.close();
+        }
+      }).embed(popupWindow.document.body);
+    }*/
   </script>
 </th:block>
 </html>

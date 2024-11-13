@@ -1,14 +1,12 @@
 package mes.app.system;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import mes.app.UtilClass;
 import mes.app.account.service.TB_RP945_Service;
 import mes.app.account.service.TB_XClientService;
@@ -21,6 +19,7 @@ import mes.domain.repository.*;
 import mes.domain.repository.actasRepository.TB_XA012Repository;
 import mes.domain.repository.actasRepository.TB_XClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
@@ -314,6 +313,20 @@ public class UserController {
 		return String.format("SW%05d", newNumber);
 	}
 
+	@GetMapping("/search")
+	public ResponseEntity<Map<String, Object>> search(
+			@RequestParam(required = false) String userGroup,
+			@RequestParam(required = false) String name,
+			@RequestParam(required = false) String username) {
+
+		// 검색 결과를 가져오는 로직 (예: 서비스 메서드 호출)
+		List<Map<String, Object>> result = userService.searchData(userGroup, name, username);
+
+		// 응답 데이터를 "data" 키로 래핑하여 JSON 형식으로 반환
+		Map<String, Object> response = new HashMap<>();
+		response.put("data", result);
+		return ResponseEntity.ok(response);
+	}
 	// user 삭제
 	@Transactional
 	@PostMapping("/delete")
@@ -328,8 +341,8 @@ public class UserController {
 		if(user.isPresent()){
 			tB_RP940Repository.deleteByUserid(user.get().getUsername());
 			tB_RP945Repository.deleteByUserid(user.get().getUsername());
+			tbXClientRepository.deleteBySaupnum(user.get().getUsername()); // TB_XCLIENT 삭제 추가
 		}
-
 		Integer userid  = Integer.parseInt(util.removeBrackers(id))  ;
 
 		this.userRepository.deleteById(userid);
@@ -353,8 +366,6 @@ public class UserController {
 			result.success = false;
 			result.message = "해당 유저에 대한 권한상세정보가 없습니다.";
 		}
-
-
 
 		return result;
 	}

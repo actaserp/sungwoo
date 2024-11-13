@@ -14,4 +14,5 @@ public interface TB_XClientRepository extends JpaRepository<TB_XCLIENT, TB_XCLIE
 
     Optional<TB_XCLIENT> findBySaupnum(String saupnum);
 
+    void deleteBySaupnum(String saupnum);
 }
