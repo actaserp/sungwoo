@@ -35,13 +35,55 @@ public class OrderDashboardController {
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
         List<Map<String, Object>> items = this.orderDashboardService.getOrderList(tbDa006WPk,
                 searchStartDate, searchEndDate, searchType);
-
+        for (Map<String, Object> item : items) {
+            if (item.get("ordflag").equals("0")) {
+                item.remove("ordflag");
+                item.put("ordflag", "주문의뢰");
+            } else if (item.get("ordflag").equals("1")) {
+                item.remove("ordflag");
+                item.put("ordflag", "견적작성");
+            } else if (item.get("ordflag").equals("2")) {
+                item.remove("ordflag");
+                item.put("ordflag", "제작");
+            } else if (item.get("ordflag").equals("3")) {
+                item.remove("ordflag");
+                item.put("ordflag", "출고");
+            }
+            // 날짜 형식 변환 (reqdate)
+            if (item.containsKey("reqdate")) {
+                String setupdt = (String) item.get("reqdate");
+                if (setupdt != null && setupdt.length() == 8) {
+                    String formattedDate = setupdt.substring(0, 4) + "-" + setupdt.substring(4, 6) + "-" + setupdt.substring(6, 8);
+                    item.put("reqdate", formattedDate);
+                }
+            }
+            // 날짜 형식 변환 (deldate)
+            if (item.containsKey("deldate")) {
+                String setupdt = (String) item.get("deldate");
+                if (setupdt != null && setupdt.length() == 8) {
+                    String formattedDate = setupdt.substring(0, 4) + "-" + setupdt.substring(4, 6) + "-" + setupdt.substring(6, 8);
+                    item.put("deldate", formattedDate);
+                }
+            }
+        }
         AjaxResult result = new AjaxResult();
         result.data = items;
 
         return result;
     }
-
+    @GetMapping("/initDatas")
+    public AjaxResult initDatas(Authentication auth){
+        User user = (User) auth.getPrincipal();
+        String username = user.getUsername();
+        Map<String, Object> userInfo = orderDashboardService.getUserInfo(username);
+        TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
+        tbDa006WPk.setSpjangcd("ZZ");
+        tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
+        List<Map<String, Object>> items = this.orderDashboardService.initDatas(tbDa006WPk);
+        AjaxResult result = new AjaxResult();
+        result.data = items;
+        return result;
+    }
 
 
 }

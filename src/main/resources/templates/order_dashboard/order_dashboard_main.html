@@ -77,36 +77,36 @@
                                 <div class="tab-contents">
                                     <div class="row">
                                         <div class="section-card-wrap">
-                                            <section style="flex: 0.5; margin-right: 5px;" class="fetchCard" data-search-type="0">
+                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="0">
                                                 <div class="title">
                                                     <h3>주문의뢰</h3>
                                                 </div>
-                                                <div class="data">
-                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                <div class="requestCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
+                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
                                             </section>
-                                            <section style="flex: 0.5; margin-right: 5px;" class="fetchCard" data-search-type="1">
+                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="1">
                                                 <div class="title">
                                                     <h3>견적작성</h3>
                                                 </div>
-                                                <div class="data">
-                                                    0<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                <div class="estimateCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
+                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
                                             </section>
-                                            <section style="flex: 0.5; margin-right: 5px;" class="fetchCard" data-search-type="2">
+                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="2">
                                                 <div class="title">
                                                     <h3>제작</h3>
                                                 </div>
-                                                <div class="data">
-                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                <div class="produceCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
+                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
                                             </section>
-                                            <section style="flex: 0.5; margin-right: 5px;" class="fetchCard" data-search-type="3">
+                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="3">
                                                 <div class="title">
                                                     <h3>출고</h3>
                                                 </div>
-                                                <div class="data">
-                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                <div class="deliveryCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
+                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
                                             </section>
                                         </div> <!--//main-card-wrap end -->
@@ -173,7 +173,9 @@
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
     <script type="text/javascript">
         let theGrid;
+        var viewdata;
         let calendar; // 전역으로 calendar 변수 선언
+
 
         // 오늘 날짜 설정
         const date = new Date();
@@ -189,8 +191,9 @@
 
         // 초반 페이지 진입시 그리드 바인딩 시작
         function init() {
-            initCalendar();
             fetchListData();
+            initCalendar();
+            initDatas();
         }
         // '.fetchCard' 클래스를 가진 모든 요소에 대해 클릭 이벤트 설정
         $('.fetchCard').click(function() {
@@ -213,42 +216,44 @@
                 success: function (data) {
                     data2 = data.data;
                     console.log("data2",data2)
+                    data2.forEach(item =>{
+                        // item.ordflag = getHgrb(item.ordflag);
+                        // item.reqdate = getListCgrb2(item.reqdate);
+                        // item.remark = getListCgrb2(item.remark);
+                        // item.deldate = getListCgrb2(item.deldate);
+                        // item.amount = getListCgrb2(item.amount);
+                    })
                 }
             })
-            // 빈 객체를 emptyRowsCount만큼 추가
-            for (let i = 0; i < emptyRowsCount; i++) {
-                data2.push({
-                    rownum: i + 1,
-                    standdt: '',
-                    title: '',
-                    smpcost: '',
-                    progress: '',
-                    amount: ''
-                });
-            }
-
+            viewdata = new wijmo.collections.CollectionView(data2);
             if (!theGrid) {
                 theGrid = new wijmo.grid.FlexGrid('#theGrid', {
                     autoGenerateColumns: false,
                     showMarquee: true,
+                    isReadOnly: true,
+                    selectionMode: wijmo.grid.SelectionMode.Row,
                     columns: [
-                        { binding: 'rownum', header: 'No', align: 'center', width: 80 },
-                        { binding: 'standdt', header: '의뢰일자', align: 'center', width: 200 },
-                        { binding: 'title', header: '제목', align: 'center', width: 200 },
-                        { binding: 'smpcost', header: '납품희망일', align: 'center', width: 200 },
-                        { binding: 'progress', header: '진행구분', align: 'center', width: 200 },
+                        { binding: 'ordflag', header: '진행구분', align: 'center', width: 100 },
+                        { binding: 'reqdate', header: '의뢰일자', align: 'center', width: 110 },
+                        { binding: 'remark', header: '제목', align: 'left', width: 160 },
+                        { binding: 'deldate', header: '납품희망일', align: 'center', width: 110 },
                         { binding: 'amount', header: '금액', align: 'center', width: 200 }
                     ],
-                    itemsSource: data2 // 빈 객체가 추가된 배열 사용
+                    itemsSource: viewdata // 빈 객체가 추가된 배열 사용
                 });
-
+                // 헤더를 중앙 정렬하는 이벤트 핸들러
+                theGrid.formatItem.addHandler(function (s, e) {
+                    if (e.panel === s.columnHeaders) {
+                        e.cell.style.textAlign = 'center';
+                    }
+                });
                 // 선택이 변경될 때, 현재 항목 업데이트
                 theGrid.rowHeaders.columns.splice(0, 1);
-                new wijmo.grid.FlexGridContextMenu(theGrid);
+                new FlexGridContextMenu(theGrid);
                 window.downloadFileName = 'Order Dashboard';
             } else {
                 // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-                theGrid.itemsSource = data2; // 빈 객체가 추가된 배열 사용
+                theGrid.itemsSource = viewdata; // 빈 객체가 추가된 배열 사용
             }
         }
 
@@ -281,6 +286,7 @@
 
                 // 공휴일 데이터 가져오기
                 fetchHolidays().then(holidays => {
+                    console.log("holidays : ", holidays)
                     holidays.forEach(holiday => {
                         calendar.addEvent({
                             title: holiday.name, // 공휴일 이름
@@ -293,6 +299,56 @@
                     calendar.render(); // 캘린더 렌더링
                 }).catch(error => {
                     console.error('공휴일 데이터를 가져오는 데 실패했습니다:', error);
+                });
+
+                // 주문현황 데이터 가져오기
+                fetchOrderDates().then(orderDates =>{
+                    console.log("holidays : ", orderDates)
+                    orderDates.forEach(orderDate => {
+                        switch (orderDate.name) {
+                            case '주문의뢰':
+                                calendar.addEvent({
+                                    title: '주문의뢰', // 진행구분 이름
+                                    start: orderDate.date,  // 진행의뢰 날짜
+                                    backgroundColor: '#02a5ff',
+                                    borderColor: '#02a5ff',
+                                    textColor: 'white'
+                                });
+                                break;
+                            case '견적작성':
+                                calendar.addEvent({
+                                    title: '견적작성', // 진행구분 이름
+                                    start: orderDate.date,  // 진행의뢰 날짜
+                                    backgroundColor: '#037abc',
+                                    borderColor: '#037abc',
+                                    textColor: 'white'
+                                });
+                                break;
+                            case '제작':
+                                calendar.addEvent({
+                                    title: '제작', // 진행구분 이름
+                                    start: orderDate.date,  // 진행의뢰 날짜
+                                    backgroundColor: '#025381',
+                                    borderColor: '#025381',
+                                    textColor: 'white'
+                                });
+                                break;
+                            case '출고':
+                                calendar.addEvent({
+                                    title: '출고', // 진행구분 이름
+                                    start: orderDate.date,  // 진행의뢰 날짜
+                                    backgroundColor: '#013450',
+                                    borderColor: '#013450',
+                                    textColor: 'white'
+                                });
+                                break;
+                            default:
+                                console.log("주문현황 바인드 오류 : ", orderDate.name);
+                        }
+                    });
+                    calendar.render(); // 캘린더 렌더링
+                }).catch(error => {
+                    console.error('주문현황 데이터를 가져오는 데 실패했습니다:', error);
                 });
             }
         }
@@ -308,8 +364,24 @@
                 const yearHolidays = await fetchHolidaysForYear(year);
                 holidays.push(...yearHolidays);
             }
-
+            console.log("holidays : ", holidays)
             return holidays;
+        }
+        // 주문현황 데이터를 가져오는 함수
+        async function fetchOrderDates() {
+            // [0: {date: '20230101', name: '1월1일'},{1:}]
+            // 모든 행의 데이터를 저장할 배열을 초기화합니다.
+            var orderDates = [];
+            // viewdata.items를 반복하여 각 항목의 ordflag와 reqdate 값을 가져옵니다.
+            for (var i = 0; i < viewdata.items.length; i++) {
+                var item = viewdata.items[i];
+                orderDates.push({
+                    name: item.ordflag,
+                    date: item.reqdate
+                });
+            }
+            console.log("orderDates : ", orderDates)
+            return orderDates;
         }
 
         async function fetchHolidaysForYear(year) {
@@ -346,6 +418,35 @@
 
                 xhr.send();
             });
+        }
+        function initDatas(){
+            $.ajax({
+                url: '/api/orderDashboard/initDatas',
+                type: 'GET',
+                data: {},
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                    data2.forEach(item =>{
+                        switch (item.ordflag) {
+                            case "0":
+                                $('.requestCnt').html(item.ordflag_count + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+                                break;
+                            case "1":
+                                $('.estimateCnt').html(item.ordflag_count + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+                                break;
+                            case "2":
+                                $('.produceCnt').html(item.ordflag_count + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+                                break;
+                            case "3":
+                                $('.deliveryCnt').html(item.ordflag_count + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+                                break;
+                            default:
+                                console.log("주문현황 바인드 오류 : ", item.ordflag);
+                        }
+                    })
+                }
+            })
         }
     </script>
 </th:block>

@@ -41,21 +41,61 @@ public class OrderDashboardService {
         dicParam.addValue("searchType", searchType);
 
         StringBuilder sql = new StringBuilder("""
-                select 
+                SELECT
+                    custcd,
+                    spjangcd,
+                    reqnum,
+                    reqdate,
+                    ordflag,
+                    deldate,
+                    telno,
+                    perid,
+                    cltzipcd,
+                    cltaddr,
+                    remark
+                FROM
+                    TB_DA006W hd
+                WHERE
+                    hd.custcd = :custcd
+                    AND hd.spjangcd = :spjangcd
                 """);
         // 날짜 필터
         if (searchStartDate != null && !searchStartDate.isEmpty()) {
-            sql.append(" AND hd.reqdate >= :searchStartDate");
+            sql.append(" AND reqdate >= :searchStartDate");
         }
         //
         if (searchEndDate != null && !searchEndDate.isEmpty()) {
-            sql.append(" AND hd.reqdate <= :searchEndDate");
+            sql.append(" AND reqdate <= :searchEndDate");
+        }
+        // 진행구분 필터
+        if (searchType != null && !searchType.isEmpty()) {
+            sql.append(" AND ordflag LIKE :searchType");
         }
         // 정렬 조건 추가
-        sql.append(" ORDER BY hd.reqdate ASC");
+        sql.append(" ORDER BY reqdate ASC");
 
         dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
         dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
+        return items;
+    }
+
+    public List<Map<String, Object>> initDatas(TB_DA006W_PK tbDa006WPk) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        StringBuilder sql = new StringBuilder("""
+                SELECT
+                    hd.ordflag,
+                    COUNT(*) AS ordflag_count
+                FROM
+                    TB_DA006W hd
+                WHERE
+                    hd.custcd = :custcd
+                    AND hd.spjangcd = :spjangcd
+                GROUP BY
+                    hd.ordflag;
+                """);
+        dicParam.addValue("custcd", tbDa006WPk.getCustcd());
+        dicParam.addValue("spjangcd", tbDa006WPk.getSpjangcd());
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }
