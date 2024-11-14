@@ -683,7 +683,6 @@
 
       const seenReqnum = new Set(); // reqnum을 기준으로 중복을 확인
       data2.forEach(item => {
-        console.log("getHgrb : ", item.hgrb)
         item.bd_hgrb = getHgrb((item.bd_hgrb));
         item.bd_exfmtypedv = getListCgrb2(item.bd_exfmtypedv);
         item.bd_infmtypedv = getListCgrb2(item.bd_infmtypedv);

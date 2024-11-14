@@ -247,6 +247,21 @@
                         e.cell.style.textAlign = 'center';
                     }
                 });
+                // 셀 더블클릭 이벤트 추가
+                theGrid.hostElement.addEventListener('dblclick', function (e) {
+                    // 클릭한 셀의 행 데이터 가져오기
+                    let hitTest = theGrid.hitTest(e);
+                    let reqdate;
+                    if (hitTest.cellType === wijmo.grid.CellType.Cell) {
+                        // 행(row), 행의 데이터(item) 정보 가져오기
+                        let row = hitTest.row;
+                        reqdate = theGrid.rows[row].reqdate; // reqdate 값 가져오기
+                    }
+                    // FullCalendar로 이동
+                    if (calendar) {
+                        //calendar.gotoDate(reqdate); // reqdate를 날짜로 이동
+                    }
+                });
                 // 선택이 변경될 때, 현재 항목 업데이트
                 theGrid.rowHeaders.columns.splice(0, 1);
                 new FlexGridContextMenu(theGrid);
