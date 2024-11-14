@@ -315,6 +315,7 @@ public class UserController {
 
 	@GetMapping("/search")
 	public ResponseEntity<Map<String, Object>> search(
+			@RequestParam(name = "auth", required = false, defaultValue = "false") boolean auth,
 			@RequestParam(required = false) String userGroup,
 			@RequestParam(required = false) String name,
 			@RequestParam(required = false) String username) {
@@ -327,28 +328,34 @@ public class UserController {
 		response.put("data", result);
 		return ResponseEntity.ok(response);
 	}
+
 	// user 삭제
 	@Transactional
 	@PostMapping("/delete")
 	public AjaxResult deleteUser(@RequestParam("id") String id,
-								 @RequestParam(value = "username", required = false) String username
-	) {
+								 @RequestParam(value = "username", required = false) String username,
+								 @RequestParam boolean auth) {
+		AjaxResult result = new AjaxResult();
+		System.out.println("삭제 들어옴");
 
-		UtilClass util = new UtilClass();
-		System.out.println(util.removeBrackers(username));
-		Optional<User> user = userRepository.findByUsername(util.removeBrackers(username));
+		if(auth){
+			result.success = false;
+			result.message = "슈퍼유저는 수정 및 삭제가 불가능합니다.";
+			return result;
+		}
+		Optional<User> user = userRepository.findByUsername(UtilClass.removeBrackers(username));
+
 
 		if(user.isPresent()){
-			tB_RP940Repository.deleteByUserid(user.get().getUsername());
-			tB_RP945Repository.deleteByUserid(user.get().getUsername());
-			tbXClientRepository.deleteBySaupnum(user.get().getUsername()); // TB_XCLIENT 삭제 추가
+			tbXClientRepository.deleteBySaupnum(user.get().getUsername());
 		}
-		Integer userid  = Integer.parseInt(util.removeBrackers(id))  ;
 
+		Integer userid  = Integer.parseInt(UtilClass.removeBrackers(id));
 		this.userRepository.deleteById(userid);
-		AjaxResult result = new AjaxResult();
+
 		return result;
 	}
+
 
 
 	@PostMapping("/modfind")

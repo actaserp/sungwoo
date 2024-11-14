@@ -52,8 +52,8 @@ public class UserService {
             au.is_active,
             au.Phone,
             txc.*,
-            FORMAT(au.date_joined, 'yyyy-MM-dd HH:mm') AS date_joined
-        FROM 
+            FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined
+        FROM
             auth_user au 
         LEFT JOIN 
             user_profile up ON up.User_id = au.id
@@ -61,8 +61,7 @@ public class UserService {
             user_group ug ON ug.id = up.UserGroup_id
         LEFT JOIN 
             TB_XCLIENT txc on	up.Name = txc.prenm
-        WHERE 
-            au.is_superuser = 0   
+         
         """;
 
         // superUser가 아닌 경우, 개발자 그룹 제외
@@ -98,6 +97,11 @@ public class UserService {
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, params);
         return items;
     }
+
+    /*필요시
+    *  WHERE
+    * au.is_superuser = 0
+    * 추가 하기 */
 
     // 사용자 상세정보 조회
     public Map<String, Object> getUserDetail(Integer id){
@@ -240,83 +244,18 @@ public class UserService {
         return sqlRunner.getRow(sql, params);
     }
 
-   /* public List<Map<String, Object>> searchData(String superUser, String userGroup, String keyword, String username, String departId, String divinm) {
-        // 쿼리 실행 및 결과 반환
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        String sql = """
-        SELECT au.id,
-               up.[Name],
-               au.username AS login_id,
-               up.[UserGroup_id],
-               ug.[id] AS group_id,
-               au.email,
-               au.tel,
-               au.agencycd,
-               ug.[Name] AS group_name,
-               up.[Factory_id],
-               uc.[Value],
-               au.divinm,
-               au.smtpid,
-               au.smtppassword,
-               rp.[ranknm],
-               up.[Depart_id],
-               up.lang_code,
-               au.is_active,
-               au.is_superuser,
-               FORMAT(au.date_joined, 'yyyy-MM-dd HH:mm') AS date_joined
-        FROM auth_user au
-        LEFT JOIN user_profile up ON up.[User_id] = au.id
-        LEFT JOIN user_group ug ON ug.id = up.[UserGroup_id]
-        LEFT JOIN user_code uc ON CAST(au.agencycd AS INT) = uc.id
-        LEFT JOIN tb_rp940 rp ON rp.userid = au.username
-        WHERE 1=1
-    """;
-
-        // 조건부 쿼리 추가
-
-        if (!StringUtils.isEmpty(userGroup)) {
-            sql += " AND ug.[id] = :userGroup ";
-            params.addValue("userGroup", userGroup);
-        }
-
-        if (!StringUtils.isEmpty(keyword)) {
-            sql += " AND up.[Name] LIKE '%' + :keyword + '%' ";
-            params.addValue("keyword", keyword);
-        }
-
-        if (!StringUtils.isEmpty(username)) {
-            sql += " AND au.username LIKE '%' + :username + '%' ";
-            params.addValue("username", username);
-        }
-
-        if (!StringUtils.isEmpty(divinm)) {
-            sql += " AND rp.divinm LIKE '%' + :divinm + '%' ";
-            params.addValue("divinm", divinm);
-        }
-
-        if (!StringUtils.isEmpty(departId)) {
-            sql += " AND up.[Depart_id] = :departId ";
-            params.addValue("departId", departId);
-        }
-
-        sql += " ORDER BY au.date_joined DESC";
-
-        // 쿼리 실행 및 결과 반환
-        return sqlRunner.getRows(sql, params);
-    }*/
-
-
     public List<Map<String, Object>> searchData(String userGroup, String name, String username) {
         // 쿼리 실행 및 결과 반환
         MapSqlParameterSource params = new MapSqlParameterSource();
         String sql = """
         SELECT au.id,
                up.[Name],
-               au.username AS login_id,
+               au.username AS userid,
                up.[UserGroup_id],
                ug.[id] AS group_id,
                au.email,
                au.tel,
+               au.phone AS Phone,
                au.agencycd,
                ug.[Name] AS group_name,
                up.[Factory_id],
@@ -329,13 +268,15 @@ public class UserService {
                up.lang_code,
                au.is_active,
                au.is_superuser,
-               FORMAT(au.date_joined, 'yyyy-MM-dd HH:mm') AS date_joined
+               txc.*,
+               FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined
         FROM auth_user au
         LEFT JOIN user_profile up ON up.[User_id] = au.id
         LEFT JOIN user_group ug ON ug.id = up.[UserGroup_id]
         LEFT JOIN user_code uc ON CAST(au.agencycd AS INT) = uc.id
         LEFT JOIN tb_rp940 rp ON rp.userid = au.username
-        WHERE 1=1
+        left join TB_XCLIENT txc ON up.Name = txc.prenm
+        WHERE 1=1 AND au.is_superuser = 0
     """;
 
         // 조건부 쿼리 추가

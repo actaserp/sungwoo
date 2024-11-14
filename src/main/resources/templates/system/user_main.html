@@ -4,714 +4,786 @@
 </style>
 
 <th:block layout:fragment="content">
-  <div class="layout-contents">
-    <!-- Page Title -->
-    <div class="page-title-wrap">
-      <div class="left">
-        <h2>사용자 관리</h2>
-        <!--                <a title="북마크" class="bookmark toggle">-->
-        <!--                    내메뉴-->
-        <!--                </a>-->
-      </div>
-      <ul class="page-navi">
-        <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-        <li>시스템설정</li>
-        <li>사용자관리</li>
-      </ul>
-    </div>
-    <!-- Select -->
-
-    <div class="tab-wrap">
-      <!--            <ul class="tab-links">-->
-      <!--                <li>-->
-      <!--                    <a href="#tab1" title="목록" id="listTabLink">목록</a>-->
-      <!--                </li>-->
-      <!--                <li>-->
-      <!--                    <a href="#tab2" title="등록" id="inputTabLink">등록</a>-->
-      <!--                </li>-->
-      <!--            </ul>-->
-      <div class="tab-contents">
-        <!-- Section -->
-        <section class="tab-item" id="tab1">
-
-          <div class="section-top">
-            <div class="title-wrap">
-              <h3>사용자 등록</h3>
+    <div class="layout-contents">
+        <!-- Page Title -->
+        <div class="page-title-wrap">
+            <div class="left">
+                <h2>사용자 관리</h2>
+                <!--                <a title="북마크" class="bookmark toggle">-->
+                <!--                    내메뉴-->
+                <!--                </a>-->
             </div>
-            <div class="button-wrap">
-              <ul>
-                <li>
-                  <a class="btn btn-excell" title="신규등록" onclick="clearForm()">
-                    <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                    신규등록
-                  </a>
-                </li>
-                <!--<li>
-                    <a  class="btn btn-delete" title="삭제" id="btnDelete2">
-                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                        삭제
-                    </a>
-                </li>-->
-                <li>
-                  <a class="btn btn-edit" id="btnSave" title="저장">
-                    <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                    저장
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div class="table-wrap">
-            <table class="write-table">
-              <caption>사용자등록 테이블</caption>
-              <colgroup>
-                <col class="wp20">
-                <col class="wp30">
-                <col class="wp20">
-                <col class="wp30">
-              </colgroup>
-              <tbody>
-              <tr>
-                <th>
-                  <label for="">
-                    업체명
-                  </label>
-                </th>
-                <td>
-                  <div class="input-clear">
-                    <input type="text" id="cltnm" name="cltnm" placeholder="업체명" style="width: 400px !important;">
-                  </div>
-                </td>
-                <th>
-                  <label for="">
-                    대표자
-                  </label>
-                </th>
-                <td>
-                  <div class="input-clear">
-                    <input type="text" id="prenm" name="prenm" placeholder="대표자" style="width: 400px !important;" >
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th>
-                  <label for="">
-                    업태
-                  </label>
-                </th>
-                <td>
-                  <div class="input-clear">
-                    <input type="text" id="biztypenm" name="biztypenm" placeholder="업태" style="width: 400px !important;">
-                  </div>
-                </td>
-                <th>
-                  <label for="">
-                    종목
-                  </label>
-                </th>
-                <td>
-                  <div class="input-clear">
-                    <input type="text" id="bizitemnm" name="bizitemnm" placeholder="종목" style="width: 400px !important;">
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th>
-                  <label for="">
-                    전화번호
-                  </label>
-                </th>
-                <td>
-                  <div class="input-clear">
-                    <input type="text" id="tel" name="tel" placeholder="전화번호" style="width: 400px !important;">
-                  </div>
-                </td>
-                <th>
-                  <label for="">
-                    핸드폰
-                  </label>
-                </th>
-                <td>
-                  <div class="input-clear">
-                    <input type="text" id="Phone" name="Phone" placeholder="핸드폰 번호 " style="width: 400px !important;">
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th>
-                  <label for="id">
-                    사업자 번호 (아이디)
-                  </label>
-                </th>
-                <td>
-                  <div class="input-clear">
-                    <input type="text" id="userid" name="userid" class="wp100" maxlength="50" placeholder="사업자 번호" style="width: 400px !important;" readonly>
-                    <input type="hidden" id="id" name="id" />
-                  </div>
-                </td>
-                <th>
-                  <label for="email">
-                    이메일
-                  </label>
-                </th>
-                <td>
-                  <div class="input-clear">
-                    <input type="text" id="email" name="email" placeholder="이메일"style="width: 400px !important;">
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <th>
-                  사용자그룹
-                </th>
-                <td>
-                  <select id="authType" name="authType" class="wp30">
-                    <option></option>
-                  </select>
-                </td>
-                <th><label for="is_active">사용여부</label></th>
-                <td style="text-align: center; vertical-align: middle;">
-                  <input type="checkbox" id="is_active" name="is_active" style="display: block; margin: auto;">
-                </td>
-              </tr>
-              <th>
-                <label for="postno">
-                  주 소
-                </label>
-              </th>
-              <td colspan="5">
-                <input type="text" id="postno" placeholder="우편번호"
-                       onclick="sample4_execDaumPostcode()"
-                       style="width: 100px; margin-bottom: 3px;">
-                <input type="text" id="address1" placeholder="도로명주소" style="width: 48%">
-                <input type="hidden" id="placeAddress" placeholder="지번주소">
-                <span id="guide" style="color:#999;display:none"></span>
-              </td>
-              </tbody>
-            </table>
-          </div>
+            <ul class="page-navi">
+                <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
+                <li>시스템설정</li>
+                <li>사용자관리</li>
+            </ul>
+        </div>
+        <!-- Select -->
 
-          <div class="section-top" style="margin-top: 24px;">
-            <div class="search-wrap">
-              <dl>
-                <dt>
-                  사용자그룹
-                </dt>
-                <dd>
-                  <select class="mg-r5" id="cboUserGroup" name="cboUserGroup" style="width: 100%">
-                    <option></option>
-                  </select>
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  <label for="select1">
-                    이름</label></dt>
-                <dd>
-                  <div class="input-clear"><input type="text" id="keyword" name="keyword" class="wp100" maxlength="50" placeholder=""></div>
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  <label>
-                    사용자ID</label></dt>
+        <div class="tab-wrap">
+            <!--            <ul class="tab-links">-->
+            <!--                <li>-->
+            <!--                    <a href="#tab1" title="목록" id="listTabLink">목록</a>-->
+            <!--                </li>-->
+            <!--                <li>-->
+            <!--                    <a href="#tab2" title="등록" id="inputTabLink">등록</a>-->
+            <!--                </li>-->
+            <!--            </ul>-->
+            <div class="tab-contents">
+                <!-- Section -->
+                <section class="tab-item" id="tab1">
 
-                <dd>
-                  <div class="input-clear"><input type="text" id="username" name="username" class="wp100" maxlength="50" autocomplete="off"></div>
-                </dd>
-              </dl>
-              <dl>
-                <dt>
-                  <label>
-                  </label>
-                </dt>
-                <dd>
-                  <div class="srch-box">
-                    <div class="input-clear"></div>
-                    <a style="margin-left: 10px" class="btn btn-delete" title="검색" id="searchgrid" onclick="searchData()" onkeyup="searchData()">
-                      <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
-                      <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
-                      검색
-                    </a>
-                  </div>
-                </dd>
-              </dl>
-            </div>
-            <div class="button-wrap">
-              <ul>
-                <li>
-                  <a  class="btn btn-delete" title="삭제" id="btnDelete">
-                    <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
-                    삭제
-                  </a>
-                </li>
-                <!--<li>
-                    <a  class="btn btn-edit" title="수정" onclick="modifyData()">
-                        <img src="/images/icon/ico-edit.svg" alt="엑셀 아이콘">
-                        수정
-                    </a>
-                </li>-->
+                    <div class="section-top">
+                        <div class="title-wrap">
+                            <h3>사용자 등록</h3>
+                        </div>
+                        <div class="button-wrap">
+                            <ul>
+                                <li>
+                                    <a class="btn btn-excell" title="신규등록" onclick="clearForm()">
+                                        <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
+                                        신규등록
+                                    </a>
+                                </li>
+                                <!--<li>
+                                    <a  class="btn btn-delete" title="삭제" id="btnDelete2">
+                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
+                                        삭제
+                                    </a>
+                                </li>-->
+                                <li>
+                                    <a class="btn btn-edit" id="btnSave" title="저장">
+                                        <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
+                                        저장
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="write-table">
+                            <caption>사용자등록 테이블</caption>
+                            <colgroup>
+                                <col class="wp20">
+                                <col class="wp30">
+                                <col class="wp20">
+                                <col class="wp30">
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <th>
+                                    <label for="">
+                                        업체명
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="cltnm" name="cltnm" placeholder="업체명"
+                                               style="width: 400px !important;">
+                                    </div>
+                                </td>
+                                <th>
+                                    <label for="">
+                                        대표자
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="prenm" name="prenm" placeholder="대표자"
+                                               style="width: 400px !important;">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="">
+                                        업태
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="biztypenm" name="biztypenm" placeholder="업태"
+                                               style="width: 400px !important;">
+                                    </div>
+                                </td>
+                                <th>
+                                    <label for="">
+                                        종목
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="bizitemnm" name="bizitemnm" placeholder="종목"
+                                               style="width: 400px !important;">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="">
+                                        전화번호
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="tel" name="tel" placeholder="전화번호"
+                                               style="width: 400px !important;">
+                                    </div>
+                                </td>
+                                <th>
+                                    <label for="">
+                                        핸드폰
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="Phone" name="Phone" placeholder="핸드폰 번호 "
+                                               style="width: 400px !important;">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label for="id">
+                                        사업자 번호 (아이디)
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="userid" name="userid" class="wp100" maxlength="50"
+                                               placeholder="사업자 번호" style="width: 400px !important;" readonly>
+                                        <input type="hidden" id="id" name="id"/>
+                                    </div>
+                                </td>
+                                <th>
+                                    <label for="email">
+                                        이메일
+                                    </label>
+                                </th>
+                                <td>
+                                    <div class="input-clear">
+                                        <input type="text" id="email" name="email" placeholder="이메일"
+                                               style="width: 400px !important;">
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    사용자그룹
+                                </th>
+                                <td>
+                                    <select id="authType" name="authType" class="wp30">
+                                        <option></option>
+                                    </select>
+                                </td>
+                                <th><label for="is_active">사용여부</label></th>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <input type="checkbox" id="is_active" name="is_active"
+                                           style="display: block; margin: auto;">
+                                </td>
+                            </tr>
+                            <th>
+                                <label for="postno">
+                                    주 소
+                                </label>
+                            </th>
+                            <td colspan="5">
+                                <input type="text" id="postno" placeholder="우편번호"
+                                       onclick="sample4_execDaumPostcode()"
+                                       style="width: 100px; margin-bottom: 3px;">
+                                <input type="text" id="address1" placeholder="도로명주소" style="width: 48%">
+                                <input type="hidden" id="placeAddress" placeholder="지번주소">
+                                <span id="guide" style="color:#999;display:none"></span>
+                            </td>
+                            </tbody>
+                        </table>
+                    </div>
 
-              </ul>
-            </div>
+                    <div class="section-top" style="margin-top: 24px;">
+                        <div class="search-wrap">
+                            <dl>
+                                <dt>
+                                    사용자그룹
+                                </dt>
+                                <dd>
+                                    <select class="mg-r5" id="cboUserGroup" name="cboUserGroup" style="width: 100%">
+                                        <option></option>
+                                    </select>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label for="select1">
+                                        이름</label></dt>
+                                <dd>
+                                    <div class="input-clear"><input type="text" id="keyword" name="keyword"
+                                                                    class="wp100" maxlength="50" placeholder="이름"></div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                        사업자번호</label></dt>
+                                <dd>
+                                    <div class="input-clear"><input type="text" id="username" name="username" placeholder="사업자번호"
+                                                                    class="wp100" maxlength="50" autocomplete="off">
+                                    </div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label>
+                                    </label>
+                                </dt>
+                                <dd>
+                                    <div class="srch-box">
+                                        <div class="input-clear"></div>
+                                        <a style="margin-left: 10px" class="btn btn-delete" title="검색" id="searchgrid"
+                                           onclick="searchData()" onkeyup="searchData()">
+                                            <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            검색
+                                        </a>
+                                    </div>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="button-wrap">
+                            <ul>
+                                <li>
+                                    <a class="btn btn-delete" title="삭제" id="btnDelete">
+                                        <img src="/images/icon/ico-delete.svg" alt="엑셀 아이콘">
+                                        삭제
+                                    </a>
+                                </li>
+                                <!--<li>
+                                    <a  class="btn btn-edit" title="수정" onclick="modifyData()">
+                                        <img src="/images/icon/ico-edit.svg" alt="엑셀 아이콘">
+                                        수정
+                                    </a>
+                                </li>-->
 
-          </div>
-          <!--//section-top end -->
-          <div class="container-fluid">
-            <p id="selectedItem"></p>
-            <div id="theGrid" style="max-height: 450px;"></div>
-          </div>
-          <div class="btn-wrap">
-          </div>
-        </section>
-      </div> <!--//tab-contens end-->
-    </div> <!--//tab-wrap end-->
-  </div> <!--//layout-contents end -->
+                            </ul>
+                        </div>
 
-  <footer>
-    <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
-  </footer>
+                    </div>
+                    <!--//section-top end -->
+                    <div class="container-fluid">
+                        <p id="selectedItem"></p>
+                        <div id="theGrid" style="max-height: 450px;"></div>
+                    </div>
+                    <div class="btn-wrap">
+                    </div>
+                </section>
+            </div> <!--//tab-contens end-->
+        </div> <!--//tab-wrap end-->
+    </div> <!--//layout-contents end -->
+
+    <footer>
+        <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
+    </footer>
 
 </th:block>
 <th:block layout:fragment="scripts">
-  <th:block th:replace="/common/approve_box :: approve_box"></th:block>
-  <th:block th:replace="/common/ax5_uploader :: ax5_uploader" ></th:block>
-  <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box" ></th:block>
-  <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+    <th:block th:replace="/common/approve_box :: approve_box"></th:block>
+    <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
+    <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
+    <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
 
-  <script type="text/javascript">
+    <script type="text/javascript">
 
-    var theGrid;
-    var viewdata;
-    let csrfToken = $("[name=_csrf]").val();
+        var theGrid;
+        var viewdata;
+        let csrfToken = $("[name=_csrf]").val();
 
-    //유효성 검사
-    const requiredFields = [
-      {id: 'userid', name: '사용자ID'},
-      {id: 'prenm', name: '사용자명'},
-      {id: 'cltnm', name: '업체명'},
-      {id: 'authType', name: '사용자그룹'},
-      {id:'biztypenm',name:'업태'},
-      {id:'bizitemnm',name:'종목'},
-      {id:'tel', name: '전화번호'},
-      {id:'Phone', name: '핸드폰'},
-      {id: 'email', name: '이메일'},
-    ]
+        //유효성 검사
+        const requiredFields = [
+            {id: 'userid', name: '사용자ID'},
+            {id: 'prenm', name: '사용자명'},
+            {id: 'cltnm', name: '업체명'},
+            {id: 'authType', name: '사용자그룹'},
+            {id: 'biztypenm', name: '업태'},
+            {id: 'bizitemnm', name: '종목'},
+            {id: 'tel', name: '전화번호'},
+            {id: 'Phone', name: '핸드폰'},
+            {id: 'email', name: '이메일'},
+        ]
 
-    document.readyState === 'complete' ? init() : window.onload = init;
+        document.readyState === 'complete' ? init() : window.onload = init;
 
-    <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
-    function init() {
-      fetchListData();
-    }
-
-    function fetchListData(){
-      let data2 = [];
-
-      $.ajax({
-        url: '/api/system/user/read',
-        type: 'GET',
-        async: false,
-        success: function (response) {
-          // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
-          if (response && Array.isArray(response.data)) {
-            data2 = response.data;
-          }
-        },
-        error: function () {
-          console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+        <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
+        function init() {
+            fetchListData();
         }
-      });
 
-      // 순번을 추가하고, 데이터가 5개 미만일 경우 빈 행을 추가
-      const minimumRows = 5;
-      data2.forEach((item, index) => {
-        item.rownum = index + 1; // 순번 추가
-      });
-
-      if (data2.length < minimumRows) {
-        const additionalRows = minimumRows - data2.length;
-        for (let i = 0; i < additionalRows; i++) {
-          data2.push({
-            id: '',
-            userid: '',
-            prenm: '',
-            cltnm: '',
-            group_name: '',
-            group_id: '',
-            biztypenm: '',
-            bizitemnm: '',
-            tel: '',
-            Phone: '',
-            email: '',
-            date_joined: '',
-          });
+        function init() {
+            fetchListData();
         }
-      }
 
-      // 기존 CollectionView를 재사용하여 데이터 업데이트
-      if (viewdata) {
-        viewdata.sourceCollection = data2;
-        viewdata.refresh(); // CollectionView 새로고침
-      } else {
-        viewdata = new wijmo.collections.CollectionView(data2);
-      }
+        function fetchListData() {
+            let data2 = [];
 
-      if (!theGrid) {
-        theGrid = new wijmo.grid.FlexGrid('#theGrid', {
-          autoGenerateColumns: false,
-          showMarquee: true,
-          allowSorting: 'MultiColumn',
-          selectionMode: wijmo.grid.SelectionMode.Row,
-          columns: [
-            { binding: 'id', header: 'id', width: '*', align: 'center', visible: false, isReadOnly: false },
-            { binding: 'userid', header: '사용자ID', width: '*', align: 'center', isReadOnly: true },
-            { binding: 'prenm', header: '대표자', width: '*', align: 'center', isReadOnly: true },
-            { binding: 'cltnm', header: '업체명', width: '*', align: 'center', isReadOnly: true },
-            { binding: 'group_name', header: '사용자그룹', width: '*', align: 'center', isReadOnly: true },
-            { binding: 'group_id', header: '사용자그룹', width: '*', align: 'center', visible: false },
-            { binding: 'biztypenm', header: '업태', width: '*', align: 'center', isReadOnly: true },
-            { binding: 'bizitemnm', header: '종목', width: '*', align: 'center', isReadOnly: true },
-            { binding: 'tel', header: '전화번호', width: '*', align: 'center', visible: false },
-            { binding: 'Phone', header: '핸드폰', width: '*', align: 'center', visible: true },
-            { binding: 'email', header: '이메일', width: '*', align: 'center', visible: false },
-            { binding: 'date_joined', header: '생성일', width: '*', align: 'center', isReadOnly: true },
-          ],
-          itemsSource: viewdata,
-        });
-        theGrid.rowHeaders.columns.splice(0, 1);
-        new FlexGridContextMenu(theGrid);
-      } else {
-        theGrid.itemsSource = viewdata; // 갱신된 CollectionView로 업데이트
-        theGrid.refresh(); // 그리드 새로고침
-      }
+            // 서버로부터 데이터를 비동기적으로 가져옴
+            $.ajax({
+                url: '/api/system/user/read',
+                type: 'GET',
+                async: false,
+                success: function (response) {
+                    if (response && Array.isArray(response.data)) {
+                        data2 = response.data;
+                    }
+                },
+                error: function () {
+                    console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+                }
+            });
 
-      // 그리드의 더블 클릭 이벤트 추가
-      let lastClickTime = 0;
-      theGrid.hostElement.addEventListener('click', function (e) {
-        const now = new Date().getTime();
+            // 순번 추가 및 최소 행 수 유지
+            const minimumRows = 5;
+            data2.forEach((item, index) => {
+                item.rownum = index + 1; // 순번 추가
+            });
 
-        if (now - lastClickTime < 300) {
-          const ht = theGrid.hitTest(e);
-
-          if (ht.cellType === wijmo.grid.CellType.Cell) {
-            const rowData = theGrid.rows[ht.row].dataItem;
-            showUserInfo(rowData);
-          }
-        }
-        lastClickTime = now;
-      });
-    }//fetchListData
-
-    <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
-    function showUserInfo(rowData) {
-      // 필드 중 하나라도 비어있는지 확인하여 추가 데이터를 가져올지 결정
-      const hasMissingFields = !rowData || !rowData.cltnm || !rowData.prenm || !rowData.biztypenm || !rowData.bizitemnm || !rowData.tel || !rowData.Phone || !rowData.userid || !rowData.email;
-
-      if (hasMissingFields) {
-        // 데이터가 불완전한 경우 AJAX 요청으로 추가 데이터 가져오기
-        $.ajax({
-          url: '/api/system/user/detail',  // 상세 정보 API 엔드포인트
-          type: 'GET',
-          data: { id: rowData ? rowData.id : null }, // rowData에 id가 있는 경우 사용
-          success: function(response) {
-            if (response && response.data) {
-              populateFields(response.data); // 서버에서 가져온 데이터로 폼 채우기
+            if (data2.length < minimumRows) {
+                const additionalRows = minimumRows - data2.length;
+                for (let i = 0; i < additionalRows; i++) {
+                    data2.push({
+                        id: '',
+                        userid: '',
+                        prenm: '',
+                        cltnm: '',
+                        group_name: '',
+                        group_id: '',
+                        biztypenm: '',
+                        bizitemnm: '',
+                        tel: '',
+                        Phone: '',
+                        email: '',
+                        date_joined: '',
+                    });
+                }
             }
-          },
-          error: function() {
-            console.error("데이터를 가져오는 중 오류가 발생했습니다.");
-          }
-        });
-      } else {
-        // 데이터가 완전한 경우 바로 폼에 채우기
-        populateFields(rowData);
-      }
-    }
 
-    function populateFields(data) {
-      // 각 필드에 데이터를 채움
-      document.getElementById("id").value = data.id || '';
-      document.getElementById("userid").value = data.userid || '';
-      document.getElementById("cltnm").value = data.cltnm || '';
-      document.getElementById("prenm").value = data.prenm || '';
-      document.getElementById("biztypenm").value = data.biztypenm || '';
-      document.getElementById("bizitemnm").value = data.bizitemnm || '';
-      document.getElementById("tel").value = data.tel || '';
-      document.getElementById("Phone").value = data.Phone || '';
-      document.getElementById("email").value = data.email || '';
-
-      // authType(사용자 그룹) 설정
-      document.getElementById('authType').value = data.group_id;
-
-      // 체크박스 설정
-      document.getElementById("is_active").checked = data.is_active || false;
-
-      // 주소 관련 필드 설정
-      document.getElementById("postno").value = data.zipcd || '';
-      document.getElementById("address1").value = data.cltadres || '';
-      document.getElementById("placeAddress").value = data.cltadres || '';
-
-      $('#userid').prop('readonly', true);
-    }
-
-    //검색
-    function searchData() {
-      // 검색 조건 수집
-      const userGroup = document.getElementById('cboUserGroup').value;
-      const name = document.getElementById('keyword').value.trim();
-      const username = document.getElementById('username').value.trim();
-
-      // 검색 조건을 객체로 정리
-      const searchParams = {
-        userGroup: userGroup,
-        name: name,
-        username: username
-      };
-
-      // 서버로 AJAX 요청 전송
-      $.ajax({
-        url: '/api/system/user/search', // 서버 API 엔드포인트 설정
-        type: 'GET',
-        data: searchParams, // 검색 조건 전달
-        success: function(response) {
-          // 성공적으로 데이터가 반환되면 그리드에 표시
-          updateGrid(response.data); // 데이터를 업데이트하는 함수 호출
-        },
-        error: function() {
-          console.error("검색 중 오류가 발생했습니다.");
-          alert("검색에 실패했습니다. 다시 시도해주세요.");
-        }
-      });
-    }
-
-    // 검색 결과를 그리드에 업데이트하는 함수
-    function updateGrid(data) {
-      // 그리드 데이터 초기화 후, 새 데이터로 설정
-      if (viewdata) {
-        viewdata.sourceCollection = data;
-        viewdata.refresh(); // CollectionView 새로고침
-      } else {
-        viewdata = new wijmo.collections.CollectionView(data);
-        theGrid.itemsSource = viewdata; // 데이터 그리드에 반영
-      }
-    }
-
-    function grid_binding(data) {
-      var inspecDto = data;
-      var inspecData = [];
-      var cnt = 1;
-      for (let i = 0; i < inspecDto.length; i++) {
-        inspecData.push({
-          id: inspecDto[i]["id"],
-          id: inspecDto[i]["id"],
-          Name: inspecDto[i]["Name"],
-          group_name: inspecDto[i]["group_name"],
-          group_id: inspecDto[i]["group_id"],
-          Value: inspecDto[i]["Value"],
-          divinm: inspecDto[i]["divinm"],
-          ranknm: inspecDto[i]["ranknm"],
-          is_active: inspecDto[i]["is_active"],
-          date_joined: inspecDto[i]["date_joined"],
-          email: inspecDto[i]["email"],
-          tel: inspecDto[i]["tel"],
-          agencycd: inspecDto[i]["agencycd"],
-          is_superuser: inspecDto[i]["is_superuser"],
-        });
-        cnt++;
-      }
-
-      theGrid.columns.clear();
-      theGrid.autoGenerateColumns = false;
-      viewdata.sourceCollection = inspecData;
-
-      for (var i = 0; i < columns.length; i++) {
-        var col = new wijmo.grid.Column(columns[i]);
-        theGrid.columns.push(col);
-      }
-    }
-
-    function clearForm() {
-      ['id', 'userid', 'prenm', 'cltnm', 'authType', 'email',
-        'Phone', 'tel', 'divinm2', 'agencycd', 'firstSelect','placeAddress',
-        'biztypenm', 'bizitemnm', 'postno','address1','username'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) { // 요소가 존재하는 경우에만 실행
-          element.value = '';
-        }
-      });
-      // 체크박스 초기화 (체크 해제)
-      const isActiveCheckbox = document.getElementById('is_active');
-      if (isActiveCheckbox) {
-        isActiveCheckbox.checked = false;
-      }
-      $('#userid').prop('readonly', false);
-
-      $('.new-fl-ac').remove();
-    }
-
-    $(document).ready(function (e) {
-
-      //검색 사용자 그룹
-      initializeSelect({
-        url: '/user-auth/type',
-        params: {},
-        elementId: 'cboUserGroup',
-        valueField: "id",
-        textField: "name"
-      })
-      initializeSelect({
-        url: '/user-auth/type',
-        params: {},
-        elementId: 'authType',
-        valueField: "id",
-        textField: "name"
-      })
-
-      initializeSelect({
-        url: '/user-codes/parent',
-        params: {parentId: 154},
-        elementId: 'agencycd',
-        valueField: "id"
-      })
-    });
-
-    // 저장
-    $('#btnSave').click(function (e) {
-      Alert.confirm('', '저장을 하시겠습니까?', function () {
-        let formData = new FormData();
-
-        // 입력 필드 값을 formData에 추가
-        formData.append("cltnm", $('#cltnm').val() || '');
-        formData.append("prenm", $('#prenm').val() || '');
-        formData.append("biztypenm", $('#biztypenm').val() || '');
-        formData.append("bizitemnm", $('#bizitemnm').val() || '');
-        formData.append("tel", $('#tel').val() || '');
-        formData.append("Phone", $('#Phone').val() || '');
-        formData.append("userid", $('#userid').val() || '');
-        formData.append("UserGroup_id", $('#authType').val() || '');
-
-        // id 값 추가 (존재 유무로 등록/업데이트를 구분)
-        let id = $('#id').val().trim();
-        formData.append("id", id);
-
-        formData.append("email", $('#email').val() || '');
-        formData.append("authType", $('#authType').val() || '');
-        formData.append("agencycd", $('#agencycd').val() || '');
-        formData.append('_csrf', $('[name=_csrf]').val());
-
-        // 체크박스 값 추가
-        const isActiveCheckbox = document.getElementById("is_active");
-        formData.append("is_active", isActiveCheckbox ? isActiveCheckbox.checked : false);
-
-        // 주소 관련 필드 추가
-        formData.append("postno", $('#postno').val() || '');
-        formData.append("address1", $('#address1').val() || '');
-        formData.append("placeAddress", $('#placeAddress').val() || '');
-
-        // 서버로 formData 전송
-        $.ajax({
-          url: '/api/system/user/save',
-          type: 'POST',
-          data: formData,
-          processData: false,
-          contentType: false,
-          headers: { 'X-CSRF-TOKEN': csrfToken }, // CSRF 토큰을 헤더에 추가
-          success: function(response) {
-            console.log("저장 성공:", response);
-            fetchListData(); // 목록 갱신
-            clearForm();     // 폼 초기화
-          },
-          error: function(xhr, status, error) {
-            console.error("저장 실패:", response.message);
-            console.error("저장 중 오류가 발생했습니다.");
-            console.log("오류가 발생했습니다. 상태 코드: " + xhr.status + "\n오류 메시지: " + xhr.responseText);
-            console.log(status,error);
-          }
-        });
-      });
-    });//저장
-
-      $('#btnDelete').click(function () {
-        let selectedItems = theGrid.selectedItems;
-        let auth = selectedItems[0].is_superuser;
-
-
-        if(auth === true){
-          Alert.alert('', '슈퍼유저 계정은 수정 및 삭제가 불가합니다.');
-          return false;
-        }
-
-        if (selectedItems[0].id === undefined || selectedItems.length === 0) {
-          Alert.alert('', '삭제할 항목을 선택하세요.');
-          return;
-        }
-        console.log('zz', selectedItems)
-        let delList = SelectItemPush(selectedItems, 'id');
-        let del940List = SelectItemPush(selectedItems, 'login_id');
-        console.log('삭제확인2', del940List);
-        console.log('삭제확인', delList);
-        Alert.confirm('', '삭제하시겠습니까?', function () {
-          let data = {
-            'id': JSON.stringify(delList),
-            'username': JSON.stringify(del940List),
-            '_csrf': csrfToken,
-            'auth' : auth
-          }
-          let fnSuccess = function (res) {
-            if (res.success) {
-              Alert.alert('', '삭제되었습니다.');
-              fetchListData(); // 목록 갱신
-              clearForm();     // 폼 초기화
+            // viewdata와 그리드 초기화 및 업데이트
+            if (!viewdata) {
+                viewdata = new wijmo.collections.CollectionView(data2);
+            } else {
+                viewdata.sourceCollection = data2;
+                viewdata.refresh();
             }
-          }
-          AjaxUtil.postAsyncData('/api/system/user/delete', data, fnSuccess);
-        })
-      });
 
+            if (!theGrid) {
+                theGrid = new wijmo.grid.FlexGrid('#theGrid', {
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    allowSorting: 'MultiColumn',
+                    selectionMode: wijmo.grid.SelectionMode.Row,
+                    columns: [
+                        {binding: 'id', header: 'id', width: '*', align: 'center', visible: false, isReadOnly: false},
+                        {binding: 'userid', header: '사용자ID', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'prenm', header: '대표자', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'cltnm', header: '업체명', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'group_name', header: '사용자그룹', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'group_id', header: '사용자그룹', width: '*', align: 'center', visible: false},
+                        {binding: 'biztypenm', header: '업태', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'bizitemnm', header: '종목', width: '*', align: 'center', isReadOnly: true},
+                        {binding: 'tel', header: '전화번호', width: '*', align: 'center', visible: false},
+                        {binding: 'Phone', header: '핸드폰', width: '*', align: 'center', visible: true},
+                        {binding: 'email', header: '이메일', width: '*', align: 'center', visible: false},
+                        {binding: 'date_joined', header: '생성일', width: '*', align: 'center', isReadOnly: true},
+                    ],
+                    itemsSource: viewdata,
+                });
+                theGrid.rowHeaders.columns.splice(0, 1);
+                new FlexGridContextMenu(theGrid);
+            } else {
+                theGrid.itemsSource = viewdata; // 갱신된 CollectionView로 업데이트
+                theGrid.refresh(); // 그리드 새로고침
+            }
 
-   /* var popupWindow;
+            // 그리드 더블 클릭 이벤트 추가
+            let lastClickTime = 0;
+            theGrid.hostElement.addEventListener('click', function (e) {
+                const now = new Date().getTime();
 
-    function sample4_execDaumPostcode() {
-      popupWindow = window.open('', 'postcodePopup', 'width=530,height=530');
-      new daum.Postcode({
-        oncomplete: function(data) {
-          // 검색 결과 선택 시 실행할 코드
-          var roadAddr = data.roadAddress;
-          var extraRoadAddr = '';
+                if (now - lastClickTime < 300) {
+                    const ht = theGrid.hitTest(e);
 
-          if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
-            extraRoadAddr += data.bname;
-          }
-          if (data.buildingName !== '' && data.apartment === 'Y') {
-            extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-          }
-          if (extraRoadAddr !== '') {
-            extraRoadAddr = ' (' + extraRoadAddr + ')';
-          }
+                    if (ht.cellType === wijmo.grid.CellType.Cell) {
+                        const rowData = theGrid.rows[ht.row].dataItem;
+                        showUserInfo(rowData);
+                    }
+                }
+                lastClickTime = now;
+            });
+        }//fetchListData
 
-          document.getElementById('postno').value = data.zonecode;
-          document.getElementById('address1').value = roadAddr;
+        <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
+        function showUserInfo(rowData) {
+            // 필드 중 하나라도 비어있는지 확인하여 추가 데이터를 가져올지 결정
+            const hasMissingFields = !rowData || !rowData.cltnm || !rowData.prenm || !rowData.biztypenm || !rowData.bizitemnm || !rowData.tel || !rowData.Phone || !rowData.userid || !rowData.email;
 
-          var guideTextBox = document.getElementById("guide");
-          if (data.autoRoadAddress) {
-            var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
-            guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
-            guideTextBox.style.display = 'block';
-          } else if (data.autoJibunAddress) {
-            var expJibunAddr = data.autoJibunAddress;
-            guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
-            guideTextBox.style.display = 'block';
-          } else {
-            guideTextBox.innerHTML = '';
-            guideTextBox.style.display = 'none';
-          }
-
-          // 검색 완료 후 팝업 닫기
-          popupWindow.close();
+            if (hasMissingFields) {
+                // 데이터가 불완전한 경우 AJAX 요청으로 추가 데이터 가져오기
+                $.ajax({
+                    url: '/api/system/user/detail',  // 상세 정보 API 엔드포인트
+                    type: 'GET',
+                    data: {id: rowData ? rowData.id : null}, // rowData에 id가 있는 경우 사용
+                    success: function (response) {
+                        if (response && response.data) {
+                            populateFields(response.data); // 서버에서 가져온 데이터로 폼 채우기
+                        }
+                    },
+                    error: function () {
+                        console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+                    }
+                });
+            } else {
+                // 데이터가 완전한 경우 바로 폼에 채우기
+                populateFields(rowData);
+            }
         }
-      }).embed(popupWindow.document.body);
-    }*/
-  </script>
+
+        function populateFields(data) {
+            // 각 필드에 데이터를 채움
+            document.getElementById("id").value = data.id || '';
+            document.getElementById("userid").value = data.userid || '';
+            document.getElementById("cltnm").value = data.cltnm || '';
+            document.getElementById("prenm").value = data.prenm || '';
+            document.getElementById("biztypenm").value = data.biztypenm || '';
+            document.getElementById("bizitemnm").value = data.bizitemnm || '';
+            document.getElementById("tel").value = data.tel || '';
+            document.getElementById("Phone").value = data.Phone || '';
+            document.getElementById("email").value = data.email || '';
+
+            // authType(사용자 그룹) 설정
+            document.getElementById('authType').value = data.group_id;
+
+            // 체크박스 설정
+            document.getElementById("is_active").checked = data.is_active || false;
+
+            // 주소 관련 필드 설정
+            document.getElementById("postno").value = data.zipcd || '';
+            document.getElementById("address1").value = data.cltadres || '';
+            document.getElementById("placeAddress").value = data.cltadres || '';
+
+            $('#userid').prop('readonly', true);
+        }
+
+        //검색
+        function searchData() {
+            // 검색 조건 수집
+            const userGroup = document.getElementById('cboUserGroup').value;
+            const name = document.getElementById('keyword').value.trim();
+            const username = document.getElementById('username').value.trim();
+
+            // 검색 조건을 객체로 정리
+            const searchParams = {
+                userGroup: userGroup,
+                name: name,
+                username: username
+            };
+
+            // 서버로 AJAX 요청 전송
+            $.ajax({
+                url: '/api/system/user/search', // 서버 API 엔드포인트 설정
+                type: 'GET',
+                data: searchParams, // 검색 조건 전달
+                success: function (response) {
+                    // 데이터가 올바르게 반환되었는지 확인
+                    if (response && response.data) {
+                        updateGrid(response.data); // 데이터를 업데이트하는 함수 호출
+                    } else {
+                        console.error("데이터가 올바르게 반환되지 않았습니다.");
+                        alert("검색 결과가 없습니다.");
+                    }
+                },
+                error: function () {
+                    console.error("검색 중 오류가 발생했습니다.");
+                    alert("검색에 실패했습니다. 다시 시도해주세요.");
+                }
+            });
+        }
+
+        // 검색 결과를 그리드에 업데이트하는 함수
+        function updateGrid(data) {
+            // 데이터를 수집하여 CollectionView로 업데이트
+            if (viewdata) {
+                viewdata.sourceCollection = data; // 데이터 갱신
+                viewdata.refresh(); // CollectionView 새로고침
+            } else {
+                viewdata = new wijmo.collections.CollectionView(data);
+                theGrid.itemsSource = viewdata; // 데이터 그리드에 반영
+            }
+            theGrid.refresh();
+        }
+
+        function grid_binding(data) {
+            var inspecDto = data;
+            var inspecData = [];
+            var cnt = 1;
+            for (let i = 0; i < inspecDto.length; i++) {
+                inspecData.push({
+                    id: item["id"],
+                    userid: item["userid"],            // 사용자ID
+                    prenm: item["prenm"],              // 대표자
+                    cltnm: item["cltnm"],              // 업체명
+                    group_name: item["group_name"],    // 사용자그룹
+                    group_id: item["group_id"],        // 사용자그룹 (보이지 않음)
+                    biztypenm: item["biztypenm"],      // 업태
+                    bizitemnm: item["bizitemnm"],      // 종목
+                    tel: item["tel"],                  // 전화번호 (보이지 않음)
+                    Phone: item["Phone"],              // 핸드폰
+                    email: item["email"],              // 이메일 (보이지 않음)
+                    date_joined: item["date_joined"]   // 생성일
+                });
+                cnt++;
+            }
+
+            theGrid.columns.clear();
+            theGrid.autoGenerateColumns = false;
+            viewdata.sourceCollection = inspecData;
+
+            for (var i = 0; i < columns.length; i++) {
+                var col = new wijmo.grid.Column(columns[i]);
+                theGrid.columns.push(col);
+            }
+        }
+
+        function clearForm() {
+            ['id', 'userid', 'prenm', 'cltnm', 'authType', 'email',
+                'Phone', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'placeAddress',
+                'biztypenm', 'bizitemnm', 'postno', 'address1', 'username'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) { // 요소가 존재하는 경우에만 실행
+                    element.value = '';
+                }
+            });
+            // 체크박스 초기화 (체크 해제)
+            const isActiveCheckbox = document.getElementById('is_active');
+            if (isActiveCheckbox) {
+                isActiveCheckbox.checked = false;
+            }
+            $('#userid').prop('readonly', false);
+
+            $('.new-fl-ac').remove();
+        }
+
+        $(document).ready(function (e) {
+
+            //검색 사용자 그룹
+            initializeSelect({
+                url: '/user-auth/type',
+                params: {},
+                elementId: 'cboUserGroup',
+                valueField: "id",
+                textField: "name"
+            })
+            initializeSelect({
+                url: '/user-auth/type',
+                params: {},
+                elementId: 'authType',
+                valueField: "id",
+                textField: "name"
+            })
+
+            initializeSelect({
+                url: '/user-codes/parent',
+                params: {parentId: 154},
+                elementId: 'agencycd',
+                valueField: "id"
+            })
+        });
+
+        // 저장
+        $('#btnSave').click(function (e) {
+            Alert.confirm('', '저장을 하시겠습니까?', function () {
+                let formData = new FormData();
+
+                // 입력 필드 값을 formData에 추가
+                formData.append("cltnm", $('#cltnm').val() || '');
+                formData.append("prenm", $('#prenm').val() || '');
+                formData.append("biztypenm", $('#biztypenm').val() || '');
+                formData.append("bizitemnm", $('#bizitemnm').val() || '');
+                formData.append("tel", $('#tel').val() || '');
+                formData.append("Phone", $('#Phone').val() || '');
+                formData.append("userid", $('#userid').val() || '');
+                formData.append("UserGroup_id", $('#authType').val() || '');
+
+                // id 값 추가 (존재 유무로 등록/업데이트를 구분)
+                let id = $('#id').val().trim();
+                formData.append("id", id);
+
+                formData.append("email", $('#email').val() || '');
+                formData.append("authType", $('#authType').val() || '');
+                formData.append("agencycd", $('#agencycd').val() || '');
+                formData.append('_csrf', $('[name=_csrf]').val());
+
+                // 체크박스 값 추가
+                const isActiveCheckbox = document.getElementById("is_active");
+                formData.append("is_active", isActiveCheckbox ? isActiveCheckbox.checked : false);
+
+                // 주소 관련 필드 추가
+                formData.append("postno", $('#postno').val() || '');
+                formData.append("address1", $('#address1').val() || '');
+                formData.append("placeAddress", $('#placeAddress').val() || '');
+
+                // 서버로 formData 전송
+                $.ajax({
+                    url: '/api/system/user/save',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {'X-CSRF-TOKEN': csrfToken}, // CSRF 토큰을 헤더에 추가
+                    success: function (response) {
+                        console.log("저장 성공:", response);
+                        fetchListData(); // 목록 갱신
+                        clearForm();     // 폼 초기화
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("저장 실패:", response.message);
+                        console.error("저장 중 오류가 발생했습니다.");
+                        console.log("오류가 발생했습니다. 상태 코드: " + xhr.status + "\n오류 메시지: " + xhr.responseText);
+                        console.log(status, error);
+                    }
+                });
+            });
+        });//저장
+
+        // 삭제 버튼 클릭 이벤트
+        $('#btnDelete').click(function () {
+            let selectedItems = theGrid.selectedItems;
+            let auth = selectedItems[0].is_superuser? 'true' : 'false';
+
+            // 슈퍼유저 계정 여부 확인
+            if (auth === true) {
+                Alert.alert('', '슈퍼유저 계정은 수정 및 삭제가 불가합니다.');
+                return false;
+            }
+
+            // 삭제할 항목이 선택되었는지 확인
+            if (selectedItems.length === 0 || selectedItems[0].id === undefined) {
+                Alert.alert('', '삭제할 항목을 선택하세요.');
+                return;
+            }
+
+            let delList = SelectItemPush(selectedItems, 'id');
+            let del940List = SelectItemPush(selectedItems, 'login_id');
+
+            Alert.confirm('', '삭제하시겠습니까?', function () {
+                // 데이터 객체를 URL 인코딩 형식으로 구성
+                let data = {
+                    'id': delList[0],         // delList 배열의 첫 번째 항목만 전송
+                    'username': del940List[0], // del940List 배열의 첫 번째 항목만 전송
+                    '_csrf': csrfToken,
+                    'auth': auth
+                };
+
+                $.ajax({
+                    url: '/api/system/user/delete',
+                    type: 'POST',
+                    contentType: 'application/x-www-form-urlencoded',  // URL 인코딩으로 전송
+                    data: $.param(data),  // URL 인코딩 형식으로 변환하여 전송
+                    success: function (response) {
+                        console.log("삭제 성공:", response);
+                        Alert.alert('', '삭제되었습니다.');
+                        fetchListData();  // 목록 갱신
+                        clearForm();      // 폼 초기화
+                    },
+                    error: function (xhr, status, error) {
+                        Alert.alert('', '삭제 실패되었습니다.');
+                        console.error("삭제 실패:", xhr.responseText);
+                        console.log("오류가 발생했습니다. 상태 코드: " + xhr.status + "\n오류 메시지: " + xhr.responseText);
+                        console.log(status, error);
+                    }
+                });
+            });
+        });
+
+
+
+        /*$('#btnDelete').click(function () {
+          let selectedItems = theGrid.selectedItems;
+          let auth = selectedItems[0].is_superuser;
+
+
+          if(auth === true){
+            Alert.alert('', '슈퍼유저 계정은 수정 및 삭제가 불가합니다.');
+            return false;
+          }
+
+          if (selectedItems[0].id === undefined || selectedItems.length === 0) {
+            Alert.alert('', '삭제할 항목을 선택하세요.');
+            return;
+          }
+          console.log('zz', selectedItems)
+          let delList = SelectItemPush(selectedItems, 'id');
+          let del940List = SelectItemPush(selectedItems, 'login_id');
+          console.log('삭제확인2', del940List);
+          console.log('삭제확인', delList);
+          Alert.confirm('', '삭제하시겠습니까?', function () {
+            let data = {
+              'id': JSON.stringify(delList),
+              'username': JSON.stringify(del940List),
+              '_csrf': csrfToken,
+              'auth' : auth
+            }
+            let fnSuccess = function (res) {
+              if (res.success) {
+                Alert.alert('', '삭제되었습니다.');
+                fetchListData(); // 목록 갱신
+                clearForm();     // 폼 초기화
+              }
+            }
+            AjaxUtil.postAsyncData('/api/system/user/delete', data, fnSuccess);
+          })
+        });*/
+
+
+        /* var popupWindow;
+
+         function sample4_execDaumPostcode() {
+           popupWindow = window.open('', 'postcodePopup', 'width=530,height=530');
+           new daum.Postcode({
+             oncomplete: function(data) {
+               // 검색 결과 선택 시 실행할 코드
+               var roadAddr = data.roadAddress;
+               var extraRoadAddr = '';
+
+               if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                 extraRoadAddr += data.bname;
+               }
+               if (data.buildingName !== '' && data.apartment === 'Y') {
+                 extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+               }
+               if (extraRoadAddr !== '') {
+                 extraRoadAddr = ' (' + extraRoadAddr + ')';
+               }
+
+               document.getElementById('postno').value = data.zonecode;
+               document.getElementById('address1').value = roadAddr;
+
+               var guideTextBox = document.getElementById("guide");
+               if (data.autoRoadAddress) {
+                 var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
+                 guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
+                 guideTextBox.style.display = 'block';
+               } else if (data.autoJibunAddress) {
+                 var expJibunAddr = data.autoJibunAddress;
+                 guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
+                 guideTextBox.style.display = 'block';
+               } else {
+                 guideTextBox.innerHTML = '';
+                 guideTextBox.style.display = 'none';
+               }
+
+               // 검색 완료 후 팝업 닫기
+               popupWindow.close();
+             }
+           }).embed(popupWindow.document.body);
+         }*/
+    </script>
 </th:block>
 </html>
