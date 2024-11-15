@@ -40,7 +40,7 @@
 
                 <div class="weather">
                     <div class="wt-main">
-                        <p class="area"> 서울 금천구</p>
+                        <p id="area"></p>
                         <div class="wt-graphic">
                             <img id="weatherIcon" src="" alt="">
                             <!--                            <p id="temperature"></p> &lt;!&ndash; 기존의 <span> 태그를 제거 -->
@@ -51,15 +51,15 @@
                         <ul>
                             <li>
                                 <img src="/images/icon/ico-umbrella.svg" alt="강수">
-                                <p id="precipitationProbability">1%</p>
+                                <p id="precipitationProbability"></p>
                             </li>
                             <li>
                                 <img src="/images/icon/ico-water.svg" alt="습도">
-                                <p id="humidity">80%</p>
+                                <p id="humidity"></p>
                             </li>
                             <li>
                                 <img src="/images/icon/ico-wind.svg" alt="풍속">
-                                <p id="windSpeed">1m/s</p>
+                                <p id="windSpeed"></p>
                             </li>
                         </ul>
                     </div>
@@ -922,15 +922,17 @@
     // 날씨 정보
     fetchWeatherData();
     // 날씨 정보를 서버에서 가져오는 함수
-    function fetchWeatherData() {
+   function fetchWeatherData() {
         $.ajax({
             url: '/weather/current',
             type: 'GET',
             dataType: 'json',
             success: function (data) {
-                // console.log("날씨 data:", JSON.stringify(data, null, 2));
-
                 // JSON 데이터 구조를 이용하여 각 항목에 대한 값을 추출
+                console.log(data); // 반환된 데이터를 콘솔에 출력
+                const fullAddress = data.address;
+                const shortAddress = fullAddress.split(" ")[0] + " " + fullAddress.split(" ")[1] + " " + fullAddress.split(" ")[2];
+                $('#area').text(shortAddress); // 지역 정보 표시
                 $('#temperature').html(`${data.T1H}<span class="celsius">℃</span>`);
                 $('#precipitationProbability').html(data.POP ? `${data.POP}%` : '0%'); // 강수확률이 없는 경우 '0%'로 표시
                 $('#humidity').html(`${data.REH}%`); // 습도를 표시할 때 '%'를 추가
@@ -944,7 +946,6 @@
             }
         });
     }
-
     // 날씨 아이콘 업데이트 함수
     function updateWeatherIcon(skyValue, ptyValue) {
         // console.log("PTY Value:", ptyValue);
@@ -982,7 +983,6 @@
         weatherIcon.attr('src', iconPath);
         weatherIcon.attr('alt', altText);
 
-        // console.log("Weather icon path:", iconPath);
     }
 </script>
 
@@ -1126,7 +1126,7 @@
         // }
 
 
-        $('#loginFrm').validate({submitHandler: submitHandler});
+       /* $('#loginFrm').validate({submitHandler: submitHandler});*/
 
     });
 
