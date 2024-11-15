@@ -936,7 +936,7 @@
               if (panel.columns[c].binding === 'ordtext') {
                 cell.innerHTML = ''; // 셀 내용 초기화
                 if (item.ordtext) {
-                  cell.innerHTML = '<a title="수정팝업" class="" onclick="showPopup2(\'popup2\')" style="color: #03428E">요청사항 확인</a>';
+                  cell.innerHTML = '<a title="수정팝업" class="" onclick="showPopup3(\'popup2\')" style="color: #03428E">요청사항 확인</a>';
                 }
               }
             }
@@ -1292,6 +1292,10 @@
             const itemToRemove = viewdata2.sourceCollection[index]; // 삭제할 항목 가져오기
             viewdata2.remove(itemToRemove); // CollectionView에서 항목 삭제
             if(selectedData.reqseq !== ""){
+              let deleteNum = {
+                reqseq: selectedData.reqseq,
+                reqnum: document.getElementById('reqnum').value
+              };
               const promise = AjaxUtil.postAsyncData('/api/request/request/bodyDelete', selectedData.reqseq, fnSuccess);
               deletePromises.push(promise);
             }
@@ -1321,7 +1325,7 @@
         Alert.alert('', '삭제할 항목을\n주문의뢰현황에서 선택해주세요.');
       }
 
-      Alert.confirm('', '삭제하시겠습니까?', function () {
+      Alert.confirm('', '주문 등록정보를\n삭제하시겠습니까?', function () {
         let data = {
           'reqnum': $('#reqnum').val(),
           '_csrf': csrfToken
@@ -1447,6 +1451,36 @@
     }
     function showPopup2(documnetId) {
       let selectedItems = theGrid.selectedItems;
+      // 해당 ID의 팝업 요소를 찾음
+      const popup = document.getElementById(documnetId);
+
+      if (popup) {
+        // 팝업을 포함한 모달을 표시
+        const modal = popup.closest('.modal');
+        if (modal) {
+          modal.style.display = 'block';
+        }
+
+        // TinyMCE 에디터에 ordtext 값을 그대로 사용하여 넣기
+        const ordtext = selectedItems[0].originOrdtext;
+
+        // TinyMCE 에디터에 HTML로 content 설정
+        tinymce.get('ordtext').setContent(ordtext);  // 'ordtext'는 TinyMCE가 적용된 요소의 id
+
+        // 팝업을 표시
+        popup.style.display = 'block';
+
+        // 애니메이션을 위한 클래스 추가
+        requestAnimationFrame(() => {
+          popup.classList.add('show');
+          if (modal) {
+            modal.classList.add('show');
+          }
+        });
+      }
+    }
+    function showPopup3(documnetId) {
+      let selectedItems = theGrid2.selectedItems;
       // 해당 ID의 팝업 요소를 찾음
       const popup = document.getElementById(documnetId);
 

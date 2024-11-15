@@ -414,14 +414,16 @@ public class RequestService {
     }
 
     @Transactional
-    public boolean deleteBody(String reqseq) {
+    public boolean deleteBody(String reqseq, String reqnum) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         try {
             String sql = """
                 DELETE FROM TB_DA007W
                 WHERE reqseq = :reqseq
+                AND reqnum = :reqnum
             """;
             dicParam.addValue("reqseq", reqseq);
+            dicParam.addValue("reqnum", reqnum);
             this.sqlRunner.queryForObject(sql, dicParam, (rs, rowNum) -> rs.getString("dtl_cd"));
         } catch (Exception e) {
             e.printStackTrace();

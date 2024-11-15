@@ -332,7 +332,7 @@ public class RequestController {
                         allSuccessful &= successUpdate;
                         result.message += successUpdate ? " | 세부사항 업데이트 성공" : " | 세부사항 업데이트 실패";
                     } else {
-                        reqseq = String.format("%04d",tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ") + 1);
+                        reqseq = String.format("%03d",tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ") + 1);
                         bodypk.setReqseq(reqseq);
                         tbDa007.setPk(bodypk);
 
@@ -624,10 +624,11 @@ public class RequestController {
     }
     // body 삭제 메서드
     @PostMapping("/bodyDelete")
-    public AjaxResult deleteBody(@RequestParam String reqseq) {
+    public AjaxResult deleteBody(@RequestParam String reqseq,
+                                 @RequestParam String reqnum) {
         AjaxResult result = new AjaxResult();
 
-        boolean success = requestService.deleteBody(reqseq);
+        boolean success = requestService.deleteBody(reqseq, reqnum);
 
         if (success) {
             result.success = true;
