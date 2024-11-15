@@ -403,38 +403,30 @@ public class SystemService {
 
     public List<Map<String, Object>> getSystemLogList(Timestamp start, Timestamp end, String type, String source) {
         String sql = """
-                   select 
-                       ROW_NUMBER() OVER (ORDER BY _created DESC) as row_num,
-                       id,
-                       Type as type,
-                       Source as source,
-                       Message as message,
-                       to_char(_created, 'yyyy-mm-dd hh24:mi:ss') as created
-                   from sys_log sl
-                   where _created between :start and :end
-            """;
+           SELECT 
+               ROW_NUMBER() OVER (ORDER BY _created DESC) AS row_num,
+               id,
+               Type AS type,
+               Source AS source,
+               Message AS message,
+               FORMAT(_created, 'yyyy-MM-dd HH:mm:ss') AS created
+           FROM sys_log sl
+           WHERE _created BETWEEN :start AND :end
+        """;
 
         if (StringUtils.hasText(type)) {
             sql += """
-                and Type ilike concat('%',:type,'%')
-                """;
+            AND Type LIKE '%' + :type + '%'
+            """;
         }
 
         if (StringUtils.hasText(source)) {
             sql += """
-                and Source ilike concat('%', :source, '%')		
-                """;
-        }
-        sql += """
-            order by _created desc		
+            AND Source LIKE '%' + :source + '%'		
             """;
+        }
 
-        //Map<String, Object> dicParam = new HashMap<String, Object>();
-        //dicParam.put("start", start);
-        //dicParam.put("end", start);
-        //dicParam.put("type", type);
-        //dicParam.put("source", source);
-        //return this.sqlRunner.getRows(sql, dicParam);
+        sql += " ORDER BY _created DESC";
 
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         namedParameters.addValue("start", start, java.sql.Types.TIMESTAMP);
@@ -444,6 +436,7 @@ public class SystemService {
 
         return this.jdbcTemplate.queryForList(sql, namedParameters);
     }
+
 
     public Map<String, Object> getSystemLogDetail(Long id) {
         String sql = """
