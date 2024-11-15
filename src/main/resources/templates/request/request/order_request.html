@@ -186,6 +186,8 @@
                 <th style="text-align: center">
                   <label for="remark">
                     제&ensp;&ensp;&ensp;&nbsp;목
+                    <br>
+                    <small style="font-size: 0.85em; color: #666;">(메&ensp;&ensp;&ensp;모)</small>
                   </label>
                 </th>
                 <td colspan="7">
@@ -1278,10 +1280,10 @@
     // 행(세부사항) 삭제(마지막 세부사항 삭제시 헤드정보도 같이 삭제)
     function deleteBody(){
       if(SelectItem === undefined || SelectItem.length === 0){
-        Alert.alert('', '삭제할 항목을 선택하세요.');
+        Alert.alert('', '삭제할 항목을 선택해 주세요.');
         return;
       }
-      Alert.confirm('', '삭제하시겠습니까?\n주의!\n세부사항을 모두 삭제할 시 주문의뢰가 삭제 됩니다.', function () {
+      Alert.confirm('', '선택된 행 내용을 삭제하시겠습니까?', function () {
         const deletePromises = []; // 비동기 요청을 저장할 배열
         SelectItem.forEach(selectedRow => {
           const selectedData = selectedRow.dataItem;
