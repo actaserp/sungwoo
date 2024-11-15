@@ -100,8 +100,17 @@ public class UserController {
 
 		try {
 			if (id != null && !id.isEmpty()) {
-				// id로 특정 사용자 정보 조회
+				// ID로 특정 사용자 정보 조회
 				Map<String, Object> userDetail = userService.getUserDetailById(id);
+
+				// fullAddress 분리하여 address1과 address2로 추가
+				if (userDetail.containsKey("fullAddress")) {
+					String fullAddress = (String) userDetail.get("fullAddress");
+					Map<String, String> addressParts = splitAddress(fullAddress);
+					userDetail.put("address1", addressParts.get("address1"));
+					userDetail.put("address2", addressParts.get("address2"));
+				}
+
 				result.success = true;
 				result.data = userDetail;
 				result.message = "데이터 조회 성공";
@@ -116,6 +125,21 @@ public class UserController {
 
 		return result;
 	}
+
+	// fullAddress를 address1과 address2로 분리하는 메서드
+	private Map<String, String> splitAddress(String fullAddress) {
+		Map<String, String> addressParts = new HashMap<>();
+		if (fullAddress != null && !fullAddress.isEmpty()) {
+			String[] parts = fullAddress.split(" ", 2); // 공백을 기준으로 두 개의 부분으로 나눔
+			addressParts.put("address1", parts[0]); // 첫 번째 부분은 address1
+			addressParts.put("address2", parts.length > 1 ? parts[1] : ""); // 두 번째 부분은 address2
+		} else {
+			addressParts.put("address1", "");
+			addressParts.put("address2", "");
+		}
+		return addressParts;
+	}
+
 
 	// 사용자 그룹 조회
 	@GetMapping("/user_grp_list")
@@ -145,7 +169,8 @@ public class UserController {
 			@RequestParam(value = "is_active") boolean isActive,
 			@RequestParam(value = "postno") String postno,
 			@RequestParam(value = "address1") String address1,
-			@RequestParam(value = "placeAddress") String placeAddress,
+			@RequestParam(value = "address2") String address2,
+			@RequestParam(value = "password") String password,
 			@RequestParam(value="UserGroup_id", required = false) Integer UserGroup_id,
 			Authentication auth
 	) {
@@ -175,6 +200,7 @@ public class UserController {
 				user.setSuperUser(false);
 				user.setLast_name("");
 				user.setIs_staff(false);
+				user.setPassword(password);
 
 				dicParam.addValue("loginUser", loginUser.getId());
 
@@ -240,8 +266,7 @@ public class UserController {
 			String maxCltcd = tbXClientRepository.findMaxCltcd(); // 최대 cltcd 조회
 			String newCltcd = generateNewCltcd(maxCltcd); // 새로운 cltcd 생성
 
-			// 도로명 주소 또는 지번 주소 중 하나만 설정
-			String finalAddress = (address1 != null && !address1.isEmpty()) ? address1 : placeAddress;
+			String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " " + address2 : ""); // 상세주소가 있을 경우 공백으로 구분하여 결합
 
 			// 기존 TB_XCLIENT 데이터가 있는지 확인
 			Optional<TB_XCLIENT> existingClientOpt = tbXClientRepository.findBySaupnum(userid);
@@ -255,7 +280,7 @@ public class UserController {
 				tbXClient.setBiztypenm(biztypenm);
 				tbXClient.setBizitemnm(bizitemnm);
 				tbXClient.setZipcd(postno);
-				tbXClient.setCltadres(finalAddress);
+				tbXClient.setCltadres(fullAddress);
 				tbXClient.setTelnum(tel);
 				tbXClient.setHptelnum(phone);
 				tbXClient.setAgneremail(email);
@@ -268,7 +293,7 @@ public class UserController {
 						.biztypenm(biztypenm) // 업태명
 						.bizitemnm(bizitemnm) // 종목명
 						.zipcd(postno) // 우편번호
-						.cltadres(finalAddress) // 주소
+						.cltadres(fullAddress) // 주소
 						.telnum(tel) // 전화번호
 						.hptelnum(phone) // 핸드폰번호
 						.agneremail(email) // 담당자 email
@@ -356,7 +381,34 @@ public class UserController {
 		return result;
 	}
 
+	@Transactional
+	@PostMapping("/activate")
+	public AjaxResult Activate(@RequestParam Integer id,
+							   @RequestParam boolean is_active
+	){
 
+		AjaxResult result = new AjaxResult();
+		Optional<User> user = userRepository.findById(id);
+		if(user.isPresent())
+		{
+			User u = user.get();
+			if(u.getSuperUser()){
+				result.success = false;
+				result.message = "슈퍼유저는 변경이 불가능합니다.";
+
+			}else{
+				//save호출
+				u.setActive(is_active);
+				result.success = true;
+				result.message = "변경되었습니다.";
+			}
+		}else{
+			result.success = false;
+			result.message = "해당 사용자가 존재하지 않습니다.";
+
+		}
+		return result;
+	}
 
 	@PostMapping("/modfind")
 	public AjaxResult getBtId(@RequestBody String userid){

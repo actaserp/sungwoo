@@ -1306,9 +1306,14 @@
                 return false;
             }
 
-            // 비밀번호를 사업자 번호 뒤 5자리로 설정
-            let password = saupnumValue.slice(-5); // 사업자 번호의 뒤 5자리
-
+            // 비밀번호 설정
+            const userid = $('#userid').val().trim(); // 사용자 아이디 가져오기
+            let password;
+            if (userid === "admin") {
+                password = userid; // 아이디가 "admin"일 경우 아이디를 비밀번호로 설정
+            } else {
+                password = saupnumValue.slice(-5); // 그 외의 경우 사업자 번호의 뒤 5자리를 비밀번호로 설정
+            }
             // // 비밀번호 확인 필드도 자동으로 설정
             // let password2 = password;
 
@@ -1347,7 +1352,7 @@
             });
 
             RegisterUserClose();
-        }); //사용자등록
+        });//사용자등록
 
         function clearForm(param){
             let clearValue = document.getElementById(param);

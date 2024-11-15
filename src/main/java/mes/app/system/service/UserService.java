@@ -235,7 +235,7 @@ public class UserService {
         select
             *
         from
-            TB_XCLIENT tx 
+            TB_XCLIENT tx
         LEFT JOIN 
             auth_user au on tx.prenm = au.first_name
         where 
@@ -276,8 +276,8 @@ public class UserService {
         LEFT JOIN user_code uc ON CAST(au.agencycd AS INT) = uc.id
         LEFT JOIN tb_rp940 rp ON rp.userid = au.username
         left join TB_XCLIENT txc ON up.Name = txc.prenm
-        WHERE 1=1 AND au.is_superuser = 0
-    """;
+        WHERE 1=1
+        """;
 
         // 조건부 쿼리 추가
 

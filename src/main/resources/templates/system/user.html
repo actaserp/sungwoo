@@ -173,19 +173,26 @@
                                     <input type="checkbox" id="is_active" name="is_active" style="display: block; margin: auto;">
                                 </td>
                             </tr>
-                            <th>
-                                <label for="postno">
-                                    주 소
-                                </label>
-                            </th>
-                            <td colspan="5">
-                                <input type="text" id="postno" placeholder="우편번호"
-                                       onclick="sample4_execDaumPostcode()"
-                                       style="width: 100px; margin-bottom: 3px;">
-                                <input type="text" id="address1" placeholder="도로명주소" style="width: 48%">
-                                <input type="hidden" id="placeAddress" placeholder="지번주소">
-                                <span id="guide" style="color:#999;display:none"></span>
-                            </td>
+                            <tr>
+                                <th>
+                                    <label for="postno">
+                                        주소
+                                    </label>
+                                </th>
+                                <td colspan="3">
+                                    <div class="input-clear">
+                                        <input type="text" id="postno" name="postno" placeholder="우편번호"
+                                               onclick="sample4_execDaumPostcode()"
+                                               style="width: 85px; margin-bottom: 3px; display: inline-block;">
+                                        <input type="text" id="address1" name="address1" placeholder="도로명주소"
+                                               style="width: 380px; display: inline-block; margin-left: 5px;"
+                                               readonly>
+                                        <input type="text" id="address2" name="address2" placeholder="상세주소"
+                                               style="width: 390px; display: inline-block; margin-left: 7px;">
+                                        <span id="guide" style="color:#999;display:none"></span>
+                                    </div>
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -267,57 +274,6 @@
         </div> <!--//tab-wrap end-->
     </div> <!--//layout-contents end -->
 
-    <!-- smtp 모달창 -->
-    <div class="modal3">
-        <div class="popup-wrapper3 w800" id="popup2">
-            <div class="popup-title">
-                <a title="팝업닫기" onclick="closeFilePopup()" class="btn-popup-close">
-                    <img src="/images/icon/btn-popup-close.svg" alt="닫기">
-                </a>
-            </div>
-            <div class="popup-contents">
-                <div class="table-wrap">
-                    <table class="write-table">
-                        <caption>점검등록 테이블</caption>
-                        <colgroup>
-                            <col class="wp20">
-                            <col class="wp80">
-                        </colgroup>
-                        <input type="hidden" id="popup-spuncode">
-                        <tbody>
-                        <tr>
-                            <th>
-                                <label>SMTP 아이디</label>
-                            </th>
-                            <td>
-                                <div class="input-clear">
-                                    <input type="text" id="smtpid" maxlength="30" class="wp60">
-                                    <span class="btn-clear">×</span>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <label>SMTP 비밀번호</label>
-                            </th>
-                            <td>
-                                <div class="input-clear">
-                                    <input type="password" id="smtppw" maxlength="30" class="wp60">
-                                    <span class="btn-clear">×</span>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="popup-button">
-                <button onclick="closeFilePopup()" style="border: 1px solid #03428E !important; font-size: 15px !important;">닫기</button>
-                <button onclick="saveSMTP()" style="border: 1px solid #03428E !important;color: white;background: #03428E !important;font-size: 15px !important;">저장</button>
-            </div>
-        </div>
-    </div>
-
     <footer>
         <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
     </footer>
@@ -328,6 +284,51 @@
     <th:block th:replace="/common/ax5_uploader :: ax5_uploader" ></th:block>
     <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box" ></th:block>
     <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        var popupWindow;
+
+        function sample4_execDaumPostcode() {
+            popupWindow = window.open('', 'postcodePopup', 'width=530,height=530');
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    // 검색 결과 선택 시 실행할 코드
+                    var roadAddr = data.roadAddress;
+                    var extraRoadAddr = '';
+
+                    if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                        extraRoadAddr += data.bname;
+                    }
+                    if (data.buildingName !== '' && data.apartment === 'Y') {
+                        extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    if (extraRoadAddr !== '') {
+                        extraRoadAddr = ' (' + extraRoadAddr + ')';
+                    }
+
+                    document.getElementById('postno').value = data.zonecode;
+                    document.getElementById('address1').value = roadAddr;
+
+                    var guideTextBox = document.getElementById("guide");
+                    if (data.autoRoadAddress) {
+                        var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
+                        guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
+                        guideTextBox.style.display = 'block';
+                    } else if (data.autoJibunAddress) {
+                        var expJibunAddr = data.autoJibunAddress;
+                        guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
+                        guideTextBox.style.display = 'block';
+                    } else {
+                        guideTextBox.innerHTML = '';
+                        guideTextBox.style.display = 'none';
+                    }
+
+                    // 검색 완료 후 팝업 닫기
+                    popupWindow.close();
+                }
+            }).embed(popupWindow.document.body);
+        }
+    </script>
 
     <script type="text/javascript">
 

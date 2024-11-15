@@ -183,19 +183,26 @@
                                            style="display: block; margin: auto;">
                                 </td>
                             </tr>
-                            <th>
-                                <label for="postno">
-                                    주 소
-                                </label>
-                            </th>
-                            <td colspan="5">
-                                <input type="text" id="postno" placeholder="우편번호"
-                                       onclick="sample4_execDaumPostcode()"
-                                       style="width: 100px; margin-bottom: 3px;">
-                                <input type="text" id="address1" placeholder="도로명주소" style="width: 48%">
-                                <input type="hidden" id="placeAddress" placeholder="지번주소">
-                                <span id="guide" style="color:#999;display:none"></span>
-                            </td>
+                            <tr>
+                                <th>
+                                    <label for="postno">
+                                        주소
+                                    </label>
+                                </th>
+                                <td colspan="3">
+                                    <div class="input-clear">
+                                        <input type="text" id="postno" name="postno" placeholder="우편번호"
+                                               onclick="sample4_execDaumPostcode()"
+                                               style="width: 85px; margin-bottom: 3px; display: inline-block;">
+                                        <input type="text" id="address1" name="address1" placeholder="도로명주소"
+                                               style="width: 380px; display: inline-block; margin-left: 5px;"
+                                               readonly>
+                                        <input type="text" id="address2" name="address2" placeholder="상세주소"
+                                               style="width: 390px; display: inline-block; margin-left: 7px;">
+                                        <span id="guide" style="color:#999;display:none"></span>
+                                    </div>
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -290,7 +297,51 @@
     <th:block th:replace="/common/ax5_uploader :: ax5_uploader"></th:block>
     <th:block th:replace="/common/upload_one_image_box :: upload_one_image_box"></th:block>
     <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        var popupWindow;
 
+        function sample4_execDaumPostcode() {
+            popupWindow = window.open('', 'postcodePopup', 'width=530,height=530');
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    // 검색 결과 선택 시 실행할 코드
+                    var roadAddr = data.roadAddress;
+                    var extraRoadAddr = '';
+
+                    if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                        extraRoadAddr += data.bname;
+                    }
+                    if (data.buildingName !== '' && data.apartment === 'Y') {
+                        extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    if (extraRoadAddr !== '') {
+                        extraRoadAddr = ' (' + extraRoadAddr + ')';
+                    }
+
+                    document.getElementById('postno').value = data.zonecode;
+                    document.getElementById('address1').value = roadAddr;
+
+                    var guideTextBox = document.getElementById("guide");
+                    if (data.autoRoadAddress) {
+                        var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
+                        guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
+                        guideTextBox.style.display = 'block';
+                    } else if (data.autoJibunAddress) {
+                        var expJibunAddr = data.autoJibunAddress;
+                        guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
+                        guideTextBox.style.display = 'block';
+                    } else {
+                        guideTextBox.innerHTML = '';
+                        guideTextBox.style.display = 'none';
+                    }
+
+                    // 검색 완료 후 팝업 닫기
+                    popupWindow.close();
+                }
+            }).embed(popupWindow.document.body);
+        }
+    </script>
     <script type="text/javascript">
 
         var theGrid;
@@ -315,11 +366,41 @@
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
         function init() {
             fetchListData();
+
+            // 체크박스 클릭 후 값이 변경될 때 함수 실행
+            theGrid.cellEditEnded.addHandler(function(s, e) {
+                var col = s.columns[e.col];
+                var item = s.rows[e.row].dataItem;
+
+                // is_active 컬럼일 경우 처리
+                if (col.binding === 'is_active' && !item.is_superuser) {
+                    var newValue = item.is_active;
+
+                    var IdValue = item.id;
+
+                    console.log('item23', item);
+
+                    console.log('idvalue: ', IdValue);
+
+
+                    let data = {
+                        is_active: newValue,
+                        id : IdValue
+                    }
+
+                    let fnSuccess = function (res){
+                        if(res.success){
+                            Alert.alert('', res.message);
+                        }else{
+                            Alert.alert('', res.message);
+                        }
+                    }
+
+                    AjaxUtil.postAsyncData('/api/system/user/activate', data, fnSuccess);
+                }
+            });
         }
 
-        function init() {
-            fetchListData();
-        }
 
         function fetchListData() {
             let data2 = [];
@@ -422,25 +503,36 @@
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
         function showUserInfo(rowData) {
             // 필드 중 하나라도 비어있는지 확인하여 추가 데이터를 가져올지 결정
-            const hasMissingFields = !rowData || !rowData.cltnm || !rowData.prenm || !rowData.biztypenm || !rowData.bizitemnm || !rowData.tel || !rowData.Phone || !rowData.userid || !rowData.email;
+            const hasMissingFields = !rowData || !rowData.cltnm || !rowData.prenm || !rowData.biztypenm ||
+                !rowData.bizitemnm || !rowData.tel || !rowData.Phone ||
+                !rowData.userid || !rowData.email;
 
             if (hasMissingFields) {
-                // 데이터가 불완전한 경우 AJAX 요청으로 추가 데이터 가져오기
-                $.ajax({
-                    url: '/api/system/user/detail',  // 상세 정보 API 엔드포인트
-                    type: 'GET',
-                    data: {id: rowData ? rowData.id : null}, // rowData에 id가 있는 경우 사용
-                    success: function (response) {
-                        if (response && response.data) {
-                            populateFields(response.data); // 서버에서 가져온 데이터로 폼 채우기
+                // 데이터가 불완전하거나 비어 있을 때
+                if (rowData && rowData.id) {
+                    // 추가 데이터가 필요한 경우 AJAX 요청으로 가져오기
+                    $.ajax({
+                        url: '/api/system/user/detail',
+                        type: 'GET',
+                        data: { id: rowData.id },
+                        success: function (response) {
+                            if (response && response.data) {
+                                populateFields(response.data); // 서버에서 가져온 데이터로 폼 채우기
+                            } else {
+                                populateFields({}); // 데이터가 없을 경우 빈 필드로 채우기
+                            }
+                        },
+                        error: function () {
+                            console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+                            populateFields({}); // 오류 발생 시 빈 필드로 채우기
                         }
-                    },
-                    error: function () {
-                        console.error("데이터를 가져오는 중 오류가 발생했습니다.");
-                    }
-                });
+                    });
+                } else {
+                    // rowData가 없거나 ID가 없는 경우 빈 필드로 채우기
+                    populateFields({});
+                }
             } else {
-                // 데이터가 완전한 경우 바로 폼에 채우기
+                // 데이터가 완전한 경우
                 populateFields(rowData);
             }
         }
@@ -491,13 +583,31 @@
                 type: 'GET',
                 data: searchParams, // 검색 조건 전달
                 success: function (response) {
-                    // 데이터가 올바르게 반환되었는지 확인
-                    if (response && response.data) {
-                        updateGrid(response.data); // 데이터를 업데이트하는 함수 호출
-                    } else {
-                        console.error("데이터가 올바르게 반환되지 않았습니다.");
-                        alert("검색 결과가 없습니다.");
+                    let data = response && response.data ? response.data : [];
+
+                    // 최소 행 수 유지 - 검색 결과가 없을 경우 빈 행 추가
+                    const minimumRows = 3;
+                    if (data.length < minimumRows) {
+                        const additionalRows = minimumRows - data.length;
+                        for (let i = 0; i < additionalRows; i++) {
+                            data.push({
+                                id: '',
+                                userid: '',
+                                prenm: '',
+                                cltnm: '',
+                                group_name: '',
+                                group_id: '',
+                                biztypenm: '',
+                                bizitemnm: '',
+                                tel: '',
+                                Phone: '',
+                                email: '',
+                                date_joined: ''
+                            });
+                        }
                     }
+
+                    updateGrid(data); // 데이터를 업데이트하는 함수 호출
                 },
                 error: function () {
                     console.error("검색 중 오류가 발생했습니다.");
@@ -524,6 +634,7 @@
             var inspecData = [];
             var cnt = 1;
             for (let i = 0; i < inspecDto.length; i++) {
+                let item = inspecDto[i];
                 inspecData.push({
                     id: item["id"],
                     userid: item["userid"],            // 사용자ID
@@ -538,11 +649,11 @@
                     email: item["email"],              // 이메일 (보이지 않음)
                     date_joined: item["date_joined"]   // 생성일
                 });
-                cnt++;
+                cnt++
             }
-
             theGrid.columns.clear();
             theGrid.autoGenerateColumns = false;
+
             viewdata.sourceCollection = inspecData;
 
             for (var i = 0; i < columns.length; i++) {
@@ -554,12 +665,13 @@
         function clearForm() {
             ['id', 'userid', 'prenm', 'cltnm', 'authType', 'email',
                 'Phone', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'placeAddress',
-                'biztypenm', 'bizitemnm', 'postno', 'address1', 'username'].forEach(id => {
+                'biztypenm', 'bizitemnm', 'postno', 'address1','address2', 'username'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) { // 요소가 존재하는 경우에만 실행
                     element.value = '';
                 }
             });
+
             // 체크박스 초기화 (체크 해제)
             const isActiveCheckbox = document.getElementById('is_active');
             if (isActiveCheckbox) {
@@ -620,14 +732,24 @@
                 formData.append("agencycd", $('#agencycd').val() || '');
                 formData.append('_csrf', $('[name=_csrf]').val());
 
-                // 체크박스 값 추가
+                // 체크박스 값
                 const isActiveCheckbox = document.getElementById("is_active");
                 formData.append("is_active", isActiveCheckbox ? isActiveCheckbox.checked : false);
 
-                // 주소 관련 필드 추가
+                // 주소 관련 필드
                 formData.append("postno", $('#postno').val() || '');
                 formData.append("address1", $('#address1').val() || '');
-                formData.append("placeAddress", $('#placeAddress').val() || '');
+                formData.append("address2", $('#address2').val() || '');
+
+                // 비밀번호 설정 로직
+                let saupnumValue = $('#saupnum').val() || ''; // 사업자번호 필드의 값을 가져옴
+                let password;
+                if (userid === "admin") {
+                    password = userid; // 아이디가 "admin"일 경우 아이디를 비밀번호로 설정
+                } else {
+                    password = saupnumValue.slice(-5); // 그 외의 경우 사업자 번호의 뒤 5자리를 비밀번호로 설정
+                }
+                formData.append("password", password);
 
                 // 서버로 formData 전송
                 $.ajax({
@@ -701,89 +823,6 @@
                 });
             });
         });
-
-
-
-        /*$('#btnDelete').click(function () {
-          let selectedItems = theGrid.selectedItems;
-          let auth = selectedItems[0].is_superuser;
-
-
-          if(auth === true){
-            Alert.alert('', '슈퍼유저 계정은 수정 및 삭제가 불가합니다.');
-            return false;
-          }
-
-          if (selectedItems[0].id === undefined || selectedItems.length === 0) {
-            Alert.alert('', '삭제할 항목을 선택하세요.');
-            return;
-          }
-          console.log('zz', selectedItems)
-          let delList = SelectItemPush(selectedItems, 'id');
-          let del940List = SelectItemPush(selectedItems, 'login_id');
-          console.log('삭제확인2', del940List);
-          console.log('삭제확인', delList);
-          Alert.confirm('', '삭제하시겠습니까?', function () {
-            let data = {
-              'id': JSON.stringify(delList),
-              'username': JSON.stringify(del940List),
-              '_csrf': csrfToken,
-              'auth' : auth
-            }
-            let fnSuccess = function (res) {
-              if (res.success) {
-                Alert.alert('', '삭제되었습니다.');
-                fetchListData(); // 목록 갱신
-                clearForm();     // 폼 초기화
-              }
-            }
-            AjaxUtil.postAsyncData('/api/system/user/delete', data, fnSuccess);
-          })
-        });*/
-
-
-        /* var popupWindow;
-
-         function sample4_execDaumPostcode() {
-           popupWindow = window.open('', 'postcodePopup', 'width=530,height=530');
-           new daum.Postcode({
-             oncomplete: function(data) {
-               // 검색 결과 선택 시 실행할 코드
-               var roadAddr = data.roadAddress;
-               var extraRoadAddr = '';
-
-               if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
-                 extraRoadAddr += data.bname;
-               }
-               if (data.buildingName !== '' && data.apartment === 'Y') {
-                 extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-               }
-               if (extraRoadAddr !== '') {
-                 extraRoadAddr = ' (' + extraRoadAddr + ')';
-               }
-
-               document.getElementById('postno').value = data.zonecode;
-               document.getElementById('address1').value = roadAddr;
-
-               var guideTextBox = document.getElementById("guide");
-               if (data.autoRoadAddress) {
-                 var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
-                 guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
-                 guideTextBox.style.display = 'block';
-               } else if (data.autoJibunAddress) {
-                 var expJibunAddr = data.autoJibunAddress;
-                 guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
-                 guideTextBox.style.display = 'block';
-               } else {
-                 guideTextBox.innerHTML = '';
-                 guideTextBox.style.display = 'none';
-               }
-
-               // 검색 완료 후 팝업 닫기
-               popupWindow.close();
-             }
-           }).embed(popupWindow.document.body);
-         }*/
     </script>
 </th:block>
 </html>

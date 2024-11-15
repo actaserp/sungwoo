@@ -70,26 +70,8 @@ public class AccountController {
 	SqlRunner sqlRunner;
 
 	@Autowired
-	TB_RP940_Service tbRp940Service;
-
-	@Autowired
-	TB_RP945_Service tbRp945Service;
-
-
-	@Autowired
-	TB_RP940Repository tb_rp940Repository;
-
-	@Autowired
-	TB_RP945Repository tb_rp945Repository;
-
-	@Autowired
 	MailService emailService;
 
-	@Autowired
-	AuthListService authListService;
-
-	@Autowired
-	TB_RP920Repository tbRp920Repository;
 	@Autowired
 	TB_XA012Repository tbXA012Repository;
 	@Autowired
@@ -154,11 +136,6 @@ public class AccountController {
 			@RequestParam("password") final String password,
 			final HttpServletRequest request) throws UnknownHostException {
 		// 여기로 들어오지 않음.
-
-
-		//System.out.print(list);
-
-
 		AjaxResult result = new AjaxResult();
 
 		HashMap<String, Object> data = new HashMap<String, Object>();
@@ -198,6 +175,7 @@ public class AccountController {
 
 		return result;
 	}
+
 
 	@GetMapping("/account/myinfo")
 	public AjaxResult getUserInfo(Authentication auth){
@@ -298,6 +276,7 @@ public class AccountController {
 			@RequestParam(value = "address2") String address2
 	) {
 		AjaxResult result = new AjaxResult();
+		MapSqlParameterSource Param = new MapSqlParameterSource();
 
 		try {
 			if (flag) {
@@ -317,19 +296,20 @@ public class AccountController {
 
 						.build();
 
+
 				userService.save(user); // User 저장
 
+				jdbcTemplate.execute("SET IDENTITY_INSERT user_profile ON");
 				// UserProfile 저장 (JDBC 사용)
-				String sql = "INSERT INTO user_profile (_created, _creater_id, User_id, lang_code, Name, UserGroup_id) VALUES (?, ?, ?, ?, ?, ?)";
+				String sql = "INSERT INTO user_profile (_created, lang_code, Name, UserGroup_id, User_id) VALUES (?,?, ?, ?, ?)";
 				jdbcTemplate.update(sql,
 						new Timestamp(System.currentTimeMillis()), // 현재 시간
-						user.getId(), // _creater_id (현재 로그인한 사용자 ID)
-						user.getId(), // User_id (저장할 사용자 ID)
 						"ko-KR", // lang_code (예: 한국어)
 						prenm, // Name (사용자 이름)
-						1 // UserGroup_id (저장할 사용자 그룹 ID: 1)
+						1 ,// UserGroup_id (저장할 사용자 그룹 ID: 1)
+						user.getId() // User_id
 				);
-
+				jdbcTemplate.execute("SET IDENTITY_INSERT user_profile OFF");
 
 				// TB_XA012에서 custcd와 spjangcd로 조회
 				String custcd = "SWSPANEL";
