@@ -126,13 +126,12 @@ public class UserController {
 		return result;
 	}
 
-	// fullAddress를 address1과 address2로 분리하는 메서드
 	private Map<String, String> splitAddress(String fullAddress) {
 		Map<String, String> addressParts = new HashMap<>();
 		if (fullAddress != null && !fullAddress.isEmpty()) {
-			String[] parts = fullAddress.split(" ", 2); // 공백을 기준으로 두 개의 부분으로 나눔
-			addressParts.put("address1", parts[0]); // 첫 번째 부분은 address1
-			addressParts.put("address2", parts.length > 1 ? parts[1] : ""); // 두 번째 부분은 address2
+			String[] parts = fullAddress.split("\\|", 2); // "|"를 기준으로 분리
+			addressParts.put("address1", parts[0].trim()); // 첫 번째 부분
+			addressParts.put("address2", parts.length > 1 ? parts[1].trim() : ""); // 두 번째 부분
 		} else {
 			addressParts.put("address1", "");
 			addressParts.put("address2", "");
@@ -266,7 +265,7 @@ public class UserController {
 			String maxCltcd = tbXClientRepository.findMaxCltcd(); // 최대 cltcd 조회
 			String newCltcd = generateNewCltcd(maxCltcd); // 새로운 cltcd 생성
 
-			String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " " + address2 : ""); // 상세주소가 있을 경우 공백으로 구분하여 결합
+			String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " | " + address2 : "");
 
 			// 기존 TB_XCLIENT 데이터가 있는지 확인
 			Optional<TB_XCLIENT> existingClientOpt = tbXClientRepository.findBySaupnum(userid);

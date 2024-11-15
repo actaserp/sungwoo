@@ -322,7 +322,7 @@ public class AccountController {
 					return result;
 				}
 
-				String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " " + address2 : ""); // 상세주소가 있을 경우 공백으로 구분하여 결합
+				String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " | " + address2 : "");
 
 				// TB_XCLIENT 저장
 				String maxCltcd = tbXClientRepository.findMaxCltcd(); // 최대 cltcd 조회
@@ -454,11 +454,11 @@ public class AccountController {
 
 
 
-	private void sendEmailLogic(String mail, String usernm){
+	private void sendEmailLogic(String mail, String prenm){
 		Random random = new Random();
 		int randomNum = 100000 + random.nextInt(900000); // 100000부터 999999까지의 랜덤 난수 생성
 		String verificationCode = String.valueOf(randomNum); // 정수를 문자열로 변환
-		emailService.sendVerificationEmail(mail, usernm, verificationCode);
+		emailService.sendVerificationEmail(mail, prenm, verificationCode);
 
 		tokenStore.put(mail, verificationCode);
 		tokenExpiry.put(mail, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(3));
