@@ -11,12 +11,11 @@ import java.util.Optional;
 
 @Repository
 public interface TB_DA007WRepository extends JpaRepository<TB_DA007W,String> {
-    @Query(value = "SELECT COALESCE(MAX(t.reqseq), 0) FROM TB_DA007W t WHERE " +
-            "t.reqnum = :reqnum AND t.custcd = :custcd AND t.spjangcd = :spjangcd AND t.reqdate = :reqdate", nativeQuery = true)
+    @Query(value = "SELECT COALESCE(MAX(CAST(t.reqnum AS INT)), 0) FROM TB_DA007W t WHERE " +
+            "t.reqnum = :reqnum AND t.custcd = :custcd AND t.spjangcd = :spjangcd", nativeQuery = true)
     int findMaxReqseq(@Param("reqnum") String reqnum
                     , @Param("custcd") String custcd
-                    , @Param("spjangcd") String spjangcd
-                    , @Param("reqdate") String reqdate);
+                    , @Param("spjangcd") String spjangcd);
 
     @Query(value = "SELECT t.reqseq FROM TB_DA007W t WHERE " +
             "t.reqnum = :reqnum AND t.custcd = :custcd AND t.spjangcd = :spjangcd AND t.reqdate = :reqdate", nativeQuery = true)

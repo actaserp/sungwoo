@@ -180,9 +180,14 @@ public class RequestController {
         headpk.setCustcd((String) userInfo.get("custcd"));
         headpk.setSpjangcd("ZZ");
         headpk.setReqdate(params.get("reqdate").replaceAll("-",""));
-        String reqnum = params.get("reqnum").equals("") ?
-                String.valueOf(tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"), "ZZ", params.get("reqdate")) + 1) :
-                params.get("reqnum");
+        // findMaxReqnum 메서드가 최대 reqnum 값을 정수로 반환한다고 가정
+        int maxReqnum = tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"), "ZZ");
+
+        // 증가된 reqnum을 4자리 문자열로 변환
+        String nextReqnum = String.format("%04d", maxReqnum + 1);
+
+        // params에 reqnum 값이 없으면 nextReqnum을 사용하고, 있으면 params 값을 그대로 사용
+        String reqnum = params.get("reqnum").equals("") ? nextReqnum : params.get("reqnum");
         headpk.setReqnum(reqnum);
 
         if(files != null){
@@ -327,7 +332,7 @@ public class RequestController {
                         allSuccessful &= successUpdate;
                         result.message += successUpdate ? " | 세부사항 업데이트 성공" : " | 세부사항 업데이트 실패";
                     } else {
-                        reqseq = String.valueOf(tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ", params.get("reqdate").replaceAll("-", "")) + 1);
+                        reqseq = String.format("%04d",tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ") + 1);
                         bodypk.setReqseq(reqseq);
                         tbDa007.setPk(bodypk);
 

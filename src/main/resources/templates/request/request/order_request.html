@@ -323,7 +323,7 @@
             </table>
             <div class="container-fluid">
               <p id=""></p>
-              <div id="theGrid2" style="max-height: 714px"></div>
+              <div id="theGrid2" style="max-height: 714px; height: 300px"></div>
             </div>
           </div>
         </section>
@@ -899,21 +899,11 @@
             item.infmtypedv = getListCgrb2(item.infmtypedv);
             item.stframedv = getListCgrb2(item.stframedv);
             item.stexplydv = getListCgrb2(item.stexplydv);
+            item.originOrdtext = item.ordtext;
           })
         }
       })
-      // 최소 5개의 행을 만들기 위해 빈 객체 추가
-      const minRows = 5;
-      if(data2 == null){
-        for(i = 1 ; i ; 5){
-          data2.push({});
 
-        }
-      }else {
-        while (data2.length < minRows) {
-          data2.push({}); // 빈 객체를 추가하여 빈 행을 생성
-        }
-      }
       viewdata2 = new wijmo.collections.CollectionView(data2);
 
       if (!theGrid2) {
@@ -934,7 +924,8 @@
             {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'left'}
+            {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'left'},
+            {binding: 'originOrdtext', visible: false},
           ],
           itemsSource: viewdata2,
           itemFormatter: function (panel, r, c, cell) {
@@ -1281,6 +1272,7 @@
       viewdata2.commitEdit();  // Commit changes
       viewdata2.refresh();  // Refresh the collection view
       theGrid2.refresh();  // Refresh the grid
+      resetBodyField();
     }
 
     // 행(세부사항) 삭제(마지막 세부사항 삭제시 헤드정보도 같이 삭제)
