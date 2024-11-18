@@ -155,7 +155,9 @@
                                         </label>
                                     </dt>
                                     <dd>
-                                        <select class="form-control2" id="cboMenuFolder" name="cboMenuFolder"></select>
+                                        <select class="form-control2" id="cboMenuFolder" name="cboMenuFolder">
+
+                                        </select>
                                     </dd>
                                 </dl>
 
@@ -410,6 +412,20 @@
             new FlexGridContextMenu(theGrid2);
 
         }
+
+        // 체크박스 초기화
+        function clearForm2() {
+            ['AllcheckRead', 'AllcheckWrite'].forEach(id => {
+                document.getElementById(id).checked = false; // 체크 상태 초기화
+            });
+
+            // 다른 폼 데이터나 UI 상태 초기화가 필요하다면 여기에 추가
+            console.log('Form and checkboxes cleared.');
+
+            // 탭 상태 업데이트 (updateTabLink 함수가 동작하도록 가정)
+            updateTabLink('id');
+        }
+
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
 
         function searchData(){
@@ -514,8 +530,8 @@
         function searchData2() {
             let group_id = $('#cboUserGroup2').val();
             let folder_id = $('#cboMenuFolder').val();
-            console.log(group_id+" 선택된 값들 "+folder_id);
-
+            console.log(group_id + "그룹 id");
+            console.log(folder_id + "폴더 id");
             $.ajax({
                 url: '/api/system/usergroupmenu/read',
                 type: 'GET',
@@ -552,32 +568,18 @@
             return item.gpname;
         })
 
-        function grid_binding2(data){
+        function grid_binding2(data) {
             console.log("바인딩 데이터:", data);
 
-            // 데이터가 없을 경우, 3개의 빈 객체를 추가
-            let UserMenuData = data.map(item => ({
-                name: item.name,
-                r: item.r,
-                w: item.w,
-                gpname: item.gpname,
-                menu_code: item.menu_code,
-                ugm_id: item.ugm_id
-            }));
-
-            // 데이터가 없을 경우 3개의 빈 행 추가
-            if (UserMenuData.length === 0) {
-                for (let i = 0; i < 3; i++) {
-                    UserMenuData.push({
-                        name: '', // 빈 값
-                        r: false, // 기본값으로 읽기 비활성
-                        w: false, // 기본값으로 쓰기 비활성
-                        gpname: '', // 빈 값
-                        menu_code: '', // 빈 값
-                        ugm_id: null // 빈 값
-                    });
-                }
-            }
+            // 중분류 메뉴가 아닌 데이터만 필터링
+            let UserMenuData = data
+                .filter(item => item.r !== null || item.w !== null) // 읽기(r) 또는 쓰기(w)가 null이 아닌 항목만 선택
+                .map(item => ({
+                    name: item.name,
+                    r: item.r,
+                    w: item.w,
+                    ugm_id: item.ugm_id // 추가: ugm_id 필드 포함
+                }));
 
             console.log("UserMenuData:", UserMenuData);
             console.log("바인딩 이후 데이터");
@@ -586,10 +588,10 @@
             theGrid2.autoGenerateColumns = false;
 
             var columns = [
-                {binding: 'name', header: '코드명', width: 250, align: 'center'},
-                {binding: 'r', header: '읽기', width: 200, align: 'center', dataType: wijmo.DataType.Boolean, isReadOnly: false},
-                {binding: 'w', header: '쓰기', width: 200, align: 'center', dataType: wijmo.DataType.Boolean, isReadOnly: false},
-                {binding: '', header: '', width: "*", align: 'center'}
+                { binding: 'name', header: '코드명', width: 250, align: 'left' },
+                { binding: 'r', header: '읽기', width: 200, align: 'center', dataType: wijmo.DataType.Boolean, isReadOnly: false },
+                { binding: 'w', header: '쓰기', width: 200, align: 'center', dataType: wijmo.DataType.Boolean, isReadOnly: false },
+                { binding: '', header: '', width: "*", align: 'center' },
             ];
 
             columns.forEach(colDef => {
@@ -641,6 +643,7 @@
             // 데이터 확인을 위한 콘솔 출력
             console.log("Items to be sent:", JSON.stringify(items, null, 2)); // 전송할 데이터 출력
 
+
             data.Q = JSON.stringify(items);
             console.log("Final data object:", JSON.stringify(data, null, 2)); // 최종 데이터 객체 출력
             //데이터입력체크루틴 누락
@@ -651,6 +654,8 @@
                     if(result.success){
                         Alert.alert('','저장되었습니다');
                         searchData2(); // 저장 후 새 데이터로 그리드 갱신
+                        /*comboboxValueInsert('/api/system/usergroupmenu/combo/cboUserGroup2',
+                            'cboUserGroup2')*/
                     }else {
                         console.error('저장 실패:', result.message);  // 실패 시 에러 로그
                     }
@@ -659,7 +664,6 @@
             }, function () { });
 
         }
-
 
         $('#cboUserGroup2, #cboMenuFolder').change(function() {
             // 값이 변경되었을 때 searchData 함수를 호출
@@ -712,9 +716,17 @@
             //삭제
             $('#btnDelete').click(function(){
 
+
                 if(SelectItem === undefined || SelectItem.length === 0){
                     Alert.alert('', '삭제할 항목을 선택하세요.');
                     return;
+                }
+
+                for(let i=0; i < SelectItem.length; i++){
+                    if(SelectItem[i]._data.flag === 'Y'){
+                        Alert.alert('', '사용자가 존재하는 그룹은 삭제불가능합니다.');
+                        return;
+                    }
                 }
 
                 console.log('asd: ', SelectItem);
@@ -733,52 +745,20 @@
                     }
                     let fnSuccess = function (res) {
                         if (res.success) {
-                            Alert.alert('', '삭제되었습니다.');
+                            Alert.alert('', res.message);
                             searchData();
+                            AjaxUtil.fillSelectOptions($('#cboUserGroup2'), 'user_group', '', '');
+                        }else{
+                            Alert.alert('', res.message);
+
                         }
                     }
-                    AjaxUtil.postAsyncData('/api/system/usergroup/delete', data, fnSuccess);
+                    AjaxUtil.postAsyncData('/api/system/usergroup/delete', data, fnSuccess,
+                        function(){
+                            Alert.alert('', '에러가 발생하였습니다.');
+                        });
                 })
             })
-
-            $('#inputTabLink').click(function(){
-
-                if(!checkAndAlert()){
-                    $('#listTabLink').click();
-                    return;
-                }
-
-                /*if(SelectItem === undefined){
-                    Alert.alert('', '항목을 선택해주세요', function(){
-                        $('#listTabLink').click();
-                    });
-                    return false;
-                }*/
-                if(SelectItem.length > 1){
-
-                    Alert.alert('', '하나의 항목만 선택해주세요', function(){
-                        $('#listTabLink').click();
-                    });
-
-                    return false;
-                }
-                let selectedItem = SelectItem[0];
-
-                if(selectedItem === undefined){
-                    clearForm();
-                    return false;
-                }
-                let bindingList = ['id', 'code', 'name', 'description', 'gmenu'];
-                let valueList = [ selectedItem._data.id , selectedItem._data.code, selectedItem._data.name, selectedItem._data.description, selectedItem._data.gmenu ];
-
-                for (let i = 0; i < bindingList.length; i++) {
-                    if (valueList[i] !== undefined) {
-                        ElementBinding(bindingList[i], valueList[i]);
-                    }
-                }
-                updateTabLink('id');
-            })
-
         });
     </script>
 </th:block>

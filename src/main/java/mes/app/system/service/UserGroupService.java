@@ -18,15 +18,15 @@ public class UserGroupService {
 	public List<Map<String,Object>> getUserGroupList(Boolean super_user) {
 		String sql = """
 				SELECT ug.id,\s
-				       ug.Code AS code,\s
-				       ug.Name AS name,\s
-				       ug.Description AS description,\s
-				       ug.Disabled AS disabled,\s
-				       ug.gmenu AS gmenu,\s
+				       ug.Code AS code,
+				       ug.Name AS name,
+				       ug.Description AS description,
+				       ug.Disabled AS disabled,
+				       ug.gmenu AS gmenu,
 				       mi.MenuName AS gmenuname,
 				       FORMAT(ug._created, 'yyyy-MM-dd HH:mm:ss') AS created
-				FROM ERP_SWSPANEL1.dbo.user_group AS ug
-				LEFT JOIN ERP_SWSPANEL1.dbo.menu_item AS mi ON mi.MenuCode = ug.gmenu
+				FROM user_group AS ug
+				LEFT JOIN menu_item AS mi ON mi.MenuCode = ug.gmenu
 				WHERE 1 = 1
 			""";
 

@@ -380,14 +380,7 @@
                             </th>
                             <td>
                                 <div class="input-clear">
-                                    <!--<select class="mg-r5" id="agency" name="agency" style="width: 100%">
-                                        <option value='CO_ID'>에너지발전소관련업체</option>
-                                        <option value='C001'>블룸에너지</option>
-                                        <option value='C002'>ESG Corp</option>
-                                    </select>-->
-                                    <!--<select class="mg-r5" id="agency" name="agency" style="width: 100%">
-                                        <option></option>
-                                    </select>-->
+
                                     <input type="text" id="agency" name="agency" style="width: 100%" />
                                 </div>
                             </td>
@@ -888,7 +881,6 @@
             });
         });
 
-
         // 언어설정
         // $('#myLanguage').on('click', function (e) {
         //     e.preventDefault();
@@ -917,8 +909,7 @@
     });
 </script>
 
-<script type="text/javascript"> 
-
+<script type="text/javascript">
     // 날씨 정보
     fetchWeatherData();
     // 날씨 정보를 서버에서 가져오는 함수
@@ -1021,7 +1012,6 @@
                 },
                 error: function (xhr, status, error) {
                     // 통신 실패 시 처리
-
 
                     // 선택 옵션을 비우거나 기본 옵션을 설정할 수 있습니다.
                     nextSelect.empty();
