@@ -486,42 +486,6 @@
             updateTabLink('id');
         }
 
-        //수정
-        function modifyData(){
-            if(SelectItem === undefined || SelectItem.length === 0){
-                Alert.alert('', '수정할 항목을 선택하세요.');
-                return;
-            }else if(SelectItem.length > 1){
-                Alert.alert('', '하나의 항목만 선택해주세요');
-                return;
-            }
-            let selectedItem = SelectItem[0];
-
-            let id = selectedItem._data.id;
-
-
-            if(!selectedItem._data.id){
-                Alert.alert('', '수정할 게시물이 없습니다.',);
-                return false;
-            }
-
-            /*let tabIds = '#tab2';
-            $(".tab-item").hide();
-            $(tabIds).show();
-
-            $("#listTabLink").parent().removeClass("active");
-            $("#inputTabLink").parent().addClass("active");*/
-
-
-            document.getElementById('code').value = selectedItem._data.code;
-            document.getElementById('name').value = selectedItem._data.name;
-            document.getElementById('id').value = selectedItem._data.id;
-            document.getElementById('description').value = selectedItem._data.description;
-            document.getElementById('gmenu').value = selectedItem._data.gmenu;
-
-        /*    updateTabLink('id');*/
-
-        }
 
         // 초기 콤보박스 채우기
         AjaxUtil.fillSelectOptions($('#cboUserGroup2'), 'user_group', '', '');
@@ -578,6 +542,8 @@
                     name: item.name,
                     r: item.r,
                     w: item.w,
+                    gpname: item.gpname,  // 그룹화를 위한 속성 추가
+                    menu_code: item.menu_code, // 추가: menu_code 필드 포함
                     ugm_id: item.ugm_id // 추가: ugm_id 필드 포함
                 }));
 
@@ -599,10 +565,14 @@
                 theGrid2.columns.push(col);
             });
 
-            // CollectionView를 생성하여 그리드에 설정
+            /*// CollectionView를 생성하여 그리드에 설정
             viewdata2 = new wijmo.collections.CollectionView(UserMenuData);
 
             // 그룹화 설정 추가
+            viewdata2.groupDescriptions.push(menuGroupName);*/
+            // CollectionView 생성 및 그룹화 설정
+            let viewdata2 = new wijmo.collections.CollectionView(UserMenuData);
+            viewdata2.groupDescriptions.clear(); // 이전 그룹화 제거
             viewdata2.groupDescriptions.push(menuGroupName);
 
             // 그리드에 바인딩
@@ -654,8 +624,7 @@
                     if(result.success){
                         Alert.alert('','저장되었습니다');
                         searchData2(); // 저장 후 새 데이터로 그리드 갱신
-                        /*comboboxValueInsert('/api/system/usergroupmenu/combo/cboUserGroup2',
-                            'cboUserGroup2')*/
+                        clearForm2();  //체크박스 초기화
                     }else {
                         console.error('저장 실패:', result.message);  // 실패 시 에러 로그
                     }
@@ -666,8 +635,8 @@
         }
 
         $('#cboUserGroup2, #cboMenuFolder').change(function() {
-            // 값이 변경되었을 때 searchData 함수를 호출
-            searchData2();
+            theGrid2.itemsSource = null; // 그리드 초기화
+            searchData2();// 값이 변경되었을 때 searchData 함수를 호출
         });
 
 

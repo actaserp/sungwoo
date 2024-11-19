@@ -118,7 +118,7 @@ public class UserGroupMenuController {
 			@RequestParam(value = "Q") String strUserGroupMenuList,
 			Authentication auth
 	) {
-		System.out.println("Received User Group Menu List: " + strUserGroupMenuList);
+		//System.out.println("Received User Group Menu List: " + strUserGroupMenuList);
 		AjaxResult result = new AjaxResult();
 		User user = (User) auth.getPrincipal();
 
@@ -167,7 +167,6 @@ public class UserGroupMenuController {
 
 				try {
 					this.sqlRunner.execute(sql, dicParam);
-					System.out.println("SQL executed successfully for menu_code: " + menuCode);
 				} catch (Exception e) {
 					throw new RuntimeException("SQL 실행 중 오류 발생: " + menuCode, e);
 				}
