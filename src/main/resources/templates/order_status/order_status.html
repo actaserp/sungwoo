@@ -749,7 +749,7 @@
                 case 3:
                     return "출고";
                 default:
-                    return "알 수 없는 상태";
+                    return " ";
             }
         }
 
@@ -888,6 +888,7 @@
 
         //검색
         function searchData() {
+
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             const searchCltnm = document.getElementById('searchCltnm').value.trim();

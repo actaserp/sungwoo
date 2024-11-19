@@ -296,8 +296,8 @@ public class WeatherService {
 			String refinedText = refined.path("text").asText(); // 정제된 주소
 			String detail = refined.path("structure").path("detail").asText(); // 상세주소
 
-			System.out.println("정제된 주소: " + refinedText);
-			System.out.println("상세 주소: " + detail);
+			/*System.out.println("정제된 주소: " + refinedText);
+			System.out.println("상세 주소: " + detail);*/
 
 			return new double[]{y, x}; // [위도, 경도] 반환
 		} catch (IOException e) {
