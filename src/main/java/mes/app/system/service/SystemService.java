@@ -27,20 +27,19 @@ public class SystemService {
     public List<Map<String, Object>> getWebMenuList(User user) {
 
         String sql = """
-                WITH recursive_tree AS (
-                    -- 초기 CTE 레벨
+                 with recursive_tree(id, menu_code, pid, name, depth, path, cycle, folder_order, _order, css, data_div, folder_id, FrontFolder_id) as (
                     SELECT
                         a.id,
-                        CAST(NULL AS NVARCHAR(MAX)) AS menu_code,  -- NULL을 NVARCHAR(MAX)로 캐스트
+                        CAST(NULL AS NVARCHAR(MAX)) AS menu_code,
                         a.Parent_id AS pid,
                         a.FolderName AS name,
                         1 AS depth,
-                        CAST('/' + CAST(a.id AS NVARCHAR(MAX)) AS NVARCHAR(MAX)) AS path, -- 배열 대신 경로를 문자열로 처리
+                        CAST('/' + CAST(a.id AS NVARCHAR(MAX)) AS NVARCHAR(MAX)) AS path, 
                         0 AS cycle,
                         a._order AS folder_order,
                         a._order AS _order,
-                        a.IconCSS AS css, -- ::text 대신 캐스트 생략
-                        CAST('folder' AS NVARCHAR(10)) AS data_div,  -- data_div 타입 일관성 유지
+                        a.IconCSS AS css, 
+                        CAST('folder' AS NVARCHAR(10)) AS data_div, 
                         a.id AS folder_id,
                         a.FrontFolder_id
                     FROM
@@ -50,19 +49,19 @@ public class SystemService {
                         
                     UNION ALL
                         
-                    -- 재귀 CTE 레벨
+                   
                     SELECT
                          NULL AS id,
-                         CAST(mi.MenuCode AS NVARCHAR(MAX)) AS menu_code,\s
+                         CAST(mi.MenuCode AS NVARCHAR(MAX)) AS menu_code,
                          mi.MenuFolder_id AS pid,
                          mi.MenuName AS name,
                          recursive_tree.depth + 1 AS depth,
-                         recursive_tree.path + '/' + CAST(mi.MenuFolder_id AS NVARCHAR(MAX)) AS path, -- array_append 대신 문자열 경로 사용
-                         CASE WHEN mi.MenuFolder_id IN (SELECT splitdata FROM dbo.SplitStrings(recursive_tree.path, '/')) THEN 1 ELSE 0 END AS cycle, -- 배열 대신 경로 문자열에서 찾기
+                         recursive_tree.path + '/' + CAST(mi.MenuFolder_id AS NVARCHAR(MAX)) AS path, 
+                         CASE WHEN mi.MenuFolder_id IN (SELECT splitdata FROM dbo.SplitStrings(recursive_tree.path, '/')) THEN 1 ELSE 0 END AS cycle, 
                          recursive_tree.folder_order AS folder_order,
                          mi._order AS _order,
                          NULL AS css,
-                         CAST('menu' AS NVARCHAR(10)) AS data_div,  -- 'menu'를 NVARCHAR로 캐스트
+                         CAST('menu' AS NVARCHAR(10)) AS data_div,  
                          mi.MenuFolder_id AS folder_id,
                          recursive_tree.FrontFolder_id
                     FROM
@@ -122,11 +121,7 @@ public class SystemService {
                     FrontFolder_id IS NOT NULL
                 ORDER BY
                     depth, _order;
-                        
-         
         """;
-
-
 
         UserGroup userGroup = user.getUserProfile().getUserGroup();
 
@@ -151,152 +146,7 @@ public class SystemService {
      * @param folderId
      * @return
      */
-
-    /*public List<Map<String, Object>> getUserGroupMenuList(Integer userGroupId, Integer folderId) {
-
-        String sql = """
-                with recursive tree as (  
-                        select a.id
-                            , a.Parent_id as pid
-                            , '' as menu_code
-                            , a.FolderName as gpname
-                            , a.FolderName as name
-                            , 1 as depth
-                            , array[a.id] as path
-                            , false as cycle
-                            , a._order as ord
-                            ,'folder' as data_div
-                            , a.id as folder_id
-                            , true as is_folder
-                            from menu_folder a   
-                            where a.Parent_id is null
-                             and a.FrontFolder_id is not null
-                """;
-        if (folderId != null) {
-            sql += " and a.id = :folder_id";
-        }
-
-        sql += """
-                      union all
-                              select null as id
-                                    , mi.MenuFolder_id as pid
-                                    , mi.MenuCode::text as menu_code
-                                    , tree.gpname as gpname
-                                    , mi.MenuName  as name
-                                    , tree.depth+1
-                                    , array_append(tree.path, mi.MenuFolder_id) as path
-                                    , mi.MenuFolder_id = any(tree.path) as cycle
-                                    , mi._order as ord
-                                    ,'menu' as data_div
-                                    , mi.MenuFolder_id as folder_id
-                                    , false as is_folder
-                              from menu_item mi
-                              inner join tree on mi.MenuFolder_id = tree.id
-                              where mi.MenuCode not in ('wm_user_group', 'wm_user', 'wm_user_group_menu')
-                        )
-                        select tree.pid
-                            , tree.id
-                            , tree.menu_code
-                            , tree.gpname
-                            , tree.name
-                            , tree.depth
-                            , tree.ord
-                            , ugm.UserGroup_id
-                            , ugm.AuthCode
-                            , case when tree.is_folder then null else coalesce(ugm.AuthCode like '%%R%%', false) end  as r
-                            , case when tree.is_folder then null else coalesce(ugm.AuthCode like '%%W%%', false) end  as w
-                            , case when tree.is_folder then null else coalesce(ugm.AuthCode like '%%X%%', false) end  as x
-                            , tree.is_folder
-                            , ugm.id as ugm_id
-                        from tree 
-                        left join user_group_menu ugm on ugm.MenuCode = tree.menu_code 
-                        and ugm.UserGroup_id = :group_id
-                        order by path, tree.ord						
-                """;
-
-        MapSqlParameterSource dicParam = new MapSqlParameterSource();
-        dicParam.addValue("folder_id", folderId);
-        dicParam.addValue("group_id", userGroupId);
-        return this.sqlRunner.getRows(sql, dicParam);
-    }*/
-
-    /*public List<Map<String, Object>> getUserGroupMenuList(Integer userGroupId, Integer folderId) {
-        System.out.println("Folder ID: " + folderId);
-        String sql = """
-        WITH tree AS (
-            SELECT 
-                a.id,
-                a.Parent_id AS pid,
-                CAST('' AS NVARCHAR(MAX)) AS menu_code,
-                a.FolderName AS gpname,
-                a.FolderName AS name,
-                1 AS depth,
-                CAST(a.id AS NVARCHAR(MAX)) AS path,
-                0 AS cycle,
-                a._order AS ord,
-                CAST('folder' AS NVARCHAR(10)) AS data_div,
-                a.id AS folder_id,
-                1 AS is_folder
-            FROM menu_folder a
-            WHERE a.Parent_id IS NULL
-              AND a.FrontFolder_id IS NOT NULL
-    """;
-
-        // Optional folder ID filtering
-        if (folderId != null) {
-            sql += " AND a.id = :folder_id";
-        }
-
-        sql += """
-            UNION ALL
-            SELECT 
-                NULL AS id,
-                mi.MenuFolder_id AS pid,
-                CAST(mi.MenuCode AS NVARCHAR(MAX)) AS menu_code,
-                tree.gpname AS gpname,
-                mi.MenuName AS name,
-                tree.depth + 1,
-                tree.path + '/' + CAST(mi.MenuFolder_id AS NVARCHAR(MAX)) AS path,
-                CASE WHEN CHARINDEX(CAST(mi.MenuFolder_id AS NVARCHAR(MAX)), tree.path) > 0 THEN 1 ELSE 0 END AS cycle,
-                mi._order AS ord,
-                CAST('menu' AS NVARCHAR(10)) AS data_div,
-                mi.MenuFolder_id AS folder_id,
-                0 AS is_folder
-            FROM menu_item mi
-            INNER JOIN tree ON mi.MenuFolder_id = tree.id
-            WHERE mi.MenuCode NOT IN ('wm_user_group', 'wm_user', 'wm_user_group_menu')
-        )
-        SELECT 
-            tree.pid,
-            tree.id,
-            tree.menu_code,
-            tree.gpname,
-            tree.name,
-            tree.depth,
-            tree.ord,
-            ugm.UserGroup_id,
-            ugm.AuthCode,
-            CASE WHEN tree.is_folder = 1 THEN NULL ELSE IIF(CHARINDEX('R', ugm.AuthCode) > 0, 1, 0) END AS r,
-            CASE WHEN tree.is_folder = 1 THEN NULL ELSE IIF(CHARINDEX('W', ugm.AuthCode) > 0, 1, 0) END AS w,
-            CASE WHEN tree.is_folder = 1 THEN NULL ELSE IIF(CHARINDEX('X', ugm.AuthCode) > 0, 1, 0) END AS x,
-            tree.is_folder,
-            ugm.id AS ugm_id
-        FROM tree 
-        LEFT JOIN user_group_menu ugm 
-            ON ugm.MenuCode = tree.menu_code 
-            AND ugm.UserGroup_id = :group_id
-        ORDER BY tree.path, tree.ord
-    """;
-
-        MapSqlParameterSource dicParam = new MapSqlParameterSource();
-        dicParam.addValue("folder_id", folderId);
-        dicParam.addValue("group_id", userGroupId);
-
-        System.out.println("Executing SQL: " + sql);
-        return this.sqlRunner.getRows(sql, dicParam);
-
-    }*/
-    public List<Map<String, Object>> getUserGroupMenuList2(Integer userGroupId, Integer folderId) {
+    public List<Map<String, Object>> getUserGroupMenuList1(Integer userGroupId, Integer folderId) {
         System.out.println("Folder ID: " + folderId);
         System.out.println("User ID: " + userGroupId);
         String sql = """
@@ -319,9 +169,8 @@ public class SystemService {
           AND a.FrontFolder_id IS NOT NULL
     """;
 
-        // Optional folder ID filtering
         if (folderId != null) {
-            sql += " AND a.id = :folder_id";
+            sql += " and a.id = :folder_id";
         }
 
         sql += """
@@ -374,7 +223,8 @@ public class SystemService {
     }
 
     public List<Map<String, Object>> getUserGroupMenuList(Integer userGroupId, Integer folderId) {
-
+        System.out.println("Folder ID: " + folderId);
+        System.out.println("User ID: " + userGroupId);
         String sql = """
     WITH tree AS (
         -- 루트 폴더 데이터
@@ -455,6 +305,7 @@ public class SystemService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("folder_id", folderId);
         dicParam.addValue("group_id", userGroupId);
+//        System.out.println("Executing SQL: " + sql + " with folder_id=" + folderId);
 
 //        System.out.println("Executing SQL: " + sql);
         return this.sqlRunner.getRows(sql, dicParam);
