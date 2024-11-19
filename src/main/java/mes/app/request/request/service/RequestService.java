@@ -1,7 +1,9 @@
 package mes.app.request.request.service;
 
-import mes.domain.entity.actasEntity.*;
-import mes.domain.repository.TB_RP920Repository;
+import mes.domain.entity.actasEntity.TB_DA006W;
+import mes.domain.entity.actasEntity.TB_DA006WFile;
+import mes.domain.entity.actasEntity.TB_DA006W_PK;
+import mes.domain.entity.actasEntity.TB_DA007W;
 import mes.domain.repository.actasRepository.TB_DA006WFILERepository;
 import mes.domain.repository.actasRepository.TB_DA006WRepository;
 import mes.domain.repository.actasRepository.TB_DA007WRepository;
@@ -14,7 +16,6 @@ import javax.transaction.Transactional;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class RequestService {
@@ -79,7 +80,7 @@ public class RequestService {
     }
     //주문의뢰현황 불러오기
     public List<Map<String, Object>> getOrderList(TB_DA006W_PK tbDa006W_pk,
-                                                  String searchStartDate, String searchEndDate, String searchRemark, String searchOrdflag) {
+                                                  String searchStartDate, String searchEndDate, String searchRemark, String searchOrdflag, String saupnum) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("searchStartDate", searchStartDate);
@@ -141,6 +142,7 @@ public class RequestService {
                 WHERE
                     hd.custcd = :custcd
                     AND hd.spjangcd = :spjangcd
+                    AND hd.saupnum = :saupnum
                 """);
         // 날짜 필터
         if (searchStartDate != null && !searchStartDate.isEmpty()) {
@@ -152,17 +154,18 @@ public class RequestService {
         }
         // 제목필터
         if (searchRemark != null && !searchRemark.isEmpty()) {
-            sql.append(" AND remark LIKE :searchRemark");
+            sql.append(" AND hd.remark LIKE :searchRemark");
         }
         // 진행구분 필터
         if (searchOrdflag != null && !searchOrdflag.isEmpty()) {
-            sql.append(" AND ordflag LIKE :searchOrdflag");
+            sql.append(" AND hd.ordflag = :searchOrdflag");
         }
         // 정렬 조건 추가
         sql.append(" ORDER BY hd.reqdate ASC");
 
         dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
         dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
+        dicParam.addValue("saupnum", saupnum);
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }
@@ -308,7 +311,8 @@ public class RequestService {
         String sql = """
                 select custcd,
                         cltcd,
-                        cltnm
+                        cltnm,
+                        saupnum
                 FROM TB_XCLIENT
                 WHERE saupnum = :username
                 """;

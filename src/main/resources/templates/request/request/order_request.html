@@ -204,9 +204,9 @@
             <div class="button-wrap" style="margin-bottom: 10px; margin-top: 10px">
               <ul>
                 <li>
-                  <a class="btn btn-saverow" id="btn-saverow" name="saverow" title="행추가" onclick="addBody()">
+                  <a class="btn btn-saverow" id="btn-saverow" name="saverow" title="세부사항 추가" onclick="addBody()">
                     <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                    행추가
+                    세부사항 추가
                   </a>
                 </li>
                 <li>
@@ -375,6 +375,10 @@
                   <div class="srch-box">
                     <select id="searchOrdflag" name="searchOrdflag">
                       <option value="">전체</option>
+                      <option value="0">주문의뢰</option>
+                      <option value="1">견적작성</option>
+                      <option value="2">제작</option>
+                      <option value="3">출고</option>
                     </select>
                     <!--                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>-->
                   </div>
@@ -463,7 +467,7 @@
     <div class="popup-wrapper w700" id="popup2" style="min-width: 1050px">
       <div class="popup-title">
         <h3>옵션 및 요청사항</h3>
-        <a title="팝업닫기" onclick="closePopup('popup2')" class="btn-popup-close">
+        <a title="팝업닫기" onclick="closePopup2('popup2')" class="btn-popup-close">
           <img src="/images/icon/btn-popup-close.svg" alt="닫기">
         </a>
       </div>
@@ -504,7 +508,7 @@
           </table>
         </div>
         <div class="popup-button">
-          <button type="button" onclick="closePopup('popup2')" class="btn-navy">작성완료</button>
+          <button type="button" onclick="endtext('popup2')" class="btn-navy">작성완료</button>
         </div>
       </div>
     </div>
@@ -717,10 +721,41 @@
         }
       });
       viewdata1 = new wijmo.collections.CollectionView(transformedData); // 변환된 데이터를 CollectionView로 변환
-      const minRows = 12;
-      while (viewdata1.length < minRows) {
-        transformedData.push({}); // 빈 객체를 추가하여 빈 행을 생성
+      const minRows = 12; // 최소 행 수
+      const rowTemplate = {
+        ordflag: null,
+        reqdate: null,
+        deldate: null,
+        panel_ht: null,
+        panel_hw: null,
+        panel_hl: null,
+        panel_hh: null,
+        remark: null,
+        downloads: null,
+        bd_hgrb: null,
+        bd_qty: null,
+        bd_panel_t: null,
+        bd_panel_w: null,
+        bd_panel_l: null,
+        bd_exfmtypedv: null,
+        bd_infmtypedv: null,
+        bd_stframedv: null,
+        bd_stexplydv: null,
+        bd_ordtext: null,
+        telno: null,
+        perid: null,
+        cltaddr: null,
+        reqnum: null,
+        isdownload: null,
+        hd_files: null,
+        originOrdtext: null
+      }; // 필요한 데이터 구조
+
+// 빈 행 추가
+      while (viewdata1.sourceCollection.length < minRows) {
+        viewdata1.sourceCollection.push({ ...rowTemplate });
       }
+
       if (!theGrid) {
         // 데이터 그리드에 바인딩
         theGrid = new wijmo.grid.FlexGrid('#theGrid', {
@@ -751,7 +786,7 @@
             {binding: 'bd_ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 130, align: 'center'},
             {binding: 'telno', header: '연락처', width: '*', minWidth: 140, align: 'center'},
             {binding: 'perid', header: '담당자', width: '*', minWidth: 100, align: 'center'},
-            {binding: 'cltaddr', header: '상세주소', width: '*', minWidth: 300, align: 'center'},
+            {binding: 'cltaddr', header: '상세주소', width: '*', minWidth: 300, align: 'left'},
 
             {binding: 'reqnum', visible: false},  // 숨길 컬럼
             {binding: 'isdownload', visible: false},
@@ -936,7 +971,7 @@
               if (panel.columns[c].binding === 'ordtext') {
                 cell.innerHTML = ''; // 셀 내용 초기화
                 if (item.ordtext) {
-                  cell.innerHTML = '<a title="수정팝업" class="" onclick="showPopup3(\'popup2\')" style="color: #03428E">요청사항 확인</a>';
+                  cell.innerHTML = '<a title="수정팝업" class="" onclick="showPopup2(\'popup2\')" style="color: #03428E">요청사항 확인</a>';
                 }
               }
             }
@@ -1372,6 +1407,8 @@
       // 기존 CollectionView를 초기화하기 위해 sourceCollection을 빈 배열로 설정 후 새 데이터 할당
       if (viewdata2) {
         viewdata2.sourceCollection = data2;
+        viewdata2 = new wijmo.collections.CollectionView(data2);
+        theGrid2.itemsSource = viewdata2;
         viewdata2.refresh();
       } else {
         viewdata2 = new wijmo.collections.CollectionView(data2);
@@ -1395,7 +1432,7 @@
     // body 필드값 초기화
     function resetBodyField() {
       const fieldsToReset = [
-        'hgrb', 'qty', 'panel_t', 'panel_w', 'panel_l', 'reqseq',
+        'qty', 'panel_t', 'panel_w', 'panel_l', 'reqseq',
         'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv'
       ];
       fieldsToReset.forEach(fieldId => {
@@ -1462,6 +1499,12 @@
 
         // TinyMCE 에디터에 HTML로 content 설정
         tinymce.get('ordtext').setContent(ordtext);  // 'ordtext'는 TinyMCE가 적용된 요소의 id
+
+        // 팝업 버튼 숨기기
+        const button = popup.querySelector('.popup-button');
+        if (button) {
+          button.style.display = 'none'; // 버튼 숨기기
+        }
 
         // 팝업을 표시
         popup.style.display = 'block';
@@ -1762,6 +1805,93 @@
       "기타": "ZZ06",
       "코일": "ZZ07"
     };
+
+    function closePopup2(documentId) {
+      // 해당 ID의 팝업 요소를 찾음
+      const popup = document.getElementById(documentId);
+
+      if (popup) {
+        // 팝업을 포함한 모달을 숨김
+        const modal = popup.closest('.modal');
+        if (modal) {
+          modal.style.display = 'none';
+          modal.classList.remove('show'); // 애니메이션 제거
+        }
+
+        // 팝업 자체 숨김
+        popup.style.display = 'none';
+        popup.classList.remove('show'); // 애니메이션 제거
+
+        // 팝업 버튼 복구
+        const button = popup.querySelector('.popup-button');
+        if (button) {
+          button.style.display = ''; // 기본 스타일로 복구
+          // 또는 button.classList.remove('hidden'); // 클래스 방식으로 복구
+        }
+      }
+    }
+
+    function endtext(documentId) {
+      // 해당 ID의 팝업 요소를 찾음
+      const popup = document.getElementById(documentId);
+
+      if (popup) {
+        // 팝업을 포함한 모달을 숨김
+        const modal = popup.closest('.modal');
+        if (modal) {
+          modal.style.display = 'none';
+          modal.classList.remove('show'); // 애니메이션 제거
+        }
+
+        // 팝업 자체 숨김
+        popup.style.display = 'none';
+        popup.classList.remove('show'); // 애니메이션 제거
+
+        // 팝업 버튼 복구
+        const button = popup.querySelector('.popup-button');
+        if (button) {
+          button.style.display = ''; // 기본 스타일로 복구
+          // 또는 button.classList.remove('hidden'); // 클래스 방식으로 복구
+        }
+      }
+      const newRowData = {
+        hgrb: getHgrb(document.getElementById("hgrb").value),
+        qty: Number(document.getElementById("qty").value),
+        panel_t: document.getElementById("panel_t").value,
+        panel_w: document.getElementById("panel_w").value,
+        panel_l: document.getElementById("panel_l").value,
+        exfmtypedv: getListCgrb2(document.getElementById("exfmtypedv").value),
+        infmtypedv: getListCgrb2(document.getElementById("infmtypedv").value),
+        stframedv: getListCgrb2(document.getElementById("stframedv").value),
+        stexplydv: getListCgrb2(document.getElementById("stexplydv").value),
+        reqseq: document.getElementById("reqseq").value,
+        ordtext: tinymce.get('ordtext').getContent()
+      };
+
+      const sourceCollection = viewdata2.sourceCollection;
+      let isUpdated = false;
+
+      for (let i = 0; i < sourceCollection.length; i++) {
+        if (newRowData.reqseq === sourceCollection[i].reqseq && newRowData.reqseq !== "") {
+          sourceCollection[i] = newRowData;  // Update existing row
+          isUpdated = true;
+          break;
+        } else if (!sourceCollection[i].hgrb || sourceCollection[i].hgrb === '') {
+          sourceCollection[i] = newRowData;  // Fill empty row
+          isUpdated = true;
+          break;
+        }
+      }
+
+      if (!isUpdated) {
+        viewdata2.addNew(newRowData);  // Add new row if no updates were made
+      }
+
+      viewdata2.commitEdit();  // Commit changes
+      viewdata2.refresh();  // Refresh the collection view
+      theGrid2.refresh();  // Refresh the grid
+    }
+
   </script>
 
 </th:block>

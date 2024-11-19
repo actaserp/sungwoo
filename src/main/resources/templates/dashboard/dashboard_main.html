@@ -17,9 +17,9 @@
     <!--- (레이아웃) Contents 영역 -->
     <div class="layout-contents">
         <!-- Page Title -->
-        <div class="page-title-wrap">
+        <div class="page-title-wrap" style="margin-bottom:0">
             <div class="left">
-                <h2>Order Management Dashboard</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img
+                <h2>관리자 Dashboard</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img
                     src="/images/icon/ico-down.png"
                     alt="알람 아이콘"></a>
                 <!--                <a title="북마크" class="bookmark toggle">-->
@@ -148,10 +148,6 @@
                     </div>
                     <div class="swiper-slide">
                         <section>
-                            <div class="title">
-                                <h3>MoM</h3>
-                                <a href="#" title="더보기" class="btn-plus"></a>
-                            </div>
                             <dl>
                                 <dt>예상수익</dt>
                                 <dd>
@@ -248,10 +244,6 @@
                     </div>
                     <div class="swiper-slide">
                         <section>
-                            <div class="title">
-                                <h3>MoM</h3>
-                                <a href="#" title="더보기" class="btn-plus"></a>
-                            </div>
                             <dl>
                                 <dt>예상수익</dt>
                                 <dd>
@@ -271,7 +263,7 @@
         </div>
 
       <div class="col wp100">
-        <section>
+        <section style="padding-top: 5px; padding-bottom: 5px; margin-bottom: 0;">
           <div class="title-wrap">
             <ul class="tab-links-sub">
               <li>
@@ -291,56 +283,56 @@
 
           <div class="tab-contents">
             <div class="tab-row" style="display: flex; width: 100%; gap: 20px; margin-bottom: 3px;">
-              <section style="width: 50%; height: 210px;">
-                <div class="tab-item-sub h280" id="tab1">
-                  <h3>주문의뢰 건수</h3>
+              <section style="width: 50%; height: 240px; padding: 10px;">
+                <div class="tab-item-sub" id="tab1">
+                  <h5>주문의뢰 건수</h5>
                   <!--<div class="chart-wrap">
                    &lt;!&ndash; <div id="chartHolder1"  style="width: 100%; height: 420px; padding-top: 13px"></div>&ndash;&gt;
                       <canvas id="revenueChart"></canvas>
                   </div>-->
-                    <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
-                        <canvas id="revenueChart"></canvas>
+                    <div class="chart-wrap" style="justify-content: normal;">
+                        <canvas id="revenueChart" style="height: 200px"></canvas>
                         <span class="material-symbols-outlined" style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);" onclick="openModal('revenueChart')">zoom_out_map</span>
                     </div>
                 </div>
               </section>
-              <section style="width: 50%; height: 210px;">
-                <div class="tab-item-sub h280" id="tab2">
-                  <h3>전년대비 건수</h3>
+              <section style="width: 50%; height: 240px; padding: 10px;">
+                <div class="tab-item-sub" id="tab2" style="height:210px;">
+                  <h5>전년대비 건수</h5>
                  <!-- <div class="chart-wrap">
                     &lt;!&ndash;<div id="chartHolder2"  style="width: 100%; height: 420px; padding-top: 13px"></div>&ndash;&gt;
                       <canvas id="orderChart"></canvas>
                   </div>-->
                     <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
-                        <canvas id="orderChart"></canvas>
+                        <canvas id="orderChart" style="height: 200px"></canvas>
                         <span class="material-symbols-outlined" style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);" onclick="openModal('orderChart')">zoom_out_map</span>
                     </div>
                 </div>
               </section>
             </div>
             <div class="tab-row" style="display: flex; width: 100%; gap: 20px; margin-bottom: 3px;">
-              <section style="width: 50%; height: 210px;">
-                <div class="tab-item-sub h280" id="tab3">
-                  <h3>당월 건수</h3>
+              <section style="width: 50%; height: 240px; padding: 10px;">
+                <div class="tab-item-sub" id="tab3">
+                  <h5>당월 건수</h5>
                   <!--<div class="chart-wrap">
                     &lt;!&ndash;<div id="chartHolder3"  style="width: 100%; height: 420px; padding-top: 13px"></div>&ndash;&gt;
                       <canvas id="estimateChart"></canvas>
                   </div>-->
                     <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
-                        <canvas id="estimateChart"></canvas>
+                        <canvas id="estimateChart" style="height: 200px"></canvas>
                         <span class="material-symbols-outlined" style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);" onclick="openModal('estimateChart')">zoom_out_map</span>
                     </div>
                 </div>
               </section>
-              <section style="width: 50%; height: 210px;">
-                <div class="tab-item-sub h280" id="tab4">
-                  <h3>전월 건수</h3>
+              <section style="width: 50%; height: 240px; padding: 10px;">
+                <div class="tab-item-sub" id="tab4">
+                  <h5>전월 건수</h5>
                   <!--<div class="chart-wrap">
                     &lt;!&ndash;<div id="chartHolder4"  style="width: 100%; height: 420px; padding-top: 13px"></div>&ndash;&gt;
                       <canvas id="requestChart"></canvas>
                   </div>-->
                     <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
-                        <canvas id="requestChart"></canvas>
+                        <canvas id="requestChart" style="height: 200px"></canvas>
                         <span class="material-symbols-outlined" style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);" onclick="openModal('requestChart')">zoom_out_map</span>
                     </div>
                 </div>
@@ -565,10 +557,14 @@
         };
 
         const estimateData = {
-            labels: ["1일", "5일", "10일", "15일", "20일", "25일", "30일"],
+            labels: ["1일", "2일", "3일", "4일", "5일", "6일", "7일", "8일", "9일", "10일"
+                , "11일", "12일", "13일", "14일", "15일", "16일", "17일", "18일", "19일", "20일"
+                , "21일", "22일", "23일", "24일", "25일", "26일", "27일", "28일", "29일", "30일"],
             datasets: [{
                 label: '당월 건수',
-                data: [800, 900, 1200, 1500, 1800, 2100, 2500],
+                data: [700, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400
+                    , 2600, 2800, 700, 800, 1000, 1200, 1400, 1600, 1800, 2000
+                    , 2600, 2800, 700, 800, 1000, 1200, 1400, 1600, 1800, 2000],
                 backgroundColor: 'rgba(98, 178, 253, 0.5)',
                 borderColor: 'rgba(98, 178, 253, 1)',
                 borderWidth: 1

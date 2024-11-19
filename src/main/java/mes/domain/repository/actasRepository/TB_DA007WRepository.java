@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface TB_DA007WRepository extends JpaRepository<TB_DA007W,String> {
@@ -18,9 +17,8 @@ public interface TB_DA007WRepository extends JpaRepository<TB_DA007W,String> {
                     , @Param("spjangcd") String spjangcd);
 
     @Query(value = "SELECT t.reqseq FROM TB_DA007W t WHERE " +
-            "t.reqnum = :reqnum AND t.custcd = :custcd AND t.spjangcd = :spjangcd AND t.reqdate = :reqdate", nativeQuery = true)
+            "t.reqnum = :reqnum AND t.custcd = :custcd AND t.spjangcd = :spjangcd", nativeQuery = true)
     List<String> findReqseq(@Param("reqnum") String reqnum
                             , @Param("custcd") String custcd
-                            , @Param("spjangcd") String spjangcd
-                            , @Param("reqdate") String reqdate);
+                            , @Param("spjangcd") String spjangcd);
 }

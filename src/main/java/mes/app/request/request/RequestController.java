@@ -10,21 +10,21 @@ import mes.domain.model.AjaxResult;
 import mes.domain.repository.actasRepository.TB_DA006WFILERepository;
 import mes.domain.repository.actasRepository.TB_DA006WRepository;
 import mes.domain.repository.actasRepository.TB_DA007WRepository;
-import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,16 +32,9 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import mes.app.UtilClass;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/request/request")
@@ -92,8 +85,11 @@ public class RequestController {
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
         tbDa006WPk.setSpjangcd("ZZ");
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
+        String saupnum = (String) userInfo.get("saupnum");
+        String search_startDate = (searchStartDate).replaceAll("-","");
+        String search_endDate = (searchEndDate).replaceAll("-","");
         List<Map<String, Object>> items = this.requestService.getOrderList(tbDa006WPk,
-                searchStartDate, searchEndDate, searchRemark, searchOrdfalg);
+                search_startDate, search_endDate, searchRemark, searchOrdfalg, saupnum);
 //        Map<String, Object> headitem = this.requestService.getHeadList(tbDa006WPk);
 //        items.add(headitem);
         for (Map<String, Object> item : items) {
@@ -267,7 +263,7 @@ public class RequestController {
         tbDa006.setPk(headpk);
         tbDa006.setCltcd((String) userInfo.get("cltcd"));
         tbDa006.setCltnm((String) userInfo.get("cltnm"));
-        tbDa006.setSaupnum((String) userInfo.get("cltcd"));
+        tbDa006.setSaupnum((String) userInfo.get("saupnum"));
 
         tbDa006.setCltzipcd(params.get("postno"));
         tbDa006.setCltaddr(params.get("address1"));
@@ -297,8 +293,10 @@ public class RequestController {
                 List<Map<String, Object>> jsonDataList = objectMapper.readValue(
                         bodyDataJson, new TypeReference<List<Map<String, Object>>>() {}
                 );
-
-                List<String> reqseqList = tbda007WRepository.findReqseq(reqnum, (String) userInfo.get("custcd"),"ZZ",params.get("reqdate").replaceAll("-",""));
+                String custcd = (String) userInfo.get("custcd");
+                //String spjangcd = (String) userInfo.get("spjangcd");
+                String spjangcd = "ZZ";
+                List<String> reqseqList = tbda007WRepository.findReqseq(reqnum, custcd, spjangcd);
                 boolean allSuccessful = true;
                 for (Map<String, Object> jsonData : jsonDataList) {
                     TB_DA007W tbDa007 = new TB_DA007W();

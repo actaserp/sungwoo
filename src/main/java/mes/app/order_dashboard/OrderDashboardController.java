@@ -1,7 +1,6 @@
 package mes.app.order_dashboard;
 
 import mes.app.order_dashboard.service.OrderDashboardService;
-import mes.app.request.request.service.RequestService;
 import mes.domain.entity.User;
 import mes.domain.entity.actasEntity.TB_DA006W_PK;
 import mes.domain.model.AjaxResult;
@@ -33,8 +32,10 @@ public class OrderDashboardController {
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
         tbDa006WPk.setSpjangcd("ZZ");
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
+        String search_startDate = (searchStartDate).replaceAll("-","");
+        String search_endDate = (searchEndDate).replaceAll("-","");
         List<Map<String, Object>> items = this.orderDashboardService.getOrderList(tbDa006WPk,
-                searchStartDate, searchEndDate, searchType);
+                search_startDate, search_endDate, searchType);
         for (Map<String, Object> item : items) {
             if (item.get("ordflag").equals("0")) {
                 item.remove("ordflag");
