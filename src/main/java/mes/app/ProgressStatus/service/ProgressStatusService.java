@@ -22,11 +22,11 @@ public class ProgressStatusService {
     SELECT
     tb007.*, 
     tb006.*   
-FROM
-    TB_DA007W tb007
-LEFT JOIN
-    TB_DA006W tb006
-ON
+    FROM
+        TB_DA007W tb007
+    LEFT JOIN
+        TB_DA006W tb006
+    ON
     tb007.custcd = tb006.custcd
     AND tb007.spjangcd = tb006.spjangcd
     AND tb007.reqdate = tb006.reqdate
@@ -35,4 +35,28 @@ ON
 
         return sqlRunner.getRows(sql, params);
     }
+    public List<Map<String, Object>> searchProgress(String startDate, String endDate, String remark) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("startDate", startDate);
+        params.addValue("endDate", endDate);
+        params.addValue("endDate", endDate);
+
+        String sql = """
+    SELECT
+    tb007.*, 
+    tb006.*   
+    FROM
+        TB_DA007W tb007
+    LEFT JOIN
+        TB_DA006W tb006
+    ON
+    tb007.custcd = tb006.custcd
+    AND tb007.spjangcd = tb006.spjangcd
+    AND tb007.reqdate = tb006.reqdate
+    AND tb007.reqnum = tb006.reqnum;
+        """;
+
+        return sqlRunner.getRows(sql, params);
+    }
+
 }
