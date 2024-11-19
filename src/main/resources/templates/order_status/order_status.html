@@ -56,31 +56,7 @@
             </ul>
         </div>
         <!-- Select -->
-        <div class="search-wrap" id="searchWrap" style="display: none">
-            <ul>
-                <li>
-                    <select title="지역" id="spworkcd" name="spworkcd"
-                            onchange="updateCompcdOptions(); saveSelectedSandanData(); ">
-                        <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
-                    </select>
-                    <input type="hidden" id="spworknm" name="spworknm">
-                </li>
-                <li>
-                    <select title="산단" id="spcompcd" name="spcompcd"
-                            onchange="updatePlancdOptions(); saveSelectedSandanData();">
-                        <!-- 산단 옵션을 JavaScript에서 동적으로 채움 -->
-                    </select>
-                    <input type="hidden" id="spcompnm" name="spcompnm">
-                </li>
-                <li>
-                    <select title="시설" id="spplancd" name="spplancd"
-                            onchange="updatePlannm(); saveSelectedSandanData()">
-                        <!-- 시설 옵션을 JavaScript에서 동적으로 채움 -->
-                    </select>
-                    <input type="hidden" id="spplannm" name="spplannm">
-                </li>
-            </ul>
-        </div>
+
         <div class="tab-wrap">
             <ul class="tab-links">
                 <li>
@@ -683,6 +659,7 @@
                 theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
                     autoGenerateColumns: false,
                     showMarquee: true,
+                    isReadOnly: true, // 전체 읽기 전용
                     columns: [
                         {binding: 'rownum', header: '순번', width: 70, align: 'center'},
                         {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
@@ -721,6 +698,10 @@
                 theGrid2.rowHeaders.columns.splice(0, 1); // 맨 앞에 헤더 부분 없애기
                 new FlexGridContextMenu(theGrid2);
                 window.downloadFileName = '진행 현황';
+
+                theGrid2.beginningEdit.addHandler((s, e) => {
+                    e.cancel = true; // 편집 차단
+                });
 
             } else {
                 // 이미 FlexGrid가 존재하는 경우, 데이터만 업데이트
