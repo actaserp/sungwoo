@@ -1367,12 +1367,8 @@
       $('#doctitle').each(function () {
         $(this).siblings('.btn-clear').hide();
       });
-      // 최소 5개의 빈 행으로 초기화
-      let data2 = [];
-      for (let i = 0; i < 5; i++) {
-        data2.push({});
-      }
 
+      let data2 = [];
       // 기존 CollectionView를 초기화하기 위해 sourceCollection을 빈 배열로 설정 후 새 데이터 할당
       if (viewdata2) {
         viewdata2.sourceCollection = data2;
