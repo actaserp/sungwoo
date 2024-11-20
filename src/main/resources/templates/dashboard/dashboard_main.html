@@ -34,7 +34,7 @@
         <div class="search-wrap" id="searchWrap" style="display: none; padding-top:10px">
             <ul>
                 <li>
-                    <select title="사업장" id="search_sjangcd" name="search_sjangcd"
+                    <select title="사업장" id="search_spjangcd" name="search_sjangcd"
                             onchange="init()">
                         <option value="" hidden selected disabled>선택</option>
                         <option value="ZZ">성우에스피(주)</option>
@@ -555,7 +555,7 @@
             let data2 = [];
 
             $.ajax({
-                url: '/api/dashboard2/',
+                url: '/api/dashboard2/LastYearCnt',
                 type: 'GET',
                 data: {
                     'search_spjangcd': $('#search_spjangcd').val()
@@ -571,7 +571,7 @@
             let data2 = [];
 
             $.ajax({
-                url: '/api/dashboard2/',
+                url: '/api/dashboard2',
                 type: 'GET',
                 data: {
                     'search_spjangcd': $('#search_spjangcd').val()
