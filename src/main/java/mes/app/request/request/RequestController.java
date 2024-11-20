@@ -63,7 +63,7 @@ public class RequestController {
         Map<String, Object> userInfo = requestService.getUserInfo(username);
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
         tbDa006WPk.setReqnum(params.get("reqnum"));
-        tbDa006WPk.setSpjangcd("ZZ");
+        tbDa006WPk.setSpjangcd((String) userInfo.get("spjangcd"));
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
         List<Map<String, Object>> items = this.requestService.getInspecList(tbDa006WPk);
 
@@ -83,7 +83,7 @@ public class RequestController {
         String username = user.getUsername();
         Map<String, Object> userInfo = requestService.getUserInfo(username);
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
-        tbDa006WPk.setSpjangcd("ZZ");
+        tbDa006WPk.setSpjangcd((String) userInfo.get("spjangcd"));
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
         String saupnum = (String) userInfo.get("saupnum");
         String search_startDate = (searchStartDate).replaceAll("-","");
@@ -174,7 +174,7 @@ public class RequestController {
 
         TB_DA006W_PK headpk = new TB_DA006W_PK();
         headpk.setCustcd((String) userInfo.get("custcd"));
-        headpk.setSpjangcd("ZZ");
+        headpk.setSpjangcd((String) userInfo.get("spjangcd"));
         headpk.setReqdate(params.get("reqdate").replaceAll("-",""));
         // findMaxReqnum 메서드가 최대 reqnum 값을 정수로 반환한다고 가정
         int maxReqnum = tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"), "ZZ");
@@ -217,7 +217,7 @@ public class RequestController {
                 tbDa006WFile.setFileornm(fileName);
                 tbDa006WFile.setFilesize(fileSize);
                 tbDa006WFile.setCustcd((String) userInfo.get("custcd"));
-                tbDa006WFile.setSpjangcd("ZZ");
+                tbDa006WFile.setSpjangcd((String) userInfo.get("spjangcd"));
                 tbDa006WFile.setReqdate(params.get("reqdate").replaceAll("-",""));
                 tbDa006WFile.setReqnum(reqnum);
                 tbDa006WFile.setIndatem(params.get("reqdate").replaceAll("-",""));
@@ -294,8 +294,7 @@ public class RequestController {
                         bodyDataJson, new TypeReference<List<Map<String, Object>>>() {}
                 );
                 String custcd = (String) userInfo.get("custcd");
-                //String spjangcd = (String) userInfo.get("spjangcd");
-                String spjangcd = "ZZ";
+                String spjangcd = (String) userInfo.get("spjangcd");
                 List<String> reqseqList = tbda007WRepository.findReqseq(reqnum, custcd, spjangcd);
                 boolean allSuccessful = true;
                 for (Map<String, Object> jsonData : jsonDataList) {
@@ -303,7 +302,7 @@ public class RequestController {
                     TB_DA007W_PK bodypk = new TB_DA007W_PK();
                     // Map을 통해 필드에 접근
                     bodypk.setCustcd((String) userInfo.get("custcd"));
-                    bodypk.setSpjangcd("ZZ");
+                    bodypk.setSpjangcd((String) userInfo.get("spjangcd"));
                     bodypk.setReqdate(params.get("reqdate").replaceAll("-",""));
                     bodypk.setReqnum(reqnum);
 
@@ -330,11 +329,12 @@ public class RequestController {
                         allSuccessful &= successUpdate;
                         result.message += successUpdate ? " | 세부사항 업데이트 성공" : " | 세부사항 업데이트 실패";
                     } else {
-                        reqseq = String.format("%03d",tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), "ZZ") + 1);
+                        reqseq = String.format("%03d",tbda007WRepository.findMaxReqseq(reqnum, (String) userInfo.get("custcd"), (String) userInfo.get("spjangcd")) + 1);
                         bodypk.setReqseq(reqseq);
                         tbDa007.setPk(bodypk);
 
                         boolean successInsert = requestService.saveBody(tbDa007);
+                        reqseqList.add(reqseq); // 삽입 후 리스트에 추가
                         allSuccessful &= successInsert;
                         result.message += successInsert ? " | 세부사항 저장 성공" : " | 세부사항 저장 실패";
                     }
@@ -403,7 +403,7 @@ public class RequestController {
 
             HttpHeaders headers = new HttpHeaders();
             String encodedFileName = URLEncoder.encode(originFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + originFileName + "\"; filename*=UTF-8''" + encodedFileName);
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=*=UTF-8''" + encodedFileName);
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentLength(file.length());
 
@@ -463,7 +463,7 @@ public class RequestController {
 
         HttpHeaders headers = new HttpHeaders();
         String encodedZipFileName = URLEncoder.encode(zipFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + zipFileName + "\"; filename*=UTF-8''" + encodedZipFileName);
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=*=UTF-8''" + encodedZipFileName);
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentLength(zipResource.contentLength());
 
@@ -622,10 +622,11 @@ public class RequestController {
     }
     // body 삭제 메서드
     @PostMapping("/bodyDelete")
-    public AjaxResult deleteBody(@RequestParam String reqseq,
-                                 @RequestParam String reqnum) {
+    public AjaxResult deleteBody(@RequestParam Map<Object, String> param) {
         AjaxResult result = new AjaxResult();
 
+        String reqseq = param.get("reqseq");
+        String reqnum = param.get("reqnum");
         boolean success = requestService.deleteBody(reqseq, reqnum);
 
         if (success) {

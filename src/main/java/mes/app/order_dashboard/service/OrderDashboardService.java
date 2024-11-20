@@ -20,11 +20,14 @@ public class OrderDashboardService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
         String sql = """
-                select custcd,
-                        cltcd,
-                        cltnm
-                FROM TB_XCLIENT
-                WHERE saupnum = :username
+                select xc.custcd,
+                       xc.cltcd,
+                       xc.cltnm,
+                       xc.saupnum,
+                       au.spjangcd
+                FROM TB_XCLIENT xc
+                left join auth_user au on au."username" = xc.saupnum
+                WHERE xc.saupnum = :username
                 """;
         dicParam.addValue("username", username);
         Map<String, Object> userInfo = this.sqlRunner.getRow(sql, dicParam);
@@ -33,12 +36,15 @@ public class OrderDashboardService {
 
     //주문의뢰현황 불러오기
     public List<Map<String, Object>> getOrderList(TB_DA006W_PK tbDa006W_pk,
-                                                  String searchStartDate, String searchEndDate, String searchType) {
+                                                  String searchStartDate, String searchEndDate, String searchType, String saupnum) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("searchStartDate", searchStartDate);
         dicParam.addValue("searchEndDate", searchEndDate);
         dicParam.addValue("searchType", searchType);
+        dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
+        dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
+        dicParam.addValue("saupnum", saupnum);
 
         StringBuilder sql = new StringBuilder("""
                 SELECT
@@ -58,6 +64,7 @@ public class OrderDashboardService {
                 WHERE
                     hd.custcd = :custcd
                     AND hd.spjangcd = :spjangcd
+                    AND hd.saupnum = :saupnum
                 """);
         // 날짜 필터
         if (searchStartDate != null && !searchStartDate.isEmpty()) {
@@ -74,8 +81,6 @@ public class OrderDashboardService {
         // 정렬 조건 추가
         sql.append(" ORDER BY reqdate ASC");
 
-        dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
-        dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }

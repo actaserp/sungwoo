@@ -8,43 +8,13 @@
     <div class="layout-contents">
         <!-- Page Title -->
         <div class="page-title-wrap">
-            <div class="left">
-                <h2>Dashboard</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png"
-                                                                                              alt="알람 아이콘"></a>
-                <!--                <a href="#" title="북마크" class="bookmark toggle">-->
-                <!--                    내메뉴-->
-                <!--                </a>-->
-            </div>
+
             <ul class="page-navi">
                 <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
             </ul>
         </div>
         <!-- Select -->
-        <div class="search-wrap" id="searchWrap" style="display: none">
-            <ul>
-                <li>
-                    <select title="지역" id="spworkcd" name="spworkcd"
-                            onchange="updateCompcdOptions(); saveSelectedSandanData(); ">
-                        <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
-                    </select>
-                    <input type="hidden" id="spworknm" name="spworknm">
-                </li>
-                <li>
-                    <select title="산단" id="spcompcd" name="spcompcd"
-                            onchange="updatePlancdOptions(); saveSelectedSandanData();">
-                        <!-- 산단 옵션을 JavaScript에서 동적으로 채움 -->
-                    </select>
-                    <input type="hidden" id="spcompnm" name="spcompnm">
-                </li>
-                <li>
-                    <select title="시설" id="spplancd" name="spplancd"
-                            onchange="updatePlannm(); saveSelectedSandanData()">
-                        <!-- 시설 옵션을 JavaScript에서 동적으로 채움 -->
-                    </select>
-                    <input type="hidden" id="spplannm" name="spplannm">
-                </li>
-            </ul>
-        </div>
+
         <div class="tab-wrap">
             <ul class="tab-links">
                 <li>

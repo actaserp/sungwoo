@@ -8,13 +8,7 @@
   <div class="layout-contents">
     <!-- Page Title -->
     <div class="page-title-wrap">
-      <div class="left">
-        <h2>주문 의뢰</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png"
-                                                                             alt="알람 아이콘"></a>
-        <!--                <a href="#" title="북마크" class="bookmark toggle">-->
-        <!--                    내메뉴-->
-        <!--                </a>-->
-      </div>
+
       <ul class="page-navi">
         <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
         <li>주문 의뢰</li>
@@ -22,31 +16,7 @@
       </ul>
     </div>
     <!-- Select -->
-    <div class="search-wrap" id="searchWrap" style="display: none">
-      <ul>
-        <li>
-          <select title="지역" id="spworkcd" name="spworkcd"
-                  onchange="updateCompcdOptions(); saveSelectedSandanData(); ">
-            <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
-          </select>
-          <input type="hidden" id="spworknm" name="spworknm">
-        </li>
-        <li>
-          <select title="산단" id="spcompcd" name="spcompcd"
-                  onchange="updatePlancdOptions(); saveSelectedSandanData();">
-            <!-- 산단 옵션을 JavaScript에서 동적으로 채움 -->
-          </select>
-          <input type="hidden" id="spcompnm" name="spcompnm">
-        </li>
-        <li>
-          <select title="시설" id="spplancd" name="spplancd"
-                  onchange="updatePlannm(); saveSelectedSandanData()">
-            <!-- 시설 옵션을 JavaScript에서 동적으로 채움 -->
-          </select>
-          <input type="hidden" id="spplannm" name="spplannm">
-        </li>
-      </ul>
-    </div>
+
     <div class="tab-wrap">
       <ul class="tab-links">
         <input type="hidden" id="checkdtParam" name="checkdtParam" th:value="${checkdt}"/>
@@ -80,8 +50,8 @@
                   </a>
                 </li>
                 <li>
-                  <a class="btn btn-delete" title="삭제">
-                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘" onclick="deletehead()">
+                  <a class="btn btn-delete" id="deleteButton" title="삭제">
+                    <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
                     삭제
                   </a>
                 </li>
@@ -467,7 +437,7 @@
     <div class="popup-wrapper w700" id="popup2" style="min-width: 1050px">
       <div class="popup-title">
         <h3>옵션 및 요청사항</h3>
-        <a title="팝업닫기" onclick="closePopup2('popup2')" class="btn-popup-close">
+        <a title="팝업닫기" onclick="closePopup('popup2')" class="btn-popup-close">
           <img src="/images/icon/btn-popup-close.svg" alt="닫기">
         </a>
       </div>
@@ -971,7 +941,7 @@
               if (panel.columns[c].binding === 'ordtext') {
                 cell.innerHTML = ''; // 셀 내용 초기화
                 if (item.ordtext) {
-                  cell.innerHTML = '<a title="수정팝업" class="" onclick="showPopup2(\'popup2\')" style="color: #03428E">요청사항 확인</a>';
+                  cell.innerHTML = '<a title="수정팝업" class="" onclick="showPopup3(\'popup2\')" style="color: #03428E">요청사항 확인</a>';
                 }
               }
             }
@@ -1129,6 +1099,7 @@
               };
               // bodyForms 배열에 detailForm 객체 추가
               bodyForms.push(bodyForm);
+              console.log("bodyForms : ", bodyForms);
             }
           }
         }
@@ -1284,19 +1255,23 @@
         stframedv: getListCgrb2(document.getElementById("stframedv").value),
         stexplydv: getListCgrb2(document.getElementById("stexplydv").value),
         reqseq: document.getElementById("reqseq").value,
-        ordtext: tinymce.get('ordtext').getContent()
+        ordtext: tinymce.get('ordtext').getContent(),
+        originOrdtext: tinymce.get('ordtext').getContent()
       };
 
       const sourceCollection = viewdata2.sourceCollection;
       let isUpdated = false;
 
       for (let i = 0; i < sourceCollection.length; i++) {
+        console.log("세부사항 그리드 현재 검색 셀 index : ", i)
         if (newRowData.reqseq === sourceCollection[i].reqseq && newRowData.reqseq !== "") {
+          console.log("수정그리드 editor text : ", sourceCollection[i].originOrdtext)
           sourceCollection[i] = newRowData;  // Update existing row
           isUpdated = true;
           break;
         } else if (!sourceCollection[i].hgrb || sourceCollection[i].hgrb === '') {
           sourceCollection[i] = newRowData;  // Fill empty row
+          console.log("추가그리드 editor text : ", sourceCollection[i].originOrdtext)
           isUpdated = true;
           break;
         }
@@ -1304,6 +1279,7 @@
 
       if (!isUpdated) {
         viewdata2.addNew(newRowData);  // Add new row if no updates were made
+        console.log("추가그리드 editor text : ", newRowData.originOrdtext)
       }
 
       viewdata2.commitEdit();  // Commit changes
@@ -1354,27 +1330,45 @@
         });
       })
     }
+
+
     // 헤드정보 삭제(세부사항 존재시 안내 alert기능)
-    function deletehead(){
-      if ($('#reqnum').val() === "" || $('#reqnum').val() === null) {
+    $(document).ready(function () {
+      $('#deleteButton').off('click').on('click', deletehead);
+    });
+
+    let isProcessing = false;
+
+    function deletehead() {
+      if (isProcessing) return;
+
+      const reqnum = $('#reqnum').val();
+      if (!reqnum) {
         Alert.alert('', '삭제할 항목을\n주문의뢰현황에서 선택해주세요.');
+        return;
       }
 
       Alert.confirm('', '주문 등록정보를\n삭제하시겠습니까?', function () {
+        isProcessing = true;
+
         let data = {
-          'reqnum': $('#reqnum').val(),
+          'reqnum': reqnum,
           '_csrf': csrfToken
-        }
+        };
+
         let fnSuccess = function (res) {
+          isProcessing = false;
           if (res.success) {
             Alert.alert('', '삭제되었습니다.');
             fetchListData();
             resetFormFields();
           }
-        }
+        };
+
         AjaxUtil.postAsyncData('/api/request/request/delete', data, fnSuccess);
       });
     }
+
     // 필드값 초기화
     function resetFormFields() {
       const fieldsToReset = [
@@ -1475,7 +1469,7 @@
           document.getElementById("telno").value = data.data.hptelnum;
           document.getElementById("perid").value = data.data.prenm;
           document.getElementById("postno").value = data.data.zipcd;
-          document.getElementById("address1").value = data.data.cltadres;
+          document.getElementById("address1").value = data.data.cltadres.replace(/\s*\|/g, '').trim();
         },
         error: function(error) {
           console.log('정보를 불러오는데 실패했습니다.', error);
@@ -1485,6 +1479,7 @@
     function showPopup2(documnetId) {
       let selectedItems = theGrid.selectedItems;
       // 해당 ID의 팝업 요소를 찾음
+      console.log("요청사항 행 데이터 : ", selectedItems);
       const popup = document.getElementById(documnetId);
 
       if (popup) {
@@ -1521,6 +1516,7 @@
     function showPopup3(documnetId) {
       let selectedItems = theGrid2.selectedItems;
       // 해당 ID의 팝업 요소를 찾음
+      console.log("요청사항 행 데이터 : ", selectedItems);
       const popup = document.getElementById(documnetId);
 
       if (popup) {
@@ -1535,6 +1531,12 @@
 
         // TinyMCE 에디터에 HTML로 content 설정
         tinymce.get('ordtext').setContent(ordtext);  // 'ordtext'는 TinyMCE가 적용된 요소의 id
+
+        // 팝업 버튼 숨기기
+        const button = popup.querySelector('.popup-button');
+        if (button) {
+          button.style.display = 'none'; // 버튼 숨기기
+        }
 
         // 팝업을 표시
         popup.style.display = 'block';
@@ -1824,6 +1826,8 @@
 
         // 팝업 버튼 복구
         const button = popup.querySelector('.popup-button');
+
+        tinymce.get('ordtext').setContent("");
         if (button) {
           button.style.display = ''; // 기본 스타일로 복구
           // 또는 button.classList.remove('hidden'); // 클래스 방식으로 복구
@@ -1876,15 +1880,7 @@
           sourceCollection[i] = newRowData;  // Update existing row
           isUpdated = true;
           break;
-        } else if (!sourceCollection[i].hgrb || sourceCollection[i].hgrb === '') {
-          sourceCollection[i] = newRowData;  // Fill empty row
-          isUpdated = true;
-          break;
         }
-      }
-
-      if (!isUpdated) {
-        viewdata2.addNew(newRowData);  // Add new row if no updates were made
       }
 
       viewdata2.commitEdit();  // Commit changes

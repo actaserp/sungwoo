@@ -30,12 +30,13 @@ public class OrderDashboardController {
         String username = user.getUsername();
         Map<String, Object> userInfo = orderDashboardService.getUserInfo(username);
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
-        tbDa006WPk.setSpjangcd("ZZ");
+        tbDa006WPk.setSpjangcd((String) userInfo.get("spjangcd"));
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
+        String saupnum = (String) userInfo.get("saupnum");
         String search_startDate = (searchStartDate).replaceAll("-","");
         String search_endDate = (searchEndDate).replaceAll("-","");
         List<Map<String, Object>> items = this.orderDashboardService.getOrderList(tbDa006WPk,
-                search_startDate, search_endDate, searchType);
+                search_startDate, search_endDate, searchType, saupnum);
         for (Map<String, Object> item : items) {
             if (item.get("ordflag").equals("0")) {
                 item.remove("ordflag");
@@ -78,7 +79,7 @@ public class OrderDashboardController {
         String username = user.getUsername();
         Map<String, Object> userInfo = orderDashboardService.getUserInfo(username);
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
-        tbDa006WPk.setSpjangcd("ZZ");
+        tbDa006WPk.setSpjangcd((String) userInfo.get("spjangcd"));
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
         List<Map<String, Object>> items = this.orderDashboardService.initDatas(tbDa006WPk);
         AjaxResult result = new AjaxResult();

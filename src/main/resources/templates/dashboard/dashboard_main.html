@@ -31,37 +31,18 @@
             </ul>
         </div>
         <!-- Select -->
-        <div class="search-wrap" id="searchWrap" style="display: none">
+        <div class="search-wrap" id="searchWrap" style="display: none; padding-top:10px">
             <ul>
                 <li>
-                    <select title="지역" id="spworkcd" name="spworkcd"
-                            onchange="updateCompcdOptions(); saveSelectedSandanData(); ">
+                    <select title="사업장" id="search_sjangcd" name="search_sjangcd"
+                            onchange="init()">
+                        <option value="" hidden selected disabled>선택</option>
+                        <option value="ZZ">성우에스피(주)</option>
+                        <option value="PP">성우피앤비(주)</option>
                         <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
                     </select>
-                    <input type="hidden" id="spworknm" name="spworknm">
-                </li>
-                <li>
-                    <select title="산단" id="spcompcd" name="spcompcd"
-                            onchange="updatePlancdOptions(); saveSelectedSandanData();">
-                        <!-- 산단 옵션을 JavaScript에서 동적으로 채움 -->
-                    </select>
-                    <input type="hidden" id="spcompnm" name="spcompnm">
-                </li>
-                <li>
-                    <select title="시설" id="spplancd" name="spplancd"
-                            onchange="updatePlannm(); saveSelectedSandanData()">
-                        <!-- 시설 옵션을 JavaScript에서 동적으로 채움 -->
-                    </select>
-                    <input type="hidden" id="spplannm" name="spplannm">
                 </li>
             </ul>
-            <div class="card-btn-wrap">
-                <div class="btn swiper-button-prev"></div>
-                <div class="btn swiper-button-next"></div>
-                <a title="카드설정" class="btn btn-popup-open" data-popup="popup1">
-                    <img src="/images/icon/btn-setting.svg" alt="설정아이콘">
-                </a>
-            </div>
         </div>
         <div class="row row-1" style="margin-bottom: 0;">
             <div class="card-wrap swiper card-swiper">
@@ -283,7 +264,7 @@
 
           <div class="tab-contents">
             <div class="tab-row" style="display: flex; width: 100%; gap: 20px; margin-bottom: 3px;">
-              <section style="width: 50%; height: 240px; padding: 10px;">
+              <section style="width: 50%; height: 260px; padding: 10px;">
                 <div class="tab-item-sub" id="tab1">
                   <h5>주문의뢰 건수</h5>
                   <!--<div class="chart-wrap">
@@ -296,7 +277,7 @@
                     </div>
                 </div>
               </section>
-              <section style="width: 50%; height: 240px; padding: 10px;">
+              <section style="width: 50%; height: 260px; padding: 10px;">
                 <div class="tab-item-sub" id="tab2" style="height:210px;">
                   <h5>전년대비 건수</h5>
                  <!-- <div class="chart-wrap">
@@ -311,7 +292,7 @@
               </section>
             </div>
             <div class="tab-row" style="display: flex; width: 100%; gap: 20px; margin-bottom: 3px;">
-              <section style="width: 50%; height: 240px; padding: 10px;">
+              <section style="width: 50%; height: 260px; padding: 10px;">
                 <div class="tab-item-sub" id="tab3">
                   <h5>당월 건수</h5>
                   <!--<div class="chart-wrap">
@@ -324,7 +305,7 @@
                     </div>
                 </div>
               </section>
-              <section style="width: 50%; height: 240px; padding: 10px;">
+              <section style="width: 50%; height: 260px; padding: 10px;">
                 <div class="tab-item-sub" id="tab4">
                   <h5>전월 건수</h5>
                   <!--<div class="chart-wrap">
@@ -356,174 +337,7 @@
         </div>
     </div>
 
-    <!-- [대시보드] 팝업  -->
-    <div class="dashboard-layout-popup">
-        <div class="popup-overlay"></div>
-        <div class="popup-wrapper wp80" id="popup1">
-            <div class="popup-title">
-                <h3>카드 수정</h3>
-                <a title="팝업닫기" class="btn-popup-close">
-                    <img src="/images/icon/btn-popup-close.svg" alt="닫기">
-                </a>
-            </div>
-            <div class="popup-contents">
-                <div class="card-wrap card-edit-wrap" id="cardwrap">
-                    <div class="gesture-box">
-                        <img src="/images/icon/ico-gesture.png" alt="제스처 안내">
-                    </div>
-                    <section class="section-item" data-title="INPUT1">
-                        <div class="title">
-                            <h3>INPUT1</h3>
-                            <a title="숨김" class="btn-hidden"></a>
-                        </div>
-                        <dl>
-                            <dt> 매출액</dt>
-                            <dd>
-                                9,999 <span class="unit">Nm³</span>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>전일대비</dt>
-                            <dd>
-                                <span class="down"></span> 1.20 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                    </section>
-                    <section class="section-item" data-title="Elec. OUTPUT">
-                        <div class="title">
-                            <h3>Elec. OUTPUT</h3>
-                            <a title="숨김" class="btn-hidden"></a>
-                        </div>
-                        <dl>
-                            <dt>전기생산량</dt>
-                            <dd>
-                                9,999 <span class="unit">kWh</span>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>전일대비</dt>
-                            <dd>
-                                <span class="up"></span> 2.20 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                    </section>
-                    <section class="section-item" data-title="Heat OUTPUT">
-                        <div class="title">
-                            <h3>Heat OUTPUT</h3>
-                            <a title="숨김" class="btn-hidden"></a>
-                        </div>
-                        <dl>
-                            <dt>열 생산량</dt>
-                            <dd>
-                                9,999 <span class="unit">Mcal</span>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>전일대비</dt>
-                            <dd>
-                                <span class="down"></span> 1.20 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                    </section>
-                    <section class="section-item" data-title="F/C Efficiency">
-                        <div class="title">
-                            <h3>F/C Efficiency</h3>
-                            <a title="숨김" class="btn-hidden"></a>
-                        </div>
-                        <dl>
-                            <dt>전기효율</dt>
-                            <dd>
-                                45.5 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>열효율</dt>
-                            <dd>
-                                39.0 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                    </section>
-                    <section class="section-item" data-title="INCOME">
-                        <div class="title">
-                            <h3>INCOME</h3>
-                            <a title="숨김" class="btn-hidden"></a>
-                        </div>
-                        <dl>
-                            <dt>예상수익</dt>
-                            <dd>
-                                999,999 <span class="unit">원</span>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>전일대비</dt>
-                            <dd>
-                                <span class="up"></span> 1.20 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                    </section>
 
-                    <section class="section-item" data-title="Heat OUTPUT2">
-                        <div class="title">
-                            <h3>Heat OUTPUT2</h3>
-                            <a title="숨김" class="btn-hidden"></a>
-                        </div>
-                        <dl>
-                            <dt>열 생산량</dt>
-                            <dd>
-                                9,999 <span class="unit">Mcal</span>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>전일대비</dt>
-                            <dd>
-                                <span class="down"></span> 1.20 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                    </section>
-                    <section class="section-item" data-title="F/C Efficiency2">
-                        <div class="title">
-                            <h3>F/C Efficiency2</h3>
-                            <a title="숨김" class="btn-hidden"></a>
-                        </div>
-                        <dl>
-                            <dt>전기효율</dt>
-                            <dd>
-                                45.5 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>열효율</dt>
-                            <dd>
-                                39.0 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                    </section>
-                    <section class="card-hidden section-item" data-title="INCOME2">
-                        <div class="title">
-                            <h3>INCOME2</h3>
-                            <a title="숨김" class="btn-hidden"></a>
-                        </div>
-                        <dl>
-                            <dt>예상수익</dt>
-                            <dd>
-                                999,999 <span class="unit">원</span>
-                            </dd>
-                        </dl>
-                        <dl>
-                            <dt>전일대비</dt>
-                            <dd>
-                                <span class="up"></span> 1.20 <span class="unit">%</span>
-                            </dd>
-                        </dl>
-                    </section>
-                </div> <!--//swiper-wrapper end -->
-            </div>
-            <div class="popup-button">
-                <button class="btn-popup-close">취소</button>
-                <button class="btn-navy" id="btnSave">저장</button>
-            </div>
-        </div>
-    </div>
 
 </th:block>
 <th:block layout:fragment="scripts">
@@ -731,51 +545,14 @@
 
         document.readyState === 'complete' ? init() : window.onload = init;
 
+        // document.getElementById('search_spjangcd')를 기준으로 페이지 reload
         function init() {
+            searchCard();
+            searcGraph();
 
         }
 
-        $('#btnSave').click(function () {
-            const parent = document.getElementById('cardwrap');
 
-            const sections = Array.from(document.querySelectorAll('.section-item'));
-
-            const sectionData = [];
-
-            sections.forEach((section, index) => {
-                const dataTitle = section.getAttribute('data-title');
-                const dataid = section.getAttribute('data-id');
-                const isHidden = section.classList.contains('card-hidden');
-                const visible = !isHidden;
-
-                sectionData.push({
-                    id: dataid,
-                    orderNum: index + 1,
-                    title: dataTitle,
-                    visible: visible
-
-                });
-            });
-
-            console.log('testest', sectionData);
-
-            fetch('/api/common/Card/Save', {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-TOKEN": csrfToken
-                },
-                body: JSON.stringify(sectionData)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    Alert.alert('', '저장되었습니다.');
-                })
-                .catch(error => {
-                    Alert.alert('', '에러가 발생하였습니다.');// 에러 처리
-                });
-
-        });
     </script>
 </th:block>
 </html>

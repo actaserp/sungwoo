@@ -309,18 +309,20 @@ public class RequestService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
         String sql = """
-                select custcd,
-                        cltcd,
-                        cltnm,
-                        saupnum
-                FROM TB_XCLIENT
-                WHERE saupnum = :username
+                select xc.custcd,
+                       xc.cltcd,
+                       xc.cltnm,
+                       xc.saupnum,
+                       au.spjangcd
+                FROM TB_XCLIENT xc
+                left join auth_user au on au."username" = xc.saupnum
+                WHERE xc.saupnum = :username
                 """;
         dicParam.addValue("username", username);
         Map<String, Object> userInfo = this.sqlRunner.getRow(sql, dicParam);
         return userInfo;
     }
-    // username으로 주무의뢰 필요 데이터 가져오기
+    // username으로 주문의뢰 필요 데이터 가져오기
     public Map<String, Object> getMyInfo(String username) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
@@ -331,6 +333,7 @@ public class RequestService {
                        x.cltadres
                 FROM TB_XCLIENT x
                 WHERE saupnum = :username
+                
                 """;
         dicParam.addValue("username", username);
         Map<String, Object> userInfo = this.sqlRunner.getRow(sql, dicParam);
@@ -428,7 +431,7 @@ public class RequestService {
             """;
             dicParam.addValue("reqseq", reqseq);
             dicParam.addValue("reqnum", reqnum);
-            this.sqlRunner.queryForObject(sql, dicParam, (rs, rowNum) -> rs.getString("dtl_cd"));
+            this.sqlRunner.execute(sql, dicParam);
         } catch (Exception e) {
             e.printStackTrace();
         }
