@@ -13,6 +13,24 @@ public class DashBoardService2 {
     @Autowired
     SqlRunner sqlRunner;
 
+    // 사용자의 사업장코드 return
+    public String getSpjangcd(String username
+                            , String searchSpjangcd) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+
+        String sql = """
+                SELECT spjangcd
+                FROM auth_user
+                WHERE username = :username
+                """;
+        dicParam.addValue("username", username);
+        Map<String, Object> spjangcdMap = this.sqlRunner.getRow(sql, dicParam);
+        String userSpjangcd = (String)spjangcdMap.get("spjangcd");
+
+        String spjangcd = searchSpjangcd(searchSpjangcd, userSpjangcd);
+        return spjangcd;
+    }
+    // init에 필요한 사업장코드 반환
     public String searchSpjangcd(String searchSpjangcd, String userSpjangcd){
 
         String resultSpjangcd = "";

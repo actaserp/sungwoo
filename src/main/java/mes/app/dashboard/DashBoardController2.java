@@ -1,6 +1,5 @@
 package mes.app.dashboard;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import mes.app.dashboard.service.DashBoardService2;
 import mes.domain.entity.User;
 import mes.domain.entity.actasEntity.TB_DA006W_PK;
@@ -25,10 +24,11 @@ public class DashBoardController2 {
     @GetMapping("/LastYearCnt")
     private AjaxResult LastYearCnt(@RequestParam(value = "search_spjangcd") String search_spjangcd
                                     , Authentication auth) {
-        ObjectMapper objectMapper = new ObjectMapper();
+        // 관리자 사용가능 페이지 사업장 코드 선택 로직
         User user = (User) auth.getPrincipal();
-        String userSpjangcd = user.getSpjangcd();
-        String spjangcd = dashBoardService2.searchSpjangcd(search_spjangcd, userSpjangcd);
+        String username = user.getUsername();
+        String spjangcd = dashBoardService2.getSpjangcd(username, search_spjangcd);
+        // 사업장 코드 선택 로직 종료 반환 spjangcd 활용
 
         List<Map<String, Object>> items = this.dashBoardService2.LastYearCnt();
 
