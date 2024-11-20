@@ -13,6 +13,22 @@ public class DashBoardService2 {
     @Autowired
     SqlRunner sqlRunner;
 
+    public String searchSpjangcd(String searchSpjangcd, String userSpjangcd){
+
+        String resultSpjangcd = "";
+        switch (searchSpjangcd){
+            case "ZZ":
+                resultSpjangcd = searchSpjangcd;
+                break;
+                case "PP":
+                    resultSpjangcd= searchSpjangcd;
+                    break;
+                    default:
+                        resultSpjangcd = userSpjangcd;
+        }
+        return resultSpjangcd;
+    }
+
     // username으로 cltcd, cltnm, saupnum, custcd 가지고 오기
     public Map<String, Object> getUserInfo(String username) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();

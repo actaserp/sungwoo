@@ -551,6 +551,37 @@
             searcGraph();
 
         }
+        function searchCard(){
+            let data2 = [];
+
+            $.ajax({
+                url: '/api/dashboard2/',
+                type: 'GET',
+                data: {
+                    'search_spjangcd': $('#search_spjangcd').val()
+                },
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                }
+            })
+        }
+
+        function searcGraph(){
+            let data2 = [];
+
+            $.ajax({
+                url: '/api/dashboard2/',
+                type: 'GET',
+                data: {
+                    'search_spjangcd': $('#search_spjangcd').val()
+                },
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                }
+            })
+        }
 
 
     </script>

@@ -1,6 +1,6 @@
 package mes.app.dashboard;
 
-import mes.app.dashboard.service.DashBoardService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import mes.app.dashboard.service.DashBoardService2;
 import mes.domain.entity.User;
 import mes.domain.entity.actasEntity.TB_DA006W_PK;
@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -22,7 +23,12 @@ public class DashBoardController2 {
 
     // 작년 1월1일부터 작년오늘날자까지 상태별 건수
     @GetMapping("/LastYearCnt")
-    private AjaxResult LastYearCnt() {
+    private AjaxResult LastYearCnt(@RequestParam(value = "search_spjangcd") String search_spjangcd
+                                    , Authentication auth) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        User user = (User) auth.getPrincipal();
+        String userSpjangcd = user.getSpjangcd();
+        String spjangcd = dashBoardService2.searchSpjangcd(search_spjangcd, userSpjangcd);
 
         List<Map<String, Object>> items = this.dashBoardService2.LastYearCnt();
 
