@@ -2,7 +2,6 @@ package mes.app.dashboard;
 
 import mes.app.dashboard.service.DashBoardService2;
 import mes.domain.entity.User;
-import mes.domain.entity.actasEntity.TB_DA006W_PK;
 import mes.domain.model.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -30,76 +30,31 @@ public class DashBoardController2 {
         String spjangcd = dashBoardService2.getSpjangcd(username, search_spjangcd);
         // 사업장 코드 선택 로직 종료 반환 spjangcd 활용
 
-        List<Map<String, Object>> items = this.dashBoardService2.LastYearCnt();
+        // 작년 진행구분(ordflag)별 데이터 개수
+        List<Map<String, Object>> LastYearCnt = this.dashBoardService2.LastYearCnt(spjangcd);
+        // 올해 진행구분(ordflag)별 데이터 개수
+        List<Map<String, Object>> ThisYearCnt = this.dashBoardService2.ThisYearCnt(spjangcd);
+
+        // 올해 월별 데이터
+        List<Map<String, Object>> ThisYearCntOfMonth = this.dashBoardService2.ThisYearCntOfMonth(spjangcd);
+        // 작년 월별 데이터
+        List<Map<String, Object>> LastYearCntOfMonth = this.dashBoardService2.LastYearCntOfMonth(spjangcd);
+        // 올해 이번달 일별 데이터 개수
+        List<Map<String, Object>> ThisMonthCntOfDate = this.dashBoardService2.ThisMonthCntOfDate(spjangcd);
+        // 작년 동일 월 일별 데이터 개수
+        List<Map<String, Object>> LastMonthCntOfDate = this.dashBoardService2.LastMonthCntOfDate(spjangcd);
 
         AjaxResult result = new AjaxResult();
-        result.data = items;
-
-        return result;
-    }
-    // 올해 1월 1일부터 오늘 날짜까지의 상태별 건수
-    @GetMapping("/ThisYearCnt")
-    private AjaxResult ThisYearCnt() {
-
-        List<Map<String, Object>> items = this.dashBoardService2.ThisYearCnt();
-
-        AjaxResult result = new AjaxResult();
-        result.data = items;
-
-        return result;
-    }
-
-    // 올해 1월 1일부터 오늘 날짜까지의 월별 건수
-    @GetMapping("/ThisYearCntOfMonth")
-    private AjaxResult ThisYearCntOfMonth() {
-
-        List<Map<String, Object>> items = this.dashBoardService2.ThisYearCntOfMonth();
-
-        AjaxResult result = new AjaxResult();
-        result.data = items;
-
-        return result;
-    }
-
-    // 작년 1월 1일부터 작년 오늘 날짜까지의 월별 건수
-    @GetMapping("/LastYearCntOfMonth")
-    private AjaxResult LastYearCntOfMonth(Authentication auth) {
-        User user = (User) auth.getPrincipal();
-        String username = user.getUsername();
-        Map<String, Object> userInfo = dashBoardService2.getUserInfo(username);
-        TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
-        tbDa006WPk.setSpjangcd("ZZ");
-        tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
-
-        List<Map<String, Object>> items = this.dashBoardService2.LastYearCntOfMonth();
-
-        AjaxResult result = new AjaxResult();
+        Map<String, Object> items = new HashMap<String, Object>();
+        items.put("LastYearCnt", LastYearCnt);
+        items.put("ThisYearCnt", ThisYearCnt);
+        items.put("ThisYearCntOfMonth", ThisYearCntOfMonth);
+        items.put("LastYearCntOfMonth", LastYearCntOfMonth);
+        items.put("ThisMonthCntOfDate", ThisMonthCntOfDate);
+        items.put("LastMonthCntOfDate", LastMonthCntOfDate);
         result.data = items;
 
         return result;
     }
 
-    // 올해 당월 1일 부터 오늘까지 일별 건수
-    @GetMapping("/ThisMonthCntOfDate")
-    private AjaxResult ThisMonthCntOfDate() {
-
-        List<Map<String, Object>> items = this.dashBoardService2.ThisMonthCntOfDate();
-
-        AjaxResult result = new AjaxResult();
-        result.data = items;
-
-        return result;
-    }
-
-    // 올해 전월 1일 부터 전월 오늘 날자까지 일별 건수
-    @GetMapping("/LastMonthCntOfDate")
-    private AjaxResult LastMonthCntOfDate() {
-
-        List<Map<String, Object>> items = this.dashBoardService2.LastMonthCntOfDate();
-
-        AjaxResult result = new AjaxResult();
-        result.data = items;
-
-        return result;
-    }
 }

@@ -63,182 +63,184 @@ public class DashBoardService2 {
         return userInfo;
     }
 
-    public List<Map<String, Object>> LastYearCnt() {
-
+    // 작년 진행구분(ordflag)별 데이터 개수
+    public List<Map<String, Object>> LastYearCnt(String spjangcd) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
         String sql = """
-                   DECLARE @Today DATE = CAST(GETDATE() AS DATE);
-                DECLARE @LastYearStart DATE = DATEADD(YEAR, -1, CAST(CONCAT(YEAR(@Today), '-01-01') AS DATE));
-                DECLARE @LastYearEnd DATE = @Today;
-                DECLARE @ThisYearStart DATE = CAST(CONCAT(YEAR(@Today), '-01-01') AS DATE);
-                DECLARE @ThisYearEnd DATE = @Today;
-                
-                -- 작년 1월 1일부터 작년 오늘 날짜까지의 행 개수
-                SELECT COUNT(*) AS LastYearCount
-                FROM ERP_SWSPANEL1.dbo.TB_DA006W
-                WHERE CAST(reqdate AS DATE) BETWEEN @LastYearStart AND @LastYearEnd;
-                
-                -- 올해 1월 1일부터 오늘 날짜까지의 행 개수
-                SELECT COUNT(*) AS ThisYearCount
-                FROM ERP_SWSPANEL1.dbo.TB_DA006W
-                WHERE CAST(reqdate AS DATE) BETWEEN @ThisYearStart AND @ThisYearEnd;
-					""";
-
-        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
-
-        return items;
-    }
-
-    public List<Map<String, Object>> ThisYearCnt() {
-
-        String sql = """
-                   DECLARE @Today DATE = CAST(GETDATE() AS DATE);
-                DECLARE @LastYearStart DATE = DATEADD(YEAR, -1, CAST(CONCAT(YEAR(@Today), '-01-01') AS DATE));
-                DECLARE @LastYearEnd DATE = @Today;
-                DECLARE @ThisYearStart DATE = CAST(CONCAT(YEAR(@Today), '-01-01') AS DATE);
-                DECLARE @ThisYearEnd DATE = @Today;
-                
-                -- 작년 1월 1일부터 작년 오늘 날짜까지의 행 개수
-                SELECT COUNT(*) AS LastYearCount
-                FROM ERP_SWSPANEL1.dbo.TB_DA006W
-                WHERE CAST(reqdate AS DATE) BETWEEN @LastYearStart AND @LastYearEnd;
-                
-                -- 올해 1월 1일부터 오늘 날짜까지의 행 개수
-                SELECT COUNT(*) AS ThisYearCount
-                FROM ERP_SWSPANEL1.dbo.TB_DA006W
-                WHERE CAST(reqdate AS DATE) BETWEEN @ThisYearStart AND @ThisYearEnd;
-					""";
-
-        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
-
-        return items;
-    }
-
-    public List<Map<String, Object>> ThisYearCntOfMonth() {
-
-        String sql = """
-                   DECLARE @Today DATE = CAST(GETDATE() AS DATE);
-                              DECLARE @LastYearStart DATE = DATEADD(YEAR, -1, CAST(CONCAT(YEAR(@Today), '-01-01') AS DATE));
-                              DECLARE @ThisYearStart DATE = CAST(CONCAT(YEAR(@Today), '-01-01') AS DATE);
-                
-                              -- 작년 월별 행 개수
-                              SELECT\s
-                                  MONTH(CAST(reqdate AS DATE)) AS Month,
-                                  COUNT(*) AS LastYearCount
-                              FROM\s
-                                  ERP_SWSPANEL1.dbo.TB_DA006W
-                              WHERE\s
-                                  CAST(reqdate AS DATE) BETWEEN @LastYearStart AND @Today
-                              GROUP BY\s
-                                  MONTH(CAST(reqdate AS DATE))
-                              ORDER BY\s
-                                  Month;
-                
-                              -- 올해 월별 행 개수
-                              SELECT\s
-                                  MONTH(CAST(reqdate AS DATE)) AS Month,
-                                  COUNT(*) AS ThisYearCount
-                              FROM\s
-                                  ERP_SWSPANEL1.dbo.TB_DA006W
-                              WHERE\s
-                                  CAST(reqdate AS DATE) BETWEEN @ThisYearStart AND @Today
-                              GROUP BY\s
-                                  MONTH(CAST(reqdate AS DATE))
-                              ORDER BY\s
-                                  Month;
-					""";
-
-        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
-
-        return items;
-    }
-
-    public List<Map<String, Object>> LastYearCntOfMonth() {
-
-        String sql = """
-                   DECLARE @Today DATE = CAST(GETDATE() AS DATE);
-                              DECLARE @LastYearStart DATE = DATEADD(YEAR, -1, CAST(CONCAT(YEAR(@Today), '-01-01') AS DATE));
-                              DECLARE @ThisYearStart DATE = CAST(CONCAT(YEAR(@Today), '-01-01') AS DATE);
-                
-                              -- 작년 월별 행 개수
-                              SELECT\s
-                                  MONTH(CAST(reqdate AS DATE)) AS Month,
-                                  COUNT(*) AS LastYearCount
-                              FROM\s
-                                  ERP_SWSPANEL1.dbo.TB_DA006W
-                              WHERE\s
-                                  CAST(reqdate AS DATE) BETWEEN @LastYearStart AND @Today
-                              GROUP BY\s
-                                  MONTH(CAST(reqdate AS DATE))
-                              ORDER BY\s
-                                  Month;
-                
-                              -- 올해 월별 행 개수
-                              SELECT\s
-                                  MONTH(CAST(reqdate AS DATE)) AS Month,
-                                  COUNT(*) AS ThisYearCount
-                              FROM\s
-                                  ERP_SWSPANEL1.dbo.TB_DA006W
-                              WHERE\s
-                                  CAST(reqdate AS DATE) BETWEEN @ThisYearStart AND @Today
-                              GROUP BY\s
-                                  MONTH(CAST(reqdate AS DATE))
-                              ORDER BY\s
-                                  Month;
-					""";
-
-        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
-
-        return items;
-    }
-
-    public List<Map<String, Object>> ThisMonthCntOfDate() {
-
-        String sql = """
-                   SELECT
-                       hd.reqdate,
-                       hd.ordflag,
-                       COUNT(*) AS ordflag_count
-                   FROM
-                       TB_DA006W hd
-                   WHERE
-                       hd.custcd = @custcd
-                       AND hd.spjangcd = @spjangcd
-                       AND hd.reqdate BETWEEN FORMAT(DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1), 'yyyyMMdd')
-                                           AND FORMAT(GETDATE(), 'yyyyMMdd')
-                   GROUP BY
-                       hd.reqdate,
-                       hd.ordflag
-                   ORDER BY
-                       hd.reqdate;
-					""";
-
-        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
-
-        return items;
-    }
-
-    public List<Map<String, Object>> LastMonthCntOfDate() {
-
-        String sql = """
+            WITH DateRanges AS (
+               SELECT
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + '0101' AS PrevYearStart, -- 전년도 1월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS PrevYearEnd, -- 전년도 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + '0101' AS ThisYearStart, -- 올해 1월 1일
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS ThisYearEnd, -- 올해 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + LEFT(CONVERT(VARCHAR(8), GETDATE(), 112), 6) + '01' AS ThisMonthStart, -- 올해 당월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + LEFT(CONVERT(VARCHAR(8), GETDATE(), 112), 6) + '01' AS LastYearThisMonthStart -- 작년 당월 1일
+            )
             SELECT
-              hd.reqdate,
-              hd.ordflag,
-              COUNT(*) AS ordflag_count
-            FROM
-              TB_DA006W hd
-            WHERE
-              hd.custcd = :custcd
-              AND hd.spjangcd = :spjangcd
-              AND hd.reqdate BETWEEN FORMAT(DATEFROMPARTS(YEAR(DATEADD(MONTH, -1, GETDATE())), MONTH(DATEADD(MONTH, -1, GETDATE())), 1), 'yyyyMMdd')
-                                  AND FORMAT(EOMONTH(DATEADD(MONTH, -1, GETDATE())), 'yyyyMMdd')
-            GROUP BY
-              hd.reqdate,
-              hd.ordflag
-            ORDER BY
-              hd.reqdate;
+                   ordflag,
+                   COUNT(*) AS TotalCount
+               FROM TB_DA006W
+               CROSS JOIN DateRanges
+               WHERE
+                   LEN(reqdate) = 8 AND                        -- 8자리 문자열인지 확인
+                   reqdate LIKE '[0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]' AND -- YYYYMMDD 형식인지 확인
+                   CONVERT(DATE, reqdate, 112) BETWEEN CONVERT(DATE, PrevYearStart, 112) AND CONVERT(DATE, PrevYearEnd, 112)
+                   AND spjangcd = :spjangcd
+               GROUP BY ordflag
             """;
+        dicParam.addValue("spjangcd", spjangcd);
+        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, dicParam);
 
-        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, null);
+        return items;
+    }
+    // 올해 진행구분(ordflag)별 데이터 개수
+    public List<Map<String, Object>> ThisYearCnt(String spjangcd) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        String sql = """
+            WITH DateRanges AS (
+               SELECT
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + '0101' AS PrevYearStart, -- 전년도 1월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS PrevYearEnd, -- 전년도 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + '0101' AS ThisYearStart, -- 올해 1월 1일
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS ThisYearEnd, -- 올해 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + LEFT(CONVERT(VARCHAR(8), GETDATE(), 112), 6) + '01' AS ThisMonthStart, -- 올해 당월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + LEFT(CONVERT(VARCHAR(8), GETDATE(), 112), 6) + '01' AS LastYearThisMonthStart -- 작년 당월 1일
+            )
+            SELECT
+                   ordflag,
+                   COUNT(*) AS TotalCount
+               FROM TB_DA006W
+               CROSS JOIN DateRanges
+               WHERE
+                   LEN(reqdate) = 8 AND                        -- 8자리 문자열인지 확인
+                   reqdate LIKE '[0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]' AND -- YYYYMMDD 형식인지 확인
+                   CONVERT(DATE, reqdate, 112) BETWEEN CONVERT(DATE, ThisYearStart, 112) AND CONVERT(DATE, ThisYearEnd, 112)
+                   AND spjangcd = :spjangcd
+               GROUP BY ordflag
+            """;
+        dicParam.addValue("spjangcd", spjangcd);
+        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+        return items;
+    }
+
+    // 올해 월별 데이터
+    public List<Map<String, Object>> ThisYearCntOfMonth(String spjangcd) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        String sql = """
+           WITH DateRanges AS (
+               SELECT
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + '0101' AS PrevYearStart, -- 전년도 1월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS PrevYearEnd, -- 전년도 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + '0101' AS ThisYearStart, -- 올해 1월 1일
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS ThisYearEnd, -- 올해 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + LEFT(CONVERT(VARCHAR(8), GETDATE(), 112), 6) + '01' AS ThisMonthStart, -- 올해 당월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + LEFT(CONVERT(VARCHAR(8), GETDATE(), 112), 6) + '01' AS LastYearThisMonthStart -- 작년 당월 1일
+            )
+            SELECT
+                 FORMAT(CONVERT(DATE, reqdate, 112), 'yyyy-MM') AS Month,
+                 COUNT(*) AS TotalCount
+             FROM TB_DA006W
+             CROSS JOIN DateRanges
+             WHERE
+                 LEN(reqdate) = 8 AND
+                 reqdate LIKE '[0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]' AND
+                 CONVERT(DATE, reqdate, 112) BETWEEN CONVERT(DATE, ThisYearStart, 112) AND CONVERT(DATE, ThisYearEnd, 112)
+                 AND spjangcd = :spjangcd
+             GROUP BY FORMAT(CONVERT(DATE, reqdate, 112), 'yyyy-MM')
+           """;
+        dicParam.addValue("spjangcd", spjangcd);
+        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+        return items;
+    }
+    // 작년 월별 데이터
+    public List<Map<String, Object>> LastYearCntOfMonth(String spjangcd) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        String sql = """
+            WITH DateRanges AS (
+               SELECT
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + '0101' AS PrevYearStart, -- 전년도 1월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS PrevYearEnd, -- 전년도 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + '0101' AS ThisYearStart, -- 올해 1월 1일
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS ThisYearEnd, -- 올해 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + LEFT(CONVERT(VARCHAR(8), GETDATE(), 112), 6) + '01' AS ThisMonthStart, -- 올해 당월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + LEFT(CONVERT(VARCHAR(8), GETDATE(), 112), 6) + '01' AS LastYearThisMonthStart -- 작년 당월 1일
+            )
+            SELECT
+                FORMAT(CONVERT(DATE, reqdate, 112), 'yyyy-MM') AS Month,
+                COUNT(*) AS TotalCount
+            FROM TB_DA006W
+            CROSS JOIN DateRanges
+            WHERE
+                LEN(reqdate) = 8 AND
+                reqdate LIKE '[0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]' AND
+                CONVERT(DATE, reqdate, 112) BETWEEN CONVERT(DATE, PrevYearStart, 112) AND CONVERT(DATE, PrevYearEnd, 112)
+                AND spjangcd = :spjangcd
+            GROUP BY FORMAT(CONVERT(DATE, reqdate, 112), 'yyyy-MM')
+            """;
+        dicParam.addValue("spjangcd", spjangcd);
+        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+        return items;
+    }
+    // 올해 이번달 일별 데이터 개수
+    public List<Map<String, Object>> ThisMonthCntOfDate(String spjangcd) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        String sql = """
+            WITH DateRanges AS (
+               SELECT
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + '0101' AS PrevYearStart, -- 전년도 1월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS PrevYearEnd, -- 전년도 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + '0101' AS ThisYearStart, -- 올해 1월 1일
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS ThisYearEnd, -- 올해 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT('0' + CAST(MONTH(GETDATE()) AS VARCHAR(2)), 2) + '01' AS ThisMonthStart, -- 올해 당월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + RIGHT('0' + CAST(MONTH(GETDATE()) AS VARCHAR(2)), 2) + '01' AS LastYearThisMonthStart -- 작년 당월 1일
+            )
+            SELECT
+                CONVERT(DATE, reqdate, 112) AS Day,
+                COUNT(*) AS TotalCount
+            FROM TB_DA006W
+            CROSS JOIN DateRanges
+            WHERE
+                LEN(reqdate) = 8 AND
+                reqdate LIKE '[0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]' AND
+                CONVERT(DATE, reqdate, 112) BETWEEN CONVERT(DATE, ThisMonthStart, 112) AND CONVERT(DATE, ThisYearEnd, 112)
+                AND spjangcd = :spjangcd
+            GROUP BY CONVERT(DATE, reqdate, 112)
+            """;
+        dicParam.addValue("spjangcd", spjangcd);
+        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, dicParam);
+
+        return items;
+    }
+    // 작년 동일 월 일별 데이터 개수
+    public List<Map<String, Object>> LastMonthCntOfDate(String spjangcd) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        String sql = """
+            WITH DateRanges AS (
+               SELECT
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + '0101' AS PrevYearStart, -- 전년도 1월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS PrevYearEnd, -- 전년도 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + '0101' AS ThisYearStart, -- 올해 1월 1일
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS ThisYearEnd, -- 올해 오늘 날짜
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT('0' + CAST(MONTH(GETDATE()) AS VARCHAR(2)), 2) + '01' AS ThisMonthStart, -- 올해 당월 1일
+                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + RIGHT('0' + CAST(MONTH(GETDATE()) AS VARCHAR(2)), 2) + '01' AS LastYearThisMonthStart -- 작년 당월 1일
+            )
+            SELECT
+                CONVERT(DATE, reqdate, 112) AS Day,
+                COUNT(*) AS TotalCount
+            FROM TB_DA006W
+            CROSS JOIN DateRanges
+            WHERE
+                LEN(reqdate) = 8 AND
+                reqdate LIKE '[0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]' AND
+                CONVERT(DATE, reqdate, 112) BETWEEN CONVERT(DATE, LastYearThisMonthStart, 112) AND CONVERT(DATE, PrevYearEnd, 112)
+                AND spjangcd = :spjangcd
+            GROUP BY CONVERT(DATE, reqdate, 112);
+            """;
+        dicParam.addValue("spjangcd", spjangcd);
+        List<Map<String,Object>> items = this.sqlRunner.getRows(sql, dicParam);
 
         return items;
     }
