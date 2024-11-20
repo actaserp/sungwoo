@@ -338,9 +338,6 @@
     <div class="popup-overlay" id="popup1"></div>
     <div class="popup-wrapper" id="wrapper1">
         <div class="popup-title">
-            <!--<a class="btn" title="새로고침" style="position: absolute; left: 30px; margin-bottom: -40px;">
-                새로고침
-            </a>-->
             <h3>사용자 정보</h3>
             <a onclick="UserInfoClose()" title="팝업닫기" class="btn-popup-close">
                 <img src="/images/icon/btn-popup-close.svg" alt="닫기">
@@ -375,52 +372,51 @@
                         <tr>
                             <th>
                                 <label for="">
-                                    소속사
+                                    업체명
                                 </label>
                             </th>
                             <td>
                                 <div class="input-clear">
-
-                                    <input type="text" id="agency" name="agency" style="width: 100%" />
+                                    <input type="text" id="cltnm" name="cltnm">
                                 </div>
                             </td>
                             <th>
                                 <label for="">
-                                    소속부서
+                                    대표자
                                 </label>
                             </th>
                             <td>
                                 <div class="input-clear">
-                                    <input type="text" id="agencyDepartment" name="agencyDepartment">
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <label for="">
-                                    직급
-                                </label>
-                            </th>
-                            <td>
-                                <div class="input-clear">
-                                    <input type="text" id="level" name="level">
-                                </div>
-                            </td>
-                            <th>
-                                <label for="">
-                                    성명
-                                </label>
-                            </th>
-                            <td>
-                                <div class="input-clear">
-                                    <input type="text" class="form-control2" id="name" name="name" title="" required/>
+                                    <input type="text" id="prenm" name="prenm">
                                 </div>
                             </td>
                         </tr>
                         <tr>
                             <th>
                                 <label for="">
-                                    핸드폰
+                                    업태
+                                </label>
+                            </th>
+                            <td>
+                                <div class="input-clear">
+                                    <input type="text" id="biztypenm" name="biztypenm">
+                                </div>
+                            </td>
+                            <th>
+                                <label for="">
+                                    종목
+                                </label>
+                            </th>
+                            <td>
+                                <div class="input-clear">
+                                    <input type="text" id="bizitemnm" name="bizitemnm">
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <label for="">
+                                    전화번호
                                 </label>
                             </th>
                             <td>
@@ -428,6 +424,35 @@
                                     <input type="text" id="tel" name="tel">
                                 </div>
                             </td>
+                            <th>
+                                <label for="">
+                                    핸드폰
+                                </label>
+                            </th>
+                            <td>
+                                <div class="input-clear">
+                                    <input type="text" id="phone" name="phone">
+                                </div>
+                            </td>
+                        </tr>
+                       <!-- <tr>
+                            <th><label for="PasswordChange">비밀번호</label></th>
+                            <td>
+                                <div class="input-clear">
+                                    <input type="password" id="PasswordChange" name="PasswordChange"
+                                           autocomplete="new-password">
+                                </div>
+                            </td>
+                            <th><label for="PasswordChangeChk">비밀번호 확인</label></th>
+                            <td>
+                                <div class="input-clear">
+                                    <input type="password" id="PasswordChangeChk" name="PasswordChangeChk"
+                                           autocomplete="off">
+                                </div>
+                            </td>
+                        </tr>-->
+
+                        <tr>
                             <th>
                                 <label for="">
                                     이메일
@@ -438,14 +463,24 @@
                                     <input type="text" id="email" name="email">
                                 </div>
                             </td>
-                        </tr> 
+                        </tr>
+                        <th><label for="postno">주소</label></th>
+                        <td colspan="3">
+                            <div class="input-clear">
+                                <input type="text" id="postno" name="postno" placeholder="우편번호" onclick="sample4_execDaumPostcode()" style="width: 85px;">
+                                <input type="text" id="address1" name="address1" placeholder="도로명주소" style="width:310px" readonly>
+                                <input type="text" id="address2" name="address2" placeholder="상세주소">
+                                <span id="guide" style="color:#999;display:none"></span>
+                            </div>
+                        </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
             </form>
         </div>
         <div class="popup-button">
-            <button class="btn-navy" id="btnSaveAuth">수정</button>
+            <button class="btn-navy" id="btnSaveAuth" onclick="btnSaveAuth()">수정</button>
         </div>
     </div>
 </div> <!-- //dashboard-layout-popup end -->
@@ -470,6 +505,53 @@
 <script type="text/javascript" src="/js/yumenu.js?v=1071"></script>
 <script type="text/javascript" src="/js/yuscript.js?v=1060"></script>
 <script type="text/javascript" src="/js/ax5commUtil.js?v=1070"></script>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script>
+    var popupWindow;
+
+    function sample4_execDaumPostcode() {
+        popupWindow = window.open('', 'postcodePopup', 'width=530,height=530');
+        new daum.Postcode({
+            oncomplete: function(data) {
+                // 검색 결과 선택 시 실행할 코드
+                var roadAddr = data.roadAddress;
+                var extraRoadAddr = '';
+
+                if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                    extraRoadAddr += data.bname;
+                }
+                if (data.buildingName !== '' && data.apartment === 'Y') {
+                    extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                }
+                if (extraRoadAddr !== '') {
+                    extraRoadAddr = ' (' + extraRoadAddr + ')';
+                }
+
+                document.getElementById('postno').value = data.zonecode;
+                document.getElementById('address1').value = roadAddr;
+
+                var guideTextBox = document.getElementById("guide");
+                if (data.autoRoadAddress) {
+                    var expRoadAddr = data.autoRoadAddress + extraRoadAddr;
+                    guideTextBox.innerHTML = '(예상 도로명 주소 : ' + expRoadAddr + ')';
+                    guideTextBox.style.display = 'block';
+                } else if (data.autoJibunAddress) {
+                    var expJibunAddr = data.autoJibunAddress;
+                    guideTextBox.innerHTML = '(예상 지번 주소 : ' + expJibunAddr + ')';
+                    guideTextBox.style.display = 'block';
+                } else {
+                    guideTextBox.innerHTML = '';
+                    guideTextBox.style.display = 'none';
+                }
+
+                // 검색 완료 후 팝업 닫기
+                popupWindow.close();
+            }
+        }).embed(popupWindow.document.body);
+    }
+
+</script>
+
 <script type="text/javascript">
     let nthTabs = null;
     let default_menu = null;
@@ -726,79 +808,6 @@
 
         $('.scrollbar-inner').scrollbar();
 
-        // var parentClass = $(this).parent('li');
-        // if (!$(this).hasClass('on')) {
-        //     $('.documents a').removeClass('on');
-        //     $(this).addClass('on');
-        // }
-        // if (parentClass.attr('class') == 'documents') {
-        //     $('.gnb li').removeClass('open');
-        //     $('.gnb li > ul').slideUp(100);
-        // }
-        // if (localStorage.getItem('theme-top') === null && localStorage.getItem('theme-left') === null) {
-        //     dynamicLinkCss('/css/theme-top-mes', '/css/theme-left-mes');
-        // } else {
-        //     dynamicLinkCss(localStorage.getItem('theme-top'), localStorage.getItem('theme-left'));
-        // }
-
-        // //let _mainUrl = 'wm_dashboard_summary';
-        // let _mainUrl = default_menu;
-        // // 모바일 구분
-        // if ('B' == 'F') {
-        //     _mainUrl = '#OBJ0000000199';
-        //     $('#navbarBarMenu1').show();
-        //     $('#navbarBarMenu2').hide();
-        //     $('.menu_wrap').addClass('mobile_menu_wrap');
-        //     $('.menu_area').addClass('mobile_menu_area');
-        //     $('.con_area').addClass('mobile_con_area');
-        // } else {
-        //     $('#navbarBarMenu1').hide();
-        //     $('#navbarBarMenu2').show();
-        // }
-        //
-        // // 메뉴 자동으로 닫히게
-        // if ($(window).innerWidth() < 800) {
-        //     $('body').addClass('open');
-        //     $('.tabWrap').addClass('menu_close');
-        //     $('.con_area').addClass('open');
-        // }
-
-        // var jsmedia = window.matchMedia("screen and (max-width:799px)");
-        // jsmedia.addListener(function (e) {
-        //     if (e.matches) {
-        //         $('body').addClass('open');
-        //         $('.wrap').addClass('menu_close');
-        //         $('.con_area').addClass('open');
-        //         $('.menu_wrap').addClass('mobile_menu_wrap');
-        //         $('.menu_area').addClass('mobile_menu_area');
-        //         $('.con_area').addClass('mobile_con_area');
-        //     } else {
-        //         $('body').removeClass('open');
-        //         $('.wrap').removeClass('menu_close');
-        //         $('.con_area').removeClass('open');
-        //         $('.menu_wrap').removeClass('mobile_menu_wrap');
-        //         $('.menu_area').removeClass('mobile_menu_area');
-        //         $('.con_area').removeClass('mobile_con_area');
-        //     }
-        // });
-
-        // //$('#mainlogotitle').text("");
-        // $('#mainlogotitle').on('click', function () {
-        //     nthTabs.toggleTab(_mainUrl);
-        // });
-
-        // //menu slide(left open)
-        // $('.open_menu').click(function () {
-        //     $(this).toggleClass('menu_close');
-        //     $('.wrap').toggleClass('menu_close');
-        // });
-        // //menu slide(left open)
-        // $('.open_menu').click(function () {
-        //     $('.con_area').toggleClass('open');
-        //     $('.left_area').toggleClass('open');
-        //     $('body').toggleClass('open');
-        // });
-
         // TAB메뉴 Context Menu
         $('#tabdragdrop').on('contextmenu', 'li', function (e) {
             if ($(this).attr('not-allow-close') === undefined) {
@@ -857,54 +866,6 @@
         //     $('#notify_text').text(notify_text);
         //     notify_index++;
         // }, 5000);
-
-        // 내정보 클릭
-        $('#myinfo').on('click', function (e) {
-            e.preventDefault();
-            Ax5Modal.open({url: '/page/account/myinfo'});
-            $(".profile_contbox").hide();
-        });
-
-        $('#myinfo').on('click', function(e) {
-            e.preventDefault();
-            // 사용자 정보를 불러오는 AJAX 요청
-            $.ajax({
-                url: 'account/myinfo', // 데이터를 가져올 URL
-                type: 'GET',
-                success: function(data) {
-                    console.log('내정보 data : ', data);
-                    $('.dashboard-layout-popup').html(data); // 응답 데이터를 팝업 본문에 삽입
-                },
-                error: function(error) {
-                    console.log('정보를 불러오는데 실패했습니다.', error);
-                }
-            });
-        });
-
-        // 언어설정
-        // $('#myLanguage').on('click', function (e) {
-        //     e.preventDefault();
-        //     Ax5Modal.open({url: '/page/account/language', width: 400, height: 200});
-        //     $(".profile_contbox").hide();
-        // });
-
-        // 테마변경
-        // $('.setting-color > label').on('click', function (e) {
-        //     dynamicLinkCss($(this).data('load-top-css'), $(this).data('load-left-css'));
-        // });
-
-        // 개인정보 처리방침 클릭
-        // $('#link_privatepolicy').on('click', function (e) {
-        //     Ax5Modal.open({url: '/page/popup/privacy_policy', width: 800, height: 200});
-        // });
-
-        // 이메일 무단수집 거부 클릭
-        // $('#link_emailreject').on('click', function (e) {
-        //     Ax5Modal.open({url: '/page/popup/email_unauthorized_collection_policy', width: 800, height: 400});
-        // });
-
-        // 오픈소스 사용공지 필요
-
 
     });
 </script>
@@ -1023,10 +984,10 @@
         }
     }
 
-
+    //내정보 클릭 함수
     function UserInfo() {
-        let popup = document.getElementById('popup1');
-        let wrapper = document.getElementById('wrapper1');
+        const popup = document.getElementById('popup1');
+        const wrapper = document.getElementById('wrapper1');
 
         $.ajax({
             url: '/account/myinfo', // 사용자 정보를 가져올 URL
@@ -1035,9 +996,19 @@
             success: function (response) {
                 // AJAX 호출 성공 시 처리할 로직
                 if (response && response.data) {
-                    $('#login_id').val(response.data.login_id); // ID 필드 채우기
-                    $('#name').val(response.data.name); // 이름 필드 채우기
-                    $('#email').val(response.data.email);
+                    // 응답 데이터를 폼 필드에 채우기
+                    $('#login_id').val(response.data.login_id || ''); // ID
+                    $('#prenm').val(response.data.prenm || ''); // 대표자 이름
+                    $('#email').val(response.data.email || ''); // 이메일
+                    $('#cltnm').val(response.data.cltnm || ''); // 업체명
+                    $('#biztypenm').val(response.data.biztypenm || ''); // 업태
+                    $('#bizitemnm').val(response.data.bizitemnm || ''); // 종목
+                  /*  $('#PasswordChange').val(response.data.PasswordChange || '');*/
+                    $('#tel').val(response.data.tel || ''); // 전화번호
+                    $('#phone').val(response.data.phone || ''); // 핸드폰
+                    $('#postno').val(response.data.postno || ''); // 우편번호
+                    $('#address1').val(response.data.address1 || ''); // 도로명 주소
+                    $('#address2').val(response.data.address2 || ''); // 상세 주소
                 }
                 console.log('사용자 정보 가져오기 성공: ', response);
             },
@@ -1047,6 +1018,7 @@
             }
         });
 
+        // 팝업 표시
         popup.style.display = 'block';
         wrapper.style.display = 'block';
     }
@@ -1058,6 +1030,91 @@
         popup.style.display = 'none';
         wrapper.style.display = 'none';
     }
+    function btnSaveAuth() {
+        const csrfToken = $('input[name="_csrf"]').val(); // CSRF 토큰이 input hidden 필드에 있는 경우
+
+        // 필요한 데이터를 가져오기
+        const data = {
+            login_id: $('#login_id').val().trim(),
+            prenm: $('#prenm').val().trim(),
+            email: $('#email').val().trim(),
+            cltnm: $('#cltnm').val().trim(),
+            biztypenm: $('#biztypenm').val().trim(),
+            bizitemnm: $('#bizitemnm').val().trim(),
+            tel: $('#tel').val().trim(),
+            phone: $('#phone').val().trim(),
+            postno: $('#postno').val().trim(),
+            address1: $('#address1').val().trim(),
+            address2: $('#address2').val().trim(),
+        };
+        console.log("가져온 데이터:", JSON.stringify(data, null, 2));
+
+        // 서버로 데이터 전송
+        $.ajax({
+            url: '/account/updateUserInfo',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(data),
+            headers: {
+                'X-CSRF-TOKEN': csrfToken // CSRF 토큰 추가
+            },
+            success: function (response) {
+                if (response.success) {
+                    Alert.alert('', '정보가 성공적으로 수정되었습니다.', function () {
+                        UserInfoClose(); // 팝업 닫기
+                        location.reload(); // 페이지 새로고침
+                    });
+                } else {
+                    Alert.alert('', response.message || '정보 수정에 실패했습니다.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('정보 수정 중 오류 발생: ', error);
+                Alert.alert('', '서버와의 통신 중 오류가 발생했습니다.');
+            }
+        });
+    }
+    function changePassword() {
+        const name = $('#name').val().trim();
+        const loginPwd = $('#PasswordChange').val().trim();
+        const loginPwd2 = $('#PasswordChangeChk').val().trim();
+
+        if (!name) {
+            alert('이름을 입력해주세요.');
+            return;
+        }
+        if (!loginPwd || !loginPwd2) {
+            alert('비밀번호를 모두 입력해주세요.');
+            return;
+        }
+        if (loginPwd !== loginPwd2) {
+            alert('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+            return;
+        }
+
+        const data = { name, loginPwd, loginPwd2 };
+
+        $.ajax({
+            url: '/account/myinfo/password_change',
+            type: 'POST',
+            contentType: 'application/x-www-form-urlencoded',
+            data: data,
+            success: function (response) {
+                if (response.success) {
+                    alert(response.message);
+                    location.reload(); // 페이지 새로고침
+                } else {
+                    alert(response.message);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('비밀번호 변경 중 오류 발생: ', error);
+                alert('서버와의 통신 중 오류가 발생했습니다.');
+            }
+        });
+    }
+
+
 
 
     function initializeSelect({

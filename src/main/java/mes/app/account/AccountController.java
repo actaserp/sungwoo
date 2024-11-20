@@ -29,8 +29,9 @@ import mes.domain.repository.*;
 import mes.domain.repository.actasRepository.TB_XA012Repository;
 import mes.domain.repository.actasRepository.TB_XClientRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -41,10 +42,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
 import mes.domain.model.AjaxResult;
@@ -80,7 +78,6 @@ public class AccountController {
 	TB_XClientRepository tbXClientRepository;
 	@Autowired
 	JdbcTemplate jdbcTemplate;
-
 
 	@Resource(name="authenticationManager")
 	private AuthenticationManager authManager;
@@ -182,9 +179,7 @@ public class AccountController {
 		User user = (User)auth.getPrincipal();
 		AjaxResult result = new AjaxResult();
 
-		Map<String, Object> dicData = new HashMap<String, Object>();
-		dicData.put("login_id", user.getUsername());	//id
-		dicData.put("name", user.getUserProfile().getName());	//이름
+		Map<String, Object> dicData = userService.getUserInfo(user.getUsername());
 		result.data = dicData;
 		return result;
 	}
@@ -217,10 +212,12 @@ public class AccountController {
 		this.userRepository.save(user);
 
 		String sql = """
-        	update user_profile set 
-        	"Name"=:name, _modified = now(), _modifier_id=:id 
-        	where id=:id 
-        """;
+			UPDATE user_profile
+			SET Name = :name,
+				_modified = GETDATE(), 
+				_modifier_id = :id
+			WHERE id = :id
+		""";
 
 		MapSqlParameterSource dicParam = new MapSqlParameterSource();
 		dicParam.addValue("name", name);
@@ -319,7 +316,7 @@ public class AccountController {
 					return result;
 				}
 
-				String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " | " + address2 : "");
+				String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " " + address2 : "");
 
 				// TB_XCLIENT 저장
 				String maxCltcd = tbXClientRepository.findMaxCltcd(); // 최대 cltcd 조회
@@ -381,24 +378,101 @@ public class AccountController {
 		// 새로운 cltcd 생성: "SW" 접두사와 5자리 숫자로 포맷
 		return String.format("SW%05d", newNumber);
 	}
-
-	/*@PostMapping("/user-auth/searchAccount")
-	public AjaxResult IdSearch(@RequestParam("usernm") final String usernm,
-							   @RequestParam("mail") final String mail){
-
+	
+	@PostMapping("/account/updateUserInfo")
+	@Transactional
+	public AjaxResult updateUserInfo(@RequestBody Map<String, Object> userData) {
+		System.out.println("받은 사용자 정보: " + userData);
 		AjaxResult result = new AjaxResult();
 
-		List<String> user = userRepository.findByFirstNameAndEmailNative(usernm, mail);
+		try {
+			// 필수값 검증
+			if (!userData.containsKey("login_id") || userData.get("login_id") == null) {
+				result.success = false;
+				result.message = "ID가 누락되었습니다.";
+				return result;
+			}
 
-		if(!user.isEmpty()){
+			// 사용자 정보 업데이트 처리
+			String loginId = userData.get("login_id").toString();
+			Optional<User> userOptional = userRepository.findByUsername(loginId);
+
+			if (userOptional.isPresent()) {
+				User user = userOptional.get();
+
+				// 사용자 정보 업데이트
+				if (user.getUserProfile() != null) {
+					user.getUserProfile().setName(userData.getOrDefault("prenm", "").toString());
+				}
+				user.setEmail(userData.getOrDefault("email", "").toString());
+				user.setPhone(userData.getOrDefault("phone", "").toString());
+				user.setTel(userData.getOrDefault("tel", "").toString());
+
+				// 저장
+				userRepository.save(user);
+			} else {
+				result.success = false;
+				result.message = "사용자를 찾을 수 없습니다.";
+				return result;
+			}
+
+			// TB_XCLIENT 정보 업데이트
+			Optional<TB_XCLIENT> clientOptional = tbXClientRepository.findBySaupnum(loginId);
+			if (clientOptional.isPresent()) {
+				TB_XCLIENT client = clientOptional.get();
+
+				client.setCltnm(userData.getOrDefault("cltnm", "").toString());
+				client.setBiztypenm(userData.getOrDefault("biztypenm", "").toString());
+				client.setBizitemnm(userData.getOrDefault("bizitemnm", "").toString());
+				client.setZipcd(userData.getOrDefault("postno", "").toString());
+
+				// 주소 병합
+				String address1 = userData.getOrDefault("address1", "").toString();
+				String address2 = userData.getOrDefault("address2", "").toString();
+				String fullAddress = address1 + (address2.isEmpty() ? "" : " | " + address2);
+				client.setCltadres(fullAddress);
+				// 저장
+				tbXClientRepository.save(client);
+			}
+
+			if (userData.containsKey("User_id") && userData.containsKey("Name")) {
+				String userId = userData.get("User_id").toString();
+				String name = userData.get("Name").toString();
+
+				String updateSql = """
+                UPDATE user_profile
+                SET 
+                    Name = :name,
+                    _modified = GETDATE()
+                WHERE User_id = :userId;
+            """;
+
+				MapSqlParameterSource params = new MapSqlParameterSource();
+				params.addValue("name", name);
+				params.addValue("userId", userId);
+
+				int rowsAffected = executeUpdate(updateSql, params);
+				System.out.println("업데이트된 행 수: " + rowsAffected);
+			}
+
 			result.success = true;
-			result.data = user;
-		}else {
+			result.message = "사용자 정보가 성공적으로 업데이트되었습니다.";
+		} catch (Exception e) {
 			result.success = false;
-			result.message = "해당 사용자가 존재하지 않습니다.";
+			result.message = "정보 업데이트 중 오류가 발생했습니다.";
+			e.printStackTrace();
 		}
+
 		return result;
-	}*/
+	}
+	public int executeUpdate(String sql, MapSqlParameterSource params) {
+		try {
+			return jdbcTemplate.update(sql, params);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return 0; // 실패 시 0 반환
+		}
+	}
 
 	@PostMapping("/user-auth/searchAccount")
 	public AjaxResult IdSearch(@RequestParam("usernm") final String usernm,

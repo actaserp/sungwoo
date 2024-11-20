@@ -1,13 +1,16 @@
 package mes.app.system.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import mes.domain.entity.User;
 import mes.domain.entity.UserGroup;
+import mes.domain.entity.actasEntity.TB_XCLIENT;
 import mes.domain.repository.UserGroupRepository;
 import mes.domain.repository.UserRepository;
+import mes.domain.repository.actasRepository.TB_XClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
@@ -26,6 +29,8 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private UserGroupRepository userGroupRepository;
+    @Autowired
+    TB_XClientRepository tbXClientRepository;
 
     // 사용자 리스트
     public List<Map<String, Object>> getUserList(boolean superUser, String cltnm, String prenm, String biztypenm, String bizitemnm, String email) {
@@ -305,4 +310,60 @@ public class UserService {
     public boolean isUserIdExists(String userid) {
         return userRepository.existsByUsername(userid); // username 컬럼 확인
     }
+
+    // 내정보리스트
+    public Map<String, Object> getUserInfo(String username) {
+
+        Map<String, Object> userInfo = new HashMap<>();
+
+        // 사용자 정보 조회
+        Optional<User> user = userRepository.findByUsername(username);
+        if (user.isPresent()) {
+            userInfo.put("login_id", user.get().getUsername());
+            userInfo.put("prenm", user.get().getUserProfile().getName());
+            userInfo.put("email", user.get().getEmail());
+            userInfo.put("phone", user.get().getPhone());
+            userInfo.put("tel", user.get().getTel());
+            userInfo.put("PasswordChange", user.get().getPassword());
+        }
+
+        // TB_XCLIENT 정보 조회
+        Optional<TB_XCLIENT> client = tbXClientRepository.findBySaupnum(username);
+        if (client.isPresent()) {
+            TB_XCLIENT clientData = client.get();
+            userInfo.put("cltnm", clientData.getCltnm()); // 업체명
+            userInfo.put("biztypenm", clientData.getBiztypenm()); // 업태
+            userInfo.put("bizitemnm", clientData.getBizitemnm()); // 종목
+            userInfo.put("postno", clientData.getZipcd()); // 우편번호
+            // 주소 분리 및 추가
+            String fullAddress = clientData.getCltadres(); // fullAddress에 전체 주소 저장
+            Map<String, String> addressParts = splitAddress(fullAddress); // 주소 분리
+            userInfo.put("address1", addressParts.get("address1"));
+            userInfo.put("address2", addressParts.get("address2"));
+        }
+
+        return userInfo;
+    }
+
+    public Map<String, String> splitAddress(String fullAddress) {
+        Map<String, String> addressParts = new HashMap<>();
+        if (fullAddress != null && !fullAddress.isEmpty()) {
+            int delimiterIndex = fullAddress.indexOf(" | "); // ' | ' 위치 찾기
+            if (delimiterIndex != -1) {
+                // ' | '를 기준으로 주소 분리
+                addressParts.put("address1", fullAddress.substring(0, delimiterIndex).trim());
+                addressParts.put("address2", fullAddress.substring(delimiterIndex + 3).trim());
+            } else {
+                // ' | '가 없으면 전체를 address1로 간주
+                addressParts.put("address1", fullAddress.trim());
+                addressParts.put("address2", "");
+            }
+        } else {
+            // fullAddress가 비어있을 경우 기본값 설정
+            addressParts.put("address1", "");
+            addressParts.put("address2", "");
+        }
+        return addressParts;
+    }
+
 }
