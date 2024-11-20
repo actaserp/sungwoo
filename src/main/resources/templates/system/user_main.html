@@ -154,6 +154,9 @@
                                         <input type="text" id="userid" name="userid" class="wp100" maxlength="50"
                                                placeholder="사업자 번호" style="width: 400px !important;" readonly>
                                         <input type="hidden" id="id" name="id"/>
+                                        <div style="text-align:left; ">
+                                         <span id="userid-check-message" style="color: red; display: none; ">중복된 코드입니다.</span>
+                                        </div>
                                     </div>
                                 </td>
                                 <th>
@@ -174,7 +177,10 @@
                                 </th>
                                 <td>
                                     <select id="authType" name="authType" class="wp30">
-                                        <option></option>
+                                        <option value="">선택하세요</option>
+                                        <option value="1">시스템관리자</option>
+                                        <option value="14">주문 담당자</option>
+                                        <option value="35">일반거래처</option>
                                     </select>
                                 </td>
                                 <th><label for="is_active">사용여부</label></th>
@@ -472,6 +478,7 @@
                         {binding: 'tel', header: '전화번호', width: '*', align: 'center', visible: false},
                         {binding: 'Phone', header: '핸드폰', width: '*', align: 'center', visible: true},
                         {binding: 'email', header: '이메일', width: '*', align: 'center', visible: false},
+                        {binding: 'is_active', header: '활성화', width: '*', align: 'center', isReadOnly: false,},
                         {binding: 'date_joined', header: '생성일', width: '*', align: 'center', isReadOnly: true},
                     ],
                     itemsSource: viewdata,
@@ -691,12 +698,39 @@
             // 체크박스 초기화 (체크 해제)
             const isActiveCheckbox = document.getElementById('is_active');
             if (isActiveCheckbox) {
-                isActiveCheckbox.checked = false;
+                isActiveCheckbox.checked = true;
             }
+
+            const selectAuthType = document.getElementById('authType');
+            if (selectAuthType) {
+                selectAuthType.value = '35'; //일반거래처
+            }
+
             $('#userid').prop('readonly', false);
 
             $('.new-fl-ac').remove();
         }
+
+        function initializeSelect2({
+                                       url,               // API 엔드포인트 URL
+                                       params = {},       // 요청 매개변수 (기본값은 빈 객체)
+                                       elementId,         // 셀렉트 요소의 ID
+                                       defaultOption = "선택하세요",  // 기본 옵션 텍스트
+                                       valueField = "code",    // 데이터의 값 필드 이름
+                                       textField = "value"     // 데이터의 표시 필드 이름
+                                   }) {
+            $.get(url, params, function(data){
+                console.log('확인: ', data);
+                let selectElement = $(`#${elementId}`);
+                selectElement.empty();
+                selectElement.append(`<option value="">${defaultOption}</option>`);
+                // 동적으로 옵션 추가
+                data.forEach(function(item) {
+                    selectElement.append(`<option value="${item[valueField]}">${item[textField]}</option>`);
+                });
+            });
+        }
+
 
         $(document).ready(function (e) {
 
@@ -708,6 +742,7 @@
                 valueField: "id",
                 textField: "name"
             })
+
             initializeSelect({
                 url: '/user-auth/type',
                 params: {},
@@ -722,10 +757,53 @@
                 elementId: 'agencycd',
                 valueField: "id"
             })
+            initializeSelect2({
+                url: '/user-auth/type',
+                params: {},
+                elementId: 'authType',
+                valueField: "id",
+                textField: "name"
+            })
+
+            initializeSelect2({
+                url: '/user-codes/parent',
+                params: {parentId: 154},
+                elementId: 'agencycd',
+                valueField: "id"
+            })
+
+
+
+            $('#userid').on('input', function () {
+                let userid = $(this).val();
+                if (userid) {
+                    checkUserId(userid);
+                } else {
+                    $('#userid-check-message').hide();
+                }
+            });
         });
 
+        function checkUserId(userid) {
+            $.ajax({
+                url: '/api/system/user/checkUserId',
+                type: 'GET',
+                data: {userid: userid},
+                success: function (response) {
+                    if (response.exists) {
+                        $('#userid-check-message').text('중복된 아이디 입니다.').show();
+                    } else {
+                        $('#userid-check-message').hide();
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error('중복 체크 오류:', textStatus, errorThrown);
+                }
+            });
+        }
+
         // 저장
-        $('#btnSave').click(function (e) {
+        /*$('#btnSave').click(function (e) {
             Alert.confirm('', '저장을 하시겠습니까?', function () {
                 let formData = new FormData();
 
@@ -760,12 +838,23 @@
                 // 비밀번호 설정 로직
                 let saupnumValue = $('#saupnum').val() || ''; // 사업자번호 필드의 값을 가져옴
                 let password;
-                if (userid === "admin") {
+                /!*if (userid === "admin") {
                     password = userid; // 아이디가 "admin"일 경우 아이디를 비밀번호로 설정
                 } else {
                     password = saupnumValue.slice(-5); // 그 외의 경우 사업자 번호의 뒤 5자리를 비밀번호로 설정
+                }*!/
+                if (authType === "35") {
+                    // 일반거래처일 경우 사업자번호를 아이디로 사용
+                    userid = $('#saupnum').val() || ''; // 사업자번호 필드 값
+                    password = saupnumValue.slice(-5); // 사업자번호의 뒤 5자리 비밀번호
+                } else {
+                    // 다른 경우 사용자로부터 입력받은 텍스트 값을 아이디로 사용
+                    userid = $('#userid').val() || ''; // 아이디 필드 값
+                    password = "12345"; // 고정된 비밀번호
                 }
                 formData.append("password", password);
+
+
 
                 // 서버로 formData 전송
                 $.ajax({
@@ -787,7 +876,68 @@
                     }
                 });
             });
-        });//저장
+        });*///저장
+
+        // 저장
+        $('#btnSave').click(function (e) {
+            Alert.confirm('', '저장을 하시겠습니까?', function () {
+                let formData = new FormData();
+
+                // 입력 필드 값을 formData에 추가
+                formData.append("cltnm", $('#cltnm').val() || '');
+                formData.append("prenm", $('#prenm').val() || '');
+                formData.append("biztypenm", $('#biztypenm').val() || '');
+                formData.append("bizitemnm", $('#bizitemnm').val() || '');
+                formData.append("tel", $('#tel').val() || '');
+                formData.append("Phone", $('#Phone').val() || '');
+                formData.append("userid", $('#userid').val() || '');
+                formData.append("UserGroup_id", $('#authType').val() || '');
+                formData.append("id", $('#id').val().trim());
+                formData.append("email", $('#email').val() || '');
+                formData.append("authType", $('#authType').val() || '');
+                formData.append("agencycd", $('#agencycd').val() || '');
+                formData.append('_csrf', $('[name=_csrf]').val());
+                formData.append("postno", $('#postno').val() || '');
+                formData.append("address1", $('#address1').val() || '');
+                formData.append("address2", $('#address2').val() || '');
+
+                // 체크박스 값 추가
+                const isActiveCheckbox = document.getElementById("is_active");
+                formData.append("is_active", isActiveCheckbox ? isActiveCheckbox.checked : false);
+
+                // 비밀번호 설정만 처리
+                let authType = $('#authType').val();
+                let saupnumValue = $('#saupnum').val(); // 사업자번호
+                let password;
+
+                if (authType === "35") {
+                    password = saupnumValue.slice(-5); // 사업자번호 뒤 5자리 비밀번호
+                } else {
+                    password = "12345"; // 기본 비밀번호
+                }
+
+                formData.append("password", password); // 비밀번호만 추가
+
+                // 서버로 데이터 전송
+                $.ajax({
+                    url: '/api/system/user/save',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: { 'X-CSRF-TOKEN': csrfToken },
+                    success: function (response) {
+                        console.log("저장 성공:", response);
+                        fetchListData(); // 목록 갱신
+                        clearForm(); // 폼 초기화
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("저장 실패:", error);
+                        Alert.alert('', "저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+                    }
+                });
+            });
+        });
 
         // 삭제 버튼 클릭 이벤트
         $('#btnDelete').click(function () {
@@ -807,13 +957,13 @@
             }
 
             let delList = SelectItemPush(selectedItems, 'id');
-            let del940List = SelectItemPush(selectedItems, 'login_id');
+            let deltbXClientList = SelectItemPush(selectedItems, 'login_id');
 
             Alert.confirm('', '삭제하시겠습니까?', function () {
                 // 데이터 객체를 URL 인코딩 형식으로 구성
                 let data = {
                     'id': delList[0],         // delList 배열의 첫 번째 항목만 전송
-                    'username': del940List[0], // del940List 배열의 첫 번째 항목만 전송
+                    'username': deltbXClientList[0], // deltbXClientList 배열의 첫 번째 항목만 전송
                     '_csrf': csrfToken,
                     'auth': auth
                 };

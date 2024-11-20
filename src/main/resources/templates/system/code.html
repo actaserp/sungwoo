@@ -194,7 +194,7 @@
                                             <tr>
                                                 <th><label for="status">사용여부</label></th>
                                                 <td style="text-align: center; vertical-align: middle;">
-                                                    <input type="checkbox" id="status" naem="status" >
+                                                    <input type="checkbox" id="status" naem="status" checked>
                                                 </td>
                                             </tr>
 
@@ -282,12 +282,18 @@
             /*   { binding: 'adescription', header: '설명', align: 'left', width: '*' }*/
         ];
 
+
         document.readyState === 'complete' ? init() : window.onload = init;
 
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
 
         let selectedRowIndex = null;  // 선택된 행 인덱스 저장
         let selectedColumnIndex = null;  // 선택된 열 인덱스 저장
+        document.addEventListener('DOMContentLoaded', function () {
+            // 특정 조건에 따라 활성화 상태를 설정
+            let isActive = true; // 조건을 기반으로 값을 설정
+            document.getElementById('status').checked = isActive;
+        });
 
         function init() {
             let data2 = [];
@@ -385,7 +391,7 @@
                         $('#name').val('');
                         $('#description').val('');
                         $('#parent_name').val('');
-                        $('#status').prop('checked', false); // A 그룹 체크박스 초기화
+                        $('#status').prop('checked', true); // A 그룹 체크박스 초기화
                     }
 
                     // 선택한 셀의 정보 출력
@@ -410,7 +416,7 @@
 
             $('#btnSave').click(saveCode);   // 등록 버튼 클릭 이벤트 핸들러 등록
 
-            $('#btnDelete').click(deleteCode);  //삭제 버튼 클릭 이벤트 헨들러 함수
+            $('#btnDelete').click(deleteCode);
 
             $('#btnSearch').click(searchDataBind); // 검색 버튼 클릭 이벤트 핸들러 등록
 
@@ -549,12 +555,15 @@
 
             // 체크박스 상태 업데이트
             if (formattedData.length > 0) {
-                $('#status').prop('checked', formattedData[0].Astatus === 'y');
-                $('#b_status').prop('checked', formattedData[0].Bstatus === 'y');
-                $('#c_status').prop('checked', formattedData[0].Cstatus === 'y');
+                // 첫 번째 항목의 상태를 체크박스에 반영
+                $('#status').prop('checked', formattedData[0].a_status === 'y');
+                $('#b_status').prop('checked', formattedData[0].b_status === 'y');
+                $('#c_status').prop('checked', formattedData[0].c_status === 'y');
             }
         }
-        
+
+
+
         function deleteCode() {
             // 그리드에서 선택된 항목과 열 정보를 가져옵니다
             var selectedRow = theGrid.selection.row;
@@ -564,12 +573,12 @@
             var selectedItem = theGrid.rows[selectedRow]?.dataItem;
 
             if (!selectedItem) {
-                Alert.alert('', '선택된 항목이 없습니다.');
+                alert('선택된 항목이 없습니다.');
                 return;
             }
 
             if (selectedColumn === null || selectedColumn === undefined) {
-                Alert.alert('', '선택된 열이 없습니다.');
+                alert('선택된 열이 없습니다.');
                 console.error('Invalid column index:', selectedColumn);
                 return;
             }
@@ -577,7 +586,7 @@
             var column = theGrid.columns[selectedColumn];
 
             if (!column) {
-                Alert.alert('', '유효한 열이 아닙니다. 선택된 열이 없는 것 같습니다.');
+                alert('유효한 열이 아닙니다. 선택된 열이 없는 것 같습니다.');
                 console.error('Invalid column:', column);
                 return;
             }
@@ -605,7 +614,7 @@
                     value = selectedItem.cgroupnm;
                     break;
                 default:
-                    Alert.alert('','알 수 없는 바인딩입니다: ' + cellBinding); // 바인딩 이름을 출력
+                    alert('알 수 없는 바인딩입니다: ' + cellBinding); // 바인딩 이름을 출력
                     return;
             }
 
@@ -638,7 +647,7 @@
                 success: function (res) {
                     // 삭제 성공 시 사용자에게 알림 표시 후 그리드 갱신
                     if (res.success) {
-                        Alert.alert('','삭제되었습니다.');
+                        alert('삭제되었습니다.');
                         searchDataBind(); // 데이터 삭제 후 그리드를 새로 고침
 
                         // 입력 필드 초기화
@@ -649,7 +658,7 @@
                         theGrid.selection = new wijmo.grid.CellRange(-1, -1, -1, -1); // 모든 셀의 선택을 해제
 
                     } else {
-                        Alert.alert('',res.message);  // 오류 발생 시 사용자에게 알림 표시
+                        alert(res.message);  // 오류 발생 시 사용자에게 알림 표시
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {

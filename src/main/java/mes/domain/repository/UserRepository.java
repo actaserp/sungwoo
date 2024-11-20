@@ -41,4 +41,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	// 사업자 번호와 대표자 이름으로 사용자 검색
 	@Query(value = "SELECT username FROM auth_user WHERE first_name = :firstName AND username = :userid1", nativeQuery = true)
 	List<String> findByFirstNameAndBusinessNumberNative(@Param("firstName") String firstName, @Param("userid1") String userid1);
+
+	boolean existsByUsername(String username);
 }

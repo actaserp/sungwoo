@@ -84,14 +84,14 @@
 
                                     <dd>
                                         <div class="srch-box" style="margin-top: 20px">
-                                        읽기<input type="checkbox" id="AllcheckRead">
+                                            읽기<input type="checkbox" id="AllcheckRead">
                                         </div>
                                     </dd>
                                 </dl>
                                 <dl>
                                     <dd>
                                         <div class="srch-box" style="margin-top: 20px;">
-                                        쓰기<input type="checkbox" id="AllcheckWrite" >
+                                            쓰기<input type="checkbox" id="AllcheckWrite" >
                                         </div>
                                     </dd>
                                 </dl>
@@ -268,6 +268,23 @@
         AjaxUtil.fillSelectOptions($('#cboUserGroup'), 'user_group', '', '');
         AjaxUtil.fillSelectOptions($('#cboMenuFolder'), 'menu_folder', 'all', '');
 
+
+        // _this.grid 와 _this.grid.itemSource의 Object의 데이터를 출력하는 코드
+        // // _this.grid의 속성을 개별적으로 출력
+        // for (let prop in _this.grid) {
+        //     if (_this.grid.hasOwnProperty(prop)) {
+        //         console.log(`this.grid[${prop}]:`, _this.grid[prop]);
+        //     }
+        // }
+        //
+        // // _this.grid.itemsSource의 속성을 개별적으로 출력
+        // for (let prop in _this.grid.itemsSource) {
+        //     if (_this.grid.itemsSource.hasOwnProperty(prop)) {
+        //         console.log(`this.grid.itemsSource[${prop}]:`, _this.grid.itemsSource[prop]);
+        //     }
+        // }
+
+
         //검색
         function searchData() {
             let group_id = $('#cboUserGroup').val();
@@ -332,11 +349,11 @@
             theGrid.autoGenerateColumns = false;
 
             var columns = [
-                    {binding: 'name',header: '코드명',width: 250,align: 'center',},
-                    {binding: 'r',header: '읽기',width: 200,align: 'center',dataType: wijmo.DataType.Boolean,isReadOnly: false,},
-                    {binding: 'w',header: '쓰기',width: 200,align: 'center',dataType: wijmo.DataType.Boolean,isReadOnly: false,},
-                    {binding: '', header: '', width: "*", align: 'center'},
-                ];
+                {binding: 'name',header: '코드명',width: 250,align: 'center',},
+                {binding: 'r',header: '읽기',width: 200,align: 'center',dataType: wijmo.DataType.Boolean,isReadOnly: false,},
+                {binding: 'w',header: '쓰기',width: 200,align: 'center',dataType: wijmo.DataType.Boolean,isReadOnly: false,},
+                {binding: '', header: '', width: "*", align: 'center'},
+            ];
 
 
             columns.forEach(colDef => {
@@ -415,11 +432,7 @@
             // 값이 변경되었을 때 searchData 함수를 호출
             searchData();
         });
-
-
         $(document).ready(function (e){
-
-
         });
 
     </script>

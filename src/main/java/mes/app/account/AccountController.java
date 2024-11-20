@@ -183,8 +183,8 @@ public class AccountController {
 		AjaxResult result = new AjaxResult();
 
 		Map<String, Object> dicData = new HashMap<String, Object>();
-		dicData.put("login_id", user.getUsername());
-		dicData.put("name", user.getUserProfile().getName());
+		dicData.put("login_id", user.getUsername());	//id
+		dicData.put("name", user.getUserProfile().getName());	//이름
 		result.data = dicData;
 		return result;
 	}
@@ -226,8 +226,6 @@ public class AccountController {
 		dicParam.addValue("name", name);
 		dicParam.addValue("id", user.getId());
 		this.sqlRunner.execute(sql, dicParam);
-
-
 		return result;
 	}
 
@@ -293,9 +291,8 @@ public class AccountController {
 						.date_joined(new Timestamp(System.currentTimeMillis()))
 						.superUser(false)
 						.phone(phone)
-
+						.spjangcd("ZZ")
 						.build();
-
 
 				userService.save(user); // User 저장
 
@@ -306,7 +303,7 @@ public class AccountController {
 						new Timestamp(System.currentTimeMillis()), // 현재 시간
 						"ko-KR", // lang_code (예: 한국어)
 						prenm, // Name (사용자 이름)
-						1 ,// UserGroup_id (저장할 사용자 그룹 ID: 1)
+						35 ,// UserGroup_id (일반거래처)
 						user.getId() // User_id
 				);
 				jdbcTemplate.execute("SET IDENTITY_INSERT user_profile OFF");

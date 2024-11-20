@@ -301,4 +301,8 @@ public class UserService {
         // 쿼리 실행 및 결과 반환
         return sqlRunner.getRows(sql, params);
     }
+
+    public boolean isUserIdExists(String userid) {
+        return userRepository.existsByUsername(userid); // username 컬럼 확인
+    }
 }

@@ -84,6 +84,8 @@ public class User implements Serializable {
 	@Column(name = "divinm")
 	String divinm;
 
+	@Column(name = "spjangcd")
+	String spjangcd;	//사업장 코드
 
 	@JsonManagedReference
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL)

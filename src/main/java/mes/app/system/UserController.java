@@ -72,6 +72,9 @@ public class UserController {
 	@Autowired
 	TB_XA012Repository tbXA012Repository;
 
+	@Autowired
+	JdbcTemplate jdbcTemplate;
+
 	@GetMapping("/read")
 	public AjaxResult getUserList(@RequestParam(value = "cltnm", required = false) String cltnm, // 업체명
 								  @RequestParam(value = "prenm", required = false) String prenm, // 대표자
@@ -139,7 +142,6 @@ public class UserController {
 		return addressParts;
 	}
 
-
 	// 사용자 그룹 조회
 	@GetMapping("/user_grp_list")
 	public AjaxResult getUserGrpList(
@@ -164,93 +166,92 @@ public class UserController {
 			@RequestParam(value = "Phone") String phone,
 			@RequestParam(value = "userid") String userid,
 			@RequestParam(value = "email") String email,
-			@RequestParam(value="agencycd", required = false) String agencycd,
+			@RequestParam(value = "agencycd", required = false) String agencycd,
+			@RequestParam(value = "authType", required = false) String authType,
 			@RequestParam(value = "is_active") boolean isActive,
 			@RequestParam(value = "postno") String postno,
 			@RequestParam(value = "address1") String address1,
 			@RequestParam(value = "address2") String address2,
 			@RequestParam(value = "password") String password,
-			@RequestParam(value="UserGroup_id", required = false) Integer UserGroup_id,
+			@RequestParam(value = "UserGroup_id", required = false) Integer UserGroup_id,
 			Authentication auth
 	) {
 		AjaxResult result = new AjaxResult();
-		System.out.println("저장들어옴");
 		try {
-			// 데이터 저장 로직
-			String sql = null;
-			User user = null;
-			User loginUser = (User)auth.getPrincipal();
-			Timestamp today = new Timestamp(System.currentTimeMillis());
-			MapSqlParameterSource dicParam = new MapSqlParameterSource();
+			System.out.println("저장 로직 시작");
 
-			if(id==null){
+			boolean isNewUser = (id == null); // 새 사용자 여부 판단
+			User user;
 
-				Optional<User> u1 = this.userRepository.findByUsername(userid);
-
-				boolean username_chk = u1.isEmpty();
-
-				if (username_chk == false){
+			if (isNewUser) {
+				// 중복된 아이디 확인
+				if (userRepository.findByUsername(userid).isPresent()) {
 					result.success = false;
 					result.message = "중복된 아이디가 존재합니다.";
 					return result;
 				}
-				user = new User();
-
-				user.setSuperUser(false);
+				user = User.builder()
+						.username(userid)
+						.password(Pbkdf2Sha256.encode(password))
+						.email(email)
+						.first_name(prenm)
+						.last_name("")
+						.tel(tel)
+						.active(true)
+						.is_staff(false)
+						.date_joined(new Timestamp(System.currentTimeMillis()))
+						.superUser(false)
+						.phone(phone)
+						.spjangcd("ZZ")
+						.build();
+			} else {
+				// 기존 사용자 업데이트
+				user = userRepository.findById(id)
+						.orElseThrow(() -> new RuntimeException("해당 사용자가 없습니다."));
+				/*user.setPassword(Pbkdf2Sha256.encode(password)); */
+				user.setEmail(email);
+				user.setFirst_name(prenm);
 				user.setLast_name("");
-				user.setIs_staff(false);
-				user.setPassword(password);
-
-				dicParam.addValue("loginUser", loginUser.getId());
-
-				sql = """
-						INSERT INTO ERP_SWSPANEL1.dbo.user_profile
-							(_created, _creater_id, User_id, lang_code, Name, UserGroup_id)
-						VALUES 
-							(GETDATE(), :loginUser, :User_id, :lang_code, :name, :UserGroup_id)
-					""";
-			}else {
-
-				user = this.userRepository.getUserById(id);
-				boolean superchk =  user.getSuperUser();
-				if(superchk){
-					result.success = false;
-					result.message = "슈퍼유저 계정은 수정이 불가합니다.";
-					return result;
-				}
-
-				sql = """
-					update user_profile set
-					     	"lang_code" = :lang_code, "Name" = :name
-					     	,   "UserGroup_id" = :UserGroup_id
-					where "User_id" = :User_id
-		        """;
+				user.setTel(tel);
+				user.setActive(isActive);
+				user.setPhone(phone);
+				user.setAgencycd(agencycd);
 			}
 
-			user.setUsername(userid);
-			user.setFirst_name(prenm);
-			user.setEmail(email);
-			user.setDate_joined(today);
-			user.setActive(true);
-			user.setTel(tel);
-			user.setPhone(phone);
-			user.setActive(isActive);
-			user.setAgencycd(agencycd);
+			// 사용자 저장
+			user = userRepository.save(user);
+			System.out.println(isNewUser ? "새 사용자 저장 완료: " : "기존 사용자 업데이트 완료: " + user.getUsername());
+
+			// 사용자 프로필 처리
+			String profileSql = """
+			SET IDENTITY_INSERT user_profile ON;
+		
+			MERGE INTO user_profile AS target
+			USING (SELECT ? AS _created, ? AS lang_code, ? AS Name, ? AS UserGroup_id, ? AS User_id) AS source
+			ON target.User_id = source.User_id
+			WHEN MATCHED THEN
+				UPDATE SET Name = source.Name, UserGroup_id = source.UserGroup_id
+			WHEN NOT MATCHED THEN
+				INSERT (_created, lang_code, Name, UserGroup_id, User_id)
+				VALUES (source._created, source.lang_code, source.Name, source.UserGroup_id, source.User_id);
+		
+			SET IDENTITY_INSERT user_profile OFF;
+			""";
+
+			jdbcTemplate.update(
+					profileSql,
+					new Timestamp(System.currentTimeMillis()), // _created
+					"ko-KR",                                  // lang_code
+					prenm,                                    // Name
+					UserGroup_id,                             // UserGroup_id
+					user.getId()                              // User_id
+			);
+
+			System.out.println("User Profile 저장 또는 업데이트 완료");
 
 
-			user = this.userRepository.save(user);
-			System.out.println("user 저장 완료");
 
-			dicParam.addValue("name", prenm);
-			dicParam.addValue("UserGroup_id", UserGroup_id);
-			dicParam.addValue("lang_code", "ko-KR");
-			dicParam.addValue("User_id", user.getId());
-
-
-			this.sqlRunner.execute(sql, dicParam);
-			System.out.println("user_profile 저장 완료");
-
-			// TB_XA012에서 custcd와 spjangcd로 조회
+			// 거래처 처리 로직
 			String custcd = "SWSPANEL";
 			List<String> spjangcds = Arrays.asList("ZZ", "YY");
 
@@ -261,18 +262,15 @@ public class UserController {
 				return result;
 			}
 
-			// TB_XCLIENT 저장
-			String maxCltcd = tbXClientRepository.findMaxCltcd(); // 최대 cltcd 조회
-			String newCltcd = generateNewCltcd(maxCltcd); // 새로운 cltcd 생성
+			// 거래처 데이터 확인 및 저장
+			String maxCltcd = tbXClientRepository.findMaxCltcd();
+			String newCltcd = generateNewCltcd(maxCltcd);
+			String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " " + address2 : "");
 
-			String fullAddress = address1 + (address2 != null && !address2.isEmpty() ? " | " + address2 : "");
-
-			// 기존 TB_XCLIENT 데이터가 있는지 확인
 			Optional<TB_XCLIENT> existingClientOpt = tbXClientRepository.findBySaupnum(userid);
-
 			TB_XCLIENT tbXClient;
+
 			if (existingClientOpt.isPresent()) {
-				// 기존 데이터가 있을 경우 업데이트
 				tbXClient = existingClientOpt.get();
 				tbXClient.setPrenm(prenm);
 				tbXClient.setCltnm(cltnm);
@@ -284,41 +282,39 @@ public class UserController {
 				tbXClient.setHptelnum(phone);
 				tbXClient.setAgneremail(email);
 			} else {
-				// 새로운 TB_XCLIENT 객체 생성
 				tbXClient = TB_XCLIENT.builder()
-						.saupnum(userid) // 사업자번호
-						.prenm(prenm) // 대표자명
-						.cltnm(cltnm) // 업체명
-						.biztypenm(biztypenm) // 업태명
-						.bizitemnm(bizitemnm) // 종목명
-						.zipcd(postno) // 우편번호
-						.cltadres(fullAddress) // 주소
-						.telnum(tel) // 전화번호
-						.hptelnum(phone) // 핸드폰번호
-						.agneremail(email) // 담당자 email
+						.saupnum(userid)
+						.prenm(prenm)
+						.cltnm(cltnm)
+						.biztypenm(biztypenm)
+						.bizitemnm(bizitemnm)
+						.zipcd(postno)
+						.cltadres(fullAddress)
+						.telnum(tel)
+						.hptelnum(phone)
+						.agneremail(email)
 						.id(new TB_XCLIENTId(custcd, newCltcd))
-
-						// 기본값 설정된 필드들
-						.rnumchk(String.valueOf(0))                 // rnumchk = 0
-						.corpperclafi(String.valueOf(1))            // corpperclafi = 1 (법인구분)
-						.cltdv(String.valueOf(1))                   // cltdv = 1 (거래처구분)
-						.prtcltnm(cltnm) 							   // prtcltnm = "인쇄 거래처명 - 거래처명"
-						.foreyn(String.valueOf(0))                  // foreyn = 0
-						.relyn(String.valueOf(1))                   // relyn = 1
-						.bonddv(String.valueOf(0))                  // bonddv = 0
-						/*.nation("KR")               				   // nation = "KR"*/
-						.clttype(String.valueOf(2))                 // clttype = 2 (거래구분)
-						.cltynm(String.valueOf(0))                  // cltynm = 0 (약명)
+						.rnumchk("0")
+						.corpperclafi("1")
+						.cltdv("1")
+						.prtcltnm(cltnm)
+						.foreyn("0")
+						.relyn("1")
+						.bonddv("0")
+						.nation("KR")
+						.clttype("2")
+						.cltynm("0")
 						.build();
 			}
 
-			System.out.println("TB_XCLIENT 저장 시작");
-			tbXClientService.save(tbXClient);// TB_XCLIENT 저장
+			tbXClientService.save(tbXClient);
 			System.out.println("TB_XCLIENT 저장 완료");
 
 			result.success = true;
-			result.message = "사용자 정보가 성공적으로 저장되었습니다.";
+			result.message = isNewUser ? "사용자가 성공적으로 등록되었습니다." : "사용자 정보가 성공적으로 업데이트되었습니다.";
 		} catch (Exception e) {
+			System.err.println("오류 발생: " + e.getMessage());
+			e.printStackTrace();
 			result.success = false;
 			result.message = "사용자 정보를 저장하는 중 오류가 발생했습니다.";
 		}
@@ -336,6 +332,14 @@ public class UserController {
 		// 새로운 cltcd 생성: "SW" 접두사와 5자리 숫자로 포맷
 		return String.format("SW%05d", newNumber);
 	}
+	@GetMapping("/check")
+	public ResponseEntity<Map<String, Boolean>> checkUserExists(@RequestParam(value = "id") Integer id) {
+		boolean exists = userRepository.findById(id).isPresent();
+		Map<String, Boolean> response = new HashMap<>();
+		response.put("exists", exists);
+		return ResponseEntity.ok(response);
+	}
+
 
 	@GetMapping("/search")
 	public ResponseEntity<Map<String, Object>> search(
@@ -367,11 +371,13 @@ public class UserController {
 			result.message = "슈퍼유저는 수정 및 삭제가 불가능합니다.";
 			return result;
 		}
+		System.out.println("조회하려는 username: " + UtilClass.removeBrackers(username));
 		Optional<User> user = userRepository.findByUsername(UtilClass.removeBrackers(username));
-
-
-		if(user.isPresent()){
+		if (user.isPresent()) {
+			System.out.println("User 조회 성공: " + user.get());
 			tbXClientRepository.deleteBySaupnum(user.get().getUsername());
+		} else {
+			System.out.println("User 조회 실패. username이 존재하지 않습니다.");
 		}
 
 		Integer userid  = Integer.parseInt(UtilClass.removeBrackers(id));
@@ -379,6 +385,15 @@ public class UserController {
 
 		return result;
 	}
+
+	@GetMapping("/checkUserId")
+	public ResponseEntity<Map<String, Boolean>> checkUserId(@RequestParam String userid) {
+		Map<String, Boolean> response = new HashMap<>();
+		boolean exists = userService.isUserIdExists(userid); // username 중복 체크
+		response.put("exists", exists);
+		return ResponseEntity.ok(response);
+	}
+
 
 	@Transactional
 	@PostMapping("/activate")
