@@ -139,83 +139,8 @@
                     </div>
                 </section>
                 <!-- Section -->
-                <!-- <section class="tab-item" id="tab2">
-                     <div class="section-top">
-                         <div class="title-wrap">
-                             <h3>사용자 등록</h3>
-                         </div>
-                         <div class="button-wrap">
-                             <ul>
-                                 <li>
-                                     <a class="btn btn-excell" title="엑셀다운로드" onclick="clearForm()">
-                                         <img src="/images/icon/ico-plus.svg" alt="등록 아이콘">
-                                         신규등록
-                                     </a>
-                                 </li>
-                                 <li>
-                                     <a class="btn btn-edit" id="btnSave" title="저장">
-                                         <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
-                                         저장
-                                     </a>
-                                 </li>
-                             </ul>
-                         </div>
-                     </div>
-                     <div class="table-wrap">
-                         <table class="write-table">
-                             <caption>점검등록 테이블</caption>
-                             <colgroup>
-                                 <col class="wp12">
-                                 <col class="wp40">
-                                 <col class="wp12">
-                                 <col class="wp40">
-                             </colgroup>
-                             <tbody>
-                             <tr>
-                                 <th>
-                                     <label for="code">
-                                         코드
-                                     </label>
-                                 </th>
-                                 <td>
-                                     <input type="text" id="code" name="code" class="wp100" maxlength="30" placeholder="코드">
-                                     <input type="hidden" id="id" name="id" class="wp100" maxlength="30" placeholder="id">
-                                 </td>
-                                 <th>
-                                     <label for="name">
-                                         그룹명
-                                     </label>
-                                 </th>
-                                 <td>
-                                     <input type="text" id="name" name="name" class="wp100" maxlength="50" placeholder="그룹명">
-                                 </td>
 
-                             </tr>
-                             <tr>
-                                 <th>
-                                     설명
-                                 </th>
-                                 <td>
-                                     <input type="text" id="description" name="description" maxlength="100" class="wp100" placeholder="설명">
-                                 </td>
-                                 <th>
-                                     <label for="name">
-                                         기본화면
-                                     </label>
-                                 </th>
-                                 <td>
-                                     <select class="mg-r5" id="gmenu" name="gmenu" style="width: 100%">
-                                         <option></option>
-                                     </select>
-                                 </td>
-                             </tr>
-                             </tbody>
-                         </table>
-                     </div>
-                 </section>-->
-
-                <!--section 3-->
-
+                <!--section 2-->
                 <section class="tab-item" id="tab2">
                     <div class="section-top">
                         <form id="searchForm" autocomplete="off">
@@ -334,14 +259,25 @@
                 success: function(data){
                     let DataLength = 10 - data.data.length;
 
-                    if(data.data.length < 10){
-                        for(let i=0; i < DataLength; i++){
-                            data.data.push('empty');
+                    if (data.data.length < 10) {
+                        for (let i = 0; i < DataLength; i++) {
+                            data.data.push({
+                                id: '',
+                                code: '',
+                                name: '',
+                                description: '',
+                                gmenu: '',
+                                gmenuname: '',
+                                flag: '',
+                            });
                         }
                     }
                     data2 = data.data;
-                }
-            })
+                },
+                error: function () {
+                    console.error('데이터를 가져오는 중 오류가 발생했습니다.');
+                },
+            });
 
             viewdata = new wijmo.collections.CollectionView(data2);
             // 데이터 그리드에 바인딩
@@ -469,7 +405,6 @@
                 }
             });
 
-
             theGrid2.rowHeaders.columns.splice(0, 1);
 
             // "읽기" 체크박스 클릭 이벤트 핸들러
@@ -504,33 +439,44 @@
                 grid_binding(result.data);
             }
         }
+        
+        function grid_binding(data) {
 
-        function grid_binding(data){
-            var inspecDto = data;
-            var inspecData = [];
-            var cnt = 1;
-            for (let i = 0; i < inspecDto.length; i++) {
-                inspecData.push({
-                    id: inspecDto[i]["id"],
-                    code: inspecDto[i]["code"],
-                    name: inspecDto[i]["name"],
-                    description: inspecDto[i]["description"],
-                    gmenu: inspecDto[i]["gmenu"],
-                    flag : inspecDto[i]["flag"]
-                });
-                cnt++;
+            const minimumRows = 10;
+            if (data.length < minimumRows) {
+                const DataLength = minimumRows - data.length;
+                for (let i = 0; i < DataLength; i++) {
+                    data.push({
+                        id: '',
+                        code: '',
+                        name: '',
+                        description: '',
+                        gmenu: '',
+                        gmenuname: '',
+                        flag: '',
+                    });
+                }
             }
+            const inspecData = data.map((item) => ({
+                id: item["id"],
+                code: item["code"],
+                name: item["name"],
+                description: item["description"],
+                gmenu: item["gmenu"],
+                gmenuname: item["gmenuname"] || '', // gmenu의 이름을 추가
+                flag: item["flag"],
+            }));
 
-            theGrid.columns.clear();
-            theGrid.autoGenerateColumns = false;
-            viewdata.sourceCollection = inspecData;
+            viewdata.sourceCollection = inspecData; // 새로운 데이터를 바인딩
+            viewdata.refresh(); // 데이터를 새로고침
 
+            theGrid.columns.clear(); // 기존 컬럼을 초기화
+            columns.forEach((colDef) => {
+                theGrid.columns.push(new wijmo.grid.Column(colDef)); // 새로운 컬럼 정의 추가
+            });
 
-            for (let i = 0; i < columns.length; i++) {
-                let col = new wijmo.grid.Column(columns[i]);
-                theGrid.columns.push(col);
-            }
-            SelectItem = undefined;
+            theGrid.refresh(); // 그리드를 새로고침
+            SelectItem = undefined; // 선택 항목 초기화
         }
 
         function checkAndAlert(){
