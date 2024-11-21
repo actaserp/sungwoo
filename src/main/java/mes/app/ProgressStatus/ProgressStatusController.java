@@ -48,7 +48,7 @@ public class ProgressStatusController {
         return result;
     }
 
-    @GetMapping("/searchProgress")
+    /*@GetMapping("/search")
     public AjaxResult searchProgress(@RequestParam(value = "search_startDate", required = false) String searchStartDate
                                     , @RequestParam(value = "search_endDate", required = false) String searchEndDate
                                     , @RequestParam(value = "search_remark", required = false) String searchRemark
@@ -58,9 +58,12 @@ public class ProgressStatusController {
         try {
             // 로그인한 사용자 정보에서 이름(perid) 가져오기
             User user = (User) auth.getPrincipal();
-            String perid = user.getFirst_name();
+            String userid = user.getUsername();
+            String spjangcd = user.getSpjangcd();
 
-            List<Map<String, Object>> progressStatusLis = progressStatusService.searchProgress(searchStartDate, searchEndDate, searchRemark);
+            List<Map<String, Object>> progressStatusLis = progressStatusService.searchProgress(
+                    searchStartDate, searchEndDate, searchRemark, userid, spjangcd);
+
             result.success = true;
             result.data = progressStatusLis;
             result.message = "데이터 조회 성공";
@@ -71,8 +74,47 @@ public class ProgressStatusController {
             result.message = "데이터를 가져오는 중 오류가 발생했습니다.";
         }
         return result;
-    }
+    }*/
+    @GetMapping("/search")
+    public AjaxResult searchProgress(@RequestParam Map<String, String> params, Authentication auth) {
+        AjaxResult result = new AjaxResult();
 
+        try {
+            // 로그인한 사용자 정보
+            User user = (User) auth.getPrincipal();
+            String userid = user.getUsername();
+            String spjangcd = user.getSpjangcd();
+
+            // 검색 조건 로깅
+            System.out.println(String.format("검색 조건: %s, 사용자: %s, 사업장: %s", params, userid, spjangcd));
+
+            // 검색 서비스 호출
+            List<Map<String, Object>> progressStatusList = progressStatusService.searchProgress(
+                    params.get("startDate"),    // 검색 시작 날짜
+                    params.get("endDate"),      // 검색 종료 날짜
+                    params.get("searchRemark"), // 검색 비고 (remark)
+                    params.get("searchtketnm"),
+                    params.get("searchCltnm"),
+                    userid,                     // 사용자 ID
+                    spjangcd                    // 사업장 코드
+            );
+
+            // 응답 생성
+            result.success = true;
+            result.data = progressStatusList;
+            result.message = "데이터 조회 성공";
+        } catch (Exception e) {
+            // 예외 로그 출력
+            System.out.println("검색 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+
+            // 응답 생성
+            result.success = false;
+            result.message = "데이터를 가져오는 중 오류가 발생했습니다.";
+        }
+
+        return result;
+    }
 
     @GetMapping("/getChartData")
     public AjaxResult getChartData(Authentication auth) {
