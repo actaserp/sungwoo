@@ -57,8 +57,11 @@ public class LoginLogService {
         }
 
         // 정렬 조건은 항상 동일하게 적용
-        sql += " order by CONVERT(varchar, ll._created, 23) desc, up.\"Name\" asc, ll._created desc ";
-
+        sql += " order by" +
+                "    CONVERT(varchar, ll._created, 23) desc," +
+                "    up.\"Name\" asc, " +
+                "    ll._created desc";
+        System.out.println();
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
         return items;
     }

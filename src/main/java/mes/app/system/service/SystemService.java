@@ -190,7 +190,7 @@ public class SystemService {
             0 AS is_folder
         FROM menu_item mi
         INNER JOIN tree ON mi.MenuFolder_id = tree.id
-        WHERE mi.MenuCode NOT IN ('wm_user_group', 'wm_user', 'wm_user_group_menu')
+        WHERE mi.MenuCode NOT IN ('wm_user_group_menu')
     )
     SELECT 
         tree.pid,
@@ -269,7 +269,7 @@ public class SystemService {
             0 AS is_folder
         FROM menu_item mi
         INNER JOIN tree ON mi.MenuFolder_id = tree.id
-        WHERE mi.MenuCode NOT IN ('wm_user_group', 'wm_user', 'wm_user_group_menu')
+        WHERE mi.MenuCode NOT IN ('wm_user_group_menu')
     )
     SELECT 
         tree.pid,
