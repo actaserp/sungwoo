@@ -41,7 +41,7 @@ public class DashBoardController2 {
         List<Map<String, Object>> LastYearCntOfMonth = this.dashBoardService2.LastYearCntOfMonth(spjangcd);
         // 올해 이번달 일별 데이터 개수
         List<Map<String, Object>> ThisMonthCntOfDate = this.dashBoardService2.ThisMonthCntOfDate(spjangcd);
-        // 작년 동일 월 일별 데이터 개수
+        // 올해 전월 일별 데이터 개수
         List<Map<String, Object>> LastMonthCntOfDate = this.dashBoardService2.LastMonthCntOfDate(spjangcd);
 
         AjaxResult result = new AjaxResult();

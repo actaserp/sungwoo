@@ -56,7 +56,7 @@
                             <dl>
                                 <dt>전년대비 건수</dt>
                                 <dd>
-                                    <span class="up"></span> 10 <span class="unit">건</span>
+                                    <span class="up"></span> - <span class="unit">건</span>
                                 </dd>
                             </dl>
 <!--                            <dl>-->
@@ -76,7 +76,7 @@
                             <dl>
                                 <dt>전년대비 건수</dt>
                                 <dd>
-                                    <span class="up"></span> 10 <span class="unit">건</span>
+                                    <span class="up"></span> - <span class="unit">건</span>
                                 </dd>
                             </dl>
                             <!--                            <dl>-->
@@ -96,7 +96,7 @@
                             <dl>
                                 <dt>전년대비 건수</dt>
                                 <dd>
-                                    <span class="up"></span> 10 <span class="unit">건</span>
+                                    <span class="up"></span> - <span class="unit">건</span>
                                 </dd>
                             </dl>
 <!--                            <dl>-->
@@ -116,7 +116,7 @@
                             <dl>
                                 <dt>전년대비 건수</dt>
                                 <dd>
-                                    <span class="up"></span> 10 <span class="unit">건</span>
+                                    <span class="up"></span> - <span class="unit">건</span>
                                 </dd>
                             </dl>
 <!--                            <dl>-->
@@ -136,7 +136,7 @@
                             <dl>
                                 <dt>전년대비 건수</dt>
                                 <dd>
-                                    <span class="up"></span> 10 <span class="unit">건</span>
+                                    <span class="up"></span> - <span class="unit">건</span>
                                 </dd>
                             </dl>
 <!--                            <dl>-->
@@ -509,7 +509,7 @@
                     // 올해 월별 데이터(전월로 바꿔야함)
                     let ThisYearCntOfMonth = data2.ThisYearCntOfMonth;
                     // X축 레이블과 Y축 데이터 생성
-                    const ThisMonth = ThisYearCntOfMonth.map(item => item.Month.slice(-2)); // Day의 마지막 두 글자
+                    const ThisMonth = ThisYearCntOfMonth.map(item => item.Month.slice(-2) + '월');
                     const ThisMonthCnt = ThisYearCntOfMonth.map(item => item.TotalCount); // TotalCount
                     // 새로운 차트 데이터
                     const revenueData = {
@@ -539,7 +539,7 @@
                     // 작년 월별 데이터
                     let LastYearCntOfMonth = data2.LastYearCntOfMonth;
                     // X축 레이블과 Y축 데이터 생성
-                    const LastMonth = LastYearCntOfMonth.map(item => item.Month.slice(-2)); // Day의 마지막 두 글자
+                    const LastMonth = LastYearCntOfMonth.map(item => item.Month.slice(-2) + '월');
                     const LastMonthCnt = LastYearCntOfMonth.map(item => item.TotalCount); // TotalCount
                     // 새로운 차트 데이터
                     const orderData = {
@@ -570,7 +570,7 @@
                     // 올해 당월 일별 데이터
                     let ThisMonthCntOfDate = data2.ThisMonthCntOfDate;
                     // X축 레이블과 Y축 데이터 생성
-                    const ThisDate = ThisMonthCntOfDate.map(item => item.Day.slice(-2)); // Day의 마지막 두 글자
+                    const ThisDate = ThisMonthCntOfDate.map(item => item.Day.slice(-2) + '일');
                     const ThisDateCnt = ThisMonthCntOfDate.map(item => item.TotalCount); // TotalCount
                     // 새로운 차트 데이터
                     const estimateData = {
@@ -583,7 +583,7 @@
                         }]
                     };
                     // 차트 생성 후 인스턴스를 data 속성에 저장
-                    $('#estimateChart').data('chart', new Chart(ctxOrder, {
+                    $('#estimateChart').data('chart', new Chart(ctxEstimate, {
                         type: 'bar',
                         data: estimateData,
                         options: {
@@ -598,15 +598,36 @@
                         }
                     }));
 
-                    // 작년 일별 데이터(전월로 바꿔야함)
+                    // 전월 일별 데이터
                     let LastMonthCntOfDate = data2.LastMonthCntOfDate;
-
-
-
-
-
-
-
+                    // X축 레이블과 Y축 데이터 생성
+                    const LastDate = LastMonthCntOfDate.map(item => item.Day.slice(-2) + '일');
+                    const LastDateCnt = LastMonthCntOfDate.map(item => item.TotalCount); // TotalCount
+                    // 새로운 차트 데이터
+                    const requestData = {
+                        labels: LastDate,
+                        datasets: [{
+                            data: LastDateCnt,
+                            backgroundColor: 'rgba(98, 178, 253, 0.5)',
+                            borderColor: 'rgba(98, 178, 253, 1)',
+                            borderWidth: 1
+                        }]
+                    };
+                    // 차트 생성 후 인스턴스를 data 속성에 저장
+                    $('#requestChart').data('chart', new Chart(ctxRequest, {
+                        type: 'bar',
+                        data: requestData,
+                        options: {
+                            plugins: {
+                                legend: {
+                                    display: false // 범례 비활성화
+                                }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    }));
 
                     // 카드 작업
                     // 작년 상태값별 데이터

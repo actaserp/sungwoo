@@ -225,7 +225,9 @@ public class DashBoardService2 {
                    CAST(YEAR(GETDATE()) AS CHAR(4)) + '0101' AS ThisYearStart, -- 올해 1월 1일
                    CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT(CONVERT(VARCHAR(8), GETDATE(), 112), 4) AS ThisYearEnd, -- 올해 오늘 날짜
                    CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT('0' + CAST(MONTH(GETDATE()) AS VARCHAR(2)), 2) + '01' AS ThisMonthStart, -- 올해 당월 1일
-                   CAST(YEAR(GETDATE()) - 1 AS CHAR(4)) + RIGHT('0' + CAST(MONTH(GETDATE()) AS VARCHAR(2)), 2) + '01' AS LastYearThisMonthStart -- 작년 당월 1일
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT('0' + CAST(MONTH(GETDATE()) - 1 AS VARCHAR(2)), 2) + '01' AS PrevMonthStart, -- 올해 전월 1일 계산
+                   CAST(YEAR(GETDATE()) AS CHAR(4)) + RIGHT('0' + CAST(MONTH(GETDATE()) - 1 AS VARCHAR(2)), 2) +
+                               RIGHT('0' + CAST(DAY(GETDATE()) AS VARCHAR(2)), 2) AS PrevMonthToday -- 올해 전월 오늘 날짜 계산
             )
             SELECT
                 CONVERT(DATE, reqdate, 112) AS Day,
@@ -233,9 +235,9 @@ public class DashBoardService2 {
             FROM TB_DA006W
             CROSS JOIN DateRanges
             WHERE
-                LEN(reqdate) = 8 AND
-                reqdate LIKE '[0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]' AND
-                CONVERT(DATE, reqdate, 112) BETWEEN CONVERT(DATE, LastYearThisMonthStart, 112) AND CONVERT(DATE, PrevYearEnd, 112)
+                LEN(reqdate) = 8
+                AND reqdate LIKE '[0-9][0-9][0-9][0-9][0-1][0-9][0-3][0-9]'
+                AND CONVERT(DATE, reqdate, 112) BETWEEN CONVERT(DATE, PrevMonthStart, 112) AND CONVERT(DATE, PrevMonthToday, 112)
                 AND spjangcd = :spjangcd
             GROUP BY CONVERT(DATE, reqdate, 112);
             """;
