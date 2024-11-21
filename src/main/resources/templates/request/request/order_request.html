@@ -1317,7 +1317,6 @@
             }
           }
         });
-        viewdata2.addNew({}); // 새로운 항목 추가 (필요한 경우)
         viewdata2.commitEdit(); // 변경 사항 저장
         Promise.all(deletePromises).then(() => {
           viewdata2.refresh();
