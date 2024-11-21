@@ -1172,6 +1172,7 @@
         });
     }
 
+
 </script>
 
 <script type="text/javascript">
@@ -1214,8 +1215,38 @@
 
     });
 
-</script>
+</script>/api/order_status
+<script type="text/javascript">
+    function isAdmin(){
+        $.ajax({
+            url: '/api/order_status/isAdmin',
+            type: 'GET',
+            success: function (response) {
+                console.log("response : ",response);
+                // '관리자' 텍스트를 포함하는 span 요소를 선택
+                const spans = document.querySelectorAll('.user span');
 
+                // 각 span을 순회하여 '관리자' 텍스트를 찾기
+                spans.forEach(span => {
+                    if (span.textContent.trim() === '관리자') {
+                        if(response.data === 'admin') {
+                            span.textContent = '관리자'; // 원하는 텍스트로 변경
+                        }else{
+                            span.textContent = '사용자';
+                        }
+                    }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('사용자 관리자여부 파악중 오류발생: ', error);
+                alert('서버와의 통신 중 오류가 발생했습니다.');
+            }
+        });
+    }
+    // 초기 실행
+    document.addEventListener('DOMContentLoaded', isAdmin);
+
+</script>
 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 </body>
 </html>

@@ -33,21 +33,25 @@ public class OrderDashboardController {
         tbDa006WPk.setSpjangcd((String) userInfo.get("spjangcd"));
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
         String saupnum = (String) userInfo.get("saupnum");
+        String cltcd = (String) userInfo.get("cltcd");
         String search_startDate = (searchStartDate).replaceAll("-","");
         String search_endDate = (searchEndDate).replaceAll("-","");
         List<Map<String, Object>> items = this.orderDashboardService.getOrderList(tbDa006WPk,
-                search_startDate, search_endDate, searchType, saupnum);
+                search_startDate, search_endDate, searchType, saupnum, cltcd);
         for (Map<String, Object> item : items) {
             if (item.get("ordflag").equals("0")) {
                 item.remove("ordflag");
                 item.put("ordflag", "주문의뢰");
             } else if (item.get("ordflag").equals("1")) {
                 item.remove("ordflag");
-                item.put("ordflag", "견적작성");
+                item.put("ordflag", "주문확인");
             } else if (item.get("ordflag").equals("2")) {
                 item.remove("ordflag");
-                item.put("ordflag", "제작");
+                item.put("ordflag", "주문확정");
             } else if (item.get("ordflag").equals("3")) {
+                item.remove("ordflag");
+                item.put("ordflag", "제작진행");
+            } else if (item.get("ordflag").equals("4")) {
                 item.remove("ordflag");
                 item.put("ordflag", "출고");
             }

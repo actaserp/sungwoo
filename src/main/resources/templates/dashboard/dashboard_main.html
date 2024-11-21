@@ -472,6 +472,7 @@
         // document.getElementById('search_spjangcd')를 기준으로 페이지 reload
         function init() {
             searchData()
+            bindSpjangcd()
         }
         // 전체 데이터 불러오기
         function searchData(){
@@ -689,7 +690,20 @@
                 }
             })
         }
-
+        function bindSpjangcd() {
+            $.ajax({
+                url: '/api/dashboard2/bindSpjangcd',
+                type: 'GET',
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                    const selectElement = document.getElementById('search_spjangcd');
+                    if (selectElement) {
+                        selectElement.value = data2; // value 속성으로 선택
+                    }
+                }
+            })
+        }
 
 
     </script>

@@ -47,7 +47,7 @@
                             <!-- 위쪽 섹션 -->
                             <section style=" box-sizing: border-box;">
                                 <div style="margin-bottom: 15px">
-                                    <h3>2024년 주문 현황</h3>
+                                    <h3 id="year-status">2024년 주문 현황</h3>
                                 </div>
                                 <div class="tab-contents">
                                     <div class="row">
@@ -61,8 +61,6 @@
                                                 </div>
                                             </section>
                                             <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="1">
-<<<<<<< Updated upstream
-=======
                                                 <div class="title">
                                                     <h3>주문확인</h3>
                                                 </div>
@@ -71,15 +69,6 @@
                                                 </div>
                                             </section>
                                             <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="2">
->>>>>>> Stashed changes
-                                                <div class="title">
-                                                    <h3>주문확인</h3>
-                                                </div>
-                                                <div class="checkCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
-                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
-                                                </div>
-                                            </section>
-                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="3">
                                                 <div class="title">
                                                     <h3>주문확정</h3>
                                                 </div>
@@ -170,7 +159,6 @@
         var viewdata;
         let calendar; // 전역으로 calendar 변수 선언
 
-
         // 오늘 날짜 설정
         const date = new Date();
         date.setHours(date.getHours() + 9); // UTC+9로 한국 시간 설정
@@ -180,6 +168,7 @@
         // 시작일 input에 올해 1월 1일을 설정합니다
         document.getElementById('startDate').value = `${currentYear}-01-01`;
         document.getElementById('endDate').value = today;
+        document.getElementById('year-status').innerText = `${currentYear}년 주문 현황`;
 
         document.readyState === 'complete' ? init() : window.onload = init;
 

@@ -56,5 +56,16 @@ public class DashBoardController2 {
 
         return result;
     }
+    @GetMapping("/bindSpjangcd")
+    public AjaxResult bindSpjangcd(Authentication auth) {
+        // 관리자 사용가능 페이지 사업장 코드 선택 로직
+        User user = (User) auth.getPrincipal();
+        String username = user.getUsername();
+        String spjangcd = dashBoardService2.getSpjangcd(username, "");
+        // 사업장 코드 선택 로직 종료 반환 spjangcd 활용
+        AjaxResult result = new AjaxResult();
+        result.data = spjangcd;
+        return result;
+    }
 
 }
