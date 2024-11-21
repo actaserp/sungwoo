@@ -63,18 +63,18 @@ public class ProgressStatusService {
         params.addValue("endDate", endDate);
 
         String sql = """
-    SELECT
-    tb007.*, 
-    tb006.*   
-    FROM
-        TB_DA007W tb007
-    LEFT JOIN
-        TB_DA006W tb006
-    ON
-    tb007.custcd = tb006.custcd
-    AND tb007.spjangcd = tb006.spjangcd
-    AND tb007.reqdate = tb006.reqdate
-    AND tb007.reqnum = tb006.reqnum;
+        SELECT
+        tb007.*, 
+        tb006.*   
+        FROM
+            TB_DA007W tb007
+        LEFT JOIN
+            TB_DA006W tb006
+        ON
+        tb007.custcd = tb006.custcd
+        AND tb007.spjangcd = tb006.spjangcd
+        AND tb007.reqdate = tb006.reqdate
+        AND tb007.reqnum = tb006.reqnum;
         """;
 
         return sqlRunner.getRows(sql, params);
@@ -85,8 +85,8 @@ public class ProgressStatusService {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("spjangcd", userid);
 
-        String sql = """
-                SELECT
+        /*String sql = """
+           SELECT
                 tb007.custcd,
                 tb007.spjangcd,
                 tb007.reqdate,
@@ -104,7 +104,28 @@ public class ProgressStatusService {
                 AND tb007.reqnum = tb006.reqnum
             GROUP BY
                 tb007.custcd, tb007.spjangcd, tb007.reqdate, tb007.reqnum, tb006.cltnm
-            """;
+            """;*/
+        String sql = """
+                   SELECT
+                    tb007.custcd,
+                    tb007.spjangcd,
+                    tb007.reqdate,
+                    tb007.reqnum,
+                    tb006.cltnm,
+                    MAX(CAST(tb006.ordflag AS INT)) AS ordflag
+                FROM
+                    TB_DA007W tb007
+                INNER JOIN
+                    TB_DA006W tb006
+                ON
+                    tb007.custcd = tb006.custcd
+                    AND tb007.spjangcd = tb006.spjangcd
+                    AND tb007.reqdate = tb006.reqdate
+                    AND tb007.reqnum = tb006.reqnum
+                GROUP BY
+                    tb007.custcd, tb007.spjangcd, tb007.reqdate, tb007.reqnum, tb006.cltnm;
+                """;
+
         return sqlRunner.getRows(sql, params);
     }
 
