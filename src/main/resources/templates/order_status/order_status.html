@@ -87,7 +87,7 @@
                             <!-- 위쪽 섹션 -->
                             <section style=" box-sizing: border-box;">
                                 <div style="margin-bottom: 15px">
-                                    <h3 id="year-status">2024년 주문 현황</h3>
+                                    <h3>2024년 주문 현황</h3>
                                 </div>
                                 <div class="tab-contents">
                                     <div class="row">
@@ -419,9 +419,6 @@
         let calendar;
         let modalGrid;
         let selectedId;
-        // 주문현황 년도 자동화
-        const currentYear = new Date().getFullYear();
-        document.getElementById('year-status').innerText = `${currentYear}년 주문 현황`;
 
         document.readyState === 'complete' ? init() : window.onload = init;
 
@@ -451,51 +448,10 @@
             $('#endDate2').val(endMonthFormatted);
         });
 
-        // '.fetchCard' 클래스를 가진 모든 요소에 대해 클릭 이벤트 설정
-        $('.fetchCard').click(function() {
-            // 클릭된 카드의 data-search-type 속성 값 가져오기
-            const searchTypeValue = $(this).data('search-type');
-            fetchListData(searchTypeValue);  // 해당 값을 fetchListData 함수로 전달
-        });
-        function fetchListData(searchTypeValue) {
+
+        function fetchListData() {
             let data2 = []; // 데이터를 담을 배열
             let emptyRowsCount = 8;
-            $.ajax({
-                url: '/api/order_status/readCalenderGrid',
-                type: 'GET',
-                data: {
-                    'search_startDate': $('#startDate2').val(),
-                    'search_endDate': $('#endDate2').val(),
-                    'search_type': searchTypeValue
-                },
-                async: false,
-                success: function (response) {
-                    // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
-                    if (response && Array.isArray(response.data)) {
-                        data2 = response.data;
-                        // 날짜 형식 변환 및 ordflag 변환
-                        data2.forEach(item => {
-                            item.reqdate = formatDateString(item.reqdate);
-                            item.deldate = formatDateString(item.deldate);
-                            item.ordflag = getOrdflagText(parseInt(item.ordflag, 10));
-                            item.hgrb = getHgrb((item.hgrb));
-                            item.exfmtypedv = getListCgrb(item.exfmtypedv);
-                            item.infmtypedv = getListCgrb(item.infmtypedv);
-                            item.stframedv = getListCgrb(item.stframedv);
-                            item.stexplydv = getListCgrb(item.stexplydv);
-
-                            // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
-                            if (item.ordtext) {
-                                item.originalOrdtext = item.ordtext; // 실제 데이터를 보존
-                                item.ordtext = "옵션 및 요청사항"; // 링크 표시용 텍스트
-                            }
-                        });
-                    }
-                },
-                error: function () {
-                    console.error("데이터를 가져오는 중 오류가 발생했습니다.");
-                }
-            });
 
             // 빈 객체를 emptyRowsCount만큼 추가
             for (let i = 0; i < emptyRowsCount; i++) {
