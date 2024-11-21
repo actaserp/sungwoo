@@ -60,46 +60,51 @@ public class TB_DA006W {
     @Column(name = "\"monrate\"")  //
     String monrate;
 
-    @Column(name = "\"remark\"")  // 요청사항 내용
+    @Column(name = "\"remark\"")
     String remark;
 
-    @Column(name = "\"operid\"")  // 용도별
+    @Column(name = "\"operid\"")
     String operid;
 
-    @Column(name = "\"dperid\"")  // 용도별
+    @Column(name = "\"dperid\"")
     String dperid;
 
-    @Column(name = "\"sperid\"")  // 용도별
+    @Column(name = "\"sperid\"")
     String sperid;
 
-    @Column(name = "\"ordflag\"")  // 용도별
+    @Column(name = "\"ordflag\"")
     String ordflag = "0";
 
-    @Column(name = "\"egrb\"")  // 용도별
+    @Column(name = "\"egrb\"")
     String egrb;
 
-    @Column(name = "\"fgrb\"")  // 용도별
+    @Column(name = "\"fgrb\"")
     String fgrb;
 
-    @Column(name = "\"panel_ht\"")  // 용도별
+    @Column(name = "\"panel_ht\"")
     String panel_ht;
 
-    @Column(name = "\"panel_hw\"")  // 용도별
+    @Column(name = "\"panel_hw\"")
     String panel_hw;
 
-    @Column(name = "\"panel_hl\"")  // 용도별
+    @Column(name = "\"panel_hl\"")
     String panel_hl;
 
-    @Column(name = "\"panel_hh\"")  // 용도별
+    @Column(name = "\"panel_hh\"")
     String panel_hh;
 
-    @Column(name = "\"indate\"")  // 용도별
+    @Column(name = "\"indate\"")
     String indate;
 
-    @Column(name = "\"inperid\"")  // 용도별
+    @Column(name = "\"inperid\"")
     String inperid;
 
-    @Column(name = "\"telno\"")  // 용도별
+    @Column(name = "\"telno\"")
     String telno;
 
+    @Column(name = "\"adflag\"")  // 관리자 알림확인 칼럼
+    String adflag = "0";
+
+    @Column(name = "\"userflag\"")  // 일반거래처 알림확인 칼럼
+    String userflag = "1";
 }
