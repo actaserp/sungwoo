@@ -94,10 +94,11 @@
                   <div class="srch-box">
                     <select id="searchtketnm" name="searchtketnm">
                       <option value="전체">전체</option>
-                      <option value="주문의뢰">주문의뢰</option>
-                      <option value="견적작성">견적작성</option>
-                      <option value="제작">제작</option>
-                      <option value="출고">출고</option>
+                      <option value="0">주문등록</option>
+                      <option value="1">주문확인</option>
+                      <option value="2">주문확정</option>
+                      <option value="3">제작진행</option>
+                      <option value="4">출고</option>
                     </select>
                   </div>
                 </dd>
@@ -145,7 +146,7 @@
 
           <div class="container-fluid">
             <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
-              <canvas id="myChart" width="400" height="100px"></canvas>
+              <canvas id="myChart" width="400" height="120px"></canvas>
                <span class="material-symbols-outlined"
                 style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);"
                 onclick="openModal()">zoom_out_map</span>
@@ -287,19 +288,21 @@
     function getOrdflagText(ordflag) {
       switch (parseInt(ordflag, 10)) { // ordflag를 숫자로 변환
         case 0:
-          return "주문의뢰";
+          return "주문등록";
         case 1:
-          return "견적진행";
+          return "주문확인";
         case 2:
-          return "제작";
+          return "주문확전";
         case 3:
-          return "출고";
+          return "제작진행";
+        case 4:
+          return "출고"
         default:
           return " ";
       }
     }
 
-    function searchButton() {
+    /*function searchButton() {
       // 입력된 값 가져오기
       const startDate = document.getElementById('startDate').value;
       const endDate = document.getElementById('endDate').value;
@@ -309,26 +312,100 @@
 
       // 검색 요청 데이터
       const queryParams = {};
+      if (startDate) queryParams.startDate = startDate;
+      if (endDate) queryParams.endDate = endDate;
+      if (searchCltnm) queryParams.searchCltnm = searchCltnm;
+      if (searchtketnm) queryParams.searchtketnm = searchtketnm;
 
-        if (startDate) queryParams.startDate = startDate;
-        if (endDate) queryParams.endDate = endDate;
-        if (searchCltnm) queryParams.searchCltnm = searchCltnm;
-        if (searchtketnm) queryParams.searchtketnm = searchtketnm;
-        if (searchstate) queryParams.searchstate = searchstate;
-
-      fetch(`api/ProgressStatus/search?${$.param(queryParams)}`, {
+      // AJAX GET 요청
+      $.ajax({
+        url: `api/ProgressStatus/search`,
         method: 'GET',
-        body: JSON.stringify(requestData),
+        data: queryParams, // 쿼리 매개변수 전달
         success: function (response) {
           console.log("서버 응답 데이터:", response);
+          bindDataToGrid(response); // 데이터를 그리드에 바인딩
+        },
+        error: function (xhr, status, error) {
+          console.error("오류 발생:", error);
+          alert("검색 중 오류가 발생했습니다.");
         }
-      })
+      });
+    }*/
+    function searchButton() {
+      // 입력된 값 가져오기
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+      const searchCltnm = document.getElementById('searchCltnm').value.trim();
+      const searchtketnm = document.getElementById('searchtketnm').value.trim();
+      const searchstate = document.getElementById('searchstate')?.value; // 검색 상태가 있는 경우
+
+      // 검색 요청 데이터 구성
+      const queryParams = {};
+      if (startDate) queryParams.startDate = startDate;
+      if (endDate) queryParams.endDate = endDate;
+      if (searchCltnm) queryParams.searchCltnm = searchCltnm;
+      if (searchtketnm) queryParams.searchtketnm = searchtketnm;
+      if (searchstate) queryParams.searchstate = searchstate;
+
+      /*$.ajax({
+        url: `/api/ProgressStatus/search?${$.param(queryParams)}`, // URL 생성
+        type: 'GET',
+        success: function (response) {
+          console.log("검색 결과:", response);
+          if (response.success && response.data) {
+            // 차트 및 그리드 데이터 바인딩
+            updateChartAndGrid(response.data);
+          } else {
+            console.error("검색 결과 처리 중 오류 발생:", response.message);
+            alert(response.message || "검색 결과를 가져오는 중 오류가 발생했습니다.");
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error("검색 요청 중 오류 발생:", error);
+          console.error("응답 내용:", xhr.responseText);
+          alert("검색 요청 처리 중 오류가 발생했습니다.");
+        }
+      });*/
+      $.ajax({
+        url: `/api/ProgressStatus/search?${$.param(queryParams)}`,
+        type: 'GET',
+        success: function (response) {
+          console.log("검색 결과:", response); // 응답 데이터 확인
+          if (response.success && response.data) {
+            // 차트 및 그리드 데이터 바인딩
+            updateChartAndGrid(response.data);
+          } else {
+            console.error("검색 결과 처리 중 오류 발생:", response.message);
+            // alert(response.message || "검색 결과를 가져오는 중 오류가 발생했습니다.");
+          }
+        },
+        error: function (xhr, status, error) {
+          console.error("검색 요청 중 오류 발생:", error);
+          console.error("응답 내용:", xhr.responseText);
+          Alert.alert("검색 요청 처리 중 오류가 발생했습니다.",'');
+        }
+      });
+
     }
 
     // 데이터 바인딩 함수 (그리드나 테이블에 출력)
     function bindDataToGrid(data2) {
-      console.log("바인딩 데이터:", data2);
+      console.log("그리드에 바인딩할 데이터:", data2);
 
+      // 응답 데이터 가공
+      if (data2 && Array.isArray(data2)) {
+        data2 = data2.map((item, index) => ({
+          ...item,
+          reqdate: formatDateString(item.reqdate), // 날짜 형식 변환
+          deldate: formatDateString(item.deldate), // 날짜 형식 변환
+          ordflag: getOrdflagText(parseInt(item.ordflag, 10)), // 진행 구분 텍스트 변환
+          rownum: index + 1 // 순번
+        }));
+      } else {
+        console.error("유효하지 않은 데이터 형식:", data2);
+        data2 = [];
+      }
       // 데이터가 10개 미만인 경우 빈 행 추가
       while (data2.length < 10) {
         data2.push({
@@ -348,39 +425,60 @@
       // Wijmo CollectionView 생성
       const viewdata = new wijmo.collections.CollectionView(data2);
 
-      // FlexGrid 초기화 또는 업데이트
       if (!theGrid) {
+        // 그리드 초기화
         theGrid = new wijmo.grid.FlexGrid('#theGrid', {
           autoGenerateColumns: false,
           showMarquee: true,
           columns: [
             { binding: 'rownum', header: '순번', width: 80, align: 'center' },
             { binding: 'reqdate', header: '주문일자', width: '*', minWidth: 100, align: 'center' },
-            { binding: 'estimatedate', header: '견적일자', width: '*', minWidth: 100, align: 'center' },
             { binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center' },
             { binding: 'cltnm', header: '업체명', width: '*', minWidth: 100, align: 'center' },
-            { binding: 'perid', header: '담당자', width: '*', minWidth: 100, align: 'center' },
-            { binding: 'telno', header: '연락처', width: '*', minWidth: 100, align: 'center' },
-            { binding: 'orderprice', header: '금액', width: '*', minWidth: 100, align: 'center' },
-            { binding: 'resdate', header: '출고일자', width: '*', minWidth: 100, align: 'center' },
             { binding: 'remark', header: '비고', width: '*', minWidth: 100, align: 'center' }
           ],
-          itemsSource: viewdata // 바인딩 데이터 설정
+          itemsSource: viewdata
         });
 
         // FlexGrid의 행 헤더 제거
         theGrid.rowHeaders.columns.splice(0, 1);
-
-        // 컨텍스트 메뉴 추가 (옵션)
-        new FlexGridContextMenu(theGrid);
-        window.downloadFileName = '주문진행 현황';
       } else {
         // 이미 FlexGrid가 존재하는 경우, 데이터만 업데이트
         theGrid.itemsSource = viewdata;
       }
     }
 
-    //
+
+    function updateChartAndGrid(data) {
+      console.log("업데이트할 데이터:", data);
+
+      // 차트 데이터를 추출 및 변환
+      const chartLabels = ['주문의뢰', '주문확인', '주문확정', '제작진행', '출고'];
+      const chartData = [0, 0, 0, 0, 0]; // 각 진행 상태별 초기값
+
+      data.forEach(item => {
+        if (item.ordflag !== undefined && item.ordflag !== null) {
+          const ordflag = parseInt(item.ordflag, 10);
+          if (ordflag >= 0 && ordflag <= 4) {
+            chartData[ordflag]++;
+          }
+        }
+      });
+
+      // 차트 업데이트
+      const chartInstance = $('#myChart').data('chart');
+      if (chartInstance) {
+        chartInstance.data.datasets[0].data = chartData;
+        chartInstance.update();
+      } else {
+        console.error("차트 인스턴스를 찾을 수 없습니다.");
+      }
+
+      // 그리드 데이터 바인딩
+      bindDataToGrid(data);
+    }
+
+    //차트
     $(document).ready(function () {
       // 숫자 → 값 매핑 객체
       const stageMapping = {
@@ -493,7 +591,7 @@
               updateChart(myChart, data);
             } else {
               console.error("서버 응답이 유효하지 않습니다:", response.message);
-              alert(response.message || "데이터를 가져오는 중 오류가 발생했습니다.");
+              Alert.alert(response.message || "데이터를 가져오는 중 오류가 발생했습니다.",'');
             }
           },
           error: function (xhr, status, error) {
