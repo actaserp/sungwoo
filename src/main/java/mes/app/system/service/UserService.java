@@ -56,6 +56,8 @@ public class UserService {
             up.lang_code,
             au.is_active,
             au.Phone,
+            au.spjangcd ,
+            au.*,
             txc.*,
             FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined
         FROM

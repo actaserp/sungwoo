@@ -337,11 +337,11 @@ public class AccountController {
 
 						// 기본값 설정된 필드들
 						.rnumchk(String.valueOf(0))                 // rnumchk = 0
-						.corpperclafi(String.valueOf(1))            // corpperclafi = 1 (법인구분)
+						.corpperclafi(String.valueOf(0))            // corpperclafi = 0 (법인구분, 기본 = 법인)
 						.cltdv(String.valueOf(1))                   // cltdv = 1 (거래처구분)
 						.prtcltnm(cltnm) 							   // prtcltnm = "인쇄 거래처명 - 거래처명"
 						.foreyn(String.valueOf(0))                  // foreyn = 0
-						.relyn(String.valueOf(1))                   // relyn = 1
+						.relyn(String.valueOf(0))                   // relyn = 0
 						.bonddv(String.valueOf(0))                  // bonddv = 0
 						/*.nation("KR")               // nation = "KR"*/
 						.clttype(String.valueOf(2))                 // clttype = 2 (거래구분)

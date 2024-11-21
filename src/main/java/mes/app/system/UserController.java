@@ -295,11 +295,11 @@ public class UserController {
 						.agneremail(email)
 						.id(new TB_XCLIENTId(custcd, newCltcd))
 						.rnumchk("0")
-						.corpperclafi("1")
+						.corpperclafi("0")
 						.cltdv("1")
 						.prtcltnm(cltnm)
 						.foreyn("0")
-						.relyn("1")
+						.relyn("0")		//거래중지컬럼 0은 해제 상태
 						.bonddv("0")
 						.nation("KR")
 						.clttype("2")

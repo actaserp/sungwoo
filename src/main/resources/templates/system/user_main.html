@@ -209,9 +209,26 @@
                                     </div>
                                 </td>
                             </tr>
+                            <tr>
+                                <th>
+                                    사업체명
+                                </th>
+                                <td>
+                                    <select id="spjType" name="spjType" class="wp30">
+                                        <option value="">선택하세요</option>
+                                        <option value="ZZ">성우에스피(주)</option>
+                                        <option value="PP">성우피앤비(주)</option>
+                                    </select>
+                                </td><th>
+                            </th>
+                                <td>
+                                </td>
+
+                            </tr>
                             </tbody>
                         </table>
                     </div>
+
 
                     <div class="section-top" style="margin-top: 24px;">
                         <div class="search-wrap">
@@ -419,6 +436,9 @@
                 success: function (response) {
                     if (response && Array.isArray(response.data)) {
                         data2 = response.data;
+                        data2.forEach(item => {
+                            item.spjType = getSpjTypeText(item.spjangcd);
+                        });
                     }
                 },
                 error: function () {
@@ -448,6 +468,7 @@
                         Phone: '',
                         email: '',
                         date_joined: '',
+                        spjType:'',
                     });
                 }
             }
@@ -479,6 +500,7 @@
                         {binding: 'Phone', header: '핸드폰', width: '*', align: 'center', visible: true},
                         {binding: 'email', header: '이메일', width: '*', align: 'center', visible: false},
                         {binding: 'is_active', header: '활성화', width: '*', align: 'center', isReadOnly: false,},
+                        {binding: 'spjType', header: '사업체명', width: '*', align: 'center', isReadOnly: true},
                         {binding: 'date_joined', header: '생성일', width: '*', align: 'center', isReadOnly: true},
                     ],
                     itemsSource: viewdata,
@@ -507,12 +529,23 @@
             });
         }//fetchListData
 
+        function getSpjTypeText(spjangcd) {
+            switch (spjangcd) {
+                case 'ZZ':
+                    return "성우에스피(주)";
+                case 'PP':
+                    return "성우피앤비(주)";
+                default:
+                    return " ";
+            }
+        }
+
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
         function showUserInfo(rowData) {
             // 필드 중 하나라도 비어있는지 확인하여 추가 데이터를 가져올지 결정
             const hasMissingFields = !rowData || !rowData.cltnm || !rowData.prenm || !rowData.biztypenm ||
                 !rowData.bizitemnm || !rowData.tel || !rowData.Phone ||
-                !rowData.userid || !rowData.email;
+                !rowData.userid || !rowData.email || !rowData.spjType;
 
             if (hasMissingFields) {
                 // 데이터가 불완전하거나 비어 있을 때
@@ -561,6 +594,9 @@
 
             // 체크박스 설정
             document.getElementById("is_active").checked = data.is_active || false;
+
+            //사업체명
+            document.getElementById('spjType').value = data.spjangcd;
 
             // 주소 관련 필드 설정
             const addressParts = splitAddress(data.cltadres || '');
@@ -625,7 +661,8 @@
                                 tel: '',
                                 Phone: '',
                                 email: '',
-                                date_joined: ''
+                                date_joined: '',
+                                spjType: '',
                             });
                         }
                     }
@@ -665,12 +702,14 @@
                     cltnm: item["cltnm"],              // 업체명
                     group_name: item["group_name"],    // 사용자그룹
                     group_id: item["group_id"],        // 사용자그룹 (보이지 않음)
+                    authType: item["UserGroup_id"],
                     biztypenm: item["biztypenm"],      // 업태
                     bizitemnm: item["bizitemnm"],      // 종목
                     tel: item["tel"],                  // 전화번호 (보이지 않음)
                     Phone: item["Phone"],              // 핸드폰
                     email: item["email"],              // 이메일 (보이지 않음)
-                    date_joined: item["date_joined"]   // 생성일
+                    date_joined: item["date_joined"],   // 생성일
+                    spjType: item['spjangcd']          //사업체명
                 });
                 cnt++
             }
@@ -688,7 +727,7 @@
         function clearForm() {
             ['id', 'userid', 'prenm', 'cltnm', 'authType', 'email',
                 'Phone', 'tel', 'divinm2', 'agencycd', 'firstSelect', 'placeAddress',
-                'biztypenm', 'bizitemnm', 'postno', 'address1','address2', 'username'].forEach(id => {
+                'biztypenm', 'bizitemnm', 'postno', 'address1','address2', 'username', 'spjType'].forEach(id => {
                 const element = document.getElementById(id);
                 if (element) { // 요소가 존재하는 경우에만 실행
                     element.value = '';
@@ -704,6 +743,11 @@
             const selectAuthType = document.getElementById('authType');
             if (selectAuthType) {
                 selectAuthType.value = '35'; //일반거래처
+            }
+
+            const selectSpjType = document.getElementById('spjType');
+            if (selectSpjType) {
+                selectSpjType.value = 'ZZ';
             }
 
             $('#userid').prop('readonly', false);
