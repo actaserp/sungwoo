@@ -55,8 +55,20 @@
                 <li>주문 현황</li>
             </ul>
         </div>
+        <div class="search-wrap" id="searchWrap" style="display: none; padding-top:10px">
+            <ul>
+                <li>
+                    <select title="사업장" id="search_sjangcd" name="search_sjangcd"
+                            onchange="init()">
+                        <option value="" hidden selected disabled>선택</option>
+                        <option value="ZZ">성우에스피(주)</option>
+                        <option value="PP">성우피앤비(주)</option>
+                        <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
+                    </select>
+                </li>
+            </ul>
+        </div>
         <!-- Select -->
-
         <div class="tab-wrap">
             <ul class="tab-links">
                 <li>
@@ -299,51 +311,6 @@
     </div>
 
     <!-- 옵션 및 요청사항 모달 -->
-    <!--<div class="modal">
-        <div class="popup-wrapper w700" id="OrdtextModal" style="display: none; min-width: 1050px;">
-            <div class="popup-title">
-                <h3>옵션 및 요청사항</h3>
-                <a title="팝업닫기" onclick="closePopup('OrdtextModal')" class="btn-popup-close">
-                    <img src="/images/icon/btn-popup-close.svg" alt="닫기" style="float: right; right: 30px;">
-                </a>
-            </div>
-            <div class="popup-contents">
-                <div class="table-wrap">
-                    <table class="write-table" style="border-top: 0px;">
-                        <caption>주문의뢰 요청사항</caption>
-                        <colgroup>
-                            <col class="wp20">
-                            <col class="wp80">
-                        </colgroup>
-                        <tbody>
-                        <tr>
-                            <td>
-                                <div class="table-wrap">
-                                    <table class="write-table">
-                                        <caption>요청사항</caption>
-                                        <tbody>
-                                        <tr style="align-items: center">
-                                            <th>
-                                                <label for="ordtext">내용</label>
-                                            </th>
-                                            <td colspan="3">
-                                                <div class="textarea-box">
-                                                    &lt;!&ndash; textarea를 읽기 전용으로 설정 &ndash;&gt;
-                                                    <textarea id="ordtext" readonly></textarea>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>-->
     <div class="modal">
         <div class="popup-wrapper w700" id="OrdtextModal" style="display: none; min-width: 1050px;">
             <div class="popup-title">
@@ -491,7 +458,7 @@
         }
         /* 캘린더 ==========================================================================================================================*/
 
-        function initCalendar() {
+        /*function initCalendar() {
            var calendarEl = document.getElementById('calendar');
            if (calendarEl) {
                // FullCalendar 설정
@@ -537,7 +504,119 @@
                    console.error('공휴일 데이터를 가져오는 데 실패했습니다:', error);
                });
            }
-       }
+       }*/
+        function initCalendar() {
+            var calendarEl = document.getElementById('calendar');
+            if (calendarEl) {
+                // FullCalendar 설정
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    locale: 'ko',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth'
+                    },
+                    initialView: 'dayGridMonth',
+                    height: 714,
+                    dayHeaderFormat: { weekday: 'short' },
+                    views: {
+                        dayGridMonth: {
+                            dayCellContent: function (arg) {
+                                return arg.dayNumberText.replace('일', '');
+                            }
+                        }
+                    },
+                    dateClick: function (info) {
+                        console.log('Clicked on: ' + info.dateStr);
+                    },
+                    events: [] // 기본 이벤트는 빈 배열로 설정
+                });
+
+                // 공휴일 데이터 가져오기
+                fetchHolidays().then(holidays => {
+                    console.log("holidays : ", holidays)
+                    holidays.forEach(holiday => {
+                        calendar.addEvent({
+                            title: holiday.name, // 공휴일 이름
+                            start: holiday.date,  // 공휴일 날짜
+                            backgroundColor: '#ec193a',
+                            borderColor: '#EC193A',
+                            textColor: 'white'
+                        });
+                    });
+                    calendar.render(); // 캘린더 렌더링
+                }).catch(error => {
+                    console.error('공휴일 데이터를 가져오는 데 실패했습니다:', error);
+                });
+
+                // 주문현황 데이터 가져오기
+                fetchOrderDates().then(orderDates =>{
+                    console.log("holidays : ", orderDates)
+                    orderDates.forEach(orderDate => {
+                        switch (orderDate.name) {
+                            case '주문의뢰':
+                                calendar.addEvent({
+                                    title: '주문의뢰', // 진행구분 이름
+                                    start: orderDate.date,  // 진행의뢰 날짜
+                                    backgroundColor: '#031B4B',
+                                    borderColor: '#031B4B',
+                                    textColor: 'white'
+                                });
+                                break;
+                            case '견적작성':
+                                calendar.addEvent({
+                                    title: '견적작성', // 진행구분 이름
+                                    start: orderDate.date,  // 진행의뢰 날짜
+                                    backgroundColor: '#03428E',
+                                    borderColor: '#03428E',
+                                    textColor: 'white'
+                                });
+                                break;
+                            case '제작':
+                                calendar.addEvent({
+                                    title: '제작', // 진행구분 이름
+                                    start: orderDate.date,  // 진행의뢰 날짜
+                                    backgroundColor: '#3069B3',
+                                    borderColor: '#3069B3',
+                                    textColor: 'white'
+                                });
+                                break;
+                            case '출고':
+                                calendar.addEvent({
+                                    title: '출고', // 진행구분 이름
+                                    start: orderDate.date,  // 진행의뢰 날짜
+                                    backgroundColor: '#C7DFF4',
+                                    borderColor: '#C7DFF4',
+                                    textColor: 'white'
+                                });
+                                break;
+                            default:
+                                console.log("주문현황 바인드 오류 : ", orderDate.name);
+                        }
+                    });
+                    calendar.render(); // 캘린더 렌더링
+                }).catch(error => {
+                    console.error('주문현황 데이터를 가져오는 데 실패했습니다:', error);
+                });
+            }
+        }
+
+        async function fetchOrderDates() {
+            // [0: {date: '20230101', name: '1월1일'},{1:}]
+            // 모든 행의 데이터를 저장할 배열을 초기화합니다.
+            var orderDates = [];
+            // viewdata.items를 반복하여 각 항목의 ordflag와 reqdate 값을 가져옵니다.
+            for (var i = 0; i < viewdata.items.length; i++) {
+                var item = viewdata.items[i];
+                orderDates.push({
+                    name: item.ordflag,
+                    date: item.reqdate
+                });
+            }
+            console.log("orderDates : ", orderDates)
+            return orderDates;
+        }
+
        // 공휴일 데이터를 가져오는 함수
        async function fetchHolidays() {
            const currentYear = new Date().getFullYear();
