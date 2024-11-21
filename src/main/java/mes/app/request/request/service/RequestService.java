@@ -80,13 +80,14 @@ public class RequestService {
     }
     //주문의뢰현황 불러오기
     public List<Map<String, Object>> getOrderList(TB_DA006W_PK tbDa006W_pk,
-                                                  String searchStartDate, String searchEndDate, String searchRemark, String searchOrdflag, String saupnum) {
+                                                  String searchStartDate, String searchEndDate, String searchRemark, String searchOrdflag, String saupnum, String cltcd) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("searchStartDate", searchStartDate);
         dicParam.addValue("searchEndDate", searchEndDate);
         dicParam.addValue("searchRemark", "%" + searchRemark + "%");
         dicParam.addValue("searchOrdflag",  searchOrdflag);
+        dicParam.addValue("cltcd",  cltcd);
 
         StringBuilder sql = new StringBuilder("""
                 SELECT
@@ -143,6 +144,7 @@ public class RequestService {
                     hd.custcd = :custcd
                     AND hd.spjangcd = :spjangcd
                     AND hd.saupnum = :saupnum
+                    AND hd.cltcd = :cltcd
                 """);
         // 날짜 필터
         if (searchStartDate != null && !searchStartDate.isEmpty()) {

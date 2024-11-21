@@ -1,5 +1,6 @@
 package mes.app.order_status.service;
 
+import mes.domain.entity.actasEntity.TB_DA006W_PK;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -161,5 +162,77 @@ public class OrderStatusService {
             return result.get(0).get("ordtext").toString();
         }
         return null; // 데이터가 없을 경우 null 반환
+    }
+    // username으로 cltcd, cltnm, saupnum, custcd 가지고 오기
+    public Map<String, Object> getUserInfo(String username) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+
+        String sql = """
+                select xc.custcd,
+                       xc.cltcd,
+                       xc.cltnm,
+                       xc.saupnum,
+                       au.spjangcd
+                FROM TB_XCLIENT xc
+                left join auth_user au on au."username" = xc.saupnum
+                WHERE xc.saupnum = :username
+                """;
+        dicParam.addValue("username", username);
+        Map<String, Object> userInfo = this.sqlRunner.getRow(sql, dicParam);
+        return userInfo;
+    }
+    //주문현황 그리드
+    public List<Map<String, Object>> getOrderList(TB_DA006W_PK tbDa006W_pk,
+                                                  String searchStartDate, String searchEndDate, String searchType, String saupnum, String userAuth) {
+
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("searchStartDate", searchStartDate);
+        dicParam.addValue("searchEndDate", searchEndDate);
+        dicParam.addValue("searchType", searchType);
+        dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
+        dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
+        dicParam.addValue("saupnum", saupnum);
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT
+                    custcd,
+                    spjangcd,
+                    reqnum,
+                    reqdate,
+                    ordflag,
+                    deldate,
+                    telno,
+                    perid,
+                    cltzipcd,
+                    cltaddr,
+                    remark
+                FROM
+                    TB_DA006W hd
+                WHERE
+                    hd.custcd = :custcd
+                    AND hd.spjangcd = :spjangcd
+                    AND hd.saupnum = :saupnum
+                """);
+        // 날짜 필터
+        if (searchStartDate != null && !searchStartDate.isEmpty()) {
+            sql.append(" AND reqdate >= :searchStartDate");
+        }
+        //
+        if (searchEndDate != null && !searchEndDate.isEmpty()) {
+            sql.append(" AND reqdate <= :searchEndDate");
+        }
+        // 진행구분 필터
+        if (searchType != null && !searchType.isEmpty()) {
+            sql.append(" AND ordflag LIKE :searchType");
+        }
+        // 사용자권한 관리자등급 유무
+        if(userAuth.equals("normal")){
+            sql.append(" AND hd.cltcd = ");
+        }
+        // 정렬 조건 추가
+        sql.append(" ORDER BY reqdate ASC");
+
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
+        return items;
     }
 }
