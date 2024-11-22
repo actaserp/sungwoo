@@ -191,7 +191,7 @@ public class RequestService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         try {
             String sql = """
-                    UPDATE ERP_SWSPANEL1.dbo.TB_DA007W
+                    UPDATE TB_DA007W
                     SET
                         hgrb = :hgrb,
                         panel_t = :panel_t,

@@ -1333,6 +1333,11 @@
             }
         }
         function initDatas(){
+            $('.requestCnt').html(0 + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+            $('.checkCnt').html(0 + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+            $('.estimateCnt').html(0 + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+            $('.produceCnt').html(0 + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+            $('.deliveryCnt').html(0 + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
             $.ajax({
                 url: '/api/order_status/initDatas',
                 type: 'GET',

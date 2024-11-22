@@ -197,6 +197,7 @@
             <table class="write-table">
               <caption>세부사항 테이블</caption>
               <input type="hidden" id="reqseq" name="reqseq">
+              <input type="hidden" id="isnew" name="isnew">
               <tbody>
               <tr>
                 <th style="text-align: center">
@@ -906,7 +907,7 @@
         success: function (data) {
           data2 = data.data;
           data2.forEach(item =>{
-            console.log("getHgrb : ", item.hgrb)
+            console.log("getHgrb : ", item)
             item.hgrb = getHgrb((item.hgrb));
             item.exfmtypedv = getListCgrb2(item.exfmtypedv);
             item.infmtypedv = getListCgrb2(item.infmtypedv);
@@ -939,6 +940,8 @@
             {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
             {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 100, align: 'left'},
             {binding: 'originOrdtext', visible: false},
+            {binding: 'reqseq', visible: false},
+            {binding: 'isnew', visible: false},
           ],
           itemsSource: viewdata2,
           itemFormatter: function (panel, r, c, cell) {
@@ -981,6 +984,7 @@
             document.getElementById('panel_w').value = item.panel_w;
             document.getElementById('panel_l').value = item.panel_l;
             document.getElementById('reqseq').value = item.reqseq;
+            document.getElementById('isnew').value = item.isnew;
             tinymce.get('ordtext').setContent(item.ordtext);  // 'ordtext'는 TinyMCE가 적용된 요소의 id
 
             const selectHgrb = document.getElementById('hgrb');
@@ -996,6 +1000,7 @@
             setSelectedIndex(selectInfmtypedv, selectedItem.infmtypedv);
             setSelectedIndex(selectStframedv, selectedItem.stframedv);
             setSelectedIndex(selectStexplydv, selectedItem.stexplydv);
+            console.log("더블클릭 실행 후 isnew : ", document.getElementById('isnew').value)
           }
         })
         // FlexGrid의 최대 높이를 제한하여 스크롤바를 활성화
@@ -1248,8 +1253,11 @@
       var selectedOptionText = selectElement.options[selectElement.selectedIndex].text;
       document.getElementById(hiddenInputId).value = selectedOptionText;
     }
-    // 행(세부사항) 추가
     function addBody() {
+      console.log("addBody 실행 직후 isnew : ", document.getElementById('isnew').value);
+      const isnewValue = Number(document.getElementById('isnew').value);
+      console.log("isnewValue : ", isnewValue);
+
       const newRowData = {
         hgrb: getHgrb(document.getElementById("hgrb").value),
         qty: Number(document.getElementById("qty").value),
@@ -1262,37 +1270,59 @@
         stexplydv: getListCgrb2(document.getElementById("stexplydv").value),
         reqseq: document.getElementById("reqseq").value,
         ordtext: tinymce.get('ordtext').getContent(),
-        originOrdtext: tinymce.get('ordtext').getContent()
+        originOrdtext: tinymce.get('ordtext').getContent(),
+        isnew: isnewValue // isnewValue를 직접 사용
       };
 
+      console.log("직전 체크 데이터 : ", newRowData.isnew);
+      console.log("직전 체크 데이터2 : ", document.getElementById('isnew').value);
+
       const sourceCollection = viewdata2.sourceCollection;
-      let isUpdated = false;
+      let isUpdated = false;  // 업데이트 여부 플래그
+      console.log("수정한 데이터 : ", newRowData.isnew);
 
       for (let i = 0; i < sourceCollection.length; i++) {
-        console.log("세부사항 그리드 현재 검색 셀 index : ", i)
+        console.log("i 번째 for 문", i);
+        console.log("그리드 데이터 : ", sourceCollection[i]);
+
+        // reqseq가 없을 경우 isnew로 비교
         if (newRowData.reqseq === sourceCollection[i].reqseq && newRowData.reqseq !== "") {
-          console.log("수정그리드 editor text : ", sourceCollection[i].originOrdtext)
-          sourceCollection[i] = newRowData;  // Update existing row
-          isUpdated = true;
-          break;
-        } else if (!sourceCollection[i].hgrb || sourceCollection[i].hgrb === '') {
-          sourceCollection[i] = newRowData;  // Fill empty row
-          console.log("추가그리드 editor text : ", sourceCollection[i].originOrdtext)
-          isUpdated = true;
-          break;
+          console.log("수정그리드 editor text : ", sourceCollection[i].originOrdtext);
+          sourceCollection[i] = { ...sourceCollection[i], ...newRowData };  // Update existing row
+          isUpdated = true;  // 업데이트 플래그 설정
+          break;  // 업데이트 후 루프 종료
+        } else if (Number(newRowData.isnew) === Number(sourceCollection[i].isnew) && newRowData.isnew !== "") {
+          console.log("isnew로 수정그리드 editor text : ", sourceCollection[i].originOrdtext);
+          sourceCollection[i] = { ...sourceCollection[i], ...newRowData };  // Update existing row based on isnew
+          document.getElementById('isnew').value = '';
+          isUpdated = true;  // 업데이트 플래그 설정
+          break;  // 업데이트 후 루프 종료
         }
       }
 
+      // 업데이트가 이루어지지 않은 경우 새로운 행 추가
       if (!isUpdated) {
-        viewdata2.addNew(newRowData);  // Add new row if no updates were made
-        console.log("추가그리드 editor text : ", newRowData.originOrdtext)
+        console.log("!isUpdated 진입 : ", isnewValue)
+        const existingIsNewValues = sourceCollection.map(row => Number(row.isnew)).filter(value => !isNaN(value));
+        let newIsNewValue = 1; // 기본값
+
+        // 기존 isnew 값 중 가장 큰 값을 찾아서 1을 더함
+        if (existingIsNewValues.length > 0) {
+          newIsNewValue = Math.max(...existingIsNewValues) + 1;
+        }
+        newRowData.isnew = newIsNewValue; // 새로운 isnew 값을 설정
+        console.log("!isUpdated 마무리 직전 : ", newRowData.isnew)
+        viewdata2.addNew(newRowData);  // Add new row
+        console.log("추가그리드 editor text : ", newRowData.originOrdtext);
       }
 
       viewdata2.commitEdit();  // Commit changes
       viewdata2.refresh();  // Refresh the collection view
       theGrid2.refresh();  // Refresh the grid
-      resetBodyField();
+      resetBodyField();  // Reset input fields
     }
+
+
 
     // 행(세부사항) 삭제(마지막 세부사항 삭제시 헤드정보도 같이 삭제)
     function deleteBody(){
@@ -1542,7 +1572,12 @@
         if (button) {
           button.style.display = 'none'; // 버튼 숨기기
         }
-
+        const closebutton = popup.querySelector('.btn-popup-close');
+        if (closebutton) {
+          closebutton.onclick = function() {
+            closePopup2('popup2'); // closePopup2로 호출 메서드 변경
+          };
+        }
         // 팝업을 표시
         popup.style.display = 'block';
 
@@ -1831,11 +1866,16 @@
 
         // 팝업 버튼 복구
         const button = popup.querySelector('.popup-button');
-
+        // closepopup으로 메서드 변경
+        const closebutton = popup.querySelector('.btn-popup-close');
+        if (closebutton) {
+          closebutton.onclick = function() {
+            closePopup('popup2'); // closePopup로 호출 메서드 변경
+          };
+        }
         tinymce.get('ordtext').setContent("");
         if (button) {
           button.style.display = ''; // 기본 스타일로 복구
-          // 또는 button.classList.remove('hidden'); // 클래스 방식으로 복구
         }
       }
     }

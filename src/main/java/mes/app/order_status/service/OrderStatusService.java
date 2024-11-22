@@ -61,7 +61,7 @@ public class OrderStatusService {
         // searchTerm이 있을 때만 LIKE 조건 추가
         String sql = """
         SELECT *
-                FROM ERP_SWSPANEL1.dbo.TB_XCLIENT
+                FROM TB_XCLIENT
         """ + (searchTerm != null && !searchTerm.isEmpty() ? " WHERE cltnm LIKE :searchTerm" : "");
 
         // searchTerm이 비어 있지 않을 때만 파라미터에 추가
