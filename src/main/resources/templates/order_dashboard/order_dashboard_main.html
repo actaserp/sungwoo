@@ -294,7 +294,10 @@
                             textColor: 'white'
                         });
                     });
-                    calendar.render(); // 캘린더 렌더링
+                    setTimeout(() => {
+                        calendar.render(); // 캘린더 렌더링
+                        console.log('캘린더가 렌더링되었습니다.');
+                    }, 500); // 500ms 딜레이
                 }).catch(error => {
                     console.error('공휴일 데이터를 가져오는 데 실패했습니다:', error);
                 });
