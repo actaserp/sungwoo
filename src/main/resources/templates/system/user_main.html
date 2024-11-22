@@ -434,11 +434,12 @@
                 type: 'GET',
                 async: false,
                 success: function (response) {
+                    console.log("API Response:", response); // 응답 데이터를 출력
                     if (response && Array.isArray(response.data)) {
                         data2 = response.data;
-                        data2.forEach(item => {
+                      /*  data2.forEach(item => {
                             item.spjType = getSpjTypeText(item.spjangcd);
-                        });
+                        });*/
                     }
                 },
                 error: function () {
@@ -539,6 +540,18 @@
                     return " ";
             }
         }
+
+        //날짜 포맷
+        function formatDateString(dateString) {
+            if (!dateString || typeof dateString !== 'string' || dateString.length < 8) {
+                return ""; // 유효하지 않은 날짜는 빈 문자열 반환
+            }
+            const year = dateString.substring(0, 4);
+            const month = dateString.substring(4, 6);
+            const day = dateString.substring(6, 8);
+            return `${year}${month}${day}`;
+        }
+
 
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
         function showUserInfo(rowData) {

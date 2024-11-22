@@ -53,21 +53,15 @@ public class UserController {
 
 	@Autowired
 	SqlRunner sqlRunner;
-	@Autowired
-	private TB_RP940Repository tB_RP940Repository;
-	@Autowired
-	private TB_RP945Repository tB_RP945Repository;
 
 	@Autowired
-	private UserCodeRepository userCodeRepository;
+	private TB_RP945Repository tB_RP945Repository;
 
 	@Autowired
 	TB_XClientService tbXClientService;
 
 	@Autowired
 	TB_XClientRepository tbXClientRepository;
-	@Autowired
-	TB_RP945_Service tbRp945Service;
 
 	@Autowired
 	TB_XA012Repository tbXA012Repository;
@@ -340,7 +334,7 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
-
+	//사용자 관리 검색
 	@GetMapping("/search")
 	public ResponseEntity<Map<String, Object>> search(
 			@RequestParam(name = "auth", required = false, defaultValue = "false") boolean auth,
@@ -348,7 +342,7 @@ public class UserController {
 			@RequestParam(required = false) String name,
 			@RequestParam(required = false) String username) {
 
-		// 검색 결과를 가져오는 로직 (예: 서비스 메서드 호출)
+		// 검색 결과를 가져오는 로직
 		List<Map<String, Object>> result = userService.searchData(userGroup, name, username);
 
 		// 응답 데이터를 "data" 키로 래핑하여 JSON 형식으로 반환

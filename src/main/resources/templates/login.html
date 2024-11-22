@@ -221,7 +221,8 @@
                                     <span class="tooltip"
                                           style="display: inline-block;width: 13px; height: 13px;border: 2px solid red;border-radius: 50%;text-align: center;line-height: 15px;color: red;margin-right: 5px;">
                                          <span style="position: absolute; top: -3px; left:1.5PX; font-size:10px;">?</span>
-                                        <span class="tooltiptext" style="color: red;">최초비밀번호는 사업자번호 5자리입니다.</span>
+                                        <!--<span class="tooltiptext" style="color: red;">최초비밀번호는 사업자번호 5자리입니다.</span>-->
+                                        <span class="tooltiptext" style="color: red;">최초비밀번호는  11111 입니다. </span>
                                     </span>
                                 </label>
                             </dt>
@@ -775,18 +776,26 @@
     }
 
     //취소버튼
-    function RegisterUserClose(){
+    function RegisterUserClose() {
         let popup = document.getElementById('popup1');
         let wrapper = document.getElementById('wrapper1');
 
-        // 우편번호 및 주소 필드 초기화
+        // 모든 입력 필드 초기화
+        let form = document.getElementById('bomForm');
+        form.reset(); // 폼 전체 초기화
+
+        // 추가로 초기화가 필요한 필드들 처리 (예: 비활성화된 필드 등)
         document.getElementById('postno').value = '';
         document.getElementById('address1').value = '';
         document.getElementById('address2').value = '';
+        document.getElementById('AuthenticationCodeRegister').value = '';
+        document.getElementById('timer2').innerText = ''; // 타이머 초기화
 
+        // 팝업 및 래퍼 숨기기
         popup.style.display = 'none';
         wrapper.style.display = 'none';
     }
+
 
 
     function initializeSelect({

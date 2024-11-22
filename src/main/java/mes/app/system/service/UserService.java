@@ -33,6 +33,10 @@ public class UserService {
     TB_XClientRepository tbXClientRepository;
 
     // 사용자 리스트
+    /*필요시
+    *  WHERE
+    * au.is_superuser = 0
+    * 추가 하기 */
     public List<Map<String, Object>> getUserList(boolean superUser, String cltnm, String prenm, String biztypenm, String bizitemnm, String email) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("superUser", superUser);
@@ -41,74 +45,47 @@ public class UserService {
         params.addValue("biztypenm", biztypenm);
         params.addValue("bizitemnm", bizitemnm);
         params.addValue("email", email);
-
         String sql = """
-        SELECT
-            au.id,
-            up.Name,
-            au.username AS  userid,
-            up.UserGroup_id,
-            ug.id AS group_id,
-            au.email,
-            au.tel,
-            au.agencycd,
-            ug.Name AS group_name,
-            up.lang_code,
-            au.is_active,
-            au.Phone,
-            au.spjangcd ,
-            au.*,
-            txc.*,
-            FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined
-        FROM
-            auth_user au 
-        LEFT JOIN 
-            user_profile up ON up.User_id = au.id
-        LEFT JOIN 
-            user_group ug ON ug.id = up.UserGroup_id
-        LEFT JOIN 
-            TB_XCLIENT txc on	up.Name = txc.prenm
-         
+                SELECT
+                            au.id,
+                            au.last_name,
+                            txc.cltnm,
+                            au.username AS userid,
+                            ug.id AS group_id,
+                            au.email,
+                            au.tel,
+                            au.spjangcd AS spjType,
+                            au.agencycd,
+                            ug.Name AS group_name,
+                            ug.id,
+                            au.last_login,
+                            up.lang_code,
+                            au.is_active,
+                            au.Phone,
+                            txc.biztypenm,
+                            txc.bizitemnm,
+                            txc.prenm,
+                            FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined
+                        FROM
+                            auth_user au
+                        LEFT JOIN
+                            user_profile up ON up.User_id = au.id
+                        LEFT JOIN
+                            user_group ug ON ug.id = up.UserGroup_id
+                        LEFT JOIN
+                            TB_XCLIENT txc
+                            ON au.first_name = txc.cltnm
+                            AND au.username = txc.saupnum
+                            AND au.last_name = txc.prenm
+                        WHERE
+                            1 = 1
         """;
 
-        // superUser가 아닌 경우, 개발자 그룹 제외
-        if (!superUser) {
-            sql += " AND ug.Code <> 'dev' ";
-        }
-
-        // 각 매개변수가 null이 아닐 경우 조건 추가
-        if (!StringUtils.isEmpty(cltnm)) {
-            sql += " AND uc.Value LIKE '%' + :cltnm + '%' ";
-        }
-
-        if (!StringUtils.isEmpty(prenm)) {
-            sql += " AND up.Name LIKE '%' + :prenm + '%' ";
-        }
-
-        if (!StringUtils.isEmpty(biztypenm)) {
-            sql += " AND rp.biztypenm LIKE '%' + :biztypenm + '%' ";
-        }
-
-        if (!StringUtils.isEmpty(bizitemnm)) {
-            sql += " AND rp.bizitemnm LIKE '%' + :bizitemnm + '%' ";
-        }
-
-        if (!StringUtils.isEmpty(email)) {
-            sql += " AND au.email LIKE '%' + :email + '%' ";
-        }
-
-        // 정렬 조건 추가
-        sql += " ORDER BY au.date_joined DESC";
-
         // SQL 실행 후 결과 반환
-        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, params);
-        return items;
+        return sqlRunner.getRows(sql, new MapSqlParameterSource());
+
     }
 
-    /*필요시
-    *  WHERE
-    * au.is_superuser = 0
-    * 추가 하기 */
 
     // 사용자 상세정보 조회
     public Map<String, Object> getUserDetail(Integer id){
@@ -270,7 +247,6 @@ public class UserService {
                au.divinm,
                au.smtpid,
                au.smtppassword,
-               rp.[ranknm],
                up.[Depart_id],
                up.lang_code,
                au.is_active,
@@ -281,7 +257,6 @@ public class UserService {
         LEFT JOIN user_profile up ON up.[User_id] = au.id
         LEFT JOIN user_group ug ON ug.id = up.[UserGroup_id]
         LEFT JOIN user_code uc ON CAST(au.agencycd AS INT) = uc.id
-        LEFT JOIN tb_rp940 rp ON rp.userid = au.username
         left join TB_XCLIENT txc ON up.Name = txc.prenm
         WHERE 1=1
         """;
