@@ -941,55 +941,6 @@
 
         })
 
-        /*//아이디 찾기
-        $('#btnSearch').click(function (e){
-
-            const errMsgDiv = document.getElementById('ErrMsg');
-            const errMsgSpan = errMsgDiv.querySelector('span');
-
-            errMsgDiv.style.display = 'none';
-            errMsgDiv.style.color = 'red';
-            errMsgDiv.classList.remove('show');
-            errMsgSpan.textContent = '해당 사용자는 존재하지 않습니다.';
-
-            let usernm = document.getElementById('usernm').value;
-            let mail = document.getElementById('mail').value;
-
-            if(usernm.trim().length === 0 || mail.trim().length === 0){
-                Alert.alert('', '빈 값은 불가능합니다.');
-                return false;
-            }
-
-
-            if(!emailValidate(mail.trim()))
-            { Alert.alert('', '유효한 이메일 형식을 입력하세요.'); return false; }
-
-            let data = { usernm, mail, _CsrfValue }
-
-            let fnSuccess = function (res){
-                if(res.success){
-                    if (Array.isArray(res.data)) {
-                        errMsgSpan.textContent = res.data.join(', ') + '입니다.'; // 각 배열 요소를 쉼표로 구분하여 표시
-                    } else {
-                        errMsgSpan.textContent = res.data + '입니다.'; // 배열이 아니면 그대로 표시
-                    }
-                    errMsgDiv.style.display = 'block';
-                    errMsgDiv.style.color = 'black';
-                    errMsgDiv.classList.add('show');
-                } else if (!res.success){
-
-                    errMsgDiv.style.display = 'block';
-                    errMsgDiv.classList.add('show');
-
-                    errMsgDiv.addEventListener('animationend', function() {
-                        errMsgDiv.classList.remove('show');
-                    });
-
-                }
-            };
-            AjaxUtil.postAsyncData("/user-auth/searchAccount", data, fnSuccess, function(){ Alert.alert('', '서버통신 실패') });
-        })*/
-
         // 등록자 확인
         $('#btnSearch').click(function (e) {
             const errMsgDiv = document.getElementById('ErrMsg');
@@ -1490,6 +1441,7 @@
                 Alert.alert('', JSON.parse(e.responseText).message);
             });
         }
+
         $('#loginFrm').validate({ submitHandler: submitHandler });
     });
 

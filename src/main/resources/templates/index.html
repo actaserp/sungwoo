@@ -28,7 +28,7 @@
 <style>
     .alarm-box {
         display: block;
-        width: 80%; /* 박스의 폭을 80%로 설정 (필요에 따라 값 조정) */
+        /*width: 50%; !* 박스의 폭을 80%로 설정 (필요에 따라 값 조정) *!*/
         margin: 0 auto; /* 가운데 정렬 */
     }
 
@@ -96,7 +96,7 @@
                     <span>알람</span>
                     <span class="num">0</span>
                 </a>
-                <div class="alarm-box">
+                <div class="alarm-box" style="width: 1000px;">
                     <ul class="alarm-tab-links">
                         <li class="active">
                             <a href="#alarm-tab1" title="주문의뢰">주문의뢰(0)</a> <!-- 동적으로 업데이트 -->
@@ -108,8 +108,8 @@
                                 <table>
                                     <caption>알람 테이블</caption>
                                     <colgroup>
-                                        <col class="wp25"> <!-- 날짜 -->
-                                        <col class="wp50"> <!-- 업체 이름 -->
+                                        <col class="wp30"> <!-- 날짜 -->
+                                        <col class="wp45"> <!-- 업체 이름 -->
                                         <col class="wp25"> <!-- 주문 상태 -->
                                     </colgroup>
                                     <thead>
@@ -471,12 +471,12 @@
     let default_menu = null;
 
     window.onload = function () {
-        // 사용자 이름 마스킹 처리
+       /* // 사용자 이름 마스킹 처리
         var userNameSpan = document.getElementById('userName2');
         var userName = userNameSpan.textContent;
         if (userName.length > 1) {
-            userNameSpan.textContent = userName.substring(0, userName.length - 1) + '*';
-        }
+            userNameSpan.textContent = userName.substring(0, userName.length - 0) + '*';
+        }*/
 
         // 사용자 ID 마스킹 처리
         var userIdSpan = document.getElementById('userName3');
@@ -1217,32 +1217,42 @@
 
 </script>/api/order_status
 <script type="text/javascript">
-    function isAdmin(){
+    function isAdmin() {
         $.ajax({
             url: '/api/order_status/isAdmin',
             type: 'GET',
             success: function (response) {
-                console.log("response : ",response);
+                console.log("response : ", response);
+
                 // '관리자' 텍스트를 포함하는 span 요소를 선택
                 const spans = document.querySelectorAll('.user span');
 
-                // 각 span을 순회하여 '관리자' 텍스트를 찾기
-                spans.forEach(span => {
+                // '관리자' 및 관련된 "·" 요소를 숨김
+                spans.forEach((span, index) => {
                     if (span.textContent.trim() === '관리자') {
-                        if(response.data === 'admin') {
-                            span.textContent = '관리자'; // 원하는 텍스트로 변경
-                        }else{
-                            span.textContent = '사용자';
+                        if (response.data !== 'admin') {
+                            // 숨김 처리
+                            span.style.display = 'none';
+
+                            // 이전 또는 다음 요소가 "·"일 경우 함께 숨김
+                            if (spans[index - 1]?.textContent.trim() === '·') {
+                                spans[index - 1].style.display = 'none';
+                            }
+                            if (spans[index + 1]?.textContent.trim() === '·') {
+                                spans[index + 1].style.display = 'none';
+                            }
                         }
                     }
                 });
             },
             error: function (xhr, status, error) {
-                console.error('사용자 관리자여부 파악중 오류발생: ', error);
+                console.error('사용자 관리자 여부 파악 중 오류 발생: ', error);
                 alert('서버와의 통신 중 오류가 발생했습니다.');
             }
         });
     }
+
+
     // 초기 실행
     document.addEventListener('DOMContentLoaded', isAdmin);
 

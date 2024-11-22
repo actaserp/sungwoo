@@ -8,6 +8,7 @@ import javax.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 
@@ -74,6 +75,7 @@ public class UserProfile extends AbstractAuditModel implements Serializable{
 	@OneToOne
 	@JoinColumn(name = "\"User_id\"")
 	private User user;
+
 
 	@ManyToOne
 	@JoinColumn(name="\"UserGroup_id\"")

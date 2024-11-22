@@ -91,6 +91,7 @@ public class UserController {
 		return result;
 	}
 
+	//사용자 관리 (더블 클릭) 사용
 	@GetMapping("/detail")
 	public AjaxResult getUserDetail(@RequestParam(value = "id", required = false) String id) {
 		AjaxResult result = new AjaxResult();

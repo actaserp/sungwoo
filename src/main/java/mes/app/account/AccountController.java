@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.app.MailService;
 import mes.app.account.service.TB_RP940_Service;
 import mes.app.account.service.TB_RP945_Service;
@@ -28,6 +29,7 @@ import mes.domain.entity.actasEntity.TB_XCLIENTId;
 import mes.domain.repository.*;
 import mes.domain.repository.actasRepository.TB_XA012Repository;
 import mes.domain.repository.actasRepository.TB_XClientRepository;
+import org.hibernate.Hibernate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.security.core.AuthenticationException;
@@ -51,7 +53,7 @@ import mes.domain.security.Pbkdf2Sha256;
 import mes.domain.services.AccountService;
 import mes.domain.services.SqlRunner;
 
-
+@Slf4j
 @RestController
 public class AccountController {
 
@@ -132,7 +134,9 @@ public class AccountController {
 			@RequestParam("username") final String username,
 			@RequestParam("password") final String password,
 			final HttpServletRequest request) throws UnknownHostException {
-		// 여기로 들어오지 않음.
+
+		System.out.println("로그인 데이터: " + username + " / " + password);
+
 		AjaxResult result = new AjaxResult();
 
 		HashMap<String, Object> data = new HashMap<String, Object>();
@@ -171,6 +175,61 @@ public class AccountController {
 		session.setAttribute("SPRING_SECURITY_CONTEXT", sc);
 
 		return result;
+	}
+
+	/*@PostMapping("/login")
+	public AjaxResult postLogin(
+			@RequestParam("username") final String username,
+			@RequestParam("password") final String password,
+			final HttpServletRequest request) throws UnknownHostException {
+		// 여기로 들어오지 않음.
+		System.out.println("========================================로그인 진입==================================");
+		AjaxResult result = new AjaxResult();
+
+		HashMap<String, Object> data = new HashMap<String, Object>();
+		result.data = data;
+
+		UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(username, password);
+		CustomAuthenticationToken auth = null;
+		try{
+			auth = (CustomAuthenticationToken)authManager.authenticate(authReq);
+		}catch (AuthenticationException e){
+			e.printStackTrace();
+			data.put("code", "NOUSER");
+			return result;
+		}
+
+		if(auth!=null) {
+			User user = (User)auth.getPrincipal();
+			if (!user.getActive()) {  // user.getActive()가 false인 경우
+				data.put("code", "noactive");
+			} else {
+				data.put("code", "OK");
+
+				try {
+					this.accountService.saveLoginLog("login", auth);
+				} catch (UnknownHostException e) {
+					// Handle the exception (e.g., log it)
+					e.printStackTrace();
+				}
+			}
+		} else {
+			result.success=false;
+			data.put("code", "NOID");
+		}
+
+		SecurityContext sc = SecurityContextHolder.getContext();
+		sc.setAuthentication(auth);
+
+		HttpSession session = request.getSession(true);
+		session.setAttribute("SPRING_SECURITY_CONTEXT", sc);
+
+		return result;
+	}
+	*/
+	private CustomAuthenticationToken authenticateUser(String username, String password) {
+		UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(username, password);
+		return (CustomAuthenticationToken) authManager.authenticate(authReq);
 	}
 
 

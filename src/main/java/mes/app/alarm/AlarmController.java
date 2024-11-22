@@ -30,11 +30,10 @@ public class AlarmController {
             // 로그인한 사용자 정보
             User user = (User) auth.getPrincipal();
             String userId = user.getUsername();
-            String spjangcd = user.getSpjangcd();
             int userGroupId = user.getUserProfile().getUserGroup().getId();
 
             // 알림 데이터 조회
-            List<Map<String, Object>> notifications = alarmService.getNotifications(userId, spjangcd, userGroupId);
+            List<Map<String, Object>> notifications = alarmService.getNotifications(userId, userGroupId);
 
             result.success = true;
             result.data = notifications;
@@ -55,11 +54,10 @@ public class AlarmController {
             // 로그인한 사용자 정보 가져오기
             User user = (User) auth.getPrincipal();
             String userId = user.getUsername();
-            String spjangcd = user.getSpjangcd();
             UserGroup userGroupId = user.getUserProfile().getUserGroup();
 
             // 알림 상태 업데이트
-            alarmService.markAsRead(userId, spjangcd, userGroupId);
+            alarmService.markAsRead(userId, userGroupId);
 
             result.success = true;
             result.message = "알림 상태가 업데이트되었습니다.";

@@ -238,7 +238,10 @@
                                 </dt>
                                 <dd>
                                     <select class="mg-r5" id="cboUserGroup" name="cboUserGroup" style="width: 100%">
-                                        <option></option>
+                                            <option value="">선택하세요</option>
+                                            <option value="1">시스템관리자</option>
+                                            <option value="14">주문 담당자</option>
+                                            <option value="35">일반거래처</option>
                                     </select>
                                 </dd>
                             </dl>
@@ -437,9 +440,6 @@
                     console.log("API Response:", response); // 응답 데이터를 출력
                     if (response && Array.isArray(response.data)) {
                         data2 = response.data;
-                      /*  data2.forEach(item => {
-                            item.spjType = getSpjTypeText(item.spjangcd);
-                        });*/
                     }
                 },
                 error: function () {
@@ -530,17 +530,6 @@
             });
         }//fetchListData
 
-        function getSpjTypeText(spjangcd) {
-            switch (spjangcd) {
-                case 'ZZ':
-                    return "성우에스피(주)";
-                case 'PP':
-                    return "성우피앤비(주)";
-                default:
-                    return " ";
-            }
-        }
-
         //날짜 포맷
         function formatDateString(dateString) {
             if (!dateString || typeof dateString !== 'string' || dateString.length < 8) {
@@ -562,6 +551,7 @@
 
             if (hasMissingFields) {
                 // 데이터가 불완전하거나 비어 있을 때
+                console.log("전송할 ID:", rowData.id);
                 if (rowData && rowData.id) {
                     // 추가 데이터가 필요한 경우 AJAX 요청으로 가져오기
                     $.ajax({
@@ -651,7 +641,7 @@
 
             // 서버로 AJAX 요청 전송
             $.ajax({
-                url: '/api/system/user/search', // 서버 API 엔드포인트 설정
+                url: `/api/system/user/search`,
                 type: 'GET',
                 data: searchParams, // 검색 조건 전달
                 success: function (response) {
@@ -674,11 +664,12 @@
                                 tel: '',
                                 Phone: '',
                                 email: '',
-                                date_joined: '',
                                 spjType: '',
+                                date_joined: ''
                             });
                         }
                     }
+
 
                     updateGrid(data); // 데이터를 업데이트하는 함수 호출
                 },

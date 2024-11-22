@@ -11,6 +11,7 @@ import mes.domain.entity.actasEntity.TB_XCLIENT;
 import mes.domain.repository.UserGroupRepository;
 import mes.domain.repository.UserRepository;
 import mes.domain.repository.actasRepository.TB_XClientRepository;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.security.core.Authentication;
@@ -46,40 +47,43 @@ public class UserService {
         params.addValue("bizitemnm", bizitemnm);
         params.addValue("email", email);
         String sql = """
-                SELECT
-                            au.id,
-                            au.last_name,
-                            txc.cltnm,
-                            au.username AS userid,
-                            ug.id AS group_id,
-                            au.email,
-                            au.tel,
-                            au.spjangcd AS spjType,
-                            au.agencycd,
-                            ug.Name AS group_name,
-                            ug.id,
-                            au.last_login,
-                            up.lang_code,
-                            au.is_active,
-                            au.Phone,
-                            txc.biztypenm,
-                            txc.bizitemnm,
-                            txc.prenm,
-                            FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined
-                        FROM
-                            auth_user au
-                        LEFT JOIN
-                            user_profile up ON up.User_id = au.id
-                        LEFT JOIN
-                            user_group ug ON ug.id = up.UserGroup_id
-                        LEFT JOIN
-                            TB_XCLIENT txc
-                            ON au.first_name = txc.cltnm
-                            AND au.username = txc.saupnum
-                            AND au.last_name = txc.prenm
-                        WHERE
-                            1 = 1
-        """;
+            SELECT
+                au.id,
+                au.last_name,
+                txc.cltnm,
+                au.username AS userid,
+                ug.id AS group_id,
+                au.email,
+                au.tel,
+                au.agencycd,
+                ug.Name AS group_name,
+                au.last_login,
+                up.lang_code,
+                au.is_active,
+                au.Phone,
+                txc.biztypenm,
+                txc.bizitemnm,
+                txc.prenm,
+                FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined,
+                CASE
+                    WHEN au.spjangcd = 'ZZ' THEN '성우에스피(주)'
+                    WHEN au.spjangcd = 'PP' THEN '성우피앤비(주)'
+                    ELSE '알 수 없음'
+                END AS spjType
+            FROM
+                auth_user au
+            LEFT JOIN
+                user_profile up ON up.User_id = au.id
+            LEFT JOIN
+                user_group ug ON ug.id = up.UserGroup_id
+            LEFT JOIN
+                TB_XCLIENT txc
+                ON au.first_name = txc.cltnm
+                AND au.username = txc.saupnum
+                AND au.last_name = txc.prenm
+            WHERE
+                1 = 1;
+""";
 
         // SQL 실행 후 결과 반환
         return sqlRunner.getRows(sql, new MapSqlParameterSource());
@@ -216,15 +220,44 @@ public class UserService {
         params.addValue("id", id);
 
         String sql = """
-        select
-            *
-        from
-            TB_XCLIENT tx
+        SELECT 
+            au.id ,
+            au.last_name,
+            au.username AS userid,
+            au.email,
+            au.tel,
+            au.agencycd,
+            au.last_login,
+            au.is_active,
+            au.Phone,
+            FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined,
+            txc.biztypenm ,
+            txc.bizitemnm ,
+            txc.prenm ,
+            txc.cltnm,
+            ug.id AS group_id,
+            ug.Name AS group_name,
+            up.lang_code ,
+            au.*,
+            txc.zipcd AS postno
+            txc.*,
+            CASE
+                    WHEN au.spjangcd = 'ZZ' THEN '성우에스피(주)'
+                    WHEN au.spjangcd = 'PP' THEN '성우피앤비(주)'
+                    ELSE '알 수 없음'
+                END AS spjType
+        FROM 
+            auth_user au
         LEFT JOIN 
-            auth_user au on tx.prenm = au.first_name
-        where 
-            au.id = :id;                
-                """;
+            user_profile up ON up.User_id = au.id
+        LEFT JOIN 
+            user_group ug ON ug.id = up.UserGroup_id
+        LEFT JOIN 
+            TB_XCLIENT txc ON au.first_name = txc.cltnm 
+        WHERE 
+            au.id = :id
+            """;
+//            System.out.println(sql);
         return sqlRunner.getRow(sql, params);
     }
 
@@ -252,18 +285,45 @@ public class UserService {
                au.is_active,
                au.is_superuser,
                txc.*,
-               FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined
+               au.id ,
+            au.last_name,
+            au.username AS userid,
+            au.email,
+            au.tel,
+            au.agencycd,
+            au.last_login,
+            au.is_active,
+            au.Phone,
+            FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined,
+            txc.biztypenm ,
+            txc.bizitemnm ,
+            txc.prenm ,
+            txc.cltnm,
+            ug.id AS group_id,
+            ug.Name AS group_name,
+            up.lang_code ,
+            au.*,
+            FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined,
+            CASE
+                    WHEN au.spjangcd = 'ZZ' THEN '성우에스피(주)'
+                    WHEN au.spjangcd = 'PP' THEN '성우피앤비(주)'
+                    ELSE '알 수 없음'
+                END AS spjType
         FROM auth_user au
         LEFT JOIN user_profile up ON up.[User_id] = au.id
         LEFT JOIN user_group ug ON ug.id = up.[UserGroup_id]
         LEFT JOIN user_code uc ON CAST(au.agencycd AS INT) = uc.id
-        left join TB_XCLIENT txc ON up.Name = txc.prenm
+        LEFT JOIN TB_XCLIENT txc ON au.first_name = txc.cltnm
         WHERE 1=1
         """;
 
         // 조건부 쿼리 추가
 
         if (!StringUtils.isEmpty(userGroup)) {
+            sql += " AND ug.[id] = :userGroup ";
+            params.addValue("userGroup", userGroup);
+        }
+        if (!ObjectUtils.isEmpty(userGroup)) {
             sql += " AND ug.[id] = :userGroup ";
             params.addValue("userGroup", userGroup);
         }
