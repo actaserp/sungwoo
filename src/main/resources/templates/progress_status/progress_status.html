@@ -53,7 +53,7 @@
     <div class="search-wrap" id="searchWrap" style="display: none; padding-top:10px">
       <ul>
         <li>
-          <select title="사업장" id="search_sjangcd" name="search_sjangcd"
+          <select title="사업장" id="search_spjangcd" name="search_spjangcd"
                   onchange="init()">
             <option value="" hidden selected disabled>선택</option>
             <option value="ZZ">성우에스피(주)</option>
@@ -185,6 +185,11 @@
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
       fetchListData();
+      if (!isBindSpjangcdCalled) {
+        bindSpjangcd();
+        isBindSpjangcdCalled = true; // 플래그 업데이트
+      }
+
     }
 
     $(document).ready(function() {
@@ -349,25 +354,7 @@
       if (searchtketnm) queryParams.searchtketnm = searchtketnm;
       if (searchstate) queryParams.searchstate = searchstate;
 
-      /*$.ajax({
-        url: `/api/ProgressStatus/search?${$.param(queryParams)}`, // URL 생성
-        type: 'GET',
-        success: function (response) {
-          console.log("검색 결과:", response);
-          if (response.success && response.data) {
-            // 차트 및 그리드 데이터 바인딩
-            updateChartAndGrid(response.data);
-          } else {
-            console.error("검색 결과 처리 중 오류 발생:", response.message);
-            alert(response.message || "검색 결과를 가져오는 중 오류가 발생했습니다.");
-          }
-        },
-        error: function (xhr, status, error) {
-          console.error("검색 요청 중 오류 발생:", error);
-          console.error("응답 내용:", xhr.responseText);
-          alert("검색 요청 처리 중 오류가 발생했습니다.");
-        }
-      });*/
+
       $.ajax({
         url: `/api/ProgressStatus/search?${$.param(queryParams)}`,
         type: 'GET',
@@ -387,7 +374,6 @@
           Alert.alert("검색 요청 처리 중 오류가 발생했습니다.",'');
         }
       });
-
     }
 
     // 데이터 바인딩 함수 (그리드나 테이블에 출력)
@@ -454,7 +440,7 @@
       console.log("업데이트할 데이터:", data);
 
       // 차트 데이터를 추출 및 변환
-      const chartLabels = ['주문의뢰', '주문확인', '주문확정', '제작진행', '출고'];
+      const chartLabels = ['', '', '', '', ''];
       const chartData = [0, 0, 0, 0, 0]; // 각 진행 상태별 초기값
 
       data.forEach(item => {
@@ -477,6 +463,8 @@
 
       // 그리드 데이터 바인딩
       bindDataToGrid(data);
+      // 차트 초기화 호출
+      initializeChart(chartData, chartLabels);
     }
 
     //차트
@@ -570,9 +558,9 @@
       $('#myChart').data('chart', myChart);
 
       // 데이터 로드 함수
-      function loadChartData() {
+      /*function loadChartData() {
         $.ajax({
-          url: '/api/ProgressStatus/getChartData',
+          url: '/api/ProgressStatus/getChartData2',
           method: 'GET',
           dataType: 'json',
           success: function (response) {
@@ -601,7 +589,42 @@
             alert("데이터를 불러오는 중 오류가 발생했습니다.");
           }
         });
+      }*/
+      function loadChartData() {
+        $.ajax({
+          url: '/api/ProgressStatus/getChartData2',
+          method: 'GET',
+          dataType: 'json',
+          success: function (response) {
+            console.log("서버 응답:", response);
+            if (response.success && response.data) {
+              const rawData = response.data;
+
+              // 데이터 분리: labels와 data 배열 생성
+              const labels = rawData.map(item => item.label);
+              const values = rawData.map(item => item.value);
+
+              if (labels.length === 0 || values.length === 0) {
+                console.warn("차트를 그릴 데이터가 부족합니다.");
+                initializeChart([0], ['데이터 없음']);
+                return;
+              }
+
+              // 차트 초기화
+              initializeChart(values, labels);
+            } else {
+              console.error("서버 응답이 유효하지 않습니다:", response.message);
+              alert(response.message || "데이터를 가져오는 중 오류가 발생했습니다.");
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error("AJAX 요청 중 오류 발생:", error);
+            console.error("응답 내용:", xhr.responseText);
+            alert("데이터를 불러오는 중 오류가 발생했습니다.");
+          }
+        });
       }
+
 
       // 페이지 로드 시 데이터 로드
       loadChartData();
@@ -648,6 +671,93 @@
       });
     });
 
+    //차트 초기화
+    function initializeChart(chartData, chartLabels) {
+      const canvas = document.getElementById('myChart');
+      if (!canvas) {
+        console.error("Canvas element with ID 'myChart' not found.");
+        return;
+      }
+
+      const ctx = canvas.getContext('2d');
+
+      // 기존 차트 제거
+      if (canvas.chartInstance) {
+        canvas.chartInstance.destroy();
+      }
+
+      // 새로운 차트 생성
+      canvas.chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: '진행 현황',
+            data: chartData,
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(255, 159, 64, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(255, 159, 64, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { beginAtZero: true },
+            y: { beginAtZero: true }
+          },
+          plugins: {
+            legend: { position: 'top' }
+          }
+        }
+      });
+
+      console.log("차트가 초기화되었습니다.");
+    }
+    function processChartData(rawData) {
+      // ordflag 값과 그 개수를 집계
+      const ordflagCounts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
+
+      rawData.forEach(item => {
+        if (item.ordflag !== undefined && ordflagCounts.hasOwnProperty(item.ordflag)) {
+          ordflagCounts[item.ordflag]++;
+        }
+      });
+
+      // labels와 data 배열 생성
+      const labels = ['주문의뢰', '주문확인', '주문확정', '제작진행', '출고'];
+      const values = Object.values(ordflagCounts);
+
+      return { labels, values };
+    }
+
+
+    function bindSpjangcd() {
+      $.ajax({
+        url: '/api/dashboard2/bindSpjangcd',
+        type: 'GET',
+        async: false,
+        success: function (data) {
+          data2 = data.data;
+          const selectElement = document.getElementById('search_spjangcd');
+          if (selectElement) {
+            selectElement.value = data2; // value 속성으로 선택
+          }
+        }
+      })
+    }
 
   </script>
 </th:block>

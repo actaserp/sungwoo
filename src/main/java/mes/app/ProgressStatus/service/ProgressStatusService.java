@@ -1,5 +1,6 @@
 package mes.app.ProgressStatus.service;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -8,15 +9,17 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class ProgressStatusService {
 
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getProgressStatusList(String perid) {
+    public List<Map<String, Object>> getProgressStatusList(String perid, String spjangcd) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("perid", perid);
+        params.addValue("spjangcd", spjangcd);
 
         String sql = """
             SELECT
@@ -57,30 +60,235 @@ public class ProgressStatusService {
         return sqlRunner.getRows(sql, params);
     }
 
+    /*public List<Map<String, Object>> getChartData(String userid, String spjangcd) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("userid", userid);
+        params.addValue("spjangcd", spjangcd);
+
+        String sql = """
+                   SELECT
+                    tb007.custcd,
+                    tb007.spjangcd,
+                    tb007.reqdate,
+                    tb007.reqnum,
+                    tb006.cltnm,
+                    MAX(CAST(tb006.ordflag AS INT)) AS ordflag
+                FROM
+                    TB_DA007W tb007
+                INNER JOIN
+                    TB_DA006W tb006
+                ON
+                    tb007.custcd = tb006.custcd
+                    AND tb007.spjangcd = tb006.spjangcd
+                    AND tb007.reqdate = tb006.reqdate
+                    AND tb007.reqnum = tb006.reqnum
+                GROUP BY
+                    tb007.custcd, tb007.spjangcd, tb007.reqdate, tb007.reqnum, tb006.cltnm;
+                """;
+        log.info("sql:",sql);
+        return sqlRunner.getRows(sql, params);
+    }*/
+
+    public List<Map<String, Object>> getChartData2(String userid, String spjangcd, String startDate, String endDate, String cltnm, Integer ordflag, String searchTitle) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("userid", userid);
+        params.addValue("spjangcd", spjangcd);
+
+        // 동적 WHERE 조건을 추가하기 위한 StringBuilder
+        StringBuilder sql = new StringBuilder("""
+               SELECT
+                  cltnm,
+                 ordflag
+              FROM
+                  TB_DA006W
+            """);
+
+        // 검색 조건 추가
+        if (startDate != null && !startDate.isEmpty()) {
+            sql.append(" AND tb007.reqdate >= :startDate");
+            params.addValue("startDate", startDate);
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            sql.append(" AND tb007.reqdate <= :endDate");
+            params.addValue("endDate", endDate);
+        }
+        if (cltnm != null && !cltnm.isEmpty()) {
+            sql.append(" AND tb006.cltnm LIKE :cltnm");
+            params.addValue("cltnm", "%" + cltnm + "%");
+        }
+        if (ordflag != null) {
+            sql.append(" AND tb006.ordflag = :ordflag");
+            params.addValue("ordflag", ordflag);
+        }
+        if (searchTitle != null && !searchTitle.isEmpty()) {
+            sql.append(" AND tb006.remark LIKE :searchTitle");
+            params.addValue("searchTitle", "%" + searchTitle + "%");
+        }
+
+        log.info("SQL: {}", sql);
+        return sqlRunner.getRows(sql.toString(), params);
+    }
+
+
+
+    public List<Map<String, Object>> searchProgress(
+            String searchStartDate,
+            String searchEndDate,
+            String searchRemark,
+            String searchtketnm,
+            String searchCltnm,
+            String userid,
+            String spjangcd) {
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+
+        params.addValue("userid", userid);
+        params.addValue("spjangcd", spjangcd);
+
+        StringBuilder sql = new StringBuilder("""
+   SELECT
+       tb007.custcd,
+       tb007.spjangcd,
+       tb007.reqdate,
+       tb007.reqnum,
+       tb006.cltnm,
+       tb006.perid,
+       tb006.telno,
+       tb006.ordflag,
+       tb006.remark,
+       tb006.deldate
+   FROM
+       TB_DA007W tb007
+   LEFT JOIN (
+       SELECT
+           custcd,
+           spjangcd,
+           reqdate,
+           reqnum,
+           MAX(cltnm) AS cltnm,
+           MAX(perid) AS perid,
+           MAX(telno) AS telno,
+           MAX(ordflag) AS ordflag,
+           MAX(remark) AS remark,
+           MAX(deldate) AS deldate
+       FROM
+           TB_DA006W
+       GROUP BY
+           custcd, spjangcd, reqdate, reqnum
+   ) tb006
+   ON
+       tb007.custcd = tb006.custcd
+       AND tb007.spjangcd = tb006.spjangcd
+       AND tb007.reqdate = tb006.reqdate
+       AND tb007.reqnum = tb006.reqnum
+   WHERE
+       tb007.spjangcd = :spjangcd
+   """);
+
+        if (searchStartDate != null && !searchStartDate.isEmpty()) {
+            sql.append(" AND tb007.reqdate >= :searchStartDate ");
+            params.addValue("searchStartDate", searchStartDate);
+        }
+        if (searchEndDate != null && !searchEndDate.isEmpty()) {
+            sql.append(" AND tb007.reqdate <= :searchEndDate ");
+            params.addValue("searchEndDate", searchEndDate);
+        }
+        if (searchRemark != null && !searchRemark.equalsIgnoreCase("전체") && !searchRemark.isEmpty()) {
+            sql.append(" AND tb006.remark LIKE :searchRemark ");
+            params.addValue("searchRemark", "%" + searchRemark + "%");
+        }
+        if (searchtketnm != null && !searchtketnm.equalsIgnoreCase("전체") && !searchtketnm.isEmpty()) {
+            sql.append(" AND tb006.ordflag = :searchtketnm ");
+            params.addValue("searchtketnm", searchtketnm);
+        }
+        if (searchCltnm != null && !searchCltnm.equalsIgnoreCase("전체") && !searchCltnm.isEmpty()) {
+            sql.append(" AND tb006.cltnm LIKE :searchCltnm ");
+            params.addValue("searchCltnm", "%" + searchCltnm + "%");
+        }
+        log.info(sql.toString());
+        return sqlRunner.getRows(sql.toString(), params);
+    }
+
+    public List<Map<String, Object>> getGridData(String userid, String spjangcd, String startDate, String endDate, String searchCltnm, Integer ordflag, String searchTitle) {
+        // 매개변수 바인딩을 위한 MapSqlParameterSource 생성
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("userid", userid);
+        params.addValue("spjangcd", spjangcd);
+
+        // SQL 쿼리 작성
+        StringBuilder sql = new StringBuilder("""
+        SELECT
+            tb007.custcd,
+            tb007.spjangcd,
+            tb007.reqdate,
+            tb007.reqnum,
+            tb006.cltnm,
+            tb006.perid,
+            tb006.telno,
+            tb006.ordflag,
+            tb006.remark,
+            tb006.deldate
+        FROM
+            TB_DA007W tb007
+        LEFT JOIN (
+            SELECT
+                custcd,
+                spjangcd,
+                reqdate,
+                reqnum,
+                MAX(cltnm) AS cltnm,
+                MAX(perid) AS perid,
+                MAX(telno) AS telno,
+                MAX(ordflag) AS ordflag,
+                MAX(remark) AS remark,
+                MAX(deldate) AS deldate
+            FROM
+                TB_DA006W
+            GROUP BY
+                custcd, spjangcd, reqdate, reqnum
+        ) tb006
+        ON
+            tb007.custcd = tb006.custcd
+            AND tb007.spjangcd = tb006.spjangcd
+            AND tb007.reqdate = tb006.reqdate
+            AND tb007.reqnum = tb006.reqnum
+        WHERE
+            tb007.spjangcd = :spjangcd
+    """);
+
+        // 조건 동적 추가
+        if (startDate != null && !startDate.isEmpty()) {
+            sql.append(" AND tb007.reqdate >= :startDate ");
+            params.addValue("startDate", startDate);
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            sql.append(" AND tb007.reqdate <= :endDate ");
+            params.addValue("endDate", endDate);
+        }
+        if (searchCltnm != null && !searchCltnm.isEmpty()) {
+            sql.append(" AND tb006.cltnm LIKE :searchCltnm ");
+            params.addValue("searchCltnm", "%" + searchCltnm + "%");
+        }
+        if (ordflag != null) {
+            sql.append(" AND tb006.ordflag = :ordflag ");
+            params.addValue("ordflag", ordflag);
+        }
+        if (searchTitle != null && !searchTitle.isEmpty()) {
+            sql.append(" AND tb006.remark LIKE :searchTitle ");
+            params.addValue("searchTitle", "%" + searchTitle + "%");
+        }
+
+        // 로그로 SQL 출력
+        log.info("Generated SQL: {}", sql.toString());
+
+        // 실행 및 결과 반환
+        return sqlRunner.getRows(sql.toString(), params);
+    }
+
     public List<Map<String, Object>> getChartData(String userid) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("spjangcd", userid);
 
-        /*String sql = """
-           SELECT
-                tb007.custcd,
-                tb007.spjangcd,
-                tb007.reqdate,
-                tb007.reqnum,
-                tb006.cltnm,
-                MAX(CAST(tb006.ordflag AS INT)) AS ordflag
-            FROM
-                TB_DA007W tb007
-            LEFT JOIN
-                TB_DA006W tb006
-            ON
-                tb007.custcd = tb006.custcd
-                AND tb007.spjangcd = tb006.spjangcd
-                AND tb007.reqdate = tb006.reqdate
-                AND tb007.reqnum = tb006.reqnum
-            GROUP BY
-                tb007.custcd, tb007.spjangcd, tb007.reqdate, tb007.reqnum, tb006.cltnm
-            """;*/
         String sql = """
                    SELECT
                     tb007.custcd,
@@ -104,231 +312,5 @@ public class ProgressStatusService {
 
         return sqlRunner.getRows(sql, params);
     }
-
-
-   /* public List<Map<String, Object>> searchProgress(String searchStartDate, String searchEndDate, String searchRemark,String searchtketnm, String searchCltnm,  String userid, String spjangcd) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-
-        // 매개변수 추가
-        params.addValue("userid", userid);
-        params.addValue("spjangcd", spjangcd);
-
-        // 동적 조건 추가
-        if (searchStartDate != null && !searchStartDate.isEmpty()) {
-            params.addValue("searchStartDate", searchStartDate);
-        }
-        if (searchEndDate != null && !searchEndDate.isEmpty()) {
-            params.addValue("searchEndDate", searchEndDate);
-        }
-        if (searchRemark != null && !searchRemark.isEmpty()) {
-            params.addValue("searchRemark", "%" + searchRemark + "%");
-        }
-        if (searchRemark != null && !searchRemark.isEmpty()) {
-            params.addValue("searchtketnm", "%" + searchtketnm + "%");
-        }
-        if (searchRemark != null && !searchRemark.isEmpty()) {
-            params.addValue("searchCltnm", "%" + searchCltnm + "%");
-        }
-
-        // 기본 SQL
-        StringBuilder sql = new StringBuilder(""" 
-            SELECT
-            tb007.custcd,         -- 고객 코드
-            tb007.spjangcd,       -- 사업장 코드
-            tb007.reqdate,        -- 주문일자
-            tb007.reqnum,         -- 주문번호
-            MAX(tb006.cltnm) AS cltnm,
-            MAX(tb006.perid) AS perid,
-            MAX(tb006.telno) AS telno,
-            MAX(tb006.ordflag) AS ordflag,
-            MAX(tb006.remark) AS remark,
-            MAX(tb006.deldate) AS deldate
-        FROM
-            TB_DA007W tb007
-        LEFT JOIN
-            TB_DA006W tb006
-        ON
-            tb007.custcd = tb006.custcd
-            AND tb007.spjangcd = tb006.spjangcd
-            AND tb007.reqdate = tb006.reqdate
-            AND tb007.reqnum = tb006.reqnum """);
-
-        // 조건 추가
-        if (searchStartDate != null && !searchStartDate.isEmpty()) {
-            sql.append(" AND tb007.reqdate >= :searchStartDate ");
-        }
-        if (searchEndDate != null && !searchEndDate.isEmpty()) {
-            sql.append(" AND tb007.reqdate <= :searchEndDate ");
-        }
-        if (searchRemark != null && !searchRemark.isEmpty()) {
-            sql.append(" AND tb006.remark LIKE :searchRemark ");
-        }
-
-        // SQL 실행 및 결과 반환
-        return sqlRunner.getRows(sql.toString(), params);
-    }*/
-   /*public List<Map<String, Object>> searchProgress(
-           String searchStartDate,
-           String searchEndDate,
-           String searchRemark,
-           String searchtketnm,
-           String searchCltnm,
-           String userid,
-           String spjangcd) {
-
-       MapSqlParameterSource params = new MapSqlParameterSource();
-
-       // 매개변수 추가
-       params.addValue("userid", userid);
-       params.addValue("spjangcd", spjangcd);
-
-       // 동적 조건 추가
-       if (searchStartDate != null && !searchStartDate.isEmpty()) {
-           params.addValue("searchStartDate", searchStartDate);
-       }
-       if (searchEndDate != null && !searchEndDate.isEmpty()) {
-           params.addValue("searchEndDate", searchEndDate);
-       }
-       if (searchRemark != null && !searchRemark.isEmpty()) {
-           params.addValue("searchRemark", "%" + searchRemark + "%");
-       }
-       if (searchtketnm != null && !searchtketnm.equalsIgnoreCase("전체") && !searchtketnm.isEmpty()) {
-           params.addValue("searchtketnm", searchtketnm);
-         *//*  sql.append(" AND tb006.ordflag = :searchtketnm ");*//*
-       }
-       if (searchCltnm != null && !searchCltnm.isEmpty()) {
-           params.addValue("searchCltnm", "%" + searchCltnm + "%");
-       }
-
-
-       // SQL 생성
-       StringBuilder sql = new StringBuilder("""
-        SELECT
-            tb007.custcd,         -- 고객 코드
-            tb007.spjangcd,       -- 사업장 코드
-            tb007.reqdate,        -- 주문일자
-            tb007.reqnum,         -- 주문번호
-            MAX(tb006.cltnm) AS cltnm,
-            MAX(tb006.perid) AS perid,
-            MAX(tb006.telno) AS telno,
-            MAX(tb006.ordflag) AS ordflag,
-            MAX(tb006.remark) AS remark,
-            MAX(tb006.deldate) AS deldate
-        FROM
-            TB_DA007W tb007
-        LEFT JOIN
-            TB_DA006W tb006
-        ON
-            tb007.custcd = tb006.custcd
-            AND tb007.spjangcd = tb006.spjangcd
-            AND tb007.reqdate = tb006.reqdate
-            AND tb007.reqnum = tb006.reqnum
-        WHERE
-            tb007.spjangcd = :spjangcd
-    """);
-
-       // 조건 추가
-       if (searchStartDate != null && !searchStartDate.isEmpty()) {
-           sql.append(" AND tb007.reqdate >= :searchStartDate ");
-       }
-       if (searchEndDate != null && !searchEndDate.isEmpty()) {
-           sql.append(" AND tb007.reqdate <= :searchEndDate ");
-       }
-       if (searchRemark != null && !searchRemark.isEmpty()) {
-           sql.append(" AND tb006.remark LIKE :searchRemark ");
-       }
-       if (searchtketnm != null && !searchtketnm.isEmpty()) {
-           sql.append(" AND tb006.ordflag = :searchtketnm ");
-       }
-       if (searchCltnm != null && !searchCltnm.isEmpty()) {
-           sql.append(" AND tb006.cltnm LIKE :searchCltnm ");
-       }
-
-       sql.append(" GROUP BY tb007.custcd, tb007.spjangcd, tb007.reqdate, tb007.reqnum ");
-
-       // SQL 실행 및 결과 반환
-       return sqlRunner.getRows(sql.toString(), params);
-   }*/
-   public List<Map<String, Object>> searchProgress(
-           String searchStartDate,
-           String searchEndDate,
-           String searchRemark,
-           String searchtketnm,
-           String searchCltnm,
-           String userid,
-           String spjangcd) {
-
-       MapSqlParameterSource params = new MapSqlParameterSource();
-
-       // 매개변수 추가
-       params.addValue("userid", userid);
-       params.addValue("spjangcd", spjangcd);
-
-       // 동적 조건 추가
-       if (searchStartDate != null && !searchStartDate.isEmpty()) {
-           params.addValue("searchStartDate", searchStartDate);
-       }
-       if (searchEndDate != null && !searchEndDate.isEmpty()) {
-           params.addValue("searchEndDate", searchEndDate);
-       }
-       if (searchRemark != null && !searchRemark.equalsIgnoreCase("전체") && !searchRemark.isEmpty()) {
-           params.addValue("searchRemark", "%" + searchRemark + "%");
-       }
-       if (searchtketnm != null && !searchtketnm.equalsIgnoreCase("전체") && !searchtketnm.isEmpty()) {
-           params.addValue("searchtketnm", searchtketnm);
-       }
-       if (searchCltnm != null && !searchCltnm.equalsIgnoreCase("전체") && !searchCltnm.isEmpty()) {
-           params.addValue("searchCltnm", "%" + searchCltnm + "%");
-       }
-
-       // SQL 생성
-       StringBuilder sql = new StringBuilder("""
-    SELECT
-        tb007.custcd,         -- 고객 코드
-        tb007.spjangcd,       -- 사업장 코드
-        tb007.reqdate,        -- 주문일자
-        tb007.reqnum,         -- 주문번호
-        MAX(tb006.cltnm) AS cltnm,
-        MAX(tb006.perid) AS perid,
-        MAX(tb006.telno) AS telno,
-        MAX(tb006.ordflag) AS ordflag,
-        MAX(tb006.remark) AS remark,
-        MAX(tb006.deldate) AS deldate
-    FROM
-        TB_DA007W tb007
-    LEFT JOIN
-        TB_DA006W tb006
-    ON
-        tb007.custcd = tb006.custcd
-        AND tb007.spjangcd = tb006.spjangcd
-        AND tb007.reqdate = tb006.reqdate
-        AND tb007.reqnum = tb006.reqnum
-    WHERE
-        tb007.spjangcd = :spjangcd
-""");
-
-       // 조건 추가
-       if (searchStartDate != null && !searchStartDate.isEmpty()) {
-           sql.append(" AND tb007.reqdate >= :searchStartDate ");
-       }
-       if (searchEndDate != null && !searchEndDate.isEmpty()) {
-           sql.append(" AND tb007.reqdate <= :searchEndDate ");
-       }
-       if (searchRemark != null && !searchRemark.equalsIgnoreCase("전체") && !searchRemark.isEmpty()) {
-           sql.append(" AND tb006.remark LIKE :searchRemark ");
-       }
-       if (searchtketnm != null && !searchtketnm.equalsIgnoreCase("전체") && !searchtketnm.isEmpty()) {
-           sql.append(" AND tb006.ordflag = :searchtketnm ");
-       }
-       if (searchCltnm != null && !searchCltnm.equalsIgnoreCase("전체") && !searchCltnm.isEmpty()) {
-           sql.append(" AND tb006.cltnm LIKE :searchCltnm ");
-       }
-
-       sql.append(" GROUP BY tb007.custcd, tb007.spjangcd, tb007.reqdate, tb007.reqnum ");
-
-       // SQL 실행 및 결과 반환
-       return sqlRunner.getRows(sql.toString(), params);
-   }
-
 
 }

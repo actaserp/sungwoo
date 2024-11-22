@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.domain.entity.User;
 import mes.domain.entity.UserGroup;
 import mes.domain.entity.actasEntity.TB_XCLIENT;
@@ -21,6 +22,7 @@ import io.micrometer.core.instrument.util.StringUtils;
 import mes.domain.services.SqlRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class UserService {
 
@@ -33,12 +35,14 @@ public class UserService {
     @Autowired
     TB_XClientRepository tbXClientRepository;
 
-    // 사용자 리스트
+    /*public List<Map<String, Object>> getUserList(boolean superUser, String cltnm, String prenm, String biztypenm, String bizitemnm, String email, String spjangcd) {
+    }*/
     /*필요시
     *  WHERE
     * au.is_superuser = 0
     * 추가 하기 */
-    public List<Map<String, Object>> getUserList(boolean superUser, String cltnm, String prenm, String biztypenm, String bizitemnm, String email) {
+    // 사용자 리스트
+    public List<Map<String, Object>> getUserList(boolean superUser, String cltnm, String prenm, String biztypenm, String bizitemnm, String email, String spjangcd) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("superUser", superUser);
         params.addValue("cltnm", cltnm);
@@ -46,7 +50,14 @@ public class UserService {
         params.addValue("biztypenm", biztypenm);
         params.addValue("bizitemnm", bizitemnm);
         params.addValue("email", email);
-        String sql = """
+
+        // spjangcd 값 설정 (필수)
+        if (spjangcd == null || spjangcd.isEmpty()) {
+            spjangcd = "ZZ"; // 기본값 설정
+        }
+        params.addValue("spjangcd", spjangcd);
+        /* String sql = """*/
+        StringBuilder sql = new StringBuilder("""
             SELECT
                 au.id,
                 au.last_name,
@@ -78,16 +89,16 @@ public class UserService {
                 user_group ug ON ug.id = up.UserGroup_id
             LEFT JOIN
                 TB_XCLIENT txc
-                ON au.first_name = txc.cltnm
-                AND au.username = txc.saupnum
-                AND au.last_name = txc.prenm
+                ON au.username = txc.saupnum
             WHERE
-                1 = 1;
-""";
+                1 = 1
+                 AND au.spjangcd = :spjangcd
+        """);
+        // SQL 디버깅 로그
+        log.info("Executing SQL: {} with params: {}", sql, params.getValues());
 
         // SQL 실행 후 결과 반환
-        return sqlRunner.getRows(sql, new MapSqlParameterSource());
-
+        return sqlRunner.getRows(sql.toString(), params);
     }
 
 
@@ -402,5 +413,6 @@ public class UserService {
         }
         return addressParts;
     }
+
 
 }

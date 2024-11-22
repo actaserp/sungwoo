@@ -75,6 +75,7 @@ public class UserController {
 								  @RequestParam(value = "biztypenm", required = false) String biztypenm, // 업태
 								  @RequestParam(value = "bizitemnm", required = false) String bizitemnm, // 종목
 								  @RequestParam(value = "email", required = false) String email,
+								  @RequestParam(value = "spjangcd", required = false) String spjangcd,
 								  Authentication auth){
 		AjaxResult result = new AjaxResult();
 		User user = (User)auth.getPrincipal();
@@ -84,7 +85,7 @@ public class UserController {
 			superUser = user.getUserProfile().getUserGroup().getCode().equals("dev");
 		}
 
-		List<Map<String, Object>> items = this.userService.getUserList(superUser, cltnm, prenm, biztypenm, bizitemnm, email);
+		List<Map<String, Object>> items = this.userService.getUserList(superUser, cltnm, prenm, biztypenm, bizitemnm, email, spjangcd);
 
 		result.data = items;
 

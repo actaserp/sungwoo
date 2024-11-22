@@ -8,7 +8,9 @@
         <!-- Page Title -->
         <div class="page-title-wrap">
             <div class="left">
-                <h2>사용자 관리</h2>
+                <h2>사용자 관리</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img
+                    src="/images/icon/ico-down.png"
+                    alt="알람 아이콘"></a>
                 <!--                <a title="북마크" class="bookmark toggle">-->
                 <!--                    내메뉴-->
                 <!--                </a>-->
@@ -20,16 +22,20 @@
             </ul>
         </div>
         <!-- Select -->
-
+        <div class="search-wrap" id="searchWrap" style="display: none; padding-top:10px">
+            <ul>
+                <li>
+                    <select title="사업장" id="search_spjangcd" name="search_spjangcd"
+                            onchange="init()">
+                        <option value="" hidden selected disabled>선택</option>
+                        <option value="ZZ">성우에스피(주)</option>
+                        <option value="PP">성우피앤비(주)</option>
+                        <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
+                    </select>
+                </li>
+            </ul>
+        </div>
         <div class="tab-wrap">
-            <!--            <ul class="tab-links">-->
-            <!--                <li>-->
-            <!--                    <a href="#tab1" title="목록" id="listTabLink">목록</a>-->
-            <!--                </li>-->
-            <!--                <li>-->
-            <!--                    <a href="#tab2" title="등록" id="inputTabLink">등록</a>-->
-            <!--                </li>-->
-            <!--            </ul>-->
             <div class="tab-contents">
                 <!-- Section -->
                 <section class="tab-item" id="tab1">
@@ -46,12 +52,6 @@
                                         신규등록
                                     </a>
                                 </li>
-                                <!--<li>
-                                    <a  class="btn btn-delete" title="삭제" id="btnDelete2">
-                                        <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                                        삭제
-                                    </a>
-                                </li>-->
                                 <li>
                                     <a class="btn btn-edit" id="btnSave" title="저장">
                                         <img src="/images/icon/ico-save.svg" alt="저장 아이콘">
@@ -290,13 +290,6 @@
                                         삭제
                                     </a>
                                 </li>
-                                <!--<li>
-                                    <a  class="btn btn-edit" title="수정" onclick="modifyData()">
-                                        <img src="/images/icon/ico-edit.svg" alt="엑셀 아이콘">
-                                        수정
-                                    </a>
-                                </li>-->
-
                             </ul>
                         </div>
 
@@ -326,6 +319,7 @@
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <script>
         var popupWindow;
+        // 전역 변수로 선언 (스크립트 최상단에 위치)
 
         function sample4_execDaumPostcode() {
             popupWindow = window.open('', 'postcodePopup', 'width=530,height=530');
@@ -388,13 +382,17 @@
         ]
 
         document.readyState === 'complete' ? init() : window.onload = init;
-
+        let isBindSpjangcdCalled = false;
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
         function init() {
             fetchListData();
+            if (!isBindSpjangcdCalled) {
+                bindSpjangcd();
+                isBindSpjangcdCalled = true; // 플래그 업데이트
+            }
 
             // 체크박스 클릭 후 값이 변경될 때 함수 실행
-            theGrid.cellEditEnded.addHandler(function(s, e) {
+            theGrid.cellEditEnded.addHandler(function (s, e) {
                 var col = s.columns[e.col];
                 var item = s.rows[e.row].dataItem;
 
@@ -411,13 +409,13 @@
 
                     let data = {
                         is_active: newValue,
-                        id : IdValue
+                        id: IdValue
                     }
 
-                    let fnSuccess = function (res){
-                        if(res.success){
+                    let fnSuccess = function (res) {
+                        if (res.success) {
                             Alert.alert('', res.message);
-                        }else{
+                        } else {
                             Alert.alert('', res.message);
                         }
                     }
@@ -426,9 +424,13 @@
                 }
             });
         }
+        document.getElementById('search_spjangcd').addEventListener('change', function () {
+            const spjangcd = this.value;
+            fetchListData(spjangcd);
+        });
 
 
-        function fetchListData() {
+        function fetchListData(spjangcd) {
             let data2 = [];
 
             // 서버로부터 데이터를 비동기적으로 가져옴
@@ -436,6 +438,7 @@
                 url: '/api/system/user/read',
                 type: 'GET',
                 async: false,
+                data: { spjangcd },
                 success: function (response) {
                     console.log("API Response:", response); // 응답 데이터를 출력
                     if (response && Array.isArray(response.data)) {
@@ -1036,6 +1039,22 @@
                 });
             });
         });
+
+        function bindSpjangcd() {
+            $.ajax({
+                url: '/api/dashboard2/bindSpjangcd',
+                type: 'GET',
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                    const selectElement = document.getElementById('search_spjangcd');
+                    if (selectElement) {
+                        selectElement.value = data2; // value 속성으로 선택
+                    }
+                }
+            })
+        }
+
     </script>
 </th:block>
 </html>
