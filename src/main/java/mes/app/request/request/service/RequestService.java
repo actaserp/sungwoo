@@ -335,7 +335,6 @@ public class RequestService {
                        x.cltadres
                 FROM TB_XCLIENT x
                 WHERE saupnum = :username
-                
                 """;
         dicParam.addValue("username", username);
         Map<String, Object> userInfo = this.sqlRunner.getRow(sql, dicParam);

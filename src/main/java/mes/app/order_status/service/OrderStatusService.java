@@ -15,9 +15,10 @@ public class OrderStatusService {
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getOrderStatusByOperid(String perid) {
+    public List<Map<String, Object>> getOrderStatusByOperid(String perid, String spjangcd) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("perid", perid);
+        params.addValue("spjangcd", spjangcd);
 
         String sql = """
         SELECT
@@ -46,7 +47,9 @@ public class OrderStatusService {
             tb007.custcd = tb006.custcd
             AND tb007.spjangcd = tb006.spjangcd
             AND tb007.reqdate = tb006.reqdate
-            AND tb007.reqnum = tb006.reqnum;
+            AND tb007.reqnum = tb006.reqnum
+        WHERE
+            tb006.spjangcd = :spjangcd
 """;
 
         return sqlRunner.getRows(sql, params);
@@ -228,6 +231,28 @@ public class OrderStatusService {
         // 정렬 조건 추가
         sql.append(" ORDER BY reqdate ASC");
 
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
+        return items;
+    }
+
+    public List<Map<String, Object>> initDatas(TB_DA006W_PK tbDa006WPk, String cltcd) {
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        StringBuilder sql = new StringBuilder("""
+                SELECT
+                    hd.ordflag,
+                    COUNT(*) AS ordflag_count
+                FROM
+                    TB_DA006W hd
+                WHERE
+                    hd.custcd = :custcd
+                    AND hd.spjangcd = :spjangcd
+                    AND LEFT(hd.reqdate, 4) = CAST(YEAR(GETDATE()) AS VARCHAR(4))
+                GROUP BY
+                    hd.ordflag;
+                """);
+        dicParam.addValue("custcd", tbDa006WPk.getCustcd());
+        dicParam.addValue("spjangcd", tbDa006WPk.getSpjangcd());
+        dicParam.addValue("cltcd", cltcd);
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }

@@ -26,15 +26,16 @@ public class OrderStatusController {
     OrderStatusService orderStatusService;
 
     @GetMapping("/read")
-    public AjaxResult orderStatusRead(Authentication auth) {
+    public AjaxResult orderStatusRead(@RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
+                                      Authentication auth) {
         AjaxResult result = new AjaxResult();
 
         try {
             // 로그인한 사용자 정보에서 이름(perid) 가져오기
             User user = (User) auth.getPrincipal();
             String perid = user.getFirst_name(); // 이름을 가져옴
-
-            List<Map<String, Object>> orderStatusList = orderStatusService.getOrderStatusByOperid(perid);
+            String spjangcd = searchSpjangcd;
+            List<Map<String, Object>> orderStatusList = orderStatusService.getOrderStatusByOperid(perid, spjangcd);
 
             result.success = true;
             result.data = orderStatusList;
@@ -108,7 +109,8 @@ public class OrderStatusController {
     }
 
     @GetMapping("/readCalenderGrid")
-    public AjaxResult getList(@RequestParam(value = "search_startDate", required = false) String searchStartDate,
+    public AjaxResult getList(@RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
+                              @RequestParam(value = "search_startDate", required = false) String searchStartDate,
                               @RequestParam(value = "search_endDate", required = false) String searchEndDate,
                               @RequestParam(value = "search_type", required = false) String searchType,
                               Authentication auth) {
@@ -116,7 +118,7 @@ public class OrderStatusController {
         String username = user.getUsername();  // 유저 사업자번호(id)
         Map<String, Object> userInfo = orderStatusService.getUserInfo(username);
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
-        tbDa006WPk.setSpjangcd((String) userInfo.get("spjangcd"));
+        tbDa006WPk.setSpjangcd(searchSpjangcd);
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
         String saupnum = (String) userInfo.get("saupnum");
         String search_startDate = (searchStartDate).replaceAll("-","");
@@ -176,6 +178,22 @@ public class OrderStatusController {
         }
         AjaxResult result = new AjaxResult();
         result.data = userAuth;
+        return result;
+    }
+
+    @GetMapping("/initDatas")
+    public AjaxResult initDatas(@RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
+                                Authentication auth){
+        User user = (User) auth.getPrincipal();
+        String username = user.getUsername();
+        Map<String, Object> userInfo = orderStatusService.getUserInfo(username);
+        TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
+        tbDa006WPk.setSpjangcd(searchSpjangcd);
+        tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
+        String cltcd = (String) userInfo.get("cltcd");
+        List<Map<String, Object>> items = this.orderStatusService.initDatas(tbDa006WPk, cltcd);
+        AjaxResult result = new AjaxResult();
+        result.data = items;
         return result;
     }
 }

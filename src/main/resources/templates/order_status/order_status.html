@@ -56,7 +56,19 @@
             </ul>
         </div>
         <!-- Select -->
-
+        <div class="search-wrap" id="searchWrap" style="display: none; padding-top:10px">
+            <ul>
+                <li>
+                    <select title="사업장코드" id="search_spjangcd" name="search_sjangcd"
+                            onchange="init()">
+                        <option value="" hidden selected disabled>선택</option>
+                        <option value="ZZ">성우에스피(주)</option>
+                        <option value="PP">성우피앤비(주)</option>
+                        <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
+                    </select>
+                </li>
+            </ul>
+        </div>
         <div class="tab-wrap">
             <ul class="tab-links">
                 <li>
@@ -91,48 +103,46 @@
                                 </div>
                                 <div class="tab-contents">
                                     <div class="row">
-                                        <div class="section-card-wrap">
-                                            <section style="flex: 0.5; margin-right: 5px;">
+                                        <div class="section-card-wrap" style="gap: 5px">
+                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="0">
                                                 <div class="title">
-                                                    <h3>주문</h3>
+                                                    <h3>주문의뢰</h3>
                                                 </div>
-                                                <div class="data">
-                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                <div class="requestCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
+                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
-                                                <dl>
-                                                    <dt>전일대비</dt>
-                                                    <dd>
-                                                        <span class="down"></span> 1.20 <span class="unit">%</span>
-                                                    </dd>
-                                                </dl>
                                             </section>
-                                            <section style="flex: 0.5; margin-right: 5px;">
+                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="1">
                                                 <div class="title">
-                                                    <h3>진행</h3>
+                                                    <h3>주문확인</h3>
                                                 </div>
-                                                <div class="data">
-                                                    0<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                <div class="checkCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
+                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
-                                                <dl>
-                                                    <dt>전일대비</dt>
-                                                    <dd>
-                                                        <span class="up"></span> 1.20 <span class="unit">%</span>
-                                                    </dd>
-                                                </dl>
                                             </section>
-                                            <section style="flex: 0.5; margin-right: 5px;">
+                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="2">
+                                                <div class="title">
+                                                    <h3>주문확정</h3>
+                                                </div>
+                                                <div class="estimateCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
+                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
+                                            </section>
+                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="3">
+                                                <div class="title">
+                                                    <h3>제작진행</h3>
+                                                </div>
+                                                <div class="produceCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
+                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                </div>
+                                            </section>
+                                            <section style="flex: 0.5; margin-right: 5px; cursor: pointer;" class="fetchCard" data-search-type="4">
                                                 <div class="title">
                                                     <h3>출고</h3>
                                                 </div>
-                                                <div class="data">
-                                                    4<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
+                                                <div class="deliveryCnt" style="font-size: 32px; font-weight: 700; text-align: right; margin: 9px 0;">
+                                                    -<span class="small-unit" style=" font-size: 0.5em; opacity: 0.5;"> 건</span>
                                                 </div>
-                                                <dl>
-                                                    <dt>전일대비</dt>
-                                                    <dd>
-                                                        <span class="down"></span> 1.20 <span class="unit">%</span>
-                                                    </dd>
-                                                </dl>
                                             </section>
                                         </div> <!--//main-card-wrap end -->
                                     </div>
@@ -419,6 +429,7 @@
         let calendar;
         let modalGrid;
         let selectedId;
+        let viewdata2;
         // 주문현황 년도 자동화
         const currentYear = new Date().getFullYear();
         document.getElementById('year-status').innerText = `${currentYear}년 주문 현황`;
@@ -427,9 +438,11 @@
 
         // 초반 페이지 진입시 그리드 바인딩 시작
         function init() {
+            bindSpjangcd();
+            fetchListData();
             initCalendar();
             fetchListData2();
-            fetchListData();
+            initDatas();
         }
 
         $(document).ready(function() {
@@ -464,6 +477,7 @@
                 url: '/api/order_status/readCalenderGrid',
                 type: 'GET',
                 data: {
+                    'search_spjangcd': $('#search_spjangcd').val(),
                     'search_startDate': $('#startDate2').val(),
                     'search_endDate': $('#endDate2').val(),
                     'search_type': searchTypeValue
@@ -475,20 +489,7 @@
                         data2 = response.data;
                         // 날짜 형식 변환 및 ordflag 변환
                         data2.forEach(item => {
-                            item.reqdate = formatDateString(item.reqdate);
-                            item.deldate = formatDateString(item.deldate);
-                            item.ordflag = getOrdflagText(parseInt(item.ordflag, 10));
-                            item.hgrb = getHgrb((item.hgrb));
-                            item.exfmtypedv = getListCgrb(item.exfmtypedv);
-                            item.infmtypedv = getListCgrb(item.infmtypedv);
-                            item.stframedv = getListCgrb(item.stframedv);
-                            item.stexplydv = getListCgrb(item.stexplydv);
 
-                            // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
-                            if (item.ordtext) {
-                                item.originalOrdtext = item.ordtext; // 실제 데이터를 보존
-                                item.ordtext = "옵션 및 요청사항"; // 링크 표시용 텍스트
-                            }
                         });
                     }
                 },
@@ -498,39 +499,39 @@
             });
 
             // 빈 객체를 emptyRowsCount만큼 추가
-            for (let i = 0; i < emptyRowsCount; i++) {
-                data2.push({
-                    rownum: i + 1,
-                    standdt: '',
-                    title: '',
-                    smpcost: '',
-                    progress: '',
-                    amount: ''
-                });
+            if(data2.length < emptyRowsCount) {
+                for (let i = 0; emptyRowsCount - data2.length ; i++) {
+                    data2.push({
+                        ordflag: '',
+                        reqdate: '',
+                        remark: '',
+                        deldate: '',
+                        amount: ''
+                    });
+                }
             }
-
+            viewdata2 = new wijmo.collections.CollectionView(data2);
             if (!theGrid) {
                 theGrid = new wijmo.grid.FlexGrid('#theGrid', {
                     autoGenerateColumns: false,
                     showMarquee: true,
                     columns: [
-                        { binding: 'rownum', header: 'No', align: 'center', width: 100 },
-                        { binding: 'standdt', header: '의뢰일자', align: 'center', width: 250 },
-                        { binding: 'title', header: '제목', align: 'center', width: 250 },
-                        { binding: 'smpcost', header: '납품희망일', align: 'center', width: 250 },
-                        { binding: 'progress', header: '진행구분', align: 'center', width: 200 },
+                        { binding: 'ordflag', header: '진행구분', align: 'center', width: 100 },
+                        { binding: 'reqdate', header: '의뢰일자', align: 'center', width: 110 },
+                        { binding: 'remark', header: '제목', align: 'left', width: 160 },
+                        { binding: 'deldate', header: '납품희망일', align: 'center', width: 110 },
                         { binding: 'amount', header: '금액', align: 'center', width: 200 }
                     ],
-                    itemsSource: data2 // 빈 객체가 추가된 배열 사용
+                    itemsSource: viewdata2 // 빈 객체가 추가된 배열 사용
                 });
 
                 // 선택이 변경될 때, 현재 항목 업데이트
                 theGrid.rowHeaders.columns.splice(0, 1);
-                new wijmo.grid.FlexGridContextMenu(theGrid);
+                new FlexGridContextMenu(theGrid);
                 window.downloadFileName = '주문 현황(캘린더)';
             } else {
                 // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
-                theGrid.itemsSource = data2; // 빈 객체가 추가된 배열 사용
+                theGrid.itemsSource = viewdata2; // 빈 객체가 추가된 배열 사용
             }
         }
         /* 캘린더 ==========================================================================================================================*/
@@ -580,6 +581,64 @@
                }).catch(error => {
                    console.error('공휴일 데이터를 가져오는 데 실패했습니다:', error);
                });
+               // 주문현황 데이터 가져오기
+               fetchOrderDates().then(orderDates =>{
+                   console.log("holidays : ", orderDates)
+                   orderDates.forEach(orderDate => {
+                       switch (orderDate.name) {
+                           case '주문의뢰':
+                               calendar.addEvent({
+                                   title: '주문의뢰', // 진행구분 이름
+                                   start: orderDate.date,  // 진행의뢰 날짜
+                                   backgroundColor: '#031B4B',
+                                   borderColor: '#031B4B',
+                                   textColor: 'white'
+                               });
+                               break;
+                           case '주문확인':
+                               calendar.addEvent({
+                                   title: '주문확인', // 진행구분 이름
+                                   start: orderDate.date,  // 진행의뢰 날짜
+                                   backgroundColor: '#03428E',
+                                   borderColor: '#03428E',
+                                   textColor: 'white'
+                               });
+                               break;
+                           case '주문확정':
+                               calendar.addEvent({
+                                   title: '주문확정', // 진행구분 이름
+                                   start: orderDate.date,  // 진행의뢰 날짜
+                                   backgroundColor: '#3069B3',
+                                   borderColor: '#3069B3',
+                                   textColor: 'white'
+                               });
+                               break;
+                           case '제작진행':
+                               calendar.addEvent({
+                                   title: '제작진행', // 진행구분 이름
+                                   start: orderDate.date,  // 진행의뢰 날짜
+                                   backgroundColor: '#C7DFF4',
+                                   borderColor: 'rgba(2,165,255,0.07)',
+                                   textColor: 'black'
+                               });
+                               break;
+                           case '출고':
+                               calendar.addEvent({
+                                   title: '출고', // 진행구분 이름
+                                   start: orderDate.date,  // 진행의뢰 날짜
+                                   backgroundColor: 'white',
+                                   borderColor: 'grey',
+                                   textColor: 'black'
+                               });
+                               break;
+                           default:
+                               console.log("주문현황 바인드 오류 : ", orderDate.name);
+                       }
+                   });
+                   calendar.render(); // 캘린더 렌더링
+               }).catch(error => {
+                   console.error('주문현황 데이터를 가져오는 데 실패했습니다:', error);
+               });
            }
        }
        // 공휴일 데이터를 가져오는 함수
@@ -596,6 +655,22 @@
 
            return holidays;
        }
+        // 주문현황 데이터를 가져오는 함수
+        async function fetchOrderDates() {
+            // [0: {date: '20230101', name: '1월1일'},{1:}]
+            // 모든 행의 데이터를 저장할 배열을 초기화합니다.
+            var orderDates = [];
+            // viewdata.items를 반복하여 각 항목의 ordflag와 reqdate 값을 가져옵니다.
+            for (var i = 0; i < viewdata2.items.length; i++) {
+                var item = viewdata2.items[i];
+                orderDates.push({
+                    name: item.ordflag,
+                    date: item.reqdate
+                });
+            }
+            console.log("orderDates : ", orderDates)
+            return orderDates;
+        }
 
         //api 요청
         async function fetchHolidaysForYear(year) {
@@ -642,6 +717,9 @@
             $.ajax({
                 url: '/api/order_status/read',
                 type: 'GET',
+                data: {
+                    'search_spjangcd': $('#search_spjangcd').val()
+                },
                 async: false,
                 success: function (response) {
                     // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
@@ -1247,6 +1325,54 @@
             if (dropdown) {
                 dropdown.value = '전체'; // 드롭다운을 기본값('전체')으로 설정
             }
+        }
+        function initDatas(){
+            $.ajax({
+                url: '/api/order_status/initDatas',
+                type: 'GET',
+                data: {
+                    'search_spjangcd': $('#search_spjangcd').val()
+                },
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                    data2.forEach(item =>{
+                        switch (item.ordflag) {
+                            case "0":
+                                $('.requestCnt').html(item.ordflag_count + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+                                break;
+                            case "1":
+                                $('.checkCnt').html(item.ordflag_count + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+                                break;
+                            case "2":
+                                $('.estimateCnt').html(item.ordflag_count + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+                                break;
+                            case "3":
+                                $('.produceCnt').html(item.ordflag_count + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+                                break;
+                            case "4":
+                                $('.deliveryCnt').html(item.ordflag_count + '<span class="small-unit" style="font-size: 0.5em; opacity: 0.5;"> 건</span>');
+                                break;
+                            default:
+                                console.log("주문현황 바인드 오류 : ", item.ordflag);
+                        }
+                    })
+                }
+            })
+        }
+        function bindSpjangcd() {
+            $.ajax({
+                url: '/api/dashboard2/bindSpjangcd',
+                type: 'GET',
+                async: false,
+                success: function (data) {
+                    data2 = data.data;
+                    const selectElement = document.getElementById('search_spjangcd');
+                    if (selectElement) {
+                        selectElement.value = data2; // value 속성으로 선택
+                    }
+                }
+            })
         }
     </script>
 </th:block>
