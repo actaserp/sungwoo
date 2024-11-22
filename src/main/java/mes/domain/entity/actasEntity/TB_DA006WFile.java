@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Getter
 @Entity
@@ -48,7 +49,7 @@ public class TB_DA006WFile {
     String fileornm;
 
     @Column(name = "\"filesize\"")  // 파일용량
-    Float filesize;
+    BigDecimal filesize;
 
     @Column(name = "\"filerem\"")  // 파일내용
     String filerem;

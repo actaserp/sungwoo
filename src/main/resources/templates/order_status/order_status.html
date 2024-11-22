@@ -435,10 +435,13 @@
         document.getElementById('year-status').innerText = `${currentYear}년 주문 현황`;
 
         document.readyState === 'complete' ? init() : window.onload = init;
-
+        let isBindSpjangcdCalled = false;
         // 초반 페이지 진입시 그리드 바인딩 시작
         function init() {
-            bindSpjangcd();
+            if (!isBindSpjangcdCalled) {
+                bindSpjangcd();
+                isBindSpjangcdCalled = true; // 플래그 업데이트
+            }
             fetchListData();
             initCalendar();
             fetchListData2();

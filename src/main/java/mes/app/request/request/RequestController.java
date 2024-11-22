@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -194,7 +195,7 @@ public class RequestController {
             for (MultipartFile multipartFile : files) {
                 String path = settings.getProperty("file_upload_path") + "주문등록";
                 MultipartFile file = multipartFile;
-                float fileSize = (float) file.getSize();
+                int fileSize = (int) file.getSize();
 
                 if(fileSize > 52428800){
                     result.message = "파일의 크기가 초과하였습니다.";
@@ -219,7 +220,7 @@ public class RequestController {
                 tbDa006WFile.setFilepath(saveFilePath);
                 tbDa006WFile.setFilesvnm(file_uuid_name);
                 tbDa006WFile.setFileornm(fileName);
-                tbDa006WFile.setFilesize(fileSize);
+                tbDa006WFile.setFilesize(BigDecimal.valueOf(fileSize));
                 tbDa006WFile.setCustcd((String) userInfo.get("custcd"));
                 tbDa006WFile.setSpjangcd((String) userInfo.get("spjangcd"));
                 tbDa006WFile.setReqdate(params.get("reqdate").replaceAll("-",""));

@@ -186,7 +186,7 @@ public class OrderStatusService {
     }
     //주문현황 그리드
     public List<Map<String, Object>> getOrderList(TB_DA006W_PK tbDa006W_pk,
-                                                  String searchStartDate, String searchEndDate, String searchType, String saupnum) {
+                                                  String searchStartDate, String searchEndDate, String searchType) {
 
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         dicParam.addValue("searchStartDate", searchStartDate);
@@ -194,7 +194,6 @@ public class OrderStatusService {
         dicParam.addValue("searchType", searchType);
         dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
         dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
-        dicParam.addValue("saupnum", saupnum);
 
         StringBuilder sql = new StringBuilder("""
                 SELECT
@@ -212,9 +211,7 @@ public class OrderStatusService {
                 FROM
                     TB_DA006W hd
                 WHERE
-                    hd.custcd = :custcd
-                    AND hd.spjangcd = :spjangcd
-                    AND hd.saupnum = :saupnum
+                    hd.spjangcd = :spjangcd
                 """);
         // 날짜 필터
         if (searchStartDate != null && !searchStartDate.isEmpty()) {
@@ -235,7 +232,7 @@ public class OrderStatusService {
         return items;
     }
 
-    public List<Map<String, Object>> initDatas(TB_DA006W_PK tbDa006WPk, String cltcd) {
+    public List<Map<String, Object>> initDatas(TB_DA006W_PK tbDa006WPk) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder("""
                 SELECT
@@ -244,15 +241,12 @@ public class OrderStatusService {
                 FROM
                     TB_DA006W hd
                 WHERE
-                    hd.custcd = :custcd
-                    AND hd.spjangcd = :spjangcd
+                    hd.spjangcd = :spjangcd
                     AND LEFT(hd.reqdate, 4) = CAST(YEAR(GETDATE()) AS VARCHAR(4))
                 GROUP BY
                     hd.ordflag;
                 """);
-        dicParam.addValue("custcd", tbDa006WPk.getCustcd());
         dicParam.addValue("spjangcd", tbDa006WPk.getSpjangcd());
-        dicParam.addValue("cltcd", cltcd);
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }

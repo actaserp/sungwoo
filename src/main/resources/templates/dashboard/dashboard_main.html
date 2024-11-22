@@ -468,11 +468,14 @@
         });
 
         document.readyState === 'complete' ? init() : window.onload = init;
-
+        let isBindSpjangcdCalled = false;
         // document.getElementById('search_spjangcd')를 기준으로 페이지 reload
         function init() {
             searchData()
-            bindSpjangcd()
+            if (!isBindSpjangcdCalled) {
+                bindSpjangcd();
+                isBindSpjangcdCalled = true; // 플래그 업데이트
+            }
         }
         // 전체 데이터 불러오기
         function searchData(){

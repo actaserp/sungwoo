@@ -119,12 +119,10 @@ public class OrderStatusController {
         Map<String, Object> userInfo = orderStatusService.getUserInfo(username);
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
         tbDa006WPk.setSpjangcd(searchSpjangcd);
-        tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
-        String saupnum = (String) userInfo.get("saupnum");
         String search_startDate = (searchStartDate).replaceAll("-","");
         String search_endDate = (searchEndDate).replaceAll("-","");
         List<Map<String, Object>> items = this.orderStatusService.getOrderList(tbDa006WPk,
-                search_startDate, search_endDate, searchType, saupnum);
+                search_startDate, search_endDate, searchType);
         for (Map<String, Object> item : items) {
             if (item.get("ordflag").equals("0")) {
                 item.remove("ordflag");
@@ -186,12 +184,9 @@ public class OrderStatusController {
                                 Authentication auth){
         User user = (User) auth.getPrincipal();
         String username = user.getUsername();
-        Map<String, Object> userInfo = orderStatusService.getUserInfo(username);
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
         tbDa006WPk.setSpjangcd(searchSpjangcd);
-        tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
-        String cltcd = (String) userInfo.get("cltcd");
-        List<Map<String, Object>> items = this.orderStatusService.initDatas(tbDa006WPk, cltcd);
+        List<Map<String, Object>> items = this.orderStatusService.initDatas(tbDa006WPk);
         AjaxResult result = new AjaxResult();
         result.data = items;
         return result;
