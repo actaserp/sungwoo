@@ -372,7 +372,7 @@ public class UserService {
             userInfo.put("email", user.get().getEmail());
             userInfo.put("phone", user.get().getPhone());
             userInfo.put("tel", user.get().getTel());
-            userInfo.put("PasswordChange", user.get().getPassword());
+            userInfo.put("loginPwd", user.get().getPassword());
         }
 
         // TB_XCLIENT 정보 조회

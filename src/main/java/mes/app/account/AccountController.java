@@ -177,62 +177,6 @@ public class AccountController {
 		return result;
 	}
 
-	/*@PostMapping("/login")
-	public AjaxResult postLogin(
-			@RequestParam("username") final String username,
-			@RequestParam("password") final String password,
-			final HttpServletRequest request) throws UnknownHostException {
-		// 여기로 들어오지 않음.
-		System.out.println("========================================로그인 진입==================================");
-		AjaxResult result = new AjaxResult();
-
-		HashMap<String, Object> data = new HashMap<String, Object>();
-		result.data = data;
-
-		UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(username, password);
-		CustomAuthenticationToken auth = null;
-		try{
-			auth = (CustomAuthenticationToken)authManager.authenticate(authReq);
-		}catch (AuthenticationException e){
-			e.printStackTrace();
-			data.put("code", "NOUSER");
-			return result;
-		}
-
-		if(auth!=null) {
-			User user = (User)auth.getPrincipal();
-			if (!user.getActive()) {  // user.getActive()가 false인 경우
-				data.put("code", "noactive");
-			} else {
-				data.put("code", "OK");
-
-				try {
-					this.accountService.saveLoginLog("login", auth);
-				} catch (UnknownHostException e) {
-					// Handle the exception (e.g., log it)
-					e.printStackTrace();
-				}
-			}
-		} else {
-			result.success=false;
-			data.put("code", "NOID");
-		}
-
-		SecurityContext sc = SecurityContextHolder.getContext();
-		sc.setAuthentication(auth);
-
-		HttpSession session = request.getSession(true);
-		session.setAttribute("SPRING_SECURITY_CONTEXT", sc);
-
-		return result;
-	}
-	*/
-	private CustomAuthenticationToken authenticateUser(String username, String password) {
-		UsernamePasswordAuthenticationToken authReq = new UsernamePasswordAuthenticationToken(username, password);
-		return (CustomAuthenticationToken) authManager.authenticate(authReq);
-	}
-
-
 	@GetMapping("/account/myinfo")
 	public AjaxResult getUserInfo(Authentication auth){
 		User user = (User)auth.getPrincipal();
@@ -467,6 +411,13 @@ public class AccountController {
 				user.setPhone(userData.getOrDefault("phone", "").toString());
 				user.setTel(userData.getOrDefault("tel", "").toString());
 
+				// 비밀번호 업데이트 (새 비밀번호가 있을 경우만 처리)
+				if (userData.containsKey("password")) {
+					String password = userData.get("password").toString();
+					if (!password.isEmpty()) {
+						user.setPassword(Pbkdf2Sha256.encode(password)); // 비밀번호 암호화 후 저장
+					}
+				}
 				// 저장
 				userRepository.save(user);
 			} else {
@@ -524,6 +475,8 @@ public class AccountController {
 
 		return result;
 	}
+
+
 	public int executeUpdate(String sql, MapSqlParameterSource params) {
 		try {
 			return jdbcTemplate.update(sql, params);

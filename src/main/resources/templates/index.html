@@ -247,12 +247,12 @@
 <!--    &lt;!&ndash;footer [E]&ndash;&gt;-->
 <!--</div>-->
 <div id="overlay"></div>
-<!-- [사용자정보] 팝업  -->
+<!-- [내정보] 팝업  -->
 <div class="dashboard-layout-popup">
     <div class="popup-overlay" id="popup1"></div>
     <div class="popup-wrapper" id="wrapper1">
         <div class="popup-title">
-            <h3>사용자 정보</h3>
+            <h3>로그인 정보(내정보)</h3>
             <a onclick="UserInfoClose()" title="팝업닫기" class="btn-popup-close">
                 <img src="/images/icon/btn-popup-close.svg" alt="닫기">
             </a>
@@ -350,18 +350,16 @@
                             </td>
                         </tr>
                         <tr>
-                            <th><label for="PasswordChange">비밀번호</label></th>
+                            <th><label for="loginPwd">비밀번호</label></th>
                             <td>
                                 <div class="input-clear">
-                                    <input type="password" id="PasswordChange" name="PasswordChange"
-                                           autocomplete="new-password">
+                                    <input type="password" class="form-control2" id="loginPwd" name="loginPwd" placeholder="비밀번호" title="" />
                                 </div>
                             </td>
-                            <th><label for="PasswordChangeChk">비밀번호 확인</label></th>
+                            <th><label for="loginPwd2">비밀번호 확인</label></th>
                             <td>
                                 <div class="input-clear">
-                                    <input type="password" id="PasswordChangeChk" name="PasswordChangeChk"
-                                           autocomplete="off">
+                                    <input type="password" class="form-control2" id="loginPwd2" name="loginPwd2" placeholder="비밀번호 확인" title="" />
                                 </div>
                             </td>
                         </tr>
@@ -394,7 +392,7 @@
             </form>
         </div>
         <div class="popup-button">
-            <button class="btn-navy" id="btnSaveAuth" onclick="btnSaveAuth()">수정</button>
+            <button class="btn-navy" id="btnSaveAuth">수정</button>
         </div>
     </div>
 </div> <!-- //dashboard-layout-popup end -->
@@ -1040,12 +1038,14 @@
                     $('#cltnm').val(response.data.cltnm || ''); // 업체명
                     $('#biztypenm').val(response.data.biztypenm || ''); // 업태
                     $('#bizitemnm').val(response.data.bizitemnm || ''); // 종목
-                  /*  $('#PasswordChange').val(response.data.PasswordChange || '');*/
+                    $('#loginPwd').val(response.data.loginPwd || '');
                     $('#tel').val(response.data.tel || ''); // 전화번호
                     $('#phone').val(response.data.phone || ''); // 핸드폰
                     $('#postno').val(response.data.postno || ''); // 우편번호
                     $('#address1').val(response.data.address1 || ''); // 도로명 주소
                     $('#address2').val(response.data.address2 || ''); // 상세 주소
+                    // 비밀번호 필드 마스킹
+                    $('#loginPwd').val('*****');
                 }
                 console.log('사용자 정보 가져오기 성공: ', response);
             },
@@ -1067,91 +1067,99 @@
         popup.style.display = 'none';
         wrapper.style.display = 'none';
     }
-    function btnSaveAuth() {
-        const csrfToken = $('input[name="_csrf"]').val(); // CSRF 토큰이 input hidden 필드에 있는 경우
 
-        // 필요한 데이터를 가져오기
-        const data = {
-            login_id: $('#login_id').val().trim(),
-            prenm: $('#prenm').val().trim(),
-            email: $('#email').val().trim(),
-            cltnm: $('#cltnm').val().trim(),
-            biztypenm: $('#biztypenm').val().trim(),
-            bizitemnm: $('#bizitemnm').val().trim(),
-            tel: $('#tel').val().trim(),
-            phone: $('#phone').val().trim(),
-            postno: $('#postno').val().trim(),
-            address1: $('#address1').val().trim(),
-            address2: $('#address2').val().trim(),
-        };
-        console.log("가져온 데이터:", JSON.stringify(data, null, 2));
+    //내정보 수정
+    $(document).ready(function () {
+        const csrfToken = $('input[name="_csrf"]').val(); // CSRF 토큰 가져오기
 
-        // 서버로 데이터 전송
-        $.ajax({
-            url: '/account/updateUserInfo',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            headers: {
-                'X-CSRF-TOKEN': csrfToken // CSRF 토큰 추가
-            },
-            success: function (response) {
-                if (response.success) {
-                    Alert.alert('', '정보가 성공적으로 수정되었습니다.', function () {
-                        UserInfoClose(); // 팝업 닫기
-                        location.reload(); // 페이지 새로고침
+        function validatePasswordPolicy(password) {
+            const passOption = {
+                length: [8, 20],
+                lower: 1,
+                upper: 1,
+                numeric: 1,
+                special: 1,
+                badWords: [],
+                badSequenceLength: 3,
+                noQwertySequences: true,
+                noSequential: true
+            };
+
+            return validatePassword(password, passOption);
+        }
+
+        //내정보 수정
+        function saveUserInfo() {
+            const data = {
+                login_id: $('#login_id').val().trim(),
+                prenm: $('#prenm').val().trim(),
+                email: $('#email').val().trim(),
+                cltnm: $('#cltnm').val().trim(),
+                biztypenm: $('#biztypenm').val().trim(),
+                bizitemnm: $('#bizitemnm').val().trim(),
+                tel: $('#tel').val().trim(),
+                phone: $('#phone').val().trim(),
+                postno: $('#postno').val().trim(),
+                address1: $('#address1').val().trim(),
+                address2: $('#address2').val().trim(),
+            };
+
+            if ($('#loginPwd').val() !== '') {
+                const password = $('#loginPwd').val();
+                const confirmPassword = $('#loginPwd2').val();
+
+                if (!validatePasswordPolicy(password)) {
+                    Alert.alert('', '패스워드 정책을 위반했습니다. 요구 사항을 확인하세요.');
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    Alert.alert('', '패스워드가 일치하지 않습니다.', function () {
+                        $('#loginPwd2').focus();
                     });
-                } else {
-                    Alert.alert('', response.message || '정보 수정에 실패했습니다.');
+                    return;
                 }
-            },
-            error: function (xhr, status, error) {
-                console.error('정보 수정 중 오류 발생: ', error);
-                Alert.alert('', '서버와의 통신 중 오류가 발생했습니다.');
+
+                data.password = password; // 비밀번호를 데이터에 추가
+            }
+
+            console.log("보낼 데이터:", JSON.stringify(data, null, 2));
+
+            $.ajax({
+                url: '/account/updateUserInfo',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken // CSRF 토큰 추가
+                },
+                success: function (response) {
+                    if (response.success) {
+                        Alert.alert('', '정보가 성공적으로 수정되었습니다.', function () {
+                            UserInfoClose(); // 팝업 닫기
+                            location.reload(); // 페이지 새로고침
+                        });
+                    } else {
+                        Alert.alert('', response.message || '정보 수정에 실패했습니다.');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('정보 수정 중 오류 발생: ', error);
+                    Alert.alert('', '서버와의 통신 중 오류가 발생했습니다.');
+                }
+            });
+        }
+
+        $('#btnSaveAuth').on('click', function () {
+            saveUserInfo();
+        });
+
+        $('#userForm').validate({
+            submitHandler: function () {
+                saveUserInfo();
             }
         });
-    }
-    function changePassword() {
-        const name = $('#name').val().trim();
-        const loginPwd = $('#PasswordChange').val().trim();
-        const loginPwd2 = $('#PasswordChangeChk').val().trim();
-
-        if (!name) {
-            alert('이름을 입력해주세요.');
-            return;
-        }
-        if (!loginPwd || !loginPwd2) {
-            alert('비밀번호를 모두 입력해주세요.');
-            return;
-        }
-        if (loginPwd !== loginPwd2) {
-            alert('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
-            return;
-        }
-
-        const data = { name, loginPwd, loginPwd2 };
-
-        $.ajax({
-            url: '/account/myinfo/password_change',
-            type: 'POST',
-            contentType: 'application/x-www-form-urlencoded',
-            data: data,
-            success: function (response) {
-                if (response.success) {
-                    alert(response.message);
-                    location.reload(); // 페이지 새로고침
-                } else {
-                    alert(response.message);
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error('비밀번호 변경 중 오류 발생: ', error);
-                alert('서버와의 통신 중 오류가 발생했습니다.');
-            }
-        });
-    }
-
-
+    });
 
 
     function initializeSelect({
