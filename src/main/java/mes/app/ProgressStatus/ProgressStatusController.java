@@ -53,7 +53,7 @@ public class ProgressStatusController {
     @GetMapping("/search")
     public AjaxResult searchProgress(@RequestParam Map<String, String> params, Authentication auth) {
         AjaxResult result = new AjaxResult();
-
+        log.info("그리드 검색: {}", params);
         try {
             // 로그인한 사용자 정보
             User user = (User) auth.getPrincipal();
@@ -64,10 +64,10 @@ public class ProgressStatusController {
             System.out.println(String.format("검색 조건: %s, 사용자: %s, 사업장: %s", params, userid, spjangcd));
 
             // 검색 서비스 호출
-            List<Map<String, Object>> progressStatusList = progressStatusService.searchProgress(
+            List<Map<String, Object>> progressStatusList = progressStatusService.searchProgressStatus(
                     params.get("startDate"),    // 검색 시작 날짜
                     params.get("endDate"),      // 검색 종료 날짜
-                    params.get("searchRemark"), // 검색 비고 (remark)
+                    params.get("searchTitle"), // 검색 비고 ()
                     params.get("searchtketnm"),
                     params.get("searchCltnm"),
                     userid,                     // 사용자 ID

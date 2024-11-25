@@ -299,6 +299,7 @@
         theGrid.itemsSource = viewdata;
       }
     }
+    //차트 데이터
     function loadChartData() {
 
       const spjangcd = document.getElementById('search_spjangcd').value;
@@ -340,24 +341,31 @@
           } else {
             // 데이터가 없을 때 차트 초기화 및 메시지 표시
             console.log(response.message || "조회된 데이터가 없습니다.");
-            initializeChart(callback);
+            initializeChart();
           }
         },
         error: function () {
           // AJAX 요청 오류 처리
           console.error("데이터 로드 중 오류 발생");
-          initializeChart(callback);
+          initializeChart();
         }
       });
     }
 
-    function initializeChart(callback) {
-      const ctx = document.getElementById('myChart').getContext('2d');
+    function initializeChart(dataInput, optionsInput, callback) {
+      const chartElement = document.getElementById('myChart');
+      const ctx = chartElement.getContext('2d');
 
-      const data = {
+      // 기존 차트 인스턴스가 있으면 파괴
+      const existingChart = $(chartElement).data('chart');
+      if (existingChart) {
+        existingChart.destroy();
+      }
+
+      // 데이터 설정
+      const defaultData = {
         labels: [],
         datasets: [{
-          /*label: '',*/
           data: [],
           backgroundColor: [
             'rgba(255, 99, 132, 0.2)',
@@ -377,38 +385,53 @@
         }]
       };
 
-      const config = {
-        type: 'bar',
-        data: data,
-        options: {
-          indexAxis: 'y',
-          plugins: {
-            legend: {
-              display: false // 범례를 숨김
-            },
-            tooltip: {
-              callbacks: {
-                title: function (tooltipItems) {
-                  return tooltipItems[0].label || ''; // 제목을 빈 문자열로 처리
-                },
-                label: function (tooltipItem) {
-                  return `${tooltipItem.raw} 값`; // 툴팁의 텍스트 내용
-                }
+      const data = { ...defaultData, ...dataInput };
+
+      // 옵션 설정
+      const defaultOptions = {
+        indexAxis: 'y',
+        plugins: {
+          legend: {
+            display: false // 범례를 숨김
+          },
+          tooltip: {
+            callbacks: {
+              title: function (tooltipItems) {
+                return tooltipItems[0].label || ''; // 제목을 빈 문자열로 처리
+              },
+              label: function (tooltipItem) {
+                return `${tooltipItem.raw} 값`; // 툴팁의 텍스트 내용
               }
             }
-          },
-          scales: {
-            x: { beginAtZero: true },
-            y: { beginAtZero: true }
           }
-        }
+        },
+        scales: {
+          x: { beginAtZero: true,
+            min: 0, // 최소값 설정
+            max: 4, // X축의 최대 값을 4로 고정 (출고에 해당)
+          },
+
+          y: { beginAtZero: true }
+        },
+    };
+
+      const options = { ...defaultOptions, ...optionsInput };
+
+      // 차트 생성
+      const config = {
+        type: 'bar', // 기본 차트 타입
+        data: data,
+        options: options
       };
 
       const myChart = new Chart(ctx, config);
-      $('#myChart').data('chart', myChart);
 
+      // 생성된 차트를 데이터에 저장
+      $(chartElement).data('chart', myChart);
+
+      // 콜백 실행
       if (callback) {
-        callback(); // 초기화 완료 후 콜백 실행
+        callback(myChart); // 생성된 차트를 콜백에 전달
       }
     }
 
@@ -556,7 +579,7 @@
       bindDataToGrid(data);
 
     }
-
+    var stageMapping;
     //차트
     $(document).ready(function () {
       // 숫자 → 값 매핑 객체
@@ -584,7 +607,7 @@
 
       // 기본 데이터 설정
       const data = {
-        labels: ['주문의뢰', '주문확인', '주문확정', '제작진행', '출고'],
+        labels: ['업체', '업체1', '업체2', '업체3', '업체4'],
         datasets: [{
           label: '진행 현황',
           data: [0],  // 기본 data
@@ -610,16 +633,19 @@
       const config = {
         type: 'bar',
         data: data,
+        legend: {
+          display: false // 범례를 숨김
+        },
         options: {
           indexAxis: 'y', // 가로 막대 그래프
           scales: {
             x: {
               beginAtZero: true,
+              min: 0, // 최소값 설정
               max: 4, // X축의 최대 값을 4로 고정 (출고에 해당)
               ticks: {
                 stepSize: 1, // 숫자 간격을 1로 고정
                 callback: function (value) {
-                  // X축 값을 stageMapping으로 매핑
                   return stageMapping[value] || '';
                 },
                 autoSkip: false // 모든 라벨 표시

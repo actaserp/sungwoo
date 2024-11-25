@@ -117,6 +117,7 @@ public class ProgressStatusService {
     }
 
 
+    //검색 그리드
     public List<Map<String, Object>> searchProgress(
             String searchStartDate,
             String searchEndDate,
@@ -132,44 +133,44 @@ public class ProgressStatusService {
         params.addValue("spjangcd", spjangcd);
 
         StringBuilder sql = new StringBuilder("""
-   SELECT
-       tb007.custcd,
-       tb007.spjangcd,
-       tb007.reqdate,
-       tb007.reqnum,
-       tb006.cltnm,
-       tb006.perid,
-       tb006.telno,
-       tb006.ordflag,
-       tb006.remark,
-       tb006.deldate
-   FROM
-       TB_DA007W tb007
-   LEFT JOIN (
        SELECT
-           custcd,
-           spjangcd,
-           reqdate,
-           reqnum,
-           MAX(cltnm) AS cltnm,
-           MAX(perid) AS perid,
-           MAX(telno) AS telno,
-           MAX(ordflag) AS ordflag,
-           MAX(remark) AS remark,
-           MAX(deldate) AS deldate
+           tb007.custcd,
+           tb007.spjangcd,
+           tb007.reqdate,
+           tb007.reqnum,
+           tb006.cltnm,
+           tb006.perid,
+           tb006.telno,
+           tb006.ordflag,
+           tb006.remark,
+           tb006.deldate
        FROM
-           TB_DA006W
-       GROUP BY
-           custcd, spjangcd, reqdate, reqnum
-   ) tb006
-   ON
-       tb007.custcd = tb006.custcd
-       AND tb007.spjangcd = tb006.spjangcd
-       AND tb007.reqdate = tb006.reqdate
-       AND tb007.reqnum = tb006.reqnum
-   WHERE
-       tb007.spjangcd = :spjangcd
-   """);
+           TB_DA007W tb007
+       LEFT JOIN (
+           SELECT
+               custcd,
+               spjangcd,
+               reqdate,
+               reqnum,
+               MAX(cltnm) AS cltnm,
+               MAX(perid) AS perid,
+               MAX(telno) AS telno,
+               MAX(ordflag) AS ordflag,
+               MAX(remark) AS remark,
+               MAX(deldate) AS deldate
+           FROM
+               TB_DA006W
+           GROUP BY
+               custcd, spjangcd, reqdate, reqnum
+       ) tb006
+       ON
+           tb007.custcd = tb006.custcd
+           AND tb007.spjangcd = tb006.spjangcd
+           AND tb007.reqdate = tb006.reqdate
+           AND tb007.reqnum = tb006.reqnum
+       WHERE
+           tb007.spjangcd = :spjangcd
+       """);
 
         if (searchStartDate != null && !searchStartDate.isEmpty()) {
             sql.append(" AND tb007.reqdate >= :searchStartDate ");
@@ -195,7 +196,7 @@ public class ProgressStatusService {
         return sqlRunner.getRows(sql.toString(), params);
     }
 
-    public List<Map<String, Object>> getGridData(String userid, String spjangcd, String startDate, String endDate, String searchCltnm, Integer ordflag, String searchTitle) {
+    /*public List<Map<String, Object>> getGridData(String userid, String spjangcd, String startDate, String endDate, String searchCltnm, Integer ordflag, String searchTitle) {
         // 매개변수 바인딩을 위한 MapSqlParameterSource 생성
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("userid", userid);
@@ -269,7 +270,7 @@ public class ProgressStatusService {
 
         // 실행 및 결과 반환
         return sqlRunner.getRows(sql.toString(), params);
-    }
+    }*/
 
     public List<Map<String, Object>> getChartData(String userid) {
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -344,6 +345,74 @@ public class ProgressStatusService {
 
         log.info("검색 실행될 SQL: {}", sql.toString());
         log.info("검섹 바인딩된 파라미터: {}", params.getValues());
+        // 데이터 조회
+        return sqlRunner.getRows(sql.toString(), params);
+    }
+
+    public List<Map<String, Object>> searchProgressStatus(
+            String startDate, String endDate,
+            String searchTitle, String searchtketnm,
+            String searchCltnm, String userid, String spjangcd) {
+
+        // 동적 쿼리를 위한 매개변수 설정
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        StringBuilder sql = new StringBuilder("""
+        SELECT
+            tb007.*,
+            tb006.*
+        FROM
+            TB_DA007W tb007
+        LEFT JOIN
+            TB_DA006W tb006
+        ON
+            tb007.custcd = tb006.custcd
+            AND tb007.spjangcd = tb006.spjangcd
+        WHERE
+            1=1
+    """); // WHERE 1=1은 조건을 추가하기 쉽게 하기 위한 트릭입니다.
+
+        // 조건 추가
+        if (startDate != null && !startDate.isEmpty()) {
+            sql.append(" AND tb006.reqdate >= :startDate");
+            params.addValue("startDate", startDate);
+        }
+
+        if (endDate != null && !endDate.isEmpty()) {
+            sql.append(" AND tb006.reqdate <= :endDate");
+            params.addValue("endDate", endDate);
+        }
+
+        if (searchCltnm != null && !searchCltnm.isEmpty()) {
+            sql.append(" AND tb006.cltnm LIKE :cltnm");
+            params.addValue("cltnm", "%" + searchCltnm + "%");
+        }
+
+        if (searchtketnm != null && !searchtketnm.isEmpty()) {
+            sql.append(" AND tb006.ordflag = :ordflag");
+            params.addValue("ordflag", searchtketnm);
+        }
+
+        if (searchTitle != null && !searchTitle.isEmpty()) {
+            sql.append(" AND tb007.remark LIKE :searchRemark");
+            params.addValue("searchRemark", "%" + searchTitle + "%");
+        }
+
+        // Optional: spjangcd 필터링 추가
+        if (spjangcd != null && !spjangcd.isEmpty()) {
+            sql.append(" AND tb007.spjangcd = :spjangcd");
+            params.addValue("spjangcd", spjangcd);
+        }
+
+        // Optional: userid 필터링 추가
+        if (userid != null && !userid.isEmpty()) {
+            sql.append(" AND tb007.userid = :userid");
+            params.addValue("userid", userid);
+        }
+
+        // 로그 출력
+        log.info("검색 실행될 SQL: {}", sql.toString());
+        log.info("검색 바인딩된 파라미터: {}", params.getValues());
+
         // 데이터 조회
         return sqlRunner.getRows(sql.toString(), params);
     }
