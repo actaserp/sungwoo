@@ -60,75 +60,61 @@ public class ProgressStatusService {
         return sqlRunner.getRows(sql, params);
     }
 
-    /*public List<Map<String, Object>> getChartData(String userid, String spjangcd) {
+
+    public List<Map<String, Object>> getChartData2(
+            String userid, String search_spjangcd, String startDate, String endDate,
+            String searchCltnm, Integer searchtketnm, String searchTitle) {
+
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("userid", userid);
-        params.addValue("spjangcd", spjangcd);
-
-        String sql = """
-                   SELECT
-                    tb007.custcd,
-                    tb007.spjangcd,
-                    tb007.reqdate,
-                    tb007.reqnum,
-                    tb006.cltnm,
-                    MAX(CAST(tb006.ordflag AS INT)) AS ordflag
-                FROM
-                    TB_DA007W tb007
-                INNER JOIN
-                    TB_DA006W tb006
-                ON
-                    tb007.custcd = tb006.custcd
-                    AND tb007.spjangcd = tb006.spjangcd
-                    AND tb007.reqdate = tb006.reqdate
-                    AND tb007.reqnum = tb006.reqnum
-                GROUP BY
-                    tb007.custcd, tb007.spjangcd, tb007.reqdate, tb007.reqnum, tb006.cltnm;
-                """;
-        log.info("sql:",sql);
-        return sqlRunner.getRows(sql, params);
-    }*/
-
-    public List<Map<String, Object>> getChartData2(String userid, String spjangcd, String startDate, String endDate, String cltnm, Integer ordflag, String searchTitle) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("userid", userid);
-        params.addValue("spjangcd", spjangcd);
-
-        // 동적 WHERE 조건을 추가하기 위한 StringBuilder
         StringBuilder sql = new StringBuilder("""
-               SELECT
-                  cltnm,
-                 ordflag
-              FROM
-                  TB_DA006W
-            """);
+        SELECT cltnm, ordflag
+        FROM tb_da006w
+        WHERE 1=1
+    """);
 
-        // 검색 조건 추가
+        // 관리자(super)일 때는 saupnum 조건 제외
+        if (userid != null && !userid.isEmpty()) {
+            // userid가 "super" 또는 "seong"이 아닌 경우에만 조건 추가
+            if (!"super".equals(userid) && !"seong".equals(userid)) {
+                sql.append(" AND saupnum = :saupnum");
+                params.addValue("saupnum", userid);
+            }
+        }
+
         if (startDate != null && !startDate.isEmpty()) {
-            sql.append(" AND tb007.reqdate >= :startDate");
+            sql.append(" AND reqdate >= :startDate");
             params.addValue("startDate", startDate);
         }
+
         if (endDate != null && !endDate.isEmpty()) {
-            sql.append(" AND tb007.reqdate <= :endDate");
+            sql.append(" AND reqdate <= :endDate");
             params.addValue("endDate", endDate);
         }
-        if (cltnm != null && !cltnm.isEmpty()) {
-            sql.append(" AND tb006.cltnm LIKE :cltnm");
-            params.addValue("cltnm", "%" + cltnm + "%");
+
+        if (searchCltnm != null && !searchCltnm.isEmpty()) {
+            sql.append(" AND cltnm LIKE :cltnm");
+            params.addValue("cltnm", "%" + searchCltnm + "%");
         }
-        if (ordflag != null) {
-            sql.append(" AND tb006.ordflag = :ordflag");
-            params.addValue("ordflag", ordflag);
+        if (search_spjangcd != null && !search_spjangcd.isEmpty()) {
+            sql.append(" AND spjangcd = :spjangcd");
+            params.addValue("spjangcd", search_spjangcd);
         }
+
+        if (searchtketnm != null) {
+            sql.append(" AND ordflag = :ordflag");
+            params.addValue("ordflag", searchtketnm);
+        }
+
         if (searchTitle != null && !searchTitle.isEmpty()) {
-            sql.append(" AND tb006.remark LIKE :searchTitle");
+            sql.append(" AND title LIKE :searchTitle");
             params.addValue("searchTitle", "%" + searchTitle + "%");
         }
 
-        log.info("SQL: {}", sql);
+        log.info("실행될 SQL: {}", sql.toString());
+        log.info("바인딩된 파라미터: {}", params.getValues());
+
         return sqlRunner.getRows(sql.toString(), params);
     }
-
 
 
     public List<Map<String, Object>> searchProgress(
@@ -311,6 +297,55 @@ public class ProgressStatusService {
                 """;
 
         return sqlRunner.getRows(sql, params);
+    }
+
+    public List<Map<String, Object>> searchProgressStatus(
+            String startDate, String endDate, String searchCltnm, String searchtketnm, String searchTitle
+    ) {
+        // 동적 쿼리를 위한 매개변수 설정
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        StringBuilder sql = new StringBuilder("""
+            SELECT
+            tb007.*,
+            tb006.*
+        FROM
+            TB_DA007W tb007
+        LEFT JOIN
+            TB_DA006W tb006
+        ON
+            tb007.custcd = tb006.custcd
+            AND tb007.spjangcd = tb006.spjangcd
+        """);
+
+        if (startDate != null && !startDate.isEmpty()) {
+            sql.append(" AND tb006.reqdate >= :startDate");
+            params.addValue("startDate", startDate);
+        }
+
+        if (endDate != null && !endDate.isEmpty()) {
+            sql.append(" AND tb006.reqdate <= :endDate");
+            params.addValue("endDate", endDate);
+        }
+
+        if (searchCltnm != null && !searchCltnm.isEmpty()) {
+            sql.append(" AND tb006.cltnm LIKE :cltnm");
+            params.addValue("cltnm", "%" + searchCltnm + "%");
+        }
+
+        if (searchtketnm != null) {
+            sql.append(" AND tb006.ordflag = :ordflag");
+            params.addValue("ordflag", searchtketnm);
+        }
+
+        if (searchTitle != null && !searchTitle.isEmpty()) {
+            sql.append(" AND tb007.remark LIKE :searchTitle");
+            params.addValue("searchTitle", "%" + searchTitle + "%");
+        }
+
+        log.info("검색 실행될 SQL: {}", sql.toString());
+        log.info("검섹 바인딩된 파라미터: {}", params.getValues());
+        // 데이터 조회
+        return sqlRunner.getRows(sql.toString(), params);
     }
 
 }

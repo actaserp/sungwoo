@@ -140,46 +140,16 @@ public class ProgressStatusController {
         return result;
     }
 
-    /*@GetMapping("/getChartData2")
-    public AjaxResult getChartData(
-            Authentication auth,
-            @RequestParam(value = "spjangcd", required = false) String spjangcd,
-            @RequestParam(value = "startDate", required = false) String startDate,
-            @RequestParam(value = "endDate", required = false) String endDate,
-            @RequestParam(value = "cltnm", required = false) String cltnm,
-            @RequestParam(value = "ordflag", required = false) Integer ordflag,
-            @RequestParam(value = "searchTitle", required = false) String searchTitle) {
-        AjaxResult result = new AjaxResult();
 
-        try {
-            User user = (User) auth.getPrincipal();
-            String userid = user.getUsername();
-
-            // 검색 조건에 따른 데이터 조회
-            log.info("검색 조건 - startDate: {}, endDate: {}, cltnm: {}, ordflag: {}, searchTitle: {}",
-                    startDate, endDate, cltnm, ordflag, searchTitle);
-
-            List<Map<String, Object>> rawData = progressStatusService.getChartData2(
-                    userid, spjangcd, startDate, endDate, cltnm, ordflag, searchTitle);
-
-            log.info("쿼리 결과 데이터: {}", rawData);
-
-            } catch (Exception e) {
-            log.error("데이터 처리 중 오류: {}", e.getMessage(), e);
-            result.success = false;
-            result.message = "데이터를 가져오는 중 오류가 발생했습니다.";
-        }
-
-        return result;
-    }*/
+    //차트 데이터
     @GetMapping("/getChartData2")
     public AjaxResult getChartData(
             Authentication auth,
-            @RequestParam(value = "spjangcd", required = false) String spjangcd,
+            @RequestParam(value = "search_spjangcd", required = false) String search_spjangcd,
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
-            @RequestParam(value = "cltnm", required = false) String cltnm,
-            @RequestParam(value = "ordflag", required = false) Integer ordflag,
+            @RequestParam(value = "searchCltnm", required = false) String searchCltnm,
+            @RequestParam(value = "searchtketnm", required = false) Integer searchtketnm,
             @RequestParam(value = "searchTitle", required = false) String searchTitle) {
 
         AjaxResult result = new AjaxResult();
@@ -187,17 +157,21 @@ public class ProgressStatusController {
             User user = (User) auth.getPrincipal();
             String userid = user.getUsername();
 
-            log.info("검색 조건 - startDate: {}, endDate: {}, cltnm: {}, ordflag: {}, searchTitle: {}",
-                    startDate, endDate, cltnm, ordflag, searchTitle);
+            log.info("검색 조건 -search_spjangcd:{}, startDate: {}, endDate: {}, cltnm: {}, ordflag: {}, searchTitle: {}",
+                    startDate, endDate, searchCltnm, searchtketnm, searchTitle);
 
-            // 데이터 조회
             List<Map<String, Object>> rawData = progressStatusService.getChartData2(
-                    userid, spjangcd, startDate, endDate, cltnm, ordflag, searchTitle);
+                    userid, search_spjangcd, startDate, endDate, searchCltnm, searchtketnm, searchTitle);
 
-            log.info("쿼리 결과 데이터: {}", rawData);
-
-            result.success = true;
-            result.data = rawData; // 리스트 그대로 반환
+            if (rawData == null || rawData.isEmpty()) {
+                log.warn("조회된 데이터가 없습니다.");
+                result.success = false;
+                result.message = "조회된 데이터가 없습니다.";
+            } else {
+                log.info("쿼리 결과 데이터: {}", rawData);
+                result.success = true;
+                result.data = rawData;
+            }
         } catch (Exception e) {
             log.error("데이터 처리 중 오류: {}", e.getMessage(), e);
             result.success = false;
@@ -206,29 +180,6 @@ public class ProgressStatusController {
 
         return result;
     }
-
-
-    @GetMapping("/getGridData")
-    public AjaxResult getGridData(Authentication auth, @RequestParam Map<String, String> params) {
-        // 그리드 관련 데이터만 처리
-        AjaxResult result = new AjaxResult();
-
-        String userid = ((User) auth.getPrincipal()).getUsername();
-        String spjangcd = params.get("spjangcd");
-        String startDate = params.get("startDate");
-        String endDate = params.get("endDate");
-        String searchCltnm = params.get("searchCltnm");
-        Integer ordflag = params.get("searchtketnm") != null ? Integer.parseInt(params.get("searchtketnm")) : null;
-        String searchTitle = params.get("searchTitle");
-
-        List<Map<String, Object>> data = progressStatusService.getGridData(userid, spjangcd, startDate, endDate, searchCltnm, ordflag, searchTitle);
-
-        result.success = true;
-        result.data = data;
-        result.message = "데이터 조회 성공";
-
-        return result;
-}
 
 
 }

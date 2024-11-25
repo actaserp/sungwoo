@@ -33,6 +33,15 @@
     max-width: 600px;
     border-radius: 8px;
   }
+  .chart-container {
+    position: relative; /* 부모 요소에 위치 고정 */
+    width: 100%;       /* 원하는 너비 */
+    height: 400px;     /* 고정된 높이 */
+    overflow-y: auto;  /* 세로 스크롤 활성화 */
+    overflow-x: hidden; /* 가로 스크롤 비활성화 */
+    border: 1px solid #ccc; /* 테두리 추가 (선택 사항) */
+    padding: 10px;      /* 여백 추가 (선택 사항) */
+  }
 
 </style>
 <th:block layout:fragment="content">
@@ -94,7 +103,7 @@
               <dd>
                 <div class="srch-box">
                   <select id="searchtketnm" name="searchtketnm">
-                    <option value="전체">전체</option>
+                    <option value="">전체</option>
                     <option value="0">주문등록</option>
                     <option value="1">주문확인</option>
                     <option value="2">주문확정</option>
@@ -145,9 +154,17 @@
           </div>
         </div>
 
-        <div class="container-fluid">
+        <!--<div class="container-fluid">
           <div class="chart-wrap" style="justify-content: normal; margin-bottom: 20px">
             <canvas id="myChart" width="400" height="120px"></canvas>
+            <span class="material-symbols-outlined"
+                  style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);"
+                  onclick="openModal()">zoom_out_map</span>
+          </div>
+        </div>-->
+        <div class="container-fluid">
+          <div class="chart-container">
+            <canvas id="myChart"></canvas>
             <span class="material-symbols-outlined"
                   style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);"
                   onclick="openModal()">zoom_out_map</span>
@@ -181,10 +198,11 @@
     var theGrid;
 
     document.readyState === 'complete' ? init() : window.onload = init;
-
+    let isBindSpjangcdCalled = false;
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
       fetchListData();
+      loadChartData();
       if (!isBindSpjangcdCalled) {
         bindSpjangcd();
         isBindSpjangcdCalled = true; // 플래그 업데이트
@@ -281,6 +299,113 @@
         theGrid.itemsSource = viewdata;
       }
     }
+    function loadChartData() {
+
+      const spjangcd = document.getElementById('search_spjangcd').value;
+      const startDate = document.getElementById('startDate').value || "";
+      const endDate = document.getElementById('endDate').value || "";
+      const searchCltnm = document.getElementById('searchCltnm').value.trim() || "";
+      const searchtketnm = document.getElementById('searchtketnm').value || "";
+      const searchTitle = document.getElementById('searchTitle')?.value || "";
+
+      const queryParams = {
+        search_spjangcd: spjangcd,
+        startDate: startDate,
+        endDate: endDate,
+        searchCltnm: searchCltnm,
+        searchtketnm: searchtketnm,
+        searchTitle: searchTitle
+      };
+      const urlParams = new URLSearchParams(queryParams).toString();
+      const url = `/api/ProgressStatus/getChartData2?${urlParams}`;
+
+      $.ajax({
+        url: url,
+        method: 'GET',
+        dataType: 'json',
+        success: function (response) {
+          if (response.success && response.data) {
+            const labels = response.data.map(item => item.cltnm || "미지정");
+            const values = response.data.map(item => item.ordflag || 0);
+
+            const chartInstance = $('#myChart').data('chart');
+            if (chartInstance) {
+              chartInstance.data.labels = labels;
+              chartInstance.data.datasets[0].data = values;
+              chartInstance.update();
+            } else {
+              console.error("차트 인스턴스를 찾을 수 없습니다.");
+            }
+          } else {
+            console.warn("차트를 초기화할 데이터가 없습니다.");
+          }
+        },
+        error: function () {
+          console.error("데이터 로드 중 오류 발생");
+          initializeChart();
+        }
+      });
+    }
+    function initializeChart(callback) {
+      const ctx = document.getElementById('myChart').getContext('2d');
+
+      const data = {
+        labels: [],
+        datasets: [{
+          /*label: '',*/
+          data: [],
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(255, 159, 64, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)'
+          ],
+          borderWidth: 2
+        }]
+      };
+
+      const config = {
+        type: 'bar',
+        data: data,
+        options: {
+          indexAxis: 'y',
+          plugins: {
+            legend: {
+              display: false // 범례를 숨김
+            },
+            tooltip: {
+              callbacks: {
+                title: function (tooltipItems) {
+                  return tooltipItems[0].label || ''; // 제목을 빈 문자열로 처리
+                },
+                label: function (tooltipItem) {
+                  return `${tooltipItem.raw} 값`; // 툴팁의 텍스트 내용
+                }
+              }
+            }
+          },
+          scales: {
+            x: { beginAtZero: true },
+            y: { beginAtZero: true }
+          }
+        }
+      };
+
+      const myChart = new Chart(ctx, config);
+      $('#myChart').data('chart', myChart);
+
+      if (callback) {
+        callback(); // 초기화 완료 후 콜백 실행
+      }
+    }
 
     function formatDateString(dateString) {
       if (!dateString || dateString.length !== 8) return dateString; // 유효성 검사
@@ -338,22 +463,29 @@
         }
       });
     }*/
+
+    //검색
     function searchButton() {
       // 입력된 값 가져오기
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
-      const searchCltnm = document.getElementById('searchCltnm').value.trim();
-      const searchtketnm = document.getElementById('searchtketnm').value.trim();
-      const searchstate = document.getElementById('searchstate')?.value; // 검색 상태가 있는 경우
+      const search_spjangcd = document.getElementById('search_spjangcd').value ||"" ;
+      const startDate = document.getElementById('startDate').value || "";
+      const endDate = document.getElementById('endDate').value || "";
+      const searchCltnm = document.getElementById('searchCltnm').value.trim() || "";
+      const searchtketnm = document.getElementById('searchtketnm').value || "";
+      const searchTitle = document.getElementById('searchTitle')?.value || "";
 
       // 검색 요청 데이터 구성
-      const queryParams = {};
-      if (startDate) queryParams.startDate = startDate;
-      if (endDate) queryParams.endDate = endDate;
-      if (searchCltnm) queryParams.searchCltnm = searchCltnm;
-      if (searchtketnm) queryParams.searchtketnm = searchtketnm;
-      if (searchstate) queryParams.searchstate = searchstate;
+      const queryParams = {
+        search_spjangcd,
+        startDate,
+        endDate,
+        searchCltnm,
+        searchtketnm,
+        searchTitle
+      };
 
+      // 차트 데이터 로드
+      loadChartData(queryParams);
 
       $.ajax({
         url: `/api/ProgressStatus/search?${$.param(queryParams)}`,
@@ -435,13 +567,8 @@
       }
     }
 
-
     function updateChartAndGrid(data) {
       console.log("업데이트할 데이터:", data);
-
-      // 차트 데이터를 추출 및 변환
-      const chartLabels = ['', '', '', '', ''];
-      const chartData = [0, 0, 0, 0, 0]; // 각 진행 상태별 초기값
 
       data.forEach(item => {
         if (item.ordflag !== undefined && item.ordflag !== null) {
@@ -451,20 +578,9 @@
           }
         }
       });
-
-      // 차트 업데이트
-      const chartInstance = $('#myChart').data('chart');
-      if (chartInstance) {
-        chartInstance.data.datasets[0].data = chartData;
-        chartInstance.update();
-      } else {
-        console.error("차트 인스턴스를 찾을 수 없습니다.");
-      }
-
       // 그리드 데이터 바인딩
       bindDataToGrid(data);
-      // 차트 초기화 호출
-      initializeChart(chartData, chartLabels);
+
     }
 
     //차트
@@ -556,78 +672,12 @@
 
       const myChart = new Chart(ctx, config);
       $('#myChart').data('chart', myChart);
-
-      // 데이터 로드 함수
-      /*function loadChartData() {
-        $.ajax({
-          url: '/api/ProgressStatus/getChartData2',
-          method: 'GET',
-          dataType: 'json',
-          success: function (response) {
-            console.log("서버 응답:", response);
-            if (response.success && response.data) {
-              const { labels, data } = response.data;
-
-              if (!labels || labels.length === 0 || !data || data.length === 0) {
-                console.warn("차트를 그릴 데이터가 부족합니다.");
-                myChart.data.labels = ['데이터 없음'];
-                updateChart(myChart, [0]);
-                return;
-              }
-
-              // 차트 업데이트
-              myChart.data.labels = labels;
-              updateChart(myChart, data);
-            } else {
-              console.error("서버 응답이 유효하지 않습니다:", response.message);
-              Alert.alert(response.message || "데이터를 가져오는 중 오류가 발생했습니다.",'');
-            }
-          },
-          error: function (xhr, status, error) {
-            console.error("AJAX 요청 중 오류 발생:", error);
-            console.error("응답 내용:", xhr.responseText);
-            alert("데이터를 불러오는 중 오류가 발생했습니다.");
-          }
+      
+      $(document).ready(function () {
+        initializeChart(function () {
+          loadChartData(); // 차트 초기화 후 데이터 로드
         });
-      }*/
-      function loadChartData() {
-        $.ajax({
-          url: '/api/ProgressStatus/getChartData2',
-          method: 'GET',
-          dataType: 'json',
-          success: function (response) {
-            console.log("서버 응답:", response);
-            if (response.success && response.data) {
-              const rawData = response.data;
-
-              // 데이터 분리: labels와 data 배열 생성
-              const labels = rawData.map(item => item.label);
-              const values = rawData.map(item => item.value);
-
-              if (labels.length === 0 || values.length === 0) {
-                console.warn("차트를 그릴 데이터가 부족합니다.");
-                initializeChart([0], ['데이터 없음']);
-                return;
-              }
-
-              // 차트 초기화
-              initializeChart(values, labels);
-            } else {
-              console.error("서버 응답이 유효하지 않습니다:", response.message);
-              alert(response.message || "데이터를 가져오는 중 오류가 발생했습니다.");
-            }
-          },
-          error: function (xhr, status, error) {
-            console.error("AJAX 요청 중 오류 발생:", error);
-            console.error("응답 내용:", xhr.responseText);
-            alert("데이터를 불러오는 중 오류가 발생했습니다.");
-          }
-        });
-      }
-
-
-      // 페이지 로드 시 데이터 로드
-      loadChartData();
+      });
 
       // 모달 열기 함수
       window.openModal = function () {
@@ -670,79 +720,6 @@
         }
       });
     });
-
-    //차트 초기화
-    function initializeChart(chartData, chartLabels) {
-      const canvas = document.getElementById('myChart');
-      if (!canvas) {
-        console.error("Canvas element with ID 'myChart' not found.");
-        return;
-      }
-
-      const ctx = canvas.getContext('2d');
-
-      // 기존 차트 제거
-      if (canvas.chartInstance) {
-        canvas.chartInstance.destroy();
-      }
-
-      // 새로운 차트 생성
-      canvas.chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: chartLabels,
-          datasets: [{
-            label: '진행 현황',
-            data: chartData,
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(255, 159, 64, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(153, 102, 255, 0.2)'
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(255, 159, 64, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)'
-            ],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: {
-            x: { beginAtZero: true },
-            y: { beginAtZero: true }
-          },
-          plugins: {
-            legend: { position: 'top' }
-          }
-        }
-      });
-
-      console.log("차트가 초기화되었습니다.");
-    }
-    function processChartData(rawData) {
-      // ordflag 값과 그 개수를 집계
-      const ordflagCounts = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 };
-
-      rawData.forEach(item => {
-        if (item.ordflag !== undefined && ordflagCounts.hasOwnProperty(item.ordflag)) {
-          ordflagCounts[item.ordflag]++;
-        }
-      });
-
-      // labels와 data 배열 생성
-      const labels = ['주문의뢰', '주문확인', '주문확정', '제작진행', '출고'];
-      const values = Object.values(ordflagCounts);
-
-      return { labels, values };
-    }
-
 
     function bindSpjangcd() {
       $.ajax({
