@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -63,15 +60,22 @@ public class ProgressStatusController {
             // 검색 조건 로깅
             System.out.println(String.format("검색 조건: %s, 사용자: %s, 사업장: %s", params, userid, spjangcd));
 
+            // groupByColumns 처리
+            List<String> groupByColumns = null;
+            if (params.containsKey("groupByColumns") && !params.get("groupByColumns").isEmpty()) {
+                groupByColumns = Arrays.asList(params.get("groupByColumns").split(",")); // 쉼표로 구분
+            }
+
             // 검색 서비스 호출
             List<Map<String, Object>> progressStatusList = progressStatusService.searchProgressStatus(
                     params.get("startDate"),    // 검색 시작 날짜
                     params.get("endDate"),      // 검색 종료 날짜
-                    params.get("searchTitle"), // 검색 비고 ()
+                    params.get("searchTitle"), // 검색 비고
                     params.get("searchtketnm"),
                     params.get("searchCltnm"),
                     userid,                     // 사용자 ID
-                    spjangcd                    // 사업장 코드
+                    spjangcd,                   // 사업장 코드
+                    groupByColumns              // 그룹바이 조건
             );
 
             // 응답 생성
@@ -80,8 +84,7 @@ public class ProgressStatusController {
             result.message = "데이터 조회 성공";
         } catch (Exception e) {
             // 예외 로그 출력
-            System.out.println("검색 중 오류 발생: " + e.getMessage());
-            e.printStackTrace();
+            log.error("검색 중 오류 발생: {}", e.getMessage(), e);
 
             // 응답 생성
             result.success = false;
@@ -90,6 +93,7 @@ public class ProgressStatusController {
 
         return result;
     }
+
 
     @GetMapping("/getChartData")
     public AjaxResult getChartData(Authentication auth) {

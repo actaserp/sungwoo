@@ -306,7 +306,7 @@ public class ProgressStatusService {
         // 동적 쿼리를 위한 매개변수 설정
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder("""
-            SELECT
+        SELECT
             tb007.*,
             tb006.*
         FROM
@@ -352,7 +352,8 @@ public class ProgressStatusService {
     public List<Map<String, Object>> searchProgressStatus(
             String startDate, String endDate,
             String searchTitle, String searchtketnm,
-            String searchCltnm, String userid, String spjangcd) {
+            String searchCltnm, String userid, String spjangcd,List<String> groupByColumns
+            ) {
 
         // 동적 쿼리를 위한 매개변수 설정
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -403,12 +404,19 @@ public class ProgressStatusService {
             params.addValue("spjangcd", spjangcd);
         }
 
-        // Optional: userid 필터링 추가
+        // 관리자(super)일 때는 saupnum 조건 제외
         if (userid != null && !userid.isEmpty()) {
-            sql.append(" AND tb007.userid = :userid");
-            params.addValue("userid", userid);
+            // userid가 "super" 또는 "seong"이 아닌 경우에만 조건 추가
+            if (!"super".equals(userid) && !"seong".equals(userid)) {
+                sql.append(" AND saupnum = :saupnum");
+                params.addValue("saupnum", userid);
+            }
         }
-
+        // GROUP BY 추가
+        if (groupByColumns != null && !groupByColumns.isEmpty()) {
+            sql.append(" GROUP BY ");
+            sql.append(String.join(", ", groupByColumns));
+        }
         // 로그 출력
         log.info("검색 실행될 SQL: {}", sql.toString());
         log.info("검색 바인딩된 파라미터: {}", params.getValues());

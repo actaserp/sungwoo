@@ -451,7 +451,7 @@
         case 1:
           return "주문확인";
         case 2:
-          return "주문확전";
+          return "주문확정";
         case 3:
           return "제작진행";
         case 4:
@@ -567,14 +567,6 @@
     function updateChartAndGrid(data) {
       console.log("업데이트할 데이터:", data);
 
-      data.forEach(item => {
-        if (item.ordflag !== undefined && item.ordflag !== null) {
-          const ordflag = parseInt(item.ordflag, 10);
-          if (ordflag >= 0 && ordflag <= 4) {
-            chartData[ordflag]++;
-          }
-        }
-      });
       // 그리드 데이터 바인딩
       bindDataToGrid(data);
 
@@ -610,7 +602,7 @@
         labels: ['업체', '업체1', '업체2', '업체3', '업체4'],
         datasets: [{
           label: '진행 현황',
-          data: [0],  // 기본 data
+          data: [0, 1, 2, 3, 4],   // 기본 data
           backgroundColor: [
             'rgba(255, 99, 132, 0.2)',
             'rgba(255, 159, 64, 0.2)',
@@ -660,6 +652,7 @@
             tooltip: {
               callbacks: {
                 label: function (tooltipItem) {
+                  console.log('tooltipItem.raw:', tooltipItem.raw); // 디버깅 로그
                   const value = tooltipItem.raw;
                   const stageText = getOrdflagText(value);
                   return `진행 현황: ${stageText} (${value})`;
