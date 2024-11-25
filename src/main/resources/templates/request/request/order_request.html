@@ -1254,9 +1254,7 @@
       document.getElementById(hiddenInputId).value = selectedOptionText;
     }
     function addBody() {
-      console.log("addBody 실행 직후 isnew : ", document.getElementById('isnew').value);
       const isnewValue = Number(document.getElementById('isnew').value);
-      console.log("isnewValue : ", isnewValue);
 
       const newRowData = {
         hgrb: getHgrb(document.getElementById("hgrb").value),
@@ -1274,28 +1272,18 @@
         isnew: isnewValue // isnewValue를 직접 사용
       };
 
-      console.log("직전 체크 데이터 : ", newRowData.isnew);
-      console.log("직전 체크 데이터2 : ", document.getElementById('isnew').value);
-
       const sourceCollection = viewdata2.sourceCollection;
       let isUpdated = false;  // 업데이트 여부 플래그
-      console.log("수정한 데이터 : ", newRowData.isnew);
 
       for (let i = 0; i < sourceCollection.length; i++) {
-        console.log("i 번째 for 문", i);
-        console.log("그리드 데이터 : ", sourceCollection[i]);
 
         // reqseq가 없을 경우 isnew로 비교
         if (newRowData.reqseq === sourceCollection[i].reqseq && newRowData.reqseq !== "") {
-          console.log("수정그리드 editor text : ", sourceCollection[i].originOrdtext);
           sourceCollection[i] = { ...sourceCollection[i], ...newRowData };  // Update existing row
           isUpdated = true;  // 업데이트 플래그 설정
           break;  // 업데이트 후 루프 종료
         } else if (Number(newRowData.isnew) === Number(sourceCollection[i].isnew) && newRowData.isnew !== "") {
-          console.log("isnew로 수정그리드 : ", sourceCollection[i]);
-          console.log("수정 내용 : ", newRowData);
           sourceCollection[i] = { ...sourceCollection[i], ...newRowData };  // Update existing row based on isnew
-          console.log("수정 완료: ", sourceCollection[i]);
           isUpdated = true;  // 업데이트 플래그 설정
           break;  // 업데이트 후 루프 종료
         }
@@ -1303,7 +1291,6 @@
 
       // 업데이트가 이루어지지 않은 경우 새로운 행 추가
       if (!isUpdated) {
-        console.log("!isUpdated 진입 : ", isnewValue)
         const existingIsNewValues = sourceCollection.map(row => Number(row.isnew)).filter(value => !isNaN(value));
         let newIsNewValue = 1; // 기본값
 
@@ -1312,11 +1299,8 @@
           newIsNewValue = Math.max(...existingIsNewValues) + 1;
         }
         newRowData.isnew = newIsNewValue; // 새로운 isnew 값을 설정
-        console.log("!isUpdated 마무리 직전 : ", newRowData.isnew)
         viewdata2.addNew(newRowData);  // Add new row
-        console.log("추가그리드 editor text : ", newRowData.originOrdtext);
       }
-      console.log("최종 그리드 데이터 : ", sourceCollection);
       viewdata2.sourceCollection = [...sourceCollection]; // 참조 갱신
       viewdata2.commitEdit(); // 변경 사항 커밋
       viewdata2.refresh(); // 데이터 소스 갱신
@@ -1904,6 +1888,7 @@
           // 또는 button.classList.remove('hidden'); // 클래스 방식으로 복구
         }
       }
+      const isnewValue = Number(document.getElementById('isnew').value);
       const newRowData = {
         hgrb: getHgrb(document.getElementById("hgrb").value),
         qty: Number(document.getElementById("qty").value),
@@ -1915,7 +1900,9 @@
         stframedv: getListCgrb2(document.getElementById("stframedv").value),
         stexplydv: getListCgrb2(document.getElementById("stexplydv").value),
         reqseq: document.getElementById("reqseq").value,
-        ordtext: tinymce.get('ordtext').getContent()
+        ordtext: tinymce.get('ordtext').getContent(),
+        originOrdtext: tinymce.get('ordtext').getContent(),
+        isnew: isnewValue // isnewValue를 직접 사용
       };
 
       const sourceCollection = viewdata2.sourceCollection;
@@ -1926,12 +1913,18 @@
           sourceCollection[i] = newRowData;  // Update existing row
           isUpdated = true;
           break;
+        } else if (Number(newRowData.isnew) === Number(sourceCollection[i].isnew) && newRowData.isnew !== "") {
+          sourceCollection[i] = { ...sourceCollection[i], ...newRowData };  // Update existing row based on isnew
+          isUpdated = true;  // 업데이트 플래그 설정
+          break;  // 업데이트 후 루프 종료
         }
       }
 
-      viewdata2.commitEdit();  // Commit changes
-      viewdata2.refresh();  // Refresh the collection view
-      theGrid2.refresh();  // Refresh the grid
+      viewdata2.sourceCollection = [...sourceCollection]; // 참조 갱신
+      viewdata2.commitEdit(); // 변경 사항 커밋
+      viewdata2.refresh(); // 데이터 소스 갱신
+      theGrid2.itemsSource = [...viewdata2.sourceCollection]; // 그리드 데이터 재설정
+      theGrid2.refresh(); // UI 갱신
     }
 
   </script>
