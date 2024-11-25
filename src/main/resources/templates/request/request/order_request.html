@@ -1323,21 +1323,29 @@
           if (index > -1) {
             const itemToRemove = viewdata2.sourceCollection[index]; // 삭제할 항목 가져오기
             viewdata2.remove(itemToRemove); // CollectionView에서 항목 삭제
+            console.log("삭제된 행 정보 : ", itemToRemove);
             if(selectedData.reqseq !== ""){
               let deleteNum = {
                 reqseq: selectedData.reqseq,
                 reqnum: document.getElementById('reqnum').value
               };
-              const promise = AjaxUtil.postAsyncData('/api/request/request/bodyDelete', selectedData.reqseq, fnSuccess);
+              let fnSuccess = function (res) {
+                isProcessing = false;
+                if (res.success) {
+                  fetchListData();
+                }
+              };
+              const promise = AjaxUtil.postAsyncData('/api/request/request/bodyDelete', deleteNum, fnSuccess);
               deletePromises.push(promise);
             }
           }
         });
         viewdata2.commitEdit(); // 변경 사항 저장
         Promise.all(deletePromises).then(() => {
-          viewdata2.refresh();
-          theGrid2.refresh();
-
+          viewdata2.commitEdit(); // 변경 사항 커밋
+          viewdata2.refresh(); // 데이터 소스 갱신
+          theGrid2.itemsSource = [...viewdata2.sourceCollection]; // 그리드 데이터 재설정
+          theGrid2.refresh(); // UI 갱신
           // 모든 행이 빈지 검사하여 헤더 삭제 메서드 호출
           const allRowsEmpty = viewdata2.sourceCollection.every(row => !row.hgrb || row.hgrb === '');
           if (allRowsEmpty) {
