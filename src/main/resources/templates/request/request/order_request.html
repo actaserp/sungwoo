@@ -1292,9 +1292,10 @@
           isUpdated = true;  // 업데이트 플래그 설정
           break;  // 업데이트 후 루프 종료
         } else if (Number(newRowData.isnew) === Number(sourceCollection[i].isnew) && newRowData.isnew !== "") {
-          console.log("isnew로 수정그리드 editor text : ", sourceCollection[i].originOrdtext);
+          console.log("isnew로 수정그리드 : ", sourceCollection[i]);
+          console.log("수정 내용 : ", newRowData);
           sourceCollection[i] = { ...sourceCollection[i], ...newRowData };  // Update existing row based on isnew
-          document.getElementById('isnew').value = '';
+          console.log("수정 완료: ", sourceCollection[i]);
           isUpdated = true;  // 업데이트 플래그 설정
           break;  // 업데이트 후 루프 종료
         }
@@ -1315,14 +1316,14 @@
         viewdata2.addNew(newRowData);  // Add new row
         console.log("추가그리드 editor text : ", newRowData.originOrdtext);
       }
-
-      viewdata2.commitEdit();  // Commit changes
-      viewdata2.refresh();  // Refresh the collection view
-      theGrid2.refresh();  // Refresh the grid
+      console.log("최종 그리드 데이터 : ", sourceCollection);
+      viewdata2.sourceCollection = [...sourceCollection]; // 참조 갱신
+      viewdata2.commitEdit(); // 변경 사항 커밋
+      viewdata2.refresh(); // 데이터 소스 갱신
+      theGrid2.itemsSource = [...viewdata2.sourceCollection]; // 그리드 데이터 재설정
+      theGrid2.refresh(); // UI 갱신
       resetBodyField();  // Reset input fields
     }
-
-
 
     // 행(세부사항) 삭제(마지막 세부사항 삭제시 헤드정보도 같이 삭제)
     function deleteBody(){
@@ -1462,7 +1463,7 @@
     function resetBodyField() {
       const fieldsToReset = [
         'qty', 'panel_t', 'panel_w', 'panel_l', 'reqseq',
-        'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv'
+        'exfmtypedv', 'infmtypedv', 'stframedv', 'stexplydv', 'isnew'
       ];
       fieldsToReset.forEach(fieldId => {
         document.getElementById(fieldId).value = '';
