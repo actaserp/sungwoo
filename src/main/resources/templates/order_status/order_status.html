@@ -639,7 +639,10 @@
                                console.log("주문현황 바인드 오류 : ", orderDate.name);
                        }
                    });
-                   calendar.render(); // 캘린더 렌더링
+                   setTimeout(() => {
+                       calendar.render(); // 캘린더 렌더링
+                       console.log('캘린더가 렌더링되었습니다.');
+                   }, 500);
                }).catch(error => {
                    console.error('주문현황 데이터를 가져오는 데 실패했습니다:', error);
                });
