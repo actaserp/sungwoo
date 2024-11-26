@@ -4,12 +4,7 @@
   .container-fluid {
     padding: 20px;
   }
-
-  .chart-wrap {
-    display: flex; /* Flexbox로 정렬 */
-    align-items: center; /* 수직 중앙 정렬 */
-  }
-  .modal {
+  .chartModal {
     display: none; /* 기본적으로 숨겨짐 */
     position: fixed;
     z-index: 10000; /* z-index 값을 높게 설정하여 다른 요소보다 위에 오도록 함 */
@@ -36,7 +31,7 @@
   .chart-container {
     position: relative; /* 부모 요소에 위치 고정 */
     width: 100%;       /* 원하는 너비 */
-    height: 400px;     /* 고정된 높이 */
+    height: 250px;     /* 고정된 높이 */
     overflow-y: auto;  /* 세로 스크롤 활성화 */
     overflow-x: hidden; /* 가로 스크롤 비활성화 */
     border: 1px solid #ccc; /* 테두리 추가 (선택 사항) */
@@ -74,7 +69,7 @@
     </div>
     <!-- Select -->
     <div class="tab-contents">
-      <section class="tab-item" style="height: 840px;">
+      <section class="tab-item" style="height: 850px; overflow: hidden;">
         <div class="section-top">
           <div class="search-wrap">
             <dl>
@@ -164,11 +159,11 @@
         </div>-->
         <div class="container-fluid">
           <div class="chart-container">
-            <canvas id="myChart"></canvas>
+            <!--<canvas id="myChart"></canvas>-->
+            <canvas id="myChart" width="400" height="110px"></canvas>
             <span class="material-symbols-outlined"
                   style="position: absolute; top: 17px; right: 3px; cursor: pointer; z-index: 10; color: rgb(179, 179, 179);"
                   onclick="openModal()">zoom_out_map</span>
-          </div>
         </div>
 
         <div>
@@ -185,12 +180,14 @@
   </footer>
 
 </th:block>
+
 <div id="chartModal" class="modal" style="opacity:100">
   <div class="modal-content">
     <span class="close">&times;</span>
     <canvas id="modalChartHolder" style="width: 1250px; height: 490px; display: block; box-sizing: border-box;" width="1250" height="490"></canvas>
   </div>
 </div>
+
 <th:block layout:fragment="scripts">
   <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -277,6 +274,7 @@
         theGrid = new wijmo.grid.FlexGrid('#theGrid', {
           autoGenerateColumns: false,
           showMarquee: true,
+          isReadOnly: true, // 전체 읽기 전용
           columns: [
             { binding: 'rownum', header: '순번', width: 80, align: 'center' },
             { binding: 'reqdate', header: '주문일자', width: '*', minWidth: 100, align: 'center' },
@@ -396,19 +394,27 @@
           },
           tooltip: {
             callbacks: {
-              title: function (tooltipItems) {
-                return tooltipItems[0].label || ''; // 제목을 빈 문자열로 처리
-              },
               label: function (tooltipItem) {
-                return `${tooltipItem.raw} 값`; // 툴팁의 텍스트 내용
+                console.log('tooltipItem.raw:', tooltipItem.raw);
+                const value = tooltipItem.raw;
+                const stageText = getOrdflagText(value);
+                return `진행 현황: ${stageText}`;
               }
             }
           }
         },
         scales: {
-          x: { beginAtZero: true,
-            min: 0, // 최소값 설정
-            max: 4, // X축의 최대 값을 4로 고정 (출고에 해당)
+          x: {
+            ticks: {
+              stepSize: 1,
+              callback: function (value) {
+                return stageMapping[value] || "";
+              },
+              autoSkip: false
+            },
+            beginAtZero: true,
+            min: 0,
+            max: 4
           },
 
           y: { beginAtZero: true }
@@ -546,6 +552,7 @@
         theGrid = new wijmo.grid.FlexGrid('#theGrid', {
           autoGenerateColumns: false,
           showMarquee: true,
+          isReadOnly: true, // 전체 읽기 전용
           columns: [
             { binding: 'rownum', header: '순번', width: 80, align: 'center' },
             { binding: 'reqdate', header: '주문일자', width: '*', minWidth: 100, align: 'center' },
@@ -571,17 +578,19 @@
       bindDataToGrid(data);
 
     }
-    var stageMapping;
+    // 숫자 → 값 매핑 객체
+    const stageMapping = {
+      0: "주문의뢰",
+      1: "주문확인",
+      2: "주문확정",
+      3: "제작진행",
+      4: "출고"
+    };
     //차트
+    console.log(Chart.version); // 콘솔에서 Chart.js 버전을 확인
+
     $(document).ready(function () {
-      // 숫자 → 값 매핑 객체
-      const stageMapping = {
-        0: '주문의뢰',
-        1: '주문확인',
-        2: '주문확정',
-        3: '제작진행',
-        4: '출고'
-      };
+
       // 차트 생성 및 인스턴스 저장
       const ctx = document.getElementById('myChart').getContext('2d');
 
@@ -626,22 +635,22 @@
         type: 'bar',
         data: data,
         legend: {
-          display: false // 범례를 숨김
+          display: false // 위에 라벨 숨김
         },
         options: {
           indexAxis: 'y', // 가로 막대 그래프
           scales: {
             x: {
-              beginAtZero: true,
-              min: 0, // 최소값 설정
-              max: 4, // X축의 최대 값을 4로 고정 (출고에 해당)
               ticks: {
-                stepSize: 1, // 숫자 간격을 1로 고정
+                stepSize: 1,
                 callback: function (value) {
-                  return stageMapping[value] || '';
+                  return stageMapping[value] || "";
                 },
-                autoSkip: false // 모든 라벨 표시
-              }
+                autoSkip: false
+              },
+              beginAtZero: true,
+              min: 0,
+              max: 4
             },
             y: {beginAtZero: true}
           },
@@ -652,7 +661,7 @@
             tooltip: {
               callbacks: {
                 label: function (tooltipItem) {
-                  console.log('tooltipItem.raw:', tooltipItem.raw); // 디버깅 로그
+                  console.log('tooltipItem.raw:', tooltipItem.raw);
                   const value = tooltipItem.raw;
                   const stageText = getOrdflagText(value);
                   return `진행 현황: ${stageText} (${value})`;
@@ -713,6 +722,7 @@
         }
       });
     });
+
 
     function bindSpjangcd() {
       $.ajax({

@@ -45,17 +45,13 @@ public class UserService {
     public List<Map<String, Object>> getUserList(boolean superUser, String cltnm, String prenm, String biztypenm, String bizitemnm, String email, String spjangcd) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("superUser", superUser);
-        params.addValue("cltnm", cltnm);
+       /* params.addValue("cltnm", cltnm);
         params.addValue("prenm", prenm);
         params.addValue("biztypenm", biztypenm);
         params.addValue("bizitemnm", bizitemnm);
-        params.addValue("email", email);
+        params.addValue("email", email);*/
+        //params.addValue("spjangcd", spjangcd);
 
-        // spjangcd 값 설정 (필수)
-        if (spjangcd == null || spjangcd.isEmpty()) {
-            spjangcd = "ZZ"; // 기본값 설정
-        }
-        params.addValue("spjangcd", spjangcd);
         /* String sql = """*/
         StringBuilder sql = new StringBuilder("""
             SELECT
@@ -76,11 +72,7 @@ public class UserService {
                 txc.bizitemnm,
                 txc.prenm,
                 FORMAT(au.date_joined, 'yyyy-MM-dd') AS date_joined,
-                CASE
-                    WHEN au.spjangcd = 'ZZ' THEN '성우에스피(주)'
-                    WHEN au.spjangcd = 'PP' THEN '성우피앤비(주)'
-                    ELSE '알 수 없음'
-                END AS spjType
+                au.spjangcd AS spjType
             FROM
                 auth_user au
             LEFT JOIN
@@ -92,8 +84,35 @@ public class UserService {
                 ON au.username = txc.saupnum
             WHERE
                 1 = 1
-                 AND au.spjangcd = :spjangcd
         """);
+
+        if (spjangcd != null && !spjangcd.isEmpty()) {
+            sql.append(" AND au.spjangcd = :spjangcd");
+            params.addValue("spjangcd", spjangcd);
+        }
+        if (cltnm != null && !cltnm.isEmpty()) {
+            sql.append(" AND txc.cltnm LIKE CONCAT('%', :cltnm, '%')");
+            params.addValue("cltnm", cltnm);
+        }
+        if (prenm != null && !prenm.isEmpty()) {
+            sql.append(" AND txc.prenm LIKE CONCAT('%', :prenm, '%')");
+            params.addValue("prenm", prenm);
+        }
+        if (biztypenm != null && !biztypenm.isEmpty()) {
+            sql.append(" AND txc.biztypenm LIKE CONCAT('%', :biztypenm, '%')");
+            params.addValue("biztypenm", biztypenm);
+        }
+        if (bizitemnm != null && !bizitemnm.isEmpty()) {
+            sql.append(" AND txc.bizitemnm LIKE CONCAT('%', :bizitemnm, '%')");
+            params.addValue("bizitemnm", bizitemnm);
+        }
+        if (email != null && !email.isEmpty()) {
+            sql.append(" AND au.email LIKE CONCAT('%', :email, '%')");
+            params.addValue("email", email);
+        }
+
+        // SQL 디버깅 로그
+        log.info("Executing SQL:\n{}\nWith Parameters: {}", sql, params.getValues());
         // SQL 디버깅 로그
         log.info("Executing SQL: {} with params: {}", sql, params.getValues());
 

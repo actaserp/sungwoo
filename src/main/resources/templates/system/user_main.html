@@ -219,16 +219,15 @@
                                         <option value="ZZ">성우에스피(주)</option>
                                         <option value="PP">성우피앤비(주)</option>
                                     </select>
-                                </td><th>
-                            </th>
+                                </td>
+                                <th>
+                                </th>
                                 <td>
                                 </td>
-
                             </tr>
                             </tbody>
                         </table>
                     </div>
-
 
                     <div class="section-top" style="margin-top: 24px;">
                         <div class="search-wrap">
@@ -368,19 +367,6 @@
         var viewdata;
         let csrfToken = $("[name=_csrf]").val();
 
-        //유효성 검사
-        const requiredFields = [
-            {id: 'userid', name: '사용자ID'},
-            {id: 'prenm', name: '사용자명'},
-            {id: 'cltnm', name: '업체명'},
-            {id: 'authType', name: '사용자그룹'},
-            {id: 'biztypenm', name: '업태'},
-            {id: 'bizitemnm', name: '종목'},
-            {id: 'tel', name: '전화번호'},
-            {id: 'Phone', name: '핸드폰'},
-            {id: 'email', name: '이메일'},
-        ]
-
         document.readyState === 'complete' ? init() : window.onload = init;
         let isBindSpjangcdCalled = false;
         <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
@@ -429,7 +415,6 @@
             fetchListData(spjangcd);
         });
 
-
         function fetchListData(spjangcd) {
             let data2 = [];
 
@@ -454,7 +439,9 @@
             const minimumRows = 5;
             data2.forEach((item, index) => {
                 item.rownum = index + 1; // 순번 추가
+                item.spjType = spjTypeText(item.spjType); // 기본값 설정 후 매핑
             });
+
 
             if (data2.length < minimumRows) {
                 const additionalRows = minimumRows - data2.length;
@@ -533,6 +520,15 @@
             });
         }//fetchListData
 
+        function spjTypeText(spjType) {
+            const mapping = {
+                "PP": "성우피앤비(주)",
+                "ZZ": "성우에스피(주)"
+            };
+
+            return mapping[spjType]; // 기본값: "상태 없음"
+        }
+
         //날짜 포맷
         function formatDateString(dateString) {
             if (!dateString || typeof dateString !== 'string' || dateString.length < 8) {
@@ -549,8 +545,7 @@
         function showUserInfo(rowData) {
             // 필드 중 하나라도 비어있는지 확인하여 추가 데이터를 가져올지 결정
             const hasMissingFields = !rowData || !rowData.cltnm || !rowData.prenm || !rowData.biztypenm ||
-                !rowData.bizitemnm || !rowData.tel || !rowData.Phone ||
-                !rowData.userid || !rowData.email || !rowData.spjType;
+                !rowData.bizitemnm ||!rowData.userid || !rowData.email || !rowData.spjType;
 
             if (hasMissingFields) {
                 // 데이터가 불완전하거나 비어 있을 때
@@ -602,7 +597,14 @@
             document.getElementById("is_active").checked = data.is_active || false;
 
             //사업체명
-            document.getElementById('spjType').value = data.spjangcd;
+            const spjTypeMapping = {
+                "성우에스피(주)": "ZZ",
+                "성우피앤비(주)": "PP"
+            };
+
+            const spjTypeElement = document.getElementById('spjType');
+            const spjangcd = spjTypeMapping[data.spjType] || ''; // 매핑 후 코드 값 반환
+            spjTypeElement.value = spjangcd;
 
             // 주소 관련 필드 설정
             const addressParts = splitAddress(data.cltadres || '');
@@ -762,7 +764,7 @@
             $('.new-fl-ac').remove();
         }
 
-        function initializeSelect2({
+        /*function initializeSelect2({
                                        url,               // API 엔드포인트 URL
                                        params = {},       // 요청 매개변수 (기본값은 빈 객체)
                                        elementId,         // 셀렉트 요소의 ID
@@ -780,7 +782,7 @@
                     selectElement.append(`<option value="${item[valueField]}">${item[textField]}</option>`);
                 });
             });
-        }
+        }*/
 
 
         $(document).ready(function (e) {

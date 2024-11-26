@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.transaction.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import mes.app.UtilClass;
 import mes.app.account.service.TB_RP945_Service;
 import mes.app.account.service.TB_XClientService;
@@ -38,6 +39,7 @@ import mes.domain.security.Pbkdf2Sha256;
 import mes.domain.services.CommonUtil;
 import mes.domain.services.SqlRunner;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/system/user")
 public class UserController {
@@ -96,6 +98,7 @@ public class UserController {
 	@GetMapping("/detail")
 	public AjaxResult getUserDetail(@RequestParam(value = "id", required = false) String id) {
 		AjaxResult result = new AjaxResult();
+		log.info("id: {}", id);
 
 		try {
 			if (id != null && !id.isEmpty()) {
