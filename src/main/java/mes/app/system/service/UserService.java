@@ -45,14 +45,7 @@ public class UserService {
     public List<Map<String, Object>> getUserList(boolean superUser, String cltnm, String prenm, String biztypenm, String bizitemnm, String email, String spjangcd) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("superUser", superUser);
-       /* params.addValue("cltnm", cltnm);
-        params.addValue("prenm", prenm);
-        params.addValue("biztypenm", biztypenm);
-        params.addValue("bizitemnm", bizitemnm);
-        params.addValue("email", email);*/
-        //params.addValue("spjangcd", spjangcd);
 
-        /* String sql = """*/
         StringBuilder sql = new StringBuilder("""
             SELECT
                 au.id,
