@@ -11,8 +11,6 @@ import mes.domain.repository.actasRepository.TB_DA006WFILERepository;
 import mes.domain.repository.actasRepository.TB_DA006WRepository;
 import mes.domain.repository.actasRepository.TB_DA007WRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -506,50 +503,28 @@ public class RequestController {
         return result;
     }
     @PostMapping("/uploadEditor")
-    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file
-                                        , HttpServletRequest request
-                                        , HttpServletResponse response) {
+    public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file, HttpServletRequest request) {
         String uploadDir = "c:\\temp\\editorFile\\";
-        // 디렉토리 확인 및 생성
         File directory = new File(uploadDir);
         if (!directory.exists()) {
-            directory.mkdirs(); // 디렉토리 생성
+            directory.mkdirs();
         }
-        // 파일 저장
         try {
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename(); // 파일 이름 중복 방지
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
             File destinationFile = new File(uploadDir + fileName);
             file.transferTo(destinationFile);
 
-            // 현재 요청의 프로토콜 및 호스트 주소 가져오기
-            String baseUrl = request.getScheme() + "://" + request.getServerName()
-                    + ":" + request.getServerPort();
-
-            // 웹 URL을 포함한 파일 경로 생성
-            String fileUrl = baseUrl + "/images/" + fileName;
-            File target = new File(uploadDir + fileName);
-            file.transferTo(target);
-            // 이미지 URL 반환
-            String imageUrl = uploadDir + fileName;
-            // JSON 응답 생성
-            JSONObject jsonResponse = new JSONObject();
-            jsonResponse.put("location", imageUrl);
-
-            // 응답에 JSON 전송
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(jsonResponse.toString());
-
+            String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+            String fileUrl = baseUrl + "/images/" + fileName; // 클라이언트 접근 URL
 
             return ResponseEntity.ok(Collections.singletonMap("location", fileUrl));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("error", "파일 업로드 실패: " + e.getMessage()));
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
         }
     }
-//    @RequestMapping(value="/uploadImage")   //공지사항 이미지 등록
+
+    //    @RequestMapping(value="/uploadImage")   //공지사항 이미지 등록
 //    public void UploadImage ( @RequestPart(value = "file",required = false) List<MultipartFile> file
 //            , Model model
 //            , HttpServletRequest request

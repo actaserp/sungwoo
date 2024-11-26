@@ -537,29 +537,30 @@
         let formData = new FormData();
         formData.append('file', blobInfo.blob(), blobInfo.filename());
 
-        // 서버 엔드포인트 호출
         fetch('/api/request/request/uploadEditor', {
           method: 'POST',
           body: formData
         })
         .then(response => {
           if (!response.ok) {
-            throw new Error('Network response was not ok: ' + response.statusText);
+            return response.text().then(text => {
+              throw new Error(`Network response was not ok: ${response.statusText}. Server response: ${text}`);
+            });
           }
-          return response.json(); // JSON 파싱 시도
+          return response.json();
         })
         .then(data => {
-          console.log("data : ", data)
           if (data.location) {
-            success(data.location); // 업로드 성공 시 이미지 URL 반환
+            success(data.location);
           } else {
             failure('Image upload failed: Invalid server response.');
           }
         })
         .catch(error => {
-          console.error('Upload error:', error); // 오류 메시지 확인
+          console.error('Upload error:', error);
           failure('Image upload failed: ' + error.message);
         });
+
       }
     });
   </script>
