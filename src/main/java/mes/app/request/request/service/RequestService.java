@@ -438,4 +438,26 @@ public class RequestService {
         }
         return true;
     }
+    //세부항목 하나 불러오기
+    public Map<String, Object> getInspecList2(TB_DA006W_PK tbDa006W_pk, String reqseq) {
+
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+
+        String sql = """
+                select 
+                *
+                from TB_DA007W
+                WHERE reqnum = :reqnum
+                AND   custcd = :custcd
+                AND   spjangcd = :spjangcd
+                AND   reqseq = :reqseq
+                order by indate desc
+                """;
+        dicParam.addValue("reqnum", tbDa006W_pk.getReqnum());
+        dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
+        dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
+        dicParam.addValue("reqseq", reqseq);
+        Map<String, Object> item = this.sqlRunner.getRow(sql, dicParam);
+        return item;
+    }
 }

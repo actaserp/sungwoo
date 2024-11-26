@@ -497,47 +497,53 @@
   <script src="https://cdn.tiny.cloud/1/vz0rv2lnngp83gy5arhr4hzhqyr3z08rnj8zq7mx8c0otwi7/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
   <script>
     tinymce.init({
-      language: "ko_KR", //한글판으로 변경
-      selector: "#ordtext", // TinyMCE를 적용할 textarea 요소의 선택자를 지정
-      plugins: "paste image imagetools", // 'paste', 'image', 'imagetools' 플러그인 추가
+      language: "ko_KR",
+      selector: "#ordtext",
+      plugins: "paste image imagetools",
       height: 500,
       width: 900,
-      toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image", // 'image' 버튼 툴바에 추가
-      paste_data_images: true, // 이미지 붙여넣기 설정 활성화
-      file_picker_types: 'image', // TinyMCE에서 이미지를 선택할 때, 이미지 파일만 선택 (옵션 : media, file 등)
-      automatic_uploads: true,
-      // // 이미지 업로드 핸들러 설정
-      images_upload_handler: function (blobInfo, success, failure) {
-        let formData = new FormData();
-        formData.append('file', blobInfo.blob(), blobInfo.filename());
+      toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image",
+      paste_data_images: false,
+      file_picker_types: 'image',
+      automatic_uploads: false, // 자동 업로드 비활성화
 
-        fetch('/api/request/request/uploadEditor', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-CSRF-Token': csrfToken // CSRF 토큰을 헤더에 추가
-          }
-        })
-        .then(response => {
-          if (!response.ok) {
-            return response.text().then(text => {
-              throw new Error(`Network response was not ok: ${response.statusText}. Server response: ${text}`);
-            });
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data.location) {
-            success(data.location);
-          } else {
-            failure('Image upload failed: Invalid server response.');
-          }
-        })
-        .catch(error => {
-          console.error('Upload error:', error);
-          failure('Image upload failed: ' + error.message);
-        });
+      // 파일 선택기 콜백
+      file_picker_callback: function (callback, value, meta) {
+        if (meta.filetype === 'image') {
+          const input = document.createElement('input');
+          input.setAttribute('type', 'file');
+          input.setAttribute('accept', 'image/*');
 
+          input.onchange = function () {
+            const file = input.files[0];
+            if (file) {
+              const formData = new FormData();
+              formData.append('file', file);
+
+              // 업로드 요청
+              fetch('/api/request/request/uploadEditor', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                  'X-CSRF-Token': csrfToken // CSRF 토큰 추가
+                }
+              })
+                      .then(response => response.json())
+                      .then(data => {
+                        if (data.location) {
+                          // 업로드된 URL을 에디터에 삽입
+                          callback(data.location, { alt: file.name });
+                        }
+                      })
+                      .catch(error => {
+                        console.error('Image upload failed:', error);
+                        alert('이미지 업로드에 실패했습니다.');
+                      });
+            }
+          };
+
+          input.click(); // 파일 탐색기 열기
+        }
       }
     });
   </script>
@@ -635,7 +641,6 @@
         async: false,
         success: function (data) {
           data2 = data.data;
-          console.log("data2",data2)
         }
       })
       // bd_details를 파싱하여 배열로 변환
@@ -782,7 +787,6 @@
             if (!item.ordflag && item.reqnum) {
               let hdRow = viewdata1.items.find(data => data.reqnum === item.reqnum && data.ordflag);
               if (hdRow) {
-                console.log('hd 정보가 있는 행을 참조:', hdRow);
                 document.getElementById('reqdate').value = hdRow.reqdate;
                 document.getElementById('deldate').value = hdRow.deldate;
                 document.getElementById('telno').value = hdRow.telno;
@@ -884,7 +888,6 @@
         success: function (data) {
           data2 = data.data;
           data2.forEach(item =>{
-            console.log("getHgrb : ", item)
             item.hgrb = getHgrb((item.hgrb));
             item.exfmtypedv = getListCgrb2(item.exfmtypedv);
             item.infmtypedv = getListCgrb2(item.infmtypedv);
@@ -954,7 +957,6 @@
             // 행(row), 행의 데이터(item) 정보 가져오기
             let row = hitTest.row;
             let item = theGrid2.rows[row].dataItem;
-            console.log('item', item);
 
             document.getElementById('qty').value = item.qty;
             document.getElementById('panel_t').value = item.panel_t;
@@ -977,7 +979,6 @@
             setSelectedIndex(selectInfmtypedv, selectedItem.infmtypedv);
             setSelectedIndex(selectStframedv, selectedItem.stframedv);
             setSelectedIndex(selectStexplydv, selectedItem.stexplydv);
-            console.log("더블클릭 실행 후 isnew : ", document.getElementById('isnew').value)
           }
         })
         // FlexGrid의 최대 높이를 제한하여 스크롤바를 활성화
@@ -1087,7 +1088,6 @@
               };
               // bodyForms 배열에 detailForm 객체 추가
               bodyForms.push(bodyForm);
-              console.log("bodyForms : ", bodyForms);
             }
           }
         }
@@ -1102,7 +1102,6 @@
         deletedFiles2.forEach((file, index) => {
           formData.append('deletedFiles2', new Blob([JSON.stringify(file)], {type: 'application/json'}));
         });
-
         function sendAjaxRequest(url) {
           $.ajax({
             url: url,
@@ -1265,7 +1264,6 @@
           break;  // 업데이트 후 루프 종료
         }
       }
-
       // 업데이트가 이루어지지 않은 경우 새로운 행 추가
       if (!isUpdated) {
         const existingIsNewValues = sourceCollection.map(row => Number(row.isnew)).filter(value => !isNaN(value));
@@ -1300,7 +1298,6 @@
           if (index > -1) {
             const itemToRemove = viewdata2.sourceCollection[index]; // 삭제할 항목 가져오기
             viewdata2.remove(itemToRemove); // CollectionView에서 항목 삭제
-            console.log("삭제된 행 정보 : ", itemToRemove);
             if(selectedData.reqseq !== ""){
               let deleteNum = {
                 reqseq: selectedData.reqseq,
@@ -1470,7 +1467,6 @@
         url: '/api/request/request/getUserInfo', // 데이터를 가져올 URL
         type: 'GET',
         success: function(data) {
-          console.log('내정보 data : ', data);
           document.getElementById("telno").value = data.data.hptelnum;
           document.getElementById("perid").value = data.data.prenm;
           document.getElementById("postno").value = data.data.zipcd;
@@ -1484,7 +1480,6 @@
     function showPopup2(documnetId) {
       let selectedItems = theGrid.selectedItems;
       // 해당 ID의 팝업 요소를 찾음
-      console.log("요청사항 행 데이터 : ", selectedItems);
       const popup = document.getElementById(documnetId);
 
       if (popup) {
@@ -1505,6 +1500,12 @@
         if (button) {
           button.style.display = 'none'; // 버튼 숨기기
         }
+        const closebutton = popup.querySelector('.btn-popup-close');
+        if (closebutton) {
+          closebutton.onclick = function() {
+            closePopup2('popup2'); // closePopup2로 호출 메서드 변경
+          };
+        }
 
         // 팝업을 표시
         popup.style.display = 'block';
@@ -1521,7 +1522,6 @@
     function showPopup3(documnetId) {
       let selectedItems = theGrid2.selectedItems;
       // 해당 ID의 팝업 요소를 찾음
-      console.log("요청사항 행 데이터 : ", selectedItems);
       const popup = document.getElementById(documnetId);
 
       if (popup) {

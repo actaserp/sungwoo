@@ -10,6 +10,10 @@ import mes.domain.model.AjaxResult;
 import mes.domain.repository.actasRepository.TB_DA006WFILERepository;
 import mes.domain.repository.actasRepository.TB_DA006WRepository;
 import mes.domain.repository.actasRepository.TB_DA007WRepository;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpHeaders;
@@ -523,93 +527,39 @@ public class RequestController {
                     .body(Collections.singletonMap("error", "파일 업로드 실패: " + e.getMessage()));
         }
     }
-
-    //    @RequestMapping(value="/uploadImage")   //공지사항 이미지 등록
-//    public void UploadImage ( @RequestPart(value = "file",required = false) List<MultipartFile> file
-//            , Model model
-//            , HttpServletRequest request
-//            , HttpServletResponse response) throws IOException {
-//        String ls_fileName = "";
-//        String ls_errmsg = "";
-//        String imageUrl = "";
-//
-//        String _uploadPath = Paths.get("C:", "temp", "editor_file").toString();
-//        /* uploadPath에 해당하는 디렉터리가 존재하지 않으면, 부모 디렉터리를 포함한 모든 디렉터리를 생성 */
-//        File dir = new File(_uploadPath);
-//        if (dir.exists() == false) {
-//            dir.mkdirs();
-//        }
-//
-//        try {
-//
-//            for(MultipartFile multipartFile : file){
-//                ls_fileName = multipartFile.getOriginalFilename();
-//
-//
-//                /* 파일이 비어있으면 비어있는 리스트 반환 */
-//                if (multipartFile.getSize() < 1) {
-//                    ls_errmsg = "success";
-//                    return ;
-//                }
-//                /* 파일 확장자 */
-//                final String extension = FilenameUtils.getExtension(multipartFile.getOriginalFilename());
-//                /* 서버에 저장할 파일명 (랜덤 문자열 + 확장자) */
-//                final String saveName = ls_fileName;
-//
-//                /* 업로드 경로에 saveName과 동일한 이름을 가진 파일 생성 */
-//                File target = new File(_uploadPath, saveName);
-//                multipartFile.transferTo(target);
-//                _uploadPath = _uploadPath + "\\";
-//                // 이미지 URL 반환
-//                imageUrl = _uploadPath + saveName;
-//                // JSON 응답 생성
-//                JSONObject jsonResponse = new JSONObject();
-//                jsonResponse.put("location", imageUrl);
-//
-//                // 응답에 JSON 전송
-//                response.setContentType("application/json");
-//                response.setCharacterEncoding("UTF-8");
-//                response.getWriter().write(jsonResponse.toString());
-//            }
-//
-//        }catch (DataAccessException e){
-//            throw e;
-//        } catch (Exception  e){
-//                /*log.info("memberUpload Exception ================================================================");
-//                log.info(e.toString());
-//                ls_errmsg = "[" + ls_fileName + "] failed to save";
-//                throw new AttachFileException("[" + ls_fileName + "] failed to save");*/
-//            //utils.showMessageWithRedirect("시스템에 문제가 발생하였습니다", "/app05/App05list/", Method.GET, model);
-//        }
-//        return ;
-//    //        utils.showMessageWithRedirect("게시글 등록이 완료되었습니다", "/app05/App05list/", Method.GET, model);
-//    }
     // 삭제 메서드
     @PostMapping("/delete")
-    public AjaxResult deleteHead(@RequestParam String reqnum) {
+    public AjaxResult deleteHead(@RequestParam String reqnum,
+                                 Authentication auth) {
+        User user = (User) auth.getPrincipal();
         AjaxResult result = new AjaxResult();
-
-            boolean success = requestService.delete(reqnum);
-
-            if (success) {
-                result.success = true;
-                result.message = "삭제하였습니다.";
-            } else {
-                result.success = false;
-                result.message = "삭제에 실패하였습니다.";
+        String username = user.getUsername();
+        Map<String, Object> userInfo = requestService.getUserInfo(username);
+        TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
+        tbDa006WPk.setReqnum(reqnum);
+        tbDa006WPk.setSpjangcd((String) userInfo.get("spjangcd"));
+        tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
+        List<Map<String, Object>> items = this.requestService.getInspecList(tbDa006WPk);
+        List<String> imageUrls = new ArrayList<>();
+        for (Map<String, Object> item : items) {
+            String ordtext = (String) item.get("ordtext"); // 큰따옴표로 수정
+            if (ordtext != null) {
+                imageUrls.addAll(extractImageUrlsFromHtml(ordtext)); // extractImageUrlsFromHtml 결과를 추가
             }
-        return result;
-    }
-    // body 삭제 메서드
-    @PostMapping("/bodyDelete")
-    public AjaxResult deleteBody(@RequestParam Map<Object, String> param) {
-        AjaxResult result = new AjaxResult();
+        }
+        // 3. 이미지 삭제 처리
+        boolean allDeleted = true;
+        for (String imageUrl : imageUrls) {
+            boolean deleted = deleteImageFromServer(imageUrl); // 이미지 삭제 메서드 호출
+            if (!deleted) {
+                allDeleted = false;
+                // 로그에 실패한 이미지 정보 기록
+                System.err.println("이미지 삭제 실패: " + imageUrl);
+            }
+        }
+        boolean success = requestService.delete(reqnum);
 
-        String reqseq = param.get("reqseq");
-        String reqnum = param.get("reqnum");
-        boolean success = requestService.deleteBody(reqseq, reqnum);
-
-        if (success) {
+        if (success && allDeleted) {
             result.success = true;
             result.message = "삭제하였습니다.";
         } else {
@@ -618,5 +568,89 @@ public class RequestController {
         }
         return result;
     }
+    // body 삭제 메서드
+    @PostMapping("/bodyDelete")
+    public AjaxResult deleteBody(@RequestParam Map<Object, String> param,
+                                 Authentication auth) {
+        User user = (User) auth.getPrincipal();
+        AjaxResult result = new AjaxResult();
+        String username = user.getUsername();
+        Map<String, Object> userInfo = requestService.getUserInfo(username);
+        TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
+        tbDa006WPk.setReqnum(param.get("reqnum"));
+        tbDa006WPk.setSpjangcd((String) userInfo.get("spjangcd"));
+        tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
+        String reqseq = param.get("reqseq");
+        String reqnum = param.get("reqnum");
+        Map<String, Object> item = this.requestService.getInspecList2(tbDa006WPk, reqseq);
+        List<String> imageUrls = new ArrayList<>();
+        String ordtext = (String) item.get("ordtext"); // 큰따옴표로 수정
+        if (ordtext != null) {
+            imageUrls.addAll(extractImageUrlsFromHtml(ordtext)); // extractImageUrlsFromHtml 결과를 추가
+        }
+        // 3. 이미지 삭제 처리
+        boolean allDeleted = true;
+        for (String imageUrl : imageUrls) {
+            boolean deleted = deleteImageFromServer(imageUrl); // 이미지 삭제 메서드 호출
+            if (!deleted) {
+                allDeleted = false;
+                // 로그에 실패한 이미지 정보 기록
+                System.err.println("이미지 삭제 실패: " + imageUrl);
+            }
+        }
+        boolean success = requestService.deleteBody(reqseq, reqnum);
+
+        if (success && allDeleted) {
+            result.success = true;
+            result.message = "삭제하였습니다.";
+        } else {
+            result.success = false;
+            result.message = "삭제에 실패하였습니다.";
+        }
+        return result;
+    }
+    // 에디터 파일 파싱 메서드
+    private List<String> extractImageUrlsFromHtml(String htmlContent) {
+        List<String> imageUrls = new ArrayList<>();
+
+        try {
+            // JSoup 라이브러리를 사용해 HTML 파싱
+            Document doc = Jsoup.parse(htmlContent);
+            Elements images = doc.select("img"); // <img> 태그 선택
+
+            for (Element img : images) {
+                String src = img.attr("src"); // src 속성 값 추출
+                if (src != null && !src.isEmpty()) {
+                    imageUrls.add(src);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return imageUrls;
+    }
+    // 에디터 파일 삭제 메서드
+    private boolean deleteImageFromServer(String imageUrl) {
+        try {
+            // 이미지 URL에서 파일 경로 추출
+            String uploadDir = "c:/temp/editorFile/"; // 업로드된 파일이 저장된 디렉토리
+            String fileName = imageUrl.substring(imageUrl.lastIndexOf("/") + 1); // 파일 이름 추출
+            File file = new File(uploadDir + fileName);
+
+            // 파일 존재 여부 확인 후 삭제
+            if (file.exists()) {
+                return file.delete();
+            } else {
+                System.err.println("삭제할 파일이 존재하지 않습니다: " + file.getAbsolutePath());
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
 }
 
