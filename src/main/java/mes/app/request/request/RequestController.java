@@ -515,7 +515,7 @@ public class RequestController {
             file.transferTo(destinationFile);
 
             String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
-            String fileUrl = baseUrl + "/images/" + fileName; // 클라이언트 접근 URL
+            String fileUrl = baseUrl + "/editorFile/" + fileName; // 클라이언트 접근 URL
 
             return ResponseEntity.ok(Collections.singletonMap("location", fileUrl));
         } catch (IOException e) {
