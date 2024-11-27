@@ -1,5 +1,6 @@
 package mes.app.order_status.service;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.domain.entity.actasEntity.TB_DA006W_PK;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,17 +10,24 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class OrderStatusService {
 
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getOrderStatusByOperid(String perid, String spjangcd) {
+    public List<Map<String, Object>> getOrderStatusByOperid(String startDate, String endDate, String perid, String spjangcd) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("perid", perid);
         params.addValue("spjangcd", spjangcd);
 
+        if (startDate != null && !startDate.isEmpty()) {
+            params.addValue("startDate", startDate);
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            params.addValue("endDate", endDate);
+        }
         String sql = """
         SELECT
             tb007.*,
@@ -50,8 +58,20 @@ public class OrderStatusService {
             AND tb007.reqnum = tb006.reqnum
         WHERE
             tb006.spjangcd = :spjangcd
-""";
+         GROUP BY
+               tb006.remark
+         ORDER BY
+            tb006.reqdate DESC
+        """;
+        if (params.hasValue("startDate")) {
+            sql += " AND tb007.reqdate >= :startDate";
+        }
+        if (params.hasValue("endDate")) {
+            sql += " AND tb007.reqdate <= :endDate";
+        }
 
+        log.info(" 실행될 SQL: {}", sql);
+        log.info("바인딩된 파라미터: {}", params.getValues());
         return sqlRunner.getRows(sql, params);
     }
 
@@ -250,4 +270,5 @@ public class OrderStatusService {
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }
+
 }

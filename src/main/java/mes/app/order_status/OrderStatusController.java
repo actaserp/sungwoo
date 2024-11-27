@@ -26,7 +26,10 @@ public class OrderStatusController {
     OrderStatusService orderStatusService;
 
     @GetMapping("/read")
-    public AjaxResult orderStatusRead(@RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
+    public AjaxResult orderStatusRead(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
                                       Authentication auth) {
         AjaxResult result = new AjaxResult();
 
@@ -35,7 +38,7 @@ public class OrderStatusController {
             User user = (User) auth.getPrincipal();
             String perid = user.getFirst_name(); // 이름을 가져옴
             String spjangcd = searchSpjangcd;
-            List<Map<String, Object>> orderStatusList = orderStatusService.getOrderStatusByOperid(perid, spjangcd);
+            List<Map<String, Object>> orderStatusList = orderStatusService.getOrderStatusByOperid(startDate,endDate,perid, spjangcd);
 
             result.success = true;
             result.data = orderStatusList;
