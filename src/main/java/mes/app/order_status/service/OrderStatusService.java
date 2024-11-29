@@ -31,22 +31,7 @@ public class OrderStatusService {
         String sql = """
         SELECT
             tb007.*,
-            tb007.hgrb,
-            tb007.qty,
-            tb007.panel_t,
-            tb007.panel_w,
-            tb007.panel_l,
-            tb007.exfmtypedv,
-            tb007.infmtypedv,
-            tb007.stframedv,
-            tb007.stexplydv,
-            tb007.ordtext,
-            tb006.*,
-            tb006.ordflag,
-            tb006.reqdate,
-            tb006.cltnm,
-            tb006.remark,
-            tb006.deldate
+            tb006.*
         FROM
             TB_DA007W tb007
         LEFT JOIN
@@ -58,10 +43,8 @@ public class OrderStatusService {
             AND tb007.reqnum = tb006.reqnum
         WHERE
             tb006.spjangcd = :spjangcd
-         GROUP BY
-               tb006.remark
-         ORDER BY
-            tb006.reqdate DESC
+        ORDER BY
+            tb006.reqdate DESC;
         """;
         if (params.hasValue("startDate")) {
             sql += " AND tb007.reqdate >= :startDate";
