@@ -135,7 +135,7 @@ public class AccountController {
 			@RequestParam("password") final String password,
 			final HttpServletRequest request) throws UnknownHostException {
 
-		System.out.println("로그인 데이터: " + username + " / " + password);
+		//System.out.println("로그인 데이터: " + username + " / " + password);
 
 		AjaxResult result = new AjaxResult();
 

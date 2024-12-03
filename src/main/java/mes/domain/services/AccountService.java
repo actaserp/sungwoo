@@ -64,7 +64,7 @@ public class AccountService {
 
 		try {
 			int rowsAffected = this.sqlRunner.execute(sql, paramMap);
-			System.out.println("Rows affected: " + rowsAffected);
+			//System.out.println("Rows affected: " + rowsAffected);
 		} catch (Exception e) {
 			System.err.println("Failed to save login log: " + e.getMessage());
 			e.printStackTrace();

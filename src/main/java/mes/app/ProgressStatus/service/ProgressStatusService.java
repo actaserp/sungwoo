@@ -46,14 +46,14 @@ public class ProgressStatusService {
         WHERE 1=1
     """);
 
-        // 관리자(super)일 때는 saupnum 조건 제외
+    /*    // 관리자(super)일 때는 saupnum 조건 제외
         if (userid != null && !userid.isEmpty()) {
             // userid가 "super" 또는 "seong"이 아닌 경우에만 조건 추가
-            if (!"super".equals(userid) && !"seong".equals(userid)) {
+            if (!"super".equals(userid) && !"seong".equals(userid) && !"admin".equals(userid)) {
                 sql.append(" AND saupnum = :saupnum");
                 params.addValue("saupnum", userid);
             }
-        }
+        }*/
 
         if (startDate != null && !startDate.isEmpty()) {
             sql.append(" AND reqdate >= :startDate");
@@ -84,8 +84,8 @@ public class ProgressStatusService {
             params.addValue("searchTitle", "%" + searchTitle + "%");
         }
 
-        log.info("실행될 SQL: {}", sql.toString());
-        log.info("바인딩된 파라미터: {}", params.getValues());
+       /* log.info("실행될 SQL: {}", sql.toString());
+        log.info("바인딩된 파라미터: {}", params.getValues());*/
 
         return sqlRunner.getRows(sql.toString(), params);
     }
