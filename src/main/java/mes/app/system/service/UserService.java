@@ -105,9 +105,9 @@ public class UserService {
         }
 
         // SQL 디버깅 로그
-        log.info("Executing SQL:\n{}\nWith Parameters: {}", sql, params.getValues());
+        //log.info("Executing SQL:\n{}\nWith Parameters: {}", sql, params.getValues());
         // SQL 디버깅 로그
-        log.info("Executing SQL: {} with params: {}", sql, params.getValues());
+        //log.info("Executing SQL: {} with params: {}", sql, params.getValues());
 
         // SQL 실행 후 결과 반환
         return sqlRunner.getRows(sql.toString(), params);

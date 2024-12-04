@@ -1273,6 +1273,7 @@
 
                     modalGrid = new wijmo.grid.FlexGrid('#modalGrid', {
                         autoGenerateColumns: false,
+                        isReadOnly: true,
                         columns: [
                             {binding: 'rownum', header: '순번', width: 50, align: 'center'},
                             {binding: 'cltcd', header: '코드', width: 140, minWidth: 80, align: 'center'},
