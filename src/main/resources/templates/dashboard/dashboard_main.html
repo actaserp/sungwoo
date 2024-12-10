@@ -22,6 +22,9 @@
                 <h2>관리자 Dashboard</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img
                     src="/images/icon/ico-down.png"
                     alt="알람 아이콘"></a>
+                <img src="/images/icon/exclamation/exclamation-circle.svg"
+                     class="zoom-img"
+                     onclick="openPopup('https://foms.atlassian.net/wiki/external/NWNjZGViOTExNzhiNGQ1OGE3ZDk2MTlkMzEwOWE2M2I')" alt="도움말">
                 <!--                <a title="북마크" class="bookmark toggle">-->
                 <!--                    내 메뉴-->
                 <!--                </a>-->
@@ -39,7 +42,6 @@
                         <option value="" hidden selected disabled>선택</option>
                         <option value="ZZ">성우에스피(주)</option>
                         <option value="PP">성우피앤비(주)</option>
-                        <!-- 지역 옵션을 JavaScript에서 동적으로 채움 -->
                     </select>
                 </li>
             </ul>
@@ -707,7 +709,12 @@
                 }
             })
         }
-
+        // 가이드 web 팝업창 열기
+        function openPopup(url) {
+            // 새 창 열기
+            window.open(url, '_blank',
+                'width=1040,height=1000,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes');
+        }
 
     </script>
 </th:block>
