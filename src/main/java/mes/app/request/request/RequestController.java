@@ -582,6 +582,7 @@ public class RequestController {
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
         String reqseq = param.get("reqseq");
         String reqnum = param.get("reqnum");
+
         Map<String, Object> item = this.requestService.getInspecList2(tbDa006WPk, reqseq);
         List<String> imageUrls = new ArrayList<>();
         String ordtext = (String) item.get("ordtext"); // 큰따옴표로 수정
