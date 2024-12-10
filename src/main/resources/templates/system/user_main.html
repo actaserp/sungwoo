@@ -42,7 +42,11 @@
 
                     <div class="section-top">
                         <div class="title-wrap">
-                            <h3>사용자 등록</h3>
+                            <h3>사용자 등록
+                                <img src="/images/icon/exclamation/exclamation-circle.svg"
+                                     class="zoom-img" style="margin-left: 5px"
+                                     onclick="openPopup('https://foms.atlassian.net/wiki/external/ZjZjNTc4NWQ3ZTUwNDVkYmIwNzk1YWU3NmZhMWMxYTQ')" alt="도움말">
+                            </h3>
                         </div>
                         <div class="button-wrap">
                             <ul>
@@ -1055,6 +1059,12 @@
                     }
                 }
             })
+        }
+
+        function openPopup(url) {
+            // 새 창 열기
+            window.open(url, '_blank',
+                'width=1040,height=1000,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes');
         }
 
     </script>

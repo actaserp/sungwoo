@@ -24,7 +24,7 @@ public class ProgressStatusController {
 
 
     @GetMapping("/read")
-    public AjaxResult ProgressStatusRead(Authentication auth,  @RequestParam(value = "spjangcd", required = false) String spjangcd) {
+    public AjaxResult ProgressStatusRead(Authentication auth, @RequestParam(value = "search_spjangcd", required = false) String search_spjangcd) {
 
         AjaxResult result = new AjaxResult();
 
@@ -33,7 +33,7 @@ public class ProgressStatusController {
             User user = (User) auth.getPrincipal();
             String perid = user.getFirst_name();
 
-            List<Map<String, Object>> progressStatusLis = progressStatusService.getProgressStatusList(perid, spjangcd);
+            List<Map<String, Object>> progressStatusLis = progressStatusService.getProgressStatusList(perid, search_spjangcd);
             result.success = true;
             result.data = progressStatusLis;
             result.message = "데이터 조회 성공";
@@ -48,17 +48,17 @@ public class ProgressStatusController {
     }
 
     @GetMapping("/search")
-    public AjaxResult searchProgress(@RequestParam Map<String, String> params, Authentication auth) {
+    public AjaxResult searchProgress(@RequestParam Map<String, String> params, Authentication auth,
+                                     @RequestParam(value = "search_spjangcd", required = false) String search_spjangcd) {
         AjaxResult result = new AjaxResult();
         log.info("그리드 검색: {}", params);
         try {
             // 로그인한 사용자 정보
             User user = (User) auth.getPrincipal();
             String userid = user.getUsername();
-            String spjangcd = user.getSpjangcd();
 
             // 검색 조건 로깅
-            System.out.println(String.format("검색 조건: %s, 사용자: %s, 사업장: %s", params, userid, spjangcd));
+            System.out.println(String.format("검색 조건: %s, 사용자: %s, 사업장: %s", params, userid, search_spjangcd));
 
             // groupByColumns 처리
             List<String> groupByColumns = null;
@@ -74,7 +74,7 @@ public class ProgressStatusController {
                     params.get("searchtketnm"),
                     params.get("searchCltnm"),
                     userid,                     // 사용자 ID
-                    spjangcd,                   // 사업장 코드
+                    search_spjangcd,                   // 사업장 코드
                     groupByColumns              // 그룹바이 조건
             );
 
@@ -94,57 +94,6 @@ public class ProgressStatusController {
         return result;
     }
 
-
-    @GetMapping("/getChartData")
-    public AjaxResult getChartData(Authentication auth) {
-        AjaxResult result = new AjaxResult();
-
-        try {
-            User user = (User) auth.getPrincipal();
-            String userid = user.getUsername();
-
-            // SQL 쿼리 결과 확인
-            List<Map<String, Object>> rawData = progressStatusService.getChartData(userid);
-            System.out.println("쿼리 결과 데이터: " + rawData);
-
-            // 데이터 가공
-            List<String> labels = new ArrayList<>();
-            List<Integer> data = new ArrayList<>();
-
-            for (Map<String, Object> row : rawData) {
-                String cltnm = (String) row.getOrDefault("cltnm", "알 수 없음");
-                Integer ordflag = (Integer) row.getOrDefault("ordflag", 0);
-
-                labels.add(cltnm);
-                data.add(ordflag);
-            }
-
-            // 가공된 데이터 확인
-            System.out.println("labels: " + labels);
-            System.out.println("data: " + data);
-
-            // 응답 데이터 생성
-            Map<String, Object> responseData = new HashMap<>();
-            responseData.put("labels", labels);
-            responseData.put("data", data);
-
-            result.success = true;
-            result.data = responseData;
-            result.message = "데이터 조회 성공";
-
-        } catch (Exception e) {
-            // 예외 발생 시 로그 출력
-            System.err.println("데이터 처리 중 오류: " + e.getMessage());
-            e.printStackTrace();
-
-            result.success = false;
-            result.message = "데이터를 가져오는 중 오류가 발생했습니다.";
-        }
-
-        return result;
-    }
-
-
     //차트 데이터
     @GetMapping("/getChartData2")
     public AjaxResult getChartData(
@@ -161,8 +110,8 @@ public class ProgressStatusController {
             User user = (User) auth.getPrincipal();
             String userid = user.getUsername();
 
-            log.info("검색 조건 -search_spjangcd:{}, startDate: {}, endDate: {}, cltnm: {}, ordflag: {}, searchTitle: {}",
-                    startDate, endDate, searchCltnm, searchtketnm, searchTitle);
+            log.info("검색 조건 search_spjangcd:{}, startDate: {}, endDate: {}, cltnm: {}, ordflag: {}, searchTitle: {}",
+                    search_spjangcd, startDate, endDate, searchCltnm, searchtketnm, searchTitle);
 
             List<Map<String, Object>> rawData = progressStatusService.getChartData2(
                     userid, search_spjangcd, startDate, endDate, searchCltnm, searchtketnm, searchTitle);

@@ -16,10 +16,10 @@ public class ProgressStatusService {
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getProgressStatusList(String perid, String spjangcd) {
+    public List<Map<String, Object>> getProgressStatusList(String perid, String search_spjangcd) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("perid", perid);
-        params.addValue("spjangcd", spjangcd);
+        params.addValue("spjangcd", search_spjangcd);
         String sql = """
                  SELECT
             tb006.*
@@ -45,15 +45,6 @@ public class ProgressStatusService {
         FROM tb_da006w
         WHERE 1=1
     """);
-
-    /*    // 관리자(super)일 때는 saupnum 조건 제외
-        if (userid != null && !userid.isEmpty()) {
-            // userid가 "super" 또는 "seong"이 아닌 경우에만 조건 추가
-            if (!"super".equals(userid) && !"seong".equals(userid) && !"admin".equals(userid)) {
-                sql.append(" AND saupnum = :saupnum");
-                params.addValue("saupnum", userid);
-            }
-        }*/
 
         if (startDate != null && !startDate.isEmpty()) {
             sql.append(" AND reqdate >= :startDate");
@@ -121,9 +112,8 @@ public class ProgressStatusService {
     public List<Map<String, Object>> searchProgressStatus(
             String startDate, String endDate,
             String searchTitle, String searchtketnm,
-            String searchCltnm, String userid, String spjangcd,List<String> groupByColumns
-            ) {
-
+            String searchCltnm, String userid, String spjangcd, List<String> groupByColumns
+    ) {
         // 동적 쿼리를 위한 매개변수 설정
         MapSqlParameterSource params = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder("""
@@ -133,9 +123,7 @@ public class ProgressStatusService {
             TB_DA006W tb006
         WHERE
             1=1
-        ORDER BY
-            reqdate DESC;
-        """); // WHERE 1=1은 조건을 추가하기 쉽게 하기 위한 트릭입니다.
+    """); // WHERE 1=1은 조건을 추가하기 쉽게 하기 위한 트릭입니다.
 
         // 조건 추가
         if (startDate != null && !startDate.isEmpty()) {
@@ -171,16 +159,18 @@ public class ProgressStatusService {
 
         // 관리자(super)일 때는 saupnum 조건 제외
         if (userid != null && !userid.isEmpty()) {
-            // userid가 "super" 또는 "seong"이 아닌 경우에만 조건 추가
             if (!"super".equals(userid) && !"seong".equals(userid)) {
                 sql.append(" AND tb006.saupnum = :saupnum");
                 params.addValue("saupnum", userid);
             }
         }
 
-        // 로그 출력
-/*        log.info("검색 실행될 SQL: {}", sql.toString());
-        log.info("검색 바인딩된 파라미터: {}", params.getValues());*/
+        // ORDER BY를 항상 맨 마지막에 추가
+        sql.append(" ORDER BY tb006.reqdate DESC");
+
+        // 로그 출력 (활성화할 경우 사용)
+/*    log.info("검색 실행될 SQL: {}", sql.toString());
+    log.info("검색 바인딩된 파라미터: {}", params.getValues());*/
 
         // 데이터 조회
         return sqlRunner.getRows(sql.toString(), params);
