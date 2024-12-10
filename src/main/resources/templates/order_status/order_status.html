@@ -44,8 +44,7 @@
         <!-- Page Title -->
         <div class="page-title-wrap">
             <div class="left">
-                <h2>주문 현황</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png"
-                                                                                     alt="알람 아이콘"></a>
+                <h2>주문 현황</h2><a id="toggleButton" onclick="toggleSearchWrap()"><img src="/images/icon/ico-down.png" alt="알람 아이콘"></a>
                 <!--                <a href="#" title="북마크" class="bookmark toggle">-->
                 <!--                    내메뉴-->
                 <!--                </a>-->
@@ -86,7 +85,11 @@
                         <section
                                 style="width: 60%; box-sizing: border-box; height: 830px; margin-right: 20px; border-radius: 10px; ">
                             <div class="title-wrap">
-                                <h3>주문 캘린더</h3>
+                                <h3>주문 캘린더
+                                    <img src="/images/icon/exclamation/exclamation-circle.svg"
+                                         class="zoom-img" style="margin-left: 5px"
+                                         onclick="openPopup('https://foms.atlassian.net/wiki/spaces/seungwoo/pages/8978521')" alt="도움말">
+                                </h3>
                                 <div class="btn-wrap">
                                 </div>
                             </div>
@@ -191,12 +194,15 @@
                         </div>
                     </div>
                 </section>
-                <section class="tab-item" id="tab2" style="height: 850px;">
+                <section class="tab-item" id="tab2" style="height: 900px; overflow: hidden;">
                     <div class="section-top">
                         <div class="search-wrap">
                             <dl>
                                 <dt>
                                     주문일자<span class="eq">*</span>
+                                    <img src="/images/icon/exclamation/exclamation-circle.svg"
+                                         class="zoom-img" style="margin-left: 5px"
+                                         onclick="openPopup('https://foms.atlassian.net/wiki/x/SYCT')" alt="도움말">
                                 </dt>
                                 <dd>
                                     <ul class="date-box">
@@ -294,6 +300,7 @@
         <p>Copyrightⓒ 0000 corp. All rights reserved.</p>
     </footer>
     <div style="height: 10px"></div>
+
     <!--업체 모달-->
     <div class="modal">
         <div id="CltnmModal" style="display: none;">
@@ -309,52 +316,27 @@
         </div>
     </div>
 
-    <!-- 옵션 및 요청사항 모달 -->
-    <!--<div class="modal">
-        <div class="popup-wrapper w700" id="OrdtextModal" style="display: none; min-width: 1050px;">
-            <div class="popup-title">
-                <h3>옵션 및 요청사항</h3>
-                <a title="팝업닫기" onclick="closePopup('OrdtextModal')" class="btn-popup-close">
-                    <img src="/images/icon/btn-popup-close.svg" alt="닫기" style="float: right; right: 30px;">
+    <!--페이지 설명 모달 -->
+    <div class="modal">
+        <div id="PageModal" style="display: none;">
+            <div class="modal-content">
+                <h2 style="text-align: center;">주문 현황 페이지 설명</h2>
+                <a title="팝업닫기" onclick="closePopup('PageModal')" class="btn-popup-close">
+                    <img src="/images/icon/btn-popup-close.svg" style="float: right; right: 30px;" alt="닫기">
                 </a>
-            </div>
-            <div class="popup-contents">
-                <div class="table-wrap">
-                    <table class="write-table" style="border-top: 0px;">
-                        <caption>주문의뢰 요청사항</caption>
-                        <colgroup>
-                            <col class="wp20">
-                            <col class="wp80">
-                        </colgroup>
-                        <tbody>
-                        <tr>
-                            <td>
-                                <div class="table-wrap">
-                                    <table class="write-table">
-                                        <caption>요청사항</caption>
-                                        <tbody>
-                                        <tr style="align-items: center">
-                                            <th>
-                                                <label for="ordtext">내용</label>
-                                            </th>
-                                            <td colspan="3">
-                                                <div class="textarea-box">
-                                                    &lt;!&ndash; textarea를 읽기 전용으로 설정 &ndash;&gt;
-                                                    <textarea id="ordtext" readonly></textarea>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <form id="PageFindForm">
+                    <p style="text-align: center;">
+                        <a href="https://foms.atlassian.net/l/cp/X9iSn8Tt"
+                           target="_blank"
+                           style="color: blue; text-decoration: underline;">
+                            Atlassian Wiki에서 페이지 보기
+                        </a>
+                    </p>
+                </form>
             </div>
         </div>
-    </div>-->
+    </div>
+       <!-- 옵션 및 요청사항 모달 -->
     <div class="modal">
         <div class="popup-wrapper w700" id="OrdtextModal" style="display: none; min-width: 1050px;">
             <div class="popup-title">
@@ -400,6 +382,7 @@
         </div>
     </div>
 
+
 </th:block>
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
@@ -437,6 +420,8 @@
 
         document.readyState === 'complete' ? init() : window.onload = init;
         let isBindSpjangcdCalled = false;
+
+
         // 초반 페이지 진입시 그리드 바인딩 시작
         function init() {
             if (!isBindSpjangcdCalled) {
@@ -1388,6 +1373,12 @@
                     }
                 }
             })
+        }
+
+        function openPopup(url) {
+            // 새 창 열기
+            window.open(url, '_blank',
+                'width=1040,height=1000,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes');
         }
     </script>
 </th:block>
