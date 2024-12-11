@@ -58,7 +58,7 @@ public class ProgressStatusController {
             String userid = user.getUsername();
 
             // 검색 조건 로깅
-            System.out.println(String.format("검색 조건: %s, 사용자: %s, 사업장: %s", params, userid, search_spjangcd));
+            //System.out.println(String.format("검색 조건: %s, 사용자: %s, 사업장: %s", params, userid, search_spjangcd));
 
             // groupByColumns 처리
             List<String> groupByColumns = null;
@@ -110,8 +110,8 @@ public class ProgressStatusController {
             User user = (User) auth.getPrincipal();
             String userid = user.getUsername();
 
-            log.info("검색 조건 search_spjangcd:{}, startDate: {}, endDate: {}, cltnm: {}, ordflag: {}, searchTitle: {}",
-                    search_spjangcd, startDate, endDate, searchCltnm, searchtketnm, searchTitle);
+            /*log.info("검색 조건 search_spjangcd:{}, startDate: {}, endDate: {}, cltnm: {}, ordflag: {}, searchTitle: {}",
+                    search_spjangcd, startDate, endDate, searchCltnm, searchtketnm, searchTitle);*/
 
             List<Map<String, Object>> rawData = progressStatusService.getChartData2(
                     userid, search_spjangcd, startDate, endDate, searchCltnm, searchtketnm, searchTitle);
@@ -121,7 +121,7 @@ public class ProgressStatusController {
                 result.success = false;
                 result.message = "조회된 데이터가 없습니다.";
             } else {
-                log.info("쿼리 결과 데이터: {}", rawData);
+                //log.info("쿼리 결과 데이터: {}", rawData);
                 result.success = true;
                 result.data = rawData;
             }

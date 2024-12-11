@@ -77,6 +77,9 @@
                         <dl>
                             <dt>
                                 조회기간<span class="eq">*</span>
+                                <img src="/images/icon/exclamation/exclamation-circle.svg"
+                                     class="zoom-img" style="margin-left: 5px"
+                                     onclick="openPopup('https://foms.atlassian.net/wiki/external/Yjk4ODJlMzgxYWI5NDcwMjhlYWRhYzkwMzgxNTcyNjc')" alt="도움말">
                             </dt>
                             <dd>
                                 <ul class="date-box">
@@ -244,6 +247,7 @@
                             reqdate: formatDateString(item.reqdate),         // 날짜 형식 변환
                             deldate: formatDateString(item.deldate),         // 날짜 형식 변환
                             ordflag: getOrdflagText(parseInt(item.ordflag, 10)), // ordflag 텍스트 변환
+                            telno: formatPhoneNumber(item.telno),
                             rownum: index + 1
                         }));
                     }
@@ -297,6 +301,12 @@
                 // 이미 FlexGrid가 존재하는 경우, 데이터만 업데이트
                 theGrid.itemsSource = viewdata;
             }
+        }
+        function formatPhoneNumber(phoneNumber) {
+            if (/^\d{11}$/.test(phoneNumber)) { // 숫자 11자리인지 확인
+                return phoneNumber.replace(/^(\d{3})(\d{4})(\d{4})$/, '$1-$2-$3');
+            }
+            return 'Invalid phone number'; // 유효하지 않은 경우 처리
         }
 
         //차트 데이터
@@ -524,6 +534,7 @@
                     reqdate: formatDateString(item.reqdate), // 날짜 형식 변환
                     deldate: formatDateString(item.deldate), // 날짜 형식 변환
                     ordflag: getOrdflagText(parseInt(item.ordflag, 10)), // 진행 구분 텍스트 변환
+                    telno: formatPhoneNumber(item.telno),
                     rownum: index + 1 // 순번
                 }));
             } else {
@@ -742,6 +753,12 @@
                     }
                 }
             })
+        }
+
+        function openPopup(url) {
+            // 새 창 열기
+            window.open(url, '_blank',
+                'width=1040,height=1000,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes');
         }
 
     </script>
