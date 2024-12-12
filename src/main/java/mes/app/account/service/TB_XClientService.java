@@ -47,4 +47,31 @@ public class TB_XClientService {
         return null;
     }
 
+    public String getTbXa012Address() {
+        // SQL 파라미터 설정
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("spjangcd1", "PP");
+        params.addValue("spjangcd2", "ZZ");
+
+        // SQL 쿼리
+        String sql = """
+        SELECT zipcd2, adres2a
+        FROM TB_XA012
+        WHERE spjangcd IN (:spjangcd1, :spjangcd2)
+    """;
+
+        // 데이터 조회
+        List<Map<String, Object>> rows = sqlRunner.getRows(sql, params);
+        if (rows.isEmpty()) {
+            return null;
+        }
+
+        // 첫 번째 행에서 zipcd2와 adres2a 결합
+        Map<String, Object> row = rows.get(0);
+        String zipcd2 = (String) row.get("zipcd2");
+        String adres2a = (String) row.get("adres2a");
+
+        return adres2a;
+    }
+
 }
