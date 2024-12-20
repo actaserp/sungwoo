@@ -79,11 +79,11 @@
             </ul>
             <div class="tab-contents">
                 <!-- Section -->
-                <section class="tab-item" id="tab1" style="height: 900px; margin-bottom: 10px">
+                <section class="tab-item" id="tab1" style="height: 880px; margin-bottom: 10px">
                     <div class="row" style="display: flex;">
                         <!-- 왼쪽 섹션: 50% 차지 -->
                         <section
-                                style="width: 60%; box-sizing: border-box; height: 830px; margin-right: 20px; border-radius: 10px; ">
+                                style="width: 60%; box-sizing: border-box; height: 800px; margin-right: 20px; border-radius: 10px; ">
                             <div class="title-wrap">
                                 <h3>주문 캘린더
                                     <img src="/images/icon/exclamation/exclamation-circle.svg"
@@ -194,7 +194,7 @@
                         </div>
                     </div>
                 </section>
-                <section class="tab-item" id="tab2" style="height: 900px; overflow: hidden;">
+                <section class="tab-item" id="tab2" style="height: 750px; overflow: hidden;">
                     <div class="section-top">
                         <div class="search-wrap">
                             <dl>
@@ -287,7 +287,7 @@
                     </div>
                     <div class="container-fluid">
                         <p id="selectedItem"></p>
-                        <div id="theGrid2" style="max-height: 800px"></div>
+                        <div id="theGrid2" style="max-height: 650px"></div>
                     </div>
                 </section>
             </div>
@@ -702,7 +702,8 @@
         }
 
         /*==============캘린더 끝=============================================================================================================*/
-        function fetchListData2() {
+
+        /*function fetchListData2() {
             let data2 = []; // 데이터를 담을 기본 배열 초기화
 
             // 서버에서 데이터 가져오기
@@ -827,6 +828,241 @@
                 // 이미 FlexGrid가 존재하는 경우, 데이터만 업데이트
                 theGrid2.itemsSource = viewdata;
             }
+        }*/
+
+        function fetchListData2() {
+            let data2 = []; // 데이터를 담을 기본 배열 초기화
+
+            // 서버에서 데이터 가져오기
+            $.ajax({
+                url: '/api/order_status/read',
+                type: 'GET',
+                data: {
+                    'search_spjangcd': $('#search_spjangcd').val()
+                },
+                async: false,
+                success: function (response) {
+                    if (response && Array.isArray(response.data)) {
+                        data2 = response.data;
+
+                        // 데이터 전처리
+                        data2.forEach(item => {
+                            item.reqdate = formatDateString(item.reqdate);
+                            item.deldate = formatDateString(item.deldate);
+                            item.ordflag = getOrdflagText(parseInt(item.ordflag, 10));
+                            item.hgrb = getHgrb((item.hgrb));
+                            item.exfmtypedv = getListCgrb(item.exfmtypedv);
+                            item.infmtypedv = getListCgrb(item.infmtypedv);
+                            item.stframedv = getListCgrb(item.stframedv);
+                            item.stexplydv = getListCgrb(item.stexplydv);
+
+                            if (item.ordtext) {
+                                item.originalOrdtext = item.ordtext;
+                                item.ordtext = "옵션 및 요청사항";
+                            }
+                        });
+                    }
+                },
+                error: function () {
+                    console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+                }
+            });
+
+            // 순번 추가 및 빈 행 추가
+            const minimumRows = 5;
+            data2.forEach((item, index) => {
+                item.rownum = index + 1;
+            });
+
+            if (data2.length < minimumRows) {
+                const additionalRows = minimumRows - data2.length;
+                for (let i = 0; i < additionalRows; i++) {
+                    data2.push({
+                        rownum: data2.length + 1,
+                        ordflag: '',
+                        reqdate: '',
+                        cltnm: '',
+                        remark: '',
+                        deldate: '',
+                        hgrb: '',
+                        qty: '',
+                        panel_t: '',
+                        panel_w: '',
+                        panel_l: '',
+                        exfmtypedv: '',
+                        infmtypedv: '',
+                        stframedv: '',
+                        stexplydv: '',
+                        downloads: '',
+                        ordtext: '',
+                        isdownload: null
+                    });
+                }
+            }
+
+            // CollectionView 생성
+            let viewdata = new wijmo.collections.CollectionView(data2);
+
+            /*// 주문일자 그룹화
+            let groupDescription = new wijmo.collections.PropertyGroupDescription('reqdate', (item, prop) => {
+                return item[prop];
+            });*/
+            // 그룹화 설정
+            let reqdateGroup = new wijmo.collections.PropertyGroupDescription('reqdate', (item, prop) => {
+                return item[prop];
+            });
+
+            let cltnmGroup = new wijmo.collections.PropertyGroupDescription('cltnm', (item, prop) => {
+                return item[prop];
+            });
+
+            viewdata.groupDescriptions.clear();
+            viewdata.groupDescriptions.push(reqdateGroup);
+            viewdata.groupDescriptions.push(cltnmGroup);
+
+            // 그룹별 행 번호 다시 설정
+            const resetRowNumbers = () => {
+                if (viewdata.groups) {
+                    viewdata.groups.forEach(group => {
+                        let rowNumber = 1;
+                        group.items.forEach(item => {
+                            item.rownum = rowNumber++;
+                        });
+                    });
+                }
+            };
+
+            // 검색 후 데이터를 업데이트한 경우에도 초기화
+            resetRowNumbers();
+
+            // FlexGrid 생성 또는 업데이트
+            if (!theGrid2) {
+                theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
+                    autoGenerateColumns: false,
+                    showMarquee: true,
+                    isReadOnly: true,
+                    columns: [
+                        {binding: 'rownum', header: '순번', width: 70, align: 'center'},
+                        {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 150, align: 'center'},
+                        {binding: 'cltnm', header: '업체명', width: '*', minWidth: 150, align: 'left'},
+                        {binding: 'remark', header: '제목', width: '*', minWidth: 200, align: 'left'},
+                        {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 150, align: 'center'},
+                        {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'qty', header: '수량', width: 80, align: 'right'},
+                        {binding: 'panel_t', header: 'T(두께)', width: 80, align: 'right'},
+                        {binding: 'panel_w', header: 'W/H(폭 또는 높이)', width: 150, align: 'right'},
+                        {binding: 'panel_l', header: 'L(길이)', width: 80, align: 'right'},
+                        {binding: 'exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 105, align: 'center'},
+                        {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'},
+
+                        {binding: 'isdownload', visible: false},
+                    ],
+                    itemsSource: viewdata,
+                    formatItem: function(s, e) {
+                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
+                            const col = s.columns[e.col]; // 현재 컬럼 정보
+                            const item = s.rows[e.row]?.dataItem; // 현재 행 데이터
+
+                            // "옵션 및 요청사항" 링크 처리
+                            if (col.binding === 'ordtext' && item && item.ordtext === "옵션 및 요청사항") {
+                                e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="showPopupById('OrdtextModal', ${e.row})">옵션 및 요청사항</a>`;
+                            }
+
+                            // 다운로드 링크 처리
+                            if (col.binding === 'downloads') {
+                                e.cell.innerHTML = ''; // 셀 내용 초기화
+                                if (item.isdownload) { // 데이터에 다운로드 가능한 상태 여부 확인
+                                    e.cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order()">다운로드</a>';
+                                }
+                            }
+                        }
+                    }
+                });
+
+                theGrid2.rowHeaders.columns.splice(0, 1);
+                new FlexGridContextMenu(theGrid2);
+                window.downloadFileName = '진행 현황';
+
+                theGrid2.beginningEdit.addHandler((s, e) => {
+                    e.cancel = true;
+                });
+            } else {
+                theGrid2.itemsSource = viewdata;
+            }
+        }
+
+        //다운로드
+        function downloadFile_order() {
+            let selectedItems = theGrid.selectedItems; // 선택된 항목 가져오기
+            let downloadList = [];
+
+            // 선택된 항목에서 다운로드할 파일 목록 생성
+            selectedItems.forEach(function (item) {
+                downloadList.push({
+                    reqnum: item.reqnum
+                });
+            });
+
+            // 다운로드 URL 지정
+            let downloadUrl = '/api/request/request/downloader';
+
+            // Jung.js에서 정의한 downloadFiles 함수 호출
+            downloadFiles(downloadList, downloadUrl);
+        }
+
+        // 파일 다운로드
+        function downloadFiles(downloadList, url) {
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRF-Token', document.querySelector('[name=_csrf]').value);
+            xhr.responseType = 'blob';
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    let blob = xhr.response;
+                    let link = document.createElement('a');
+                    let downloadUrl = window.URL.createObjectURL(blob);
+                    let contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                    let fileName = 'downloadedFile';
+
+                    if (contentDisposition) {
+                        let fileNameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        let matches = fileNameRegex.exec(contentDisposition);
+                        if (matches != null && matches[1]) {
+                            fileName = decodeURIComponent(matches[1].replace(/['"]/g, ''));
+                        }
+
+                        // filename* 속성에서 파일 이름 추출
+                        let fileNameStarRegex = /filename\*\=([^;]*)/;
+                        let matchesStar = fileNameStarRegex.exec(contentDisposition);
+                        if (matchesStar != null && matchesStar[1]) {
+                            fileName = decodeURIComponent(matchesStar[1].split("''")[1].replace(/['"]/g, ''));
+                        }
+                    }
+
+                    link.href = downloadUrl;
+                    link.download = fileName;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    window.URL.revokeObjectURL(downloadUrl);
+                } else {
+                    console.error('Download failed:', xhr.statusText);
+                }
+            };
+
+            xhr.onerror = function () {
+                console.error('Network error');
+            };
+
+            xhr.send(JSON.stringify(downloadList));
         }
 
         //날짜 포맷
