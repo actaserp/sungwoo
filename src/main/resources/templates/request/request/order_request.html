@@ -873,7 +873,7 @@
         // 선택이 변경될 때, 현재 항목 업데이트
         theGrid.rowHeaders.columns.splice(0, 1);  //맨 앞에 헤더부분 없애기
         new FlexGridContextMenu(theGrid);
-        window.downloadFileName = '티켓현황';
+        window.downloadFileName = '주문의뢰 첨부파일';
       } else {
         // 이미 FlexGrid이 존재하는 경우, 데이터만 업데이트
         theGrid.itemsSource = viewdata1;
@@ -1923,6 +1923,36 @@
       window.open(url, '_blank',
               'width=1040,height=1000,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes');
     }
+    // enter입력시 다음 input으로 cursor이동
+    function moveFocusOnEnter(currentId, nextId) {
+      const currentElement = document.getElementById(currentId);
+      currentElement.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+          event.preventDefault(); // 기본 Enter 동작 방지
+          const nextElement = document.getElementById(nextId);
+          if (nextElement) {
+            nextElement.focus(); // 포커스 이동
+          }
+        }
+      });
+    }
+    moveFocusOnEnter("reqdate", "deldate");
+    moveFocusOnEnter("deldate", "telno");
+    moveFocusOnEnter("telno", "perid");
+    moveFocusOnEnter("perid", "panel_ht");
+    moveFocusOnEnter("panel_ht", "panel_hw");
+    moveFocusOnEnter("panel_hw", "panel_hl");
+    moveFocusOnEnter("panel_hl", "panel_hh");
+    moveFocusOnEnter("panel_hh", "remark");
+    moveFocusOnEnter("remark", "hgrb");
+    moveFocusOnEnter("hgrb", "qty");
+    moveFocusOnEnter("qty", "panel_t");
+    moveFocusOnEnter("panel_t", "panel_w");
+    moveFocusOnEnter("panel_w", "panel_l");
+    moveFocusOnEnter("panel_l", "exfmtypedv");
+    moveFocusOnEnter("exfmtypedv", "infmtypedv");
+    moveFocusOnEnter("infmtypedv", "stframedv");
+    moveFocusOnEnter("stframedv", "stexplydv");
   </script>
 
 </th:block>
