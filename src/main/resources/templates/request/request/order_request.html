@@ -500,7 +500,7 @@
 
 <th:block layout:fragment="scripts">
   <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-  <script src="https://cdn.tiny.cloud/1/vz0rv2lnngp83gy5arhr4hzhqyr3z08rnj8zq7mx8c0otwi7/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+  <script src="https://cdn.tiny.cloud/1/7u1hg8ws4zgi4u6yjgxcvmxwiv1m4fo9zboacpvt2qbaerrh/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
   <script>
     tinymce.init({
       language: "ko_KR",
@@ -508,7 +508,6 @@
       plugins: "paste image imagetools",
       height: 500,
       width: 900,
-      readonly: false, // 명시적으로 읽기 전용 모드 비활성화
       toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image",
       paste_data_images: false,
       file_picker_types: 'image',
