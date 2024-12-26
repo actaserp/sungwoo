@@ -121,7 +121,27 @@ public class OrderStatusService {
             tb006.*,
             tb006.cltnm,
             tb006.remark,
-            tb006.ordflag
+            tb006.ordflag,
+            (
+                   SELECT
+                       bd.filepath,
+                       bd.filesvnm,
+                       bd.fileextns,
+                       bd.fileurl,
+                       bd.fileornm,
+                       bd.filesize,
+                       bd.fileid
+                   FROM
+                       tb_DA006WFILE bd
+                   WHERE
+                       bd.custcd = tb007.custcd
+                       AND bd.spjangcd = tb007.spjangcd
+                       AND bd.reqdate = tb007.reqdate
+                       AND bd.reqnum = tb007.reqnum
+                   ORDER BY
+                       bd.indatem DESC
+                   FOR JSON PATH
+               ) AS hd_files
         FROM
             TB_DA007W tb007
         LEFT JOIN

@@ -1,5 +1,6 @@
 package mes.app.request.request.service;
 
+import lombok.extern.slf4j.Slf4j;
 import mes.domain.entity.actasEntity.TB_DA006W;
 import mes.domain.entity.actasEntity.TB_DA006WFile;
 import mes.domain.entity.actasEntity.TB_DA006W_PK;
@@ -17,6 +18,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class RequestService {
 
@@ -168,6 +170,8 @@ public class RequestService {
         dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
         dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
         dicParam.addValue("saupnum", saupnum);
+        log.info(" 실행될 SQL: {}", sql);
+        log.info("바인딩된 파라미터: {}", dicParam.getValues());
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }

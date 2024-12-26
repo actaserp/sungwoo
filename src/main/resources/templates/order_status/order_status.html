@@ -731,7 +731,8 @@
                             }
                             item.isdownload = item.isdownload === true;
                         });
-                        data2 = removeDuplicates(data2, ['ordflag', 'reqdate', 'deldate']);
+                        console.log("서버에서 가져온 데이터(주문현황):", data2);
+                        //data2 = removeDuplicates(data2, ['ordflag', 'reqdate', 'deldate']);
                     }
                 },
                 error: function () {
@@ -877,9 +878,22 @@
             }
         }
 
+        // 중복 제거 함수
+        function removeDuplicates(data, keys) {
+            const seen = new Set();
+            return data.filter(item => {
+                const key = keys.map(k => item[k]).join('|'); // 중복 기준 필드 조합
+                if (seen.has(key)) {
+                    return false; // 이미 처리된 항목은 제외
+                }
+                seen.add(key);
+                return true; // 새 항목만 유지
+            });
+        }
+
         //다운로드
         function downloadFile_order_status() {
-            let selectedItems = theGrid.selectedItems; // 선택된 항목 가져오기
+            let selectedItems = theGrid2.selectedItems; // 선택된 항목 가져오기
             let downloadList = [];
 
             // 선택된 항목에서 다운로드할 파일 목록 생성
@@ -913,7 +927,7 @@
                 case 1:
                     return "주문확인";
                 case 2:
-                    return "주문확전";
+                    return "주문확정";
                 case 3:
                     return "제작진행";
                 case 4:
@@ -1099,6 +1113,7 @@
                                 item.originalOrdtext = item.ordtext; // 실제 데이터를 보존
                                 item.ordtext = "옵션 및 요청사항"; // 링크 표시용 텍스트
                             }
+                            item.isdownload = item.isdownload === true;
                         });
 
                         // 순번을 추가하고, 데이터가 10개 미만일 경우 빈 행을 추가
@@ -1128,6 +1143,7 @@
                                     stexplydv: '',
                                     downloads:'',
                                     ordtext: '',
+                                    reqnum:'',
                                     isdownload:''
                                 });
                             }
@@ -1179,7 +1195,7 @@
                                     {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
                                     {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 150, align: 'center'},
                                     {binding: 'cltnm', header: '업체명', width: '*', minWidth: 150, align: 'left'},
-                                    {binding: 'remark', header: '제목', width: '*', minWidth: 200, align: 'left'},
+                                    {binding: 'remark', header: '제목', width: '*', minWidth: 400, align: 'left'},
                                     {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 150, align: 'center'},
                                     {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
                                     {binding: 'qty', header: '수량', width: 80, align: 'right'},
@@ -1192,7 +1208,8 @@
                                     {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
                                     {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 105, align: 'center'},
                                     {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'},
-                                    {binding: 'isdownload', visible: false},
+                                    {binding: 'reqnum', visible: false},
+                                    {binding: 'isdownload', visible: false}
                                 ],
                                 itemsSource: viewdata, // 데이터 바인딩
                                 formatItem: function(s, e) {
@@ -1209,9 +1226,11 @@
                                         }
                                         // 다운로드 링크 처리
                                         if (col.binding === 'downloads') {
+                                            //console.log('downloads column detected', item); // 디버깅용 로그 추가
                                             e.cell.innerHTML = ''; // 셀 내용 초기화
                                             if (item.isdownload) { // 데이터에 다운로드 가능한 상태 여부 확인
-                                                e.cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order()">다운로드</a>';
+                                                //console.log('Download link added for item:', item); // 디버깅용 로그 추가
+                                                e.cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order_status()">다운로드</a>';
                                             }
                                         }
                                     }
