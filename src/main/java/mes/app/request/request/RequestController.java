@@ -409,7 +409,7 @@ public class RequestController {
 
             HttpHeaders headers = new HttpHeaders();
             String encodedFileName = URLEncoder.encode(originFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=*=UTF-8''" + encodedFileName);
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=*''" + encodedFileName);
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentLength(file.length());
 
@@ -469,7 +469,7 @@ public class RequestController {
 
         HttpHeaders headers = new HttpHeaders();
         String encodedZipFileName = URLEncoder.encode(zipFileName, StandardCharsets.UTF_8.toString()).replaceAll("\\+", "%20");
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=*=UTF-8''" + encodedZipFileName);
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=*''" + encodedZipFileName);
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentLength(zipResource.contentLength());
 
