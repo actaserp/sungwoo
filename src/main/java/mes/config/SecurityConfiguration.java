@@ -48,6 +48,7 @@ public class SecurityConfiguration {
 				.mvcMatchers("/api/sales/upload/**", "/api/gene/**").permitAll()  // 모든 사용자에게 허용 (임시)
 				.mvcMatchers("/user-codes/**", "/user-auth/**").permitAll()
 				.mvcMatchers("/authentication/**").permitAll()
+				.mvcMatchers("/api/request/**").permitAll()
 //				.mvcMatchers("/api/sales/upload/**").authenticated()  // 모든 인증된 사용자에게 허용 (임시)
         .mvcMatchers("/setup").hasAuthority("admin")		// hasRole -> hasAuthority로 수정
         .anyRequest().authenticated();

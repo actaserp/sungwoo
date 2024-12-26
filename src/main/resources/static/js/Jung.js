@@ -183,8 +183,10 @@ function downloadFiles(downloadList, url) {
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(downloadUrl);
+        } else if (xhr.status === 404) {
+            Alert.alert('', '파일이 존재하지 않습니다.');
         } else {
-            console.error('Download failed:', xhr.statusText);
+            Alert.alert('', '파일 다운로드 중 오류가 발생했습니다.');
         }
     };
 
