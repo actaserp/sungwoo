@@ -386,9 +386,6 @@
 </th:block>
 <th:block layout:fragment="scripts">
     <th:block th:replace="/common/columns_setting :: columns_setting"></th:block>
-    <script src="https://cdn.tiny.cloud/1/vz0rv2lnngp83gy5arhr4hzhqyr3z08rnj8zq7mx8c0otwi7/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
-
-    <!-- TinyMCE 초기화 코드 -->
     <script>
         tinymce.init({
             language: "ko_KR",
@@ -405,15 +402,15 @@
         });
 
     </script>
-
     <script type="text/javascript">
 
         let theGrid;
         let theGrid2;
         let calendar;
         let modalGrid;
-        let selectedId;
         let viewdata2;
+        let viewdata;
+
         // 주문현황 년도 자동화
         const currentYear = new Date().getFullYear();
         document.getElementById('year-status').innerText = `${currentYear}년 주문 현황`;
@@ -703,133 +700,6 @@
 
         /*==============캘린더 끝=============================================================================================================*/
 
-        /*function fetchListData2() {
-            let data2 = []; // 데이터를 담을 기본 배열 초기화
-
-            // 서버에서 데이터 가져오기
-            $.ajax({
-                url: '/api/order_status/read',
-                type: 'GET',
-                data: {
-                    'search_spjangcd': $('#search_spjangcd').val()
-                },
-                async: false,
-                success: function (response) {
-                    // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
-                    if (response && Array.isArray(response.data)) {
-                        data2 = response.data;
-                        // 날짜 형식 변환 및 ordflag 변환
-                        data2.forEach(item => {
-                            item.reqdate = formatDateString(item.reqdate);
-                            item.deldate = formatDateString(item.deldate);
-                            item.ordflag = getOrdflagText(parseInt(item.ordflag, 10));
-                            item.hgrb = getHgrb((item.hgrb));
-                            item.exfmtypedv = getListCgrb(item.exfmtypedv);
-                            item.infmtypedv = getListCgrb(item.infmtypedv);
-                            item.stframedv = getListCgrb(item.stframedv);
-                            item.stexplydv = getListCgrb(item.stexplydv);
-
-                            // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
-                            if (item.ordtext) {
-                                item.originalOrdtext = item.ordtext; // 실제 데이터를 보존
-                                item.ordtext = "옵션 및 요청사항"; // 링크 표시용 텍스트
-                            }
-                        });
-                    }
-                },
-                error: function () {
-                    console.error("데이터를 가져오는 중 오류가 발생했습니다.");
-                }
-            });
-
-            // 순번을 추가하고, 데이터가 5개 미만일 경우 빈 행을 추가
-            const minimumRows = 5;
-            data2.forEach((item, index) => {
-                item.rownum = index + 1; // 순번 추가
-            });
-
-            if (data2.length < minimumRows) {
-                const additionalRows = minimumRows - data2.length;
-                for (let i = 0; i < additionalRows; i++) {
-                    data2.push({
-                        rownum: data2.length + 1, // 현재 데이터 길이에 맞게 순번을 맞춤
-                        ordflag: '',
-                        reqdate: '',
-                        cltnm: '',
-                        remark: '',
-                        deldate: '',
-                        hgrb: '',
-                        qty: '',
-                        panel_t: '',
-                        panel_w: '',
-                        panel_l: '',
-                        exfmtypedv: '',
-                        infmtypedv: '',
-                        stframedv: '',
-                        stexplydv: '',
-                        ordtext: ''
-                    });
-                }
-            }
-
-            // CollectionView 생성 및 FlexGrid 바인딩
-            let viewdata = new wijmo.collections.CollectionView(data2);
-
-            if (!theGrid2) {
-                // theGrid2가 처음 생성되는 경우 설정
-                theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
-                    autoGenerateColumns: false,
-                    showMarquee: true,
-                    isReadOnly: true, // 전체 읽기 전용
-                    columns: [
-                        {binding: 'rownum', header: '순번', width: 70, align: 'center'},
-                        {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 150, align: 'center'},
-                        {binding: 'cltnm', header: '업체명', width: '*', minWidth: 150, align: 'left'},
-                        {binding: 'remark', header: '제목', width: '*', minWidth: 200, align: 'left'},
-                        {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 150, align: 'center'},
-                        {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'qty', header: '수량', width: 80, align: 'right'},
-                        {binding: 'panel_t', header: 'T(두께)', width: 80, align: 'right'},
-                        {binding: 'panel_w', header: 'W/H(폭 또는 높이)', width: 150, align: 'right'},
-                        {binding: 'panel_l', header: 'L(길이)', width: 80, align: 'right'},
-                        {binding: 'exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'}
-                    ],
-                    itemsSource: viewdata, // 서버에서 가져온 데이터를 바인딩
-                    formatItem: function(s, e) {
-                        if (e.panel.cellType === wijmo.grid.CellType.Cell) {
-                            const col = s.columns[e.col];
-                            const item = s.rows[e.row]?.dataItem;
-
-                            // ordtext 셀에 데이터가 있는 경우 링크처럼 표시
-                            if (col.binding === 'ordtext' && item && item.ordtext === "옵션 및 요청사항") {
-                                console.log("Creating link for ordtext at row:", e.row); // e.row 값 확인
-                                e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="showPopupById('OrdtextModal', ${e.row})">옵션 및 요청사항</a>`;
-                            } else {
-                                console.warn("No ordtext data found or invalid row:", e.row);
-                            }
-                        }
-                    }
-                });
-
-                theGrid2.rowHeaders.columns.splice(0, 1); // 맨 앞에 헤더 부분 없애기
-                new FlexGridContextMenu(theGrid2);
-                window.downloadFileName = '진행 현황';
-
-                theGrid2.beginningEdit.addHandler((s, e) => {
-                    e.cancel = true; // 편집 차단
-                });
-
-            } else {
-                // 이미 FlexGrid가 존재하는 경우, 데이터만 업데이트
-                theGrid2.itemsSource = viewdata;
-            }
-        }*/
-
         function fetchListData2() {
             let data2 = []; // 데이터를 담을 기본 배열 초기화
 
@@ -855,12 +725,13 @@
                             item.infmtypedv = getListCgrb(item.infmtypedv);
                             item.stframedv = getListCgrb(item.stframedv);
                             item.stexplydv = getListCgrb(item.stexplydv);
-
                             if (item.ordtext) {
                                 item.originalOrdtext = item.ordtext;
                                 item.ordtext = "옵션 및 요청사항";
                             }
+                            item.isdownload = item.isdownload === true;
                         });
+                        data2 = removeDuplicates(data2, ['ordflag', 'reqdate', 'deldate']);
                     }
                 },
                 error: function () {
@@ -895,7 +766,8 @@
                         stexplydv: '',
                         downloads: '',
                         ordtext: '',
-                        isdownload: null
+                        reqnum:'',
+                        isdownload: ''
                     });
                 }
             }
@@ -903,10 +775,6 @@
             // CollectionView 생성
             let viewdata = new wijmo.collections.CollectionView(data2);
 
-            /*// 주문일자 그룹화
-            let groupDescription = new wijmo.collections.PropertyGroupDescription('reqdate', (item, prop) => {
-                return item[prop];
-            });*/
             // 그룹화 설정
             let reqdateGroup = new wijmo.collections.PropertyGroupDescription('reqdate', (item, prop) => {
                 return item[prop];
@@ -923,11 +791,20 @@
             // 그룹별 행 번호 다시 설정
             const resetRowNumbers = () => {
                 if (viewdata.groups) {
-                    viewdata.groups.forEach(group => {
-                        let rowNumber = 1;
-                        group.items.forEach(item => {
-                            item.rownum = rowNumber++;
-                        });
+                    viewdata.groups.forEach(firstGroup => { // 1차 그룹 (reqdate)
+                        if (firstGroup.groups) { // 2차 그룹(cltnm)이 존재하면 처리
+                            firstGroup.groups.forEach(secondGroup => { // 2차 그룹 (cltnm)
+                                let rowNumber = 1; // 각 2차 그룹별로 행 번호 초기화
+                                secondGroup.items.forEach(item => {
+                                    item.rownum = rowNumber++;
+                                });
+                            });
+                        } else { // 2차 그룹이 없고 1차 그룹만 있을 경우 처리
+                            let rowNumber = 1;
+                            firstGroup.items.forEach(item => {
+                                item.rownum = rowNumber++;
+                            });
+                        }
                     });
                 }
             };
@@ -941,12 +818,13 @@
                     autoGenerateColumns: false,
                     showMarquee: true,
                     isReadOnly: true,
+                    virtualizationThreshold: 1,
                     columns: [
                         {binding: 'rownum', header: '순번', width: 70, align: 'center'},
                         {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
                         {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 150, align: 'center'},
                         {binding: 'cltnm', header: '업체명', width: '*', minWidth: 150, align: 'left'},
-                        {binding: 'remark', header: '제목', width: '*', minWidth: 200, align: 'left'},
+                        {binding: 'remark', header: '제목', width: '*', minWidth: 400, align: 'left'},
                         {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 150, align: 'center'},
                         {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
                         {binding: 'qty', header: '수량', width: 80, align: 'right'},
@@ -959,9 +837,10 @@
                         {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
                         {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 105, align: 'center'},
                         {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'},
-
-                        {binding: 'isdownload', visible: false},
+                        {binding: 'reqnum', visible: false},  // 숨길 컬럼
+                        {binding: 'isdownload', visible: false}
                     ],
+
                     itemsSource: viewdata,
                     formatItem: function(s, e) {
                         if (e.panel.cellType === wijmo.grid.CellType.Cell) {
@@ -975,9 +854,11 @@
 
                             // 다운로드 링크 처리
                             if (col.binding === 'downloads') {
+                                //console.log('downloads column detected', item); // 디버깅용 로그 추가
                                 e.cell.innerHTML = ''; // 셀 내용 초기화
                                 if (item.isdownload) { // 데이터에 다운로드 가능한 상태 여부 확인
-                                    e.cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order()">다운로드</a>';
+                                    //console.log('Download link added for item:', item); // 디버깅용 로그 추가
+                                    e.cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order_status()">다운로드</a>';
                                 }
                             }
                         }
@@ -997,7 +878,7 @@
         }
 
         //다운로드
-        function downloadFile_order() {
+        function downloadFile_order_status() {
             let selectedItems = theGrid.selectedItems; // 선택된 항목 가져오기
             let downloadList = [];
 
@@ -1013,56 +894,6 @@
 
             // Jung.js에서 정의한 downloadFiles 함수 호출
             downloadFiles(downloadList, downloadUrl);
-        }
-
-        // 파일 다운로드
-        function downloadFiles(downloadList, url) {
-            let xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('X-CSRF-Token', document.querySelector('[name=_csrf]').value);
-            xhr.responseType = 'blob';
-
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    let blob = xhr.response;
-                    let link = document.createElement('a');
-                    let downloadUrl = window.URL.createObjectURL(blob);
-                    let contentDisposition = xhr.getResponseHeader('Content-Disposition');
-                    let fileName = 'downloadedFile';
-
-                    if (contentDisposition) {
-                        let fileNameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                        let matches = fileNameRegex.exec(contentDisposition);
-                        if (matches != null && matches[1]) {
-                            fileName = decodeURIComponent(matches[1].replace(/['"]/g, ''));
-                        }
-
-                        // filename* 속성에서 파일 이름 추출
-                        let fileNameStarRegex = /filename\*\=([^;]*)/;
-                        let matchesStar = fileNameStarRegex.exec(contentDisposition);
-                        if (matchesStar != null && matchesStar[1]) {
-                            fileName = decodeURIComponent(matchesStar[1].split("''")[1].replace(/['"]/g, ''));
-                        }
-                    }
-
-                    link.href = downloadUrl;
-                    link.download = fileName;
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    window.URL.revokeObjectURL(downloadUrl);
-                } else {
-                    console.error('Download failed:', xhr.statusText);
-                }
-            };
-
-            xhr.onerror = function () {
-                console.error('Network error');
-            };
-
-            xhr.send(JSON.stringify(downloadList));
         }
 
         //날짜 포맷
@@ -1295,13 +1126,50 @@
                                     infmtypedv: '',
                                     stframedv: '',
                                     stexplydv: '',
-                                    ordtext: ''
+                                    downloads:'',
+                                    ordtext: '',
+                                    isdownload:''
                                 });
                             }
                         }
+                        let viewdata = new wijmo.collections.CollectionView(data2);
+                        // 그룹화 설정
+                        let reqdateGroup = new wijmo.collections.PropertyGroupDescription('reqdate', (item, prop) => {
+                            return item[prop];
+                        });
+
+                        let cltnmGroup = new wijmo.collections.PropertyGroupDescription('cltnm', (item, prop) => {
+                            return item[prop];
+                        });
+
+                        viewdata.groupDescriptions.push(reqdateGroup);
+                        viewdata.groupDescriptions.push(cltnmGroup);
+
+                        // 그룹별 행 번호 다시 설정
+                        const resetRowNumbers = () => {
+                            if (viewdata.groups) {
+                                viewdata.groups.forEach(firstGroup => { // 1차 그룹 순회 (reqdate)
+                                    if (firstGroup.groups) { // 2차 그룹(cltnm)이 존재하면 처리
+                                        firstGroup.groups.forEach(secondGroup => { // 2차 그룹 순회 (cltnm)
+                                            let rowNumber = 1; // 각 2차 그룹별로 행 번호 초기화
+                                            secondGroup.items.forEach(item => {
+                                                item.rownum = rowNumber++;
+                                            });
+                                        });
+                                    } else { // 2차 그룹이 없고 1차 그룹만 있을 경우 처리
+                                        let rowNumber = 1;
+                                        firstGroup.items.forEach(item => {
+                                            item.rownum = rowNumber++;
+                                        });
+                                    }
+                                });
+                            }
+                        };
+                        // 검색 후 데이터를 업데이트한 경우에도 초기화
+                        resetRowNumbers();
 
                         // 그리드 업데이트
-                        const viewdata = new wijmo.collections.CollectionView(data2);
+                        //const viewdata = new wijmo.collections.CollectionView(data2);
                         if (!theGrid2) {
                             theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
                                 autoGenerateColumns: false,
@@ -1322,7 +1190,9 @@
                                     {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
                                     {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
                                     {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-                                    {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'}
+                                    {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 105, align: 'center'},
+                                    {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'},
+                                    {binding: 'isdownload', visible: false},
                                 ],
                                 itemsSource: viewdata, // 데이터 바인딩
                                 formatItem: function(s, e) {
@@ -1336,6 +1206,13 @@
                                             e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="showPopupById('OrdtextModal', ${e.row})">옵션 및 요청사항</a>`;
                                         } else {
                                             console.warn("ordtext 데이터가 없거나 잘못된 행입니다:", e.row);
+                                        }
+                                        // 다운로드 링크 처리
+                                        if (col.binding === 'downloads') {
+                                            e.cell.innerHTML = ''; // 셀 내용 초기화
+                                            if (item.isdownload) { // 데이터에 다운로드 가능한 상태 여부 확인
+                                                e.cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order()">다운로드</a>';
+                                            }
                                         }
                                     }
                                 }

@@ -31,7 +31,27 @@ public class OrderStatusService {
         String sql = """
         SELECT
             tb007.*,
-            tb006.*
+             tb006.*,
+               (
+                   SELECT
+                       bd.filepath,
+                       bd.filesvnm,
+                       bd.fileextns,
+                       bd.fileurl,
+                       bd.fileornm,
+                       bd.filesize,
+                       bd.fileid
+                   FROM
+                       tb_DA006WFILE bd
+                   WHERE
+                       bd.custcd = tb007.custcd
+                       AND bd.spjangcd = tb007.spjangcd
+                       AND bd.reqdate = tb007.reqdate
+                       AND bd.reqnum = tb007.reqnum
+                   ORDER BY
+                       bd.indatem DESC
+                   FOR JSON PATH
+               ) AS hd_files
         FROM
             TB_DA007W tb007
         LEFT JOIN
@@ -132,6 +152,8 @@ public class OrderStatusService {
         }
 
         // 쿼리 실행 및 결과 반환
+        log.info(" 실행될 SQL: {}", sql);
+        log.info("바인딩된 파라미터: {}", params.getValues());
         return sqlRunner.getRows(sql, params);
     }
 
@@ -169,6 +191,7 @@ public class OrderStatusService {
         }
         return null; // 데이터가 없을 경우 null 반환
     }
+
     // username으로 cltcd, cltnm, saupnum, custcd 가지고 오기
     public Map<String, Object> getUserInfo(String username) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
@@ -187,6 +210,7 @@ public class OrderStatusService {
         Map<String, Object> userInfo = this.sqlRunner.getRow(sql, dicParam);
         return userInfo;
     }
+
     //주문현황 그리드
     public List<Map<String, Object>> getOrderList(TB_DA006W_PK tbDa006W_pk,
                                                   String searchStartDate, String searchEndDate, String searchType) {

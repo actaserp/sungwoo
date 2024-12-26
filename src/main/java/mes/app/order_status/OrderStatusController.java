@@ -1,6 +1,8 @@
 package mes.app.order_status;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import mes.app.order_status.service.OrderStatusService;
 import mes.domain.entity.User;
 import mes.domain.entity.actasEntity.TB_DA006W_PK;
@@ -13,9 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -25,7 +25,7 @@ public class OrderStatusController {
     @Autowired
     OrderStatusService orderStatusService;
 
-    @GetMapping("/read")
+    /*@GetMapping("/read")
     public AjaxResult orderStatusRead(
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
@@ -40,6 +40,73 @@ public class OrderStatusController {
             String spjangcd = searchSpjangcd;
             List<Map<String, Object>> orderStatusList = orderStatusService.getOrderStatusByOperid(startDate,endDate,perid, spjangcd);
 
+            result.success = true;
+            result.data = orderStatusList;
+            result.message = "데이터 조회 성공";
+
+        } catch (Exception e) {
+            // 오류 발생 시 실패 상태 설정
+            result.success = false;
+            result.message = "데이터를 가져오는 중 오류가 발생했습니다.";
+        }
+
+        return result;
+    }*/
+    @GetMapping("/read")
+    public AjaxResult orderStatusRead(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
+            Authentication auth) {
+        AjaxResult result = new AjaxResult();
+
+        try {
+            // 로그인한 사용자 정보에서 이름(perid) 가져오기
+            User user = (User) auth.getPrincipal();
+            String perid = user.getFirst_name(); // 이름을 가져옴
+            String spjangcd = searchSpjangcd;
+
+            // 서비스에서 데이터 가져오기
+            List<Map<String, Object>> orderStatusList = orderStatusService.getOrderStatusByOperid(startDate, endDate, perid, spjangcd);
+
+            // ObjectMapper를 사용하여 hd_files 처리
+            ObjectMapper objectMapper = new ObjectMapper();
+            for (Map<String, Object> item : orderStatusList) {
+                if (item.get("hd_files") != null) {
+                    try {
+                        // JSON 문자열을 List<Map<String, Object>>로 변환
+                        List<Map<String, Object>> fileitems = objectMapper.readValue(
+                                (String) item.get("hd_files"),
+                                new TypeReference<List<Map<String, Object>>>() {}
+                        );
+
+                        // fileitems를 순회하며 필요한 처리 수행
+                        for (Map<String, Object> fileitem : fileitems) {
+                            if (fileitem.get("filepath") != null && fileitem.get("fileornm") != null) {
+                                String filenames = (String) fileitem.get("fileornm");
+                                String filepaths = (String) fileitem.get("filepath");
+                                String filesvnms = (String) fileitem.get("filesvnm");
+
+                                List<String> fileornmList = filenames != null ? Arrays.asList(filenames.split(",")) : Collections.emptyList();
+                                List<String> filepathList = filepaths != null ? Arrays.asList(filepaths.split(",")) : Collections.emptyList();
+                                List<String> filesvnmList = filesvnms != null ? Arrays.asList(filesvnms.split(",")) : Collections.emptyList();
+
+                                item.put("isdownload", !fileornmList.isEmpty() && !filepathList.isEmpty());
+                            } else {
+                                item.put("isdownload", false);
+                            }
+                        }
+
+                        // 처리된 fileitems를 item에 업데이트
+                        item.remove("hd_files");
+                        item.put("hd_files", fileitems);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            // AjaxResult 설정
             result.success = true;
             result.data = orderStatusList;
             result.message = "데이터 조회 성공";
