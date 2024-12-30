@@ -71,7 +71,7 @@ public class ProgressStatusService {
         }
 
         if (searchTitle != null && !searchTitle.isEmpty()) {
-            sql.append(" AND title LIKE :searchTitle");
+            sql.append(" AND remark LIKE :searchTitle");
             params.addValue("searchTitle", "%" + searchTitle + "%");
         }
 
