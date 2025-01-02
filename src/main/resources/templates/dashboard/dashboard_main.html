@@ -605,7 +605,7 @@
                     }));
 
                     // 전월 일별 데이터
-                    let LastMonthCntOfDate = data2.LastMonthCntOfDate;
+                    const LastMonthCntOfDate = data2.LastMonthCntOfDate || [];
                     // X축 레이블과 Y축 데이터 생성
                     const LastDate = LastMonthCntOfDate.map(item => item.Day.slice(-2) + '일');
                     const LastDateCnt = LastMonthCntOfDate.map(item => item.TotalCount); // TotalCount

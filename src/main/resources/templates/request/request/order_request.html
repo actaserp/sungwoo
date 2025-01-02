@@ -188,9 +188,15 @@
                   </a>
                 </li>
                 <li>
+                  <a class="btn btn-saverow" id="btn-addrow" name="addrow" title="행 복사" onclick="copyLastRow()">
+                    <img src="/images/icon/ico-edit.svg" alt="등록 아이콘">
+                    행 복사
+                  </a>
+                </li>
+                <li>
                   <a class="btn btn-deleterow" id="btn-deleterow" name="deleterow" title="행삭제" onclick="deleteBody()">
                     <img src="/images/icon/ico-delete.svg" alt="삭제 아이콘">
-                    행삭제
+                    행 삭제
                   </a>
                 </li>
               </ul>
@@ -255,7 +261,12 @@
                 </th>
                 <td>
                   <select id="exfmtypedv" name="exfmtypedv" style="width: 100px">
-                    <option value="" selected>선택</option>
+                    <option value="" selected>없음</option>
+                    <option value="MAC">GRP</option>
+                    <option value="MAA">AL</option>
+                    <option value="MAB">GI</option>
+                    <option value="MAI">SUS</option>
+                    <option value="MAZ">기타</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -265,7 +276,10 @@
                 </th>
                 <td>
                   <select id="infmtypedv" name="infmtypedv" style="width: 100px">
-                    <option value="" selected>선택</option>
+                    <option value="" selected>없음</option>
+                    <option value="MCA">합판</option>
+                    <option value="MCD">LTP</option>
+                    <option value="MCE">기타</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -275,7 +289,10 @@
                 </th>
                 <td>
                   <select id="stframedv" name="stframedv" style="width: 100px">
-                    <option value="" selected>선택</option>
+                    <option value="" selected>없음</option>
+                    <option value="MCA">합판</option>
+                    <option value="MCD">LTP</option>
+                    <option value="MCE">기타</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -285,7 +302,12 @@
                 </th>
                 <td>
                   <select id="stexplydv" name="stexplydv" style="width: 100px">
-                    <option value="" selected>선택</option>
+                    <option value="" selected>없음</option>
+                    <option value="MAC">GRP</option>
+                    <option value="MAA">AL</option>
+                    <option value="MAB">GI</option>
+                    <option value="MAI">SUS</option>
+                    <option value="MAZ">기타</option>
                   </select>
                 </td>
                 <th style="text-align: center">
@@ -1141,10 +1163,10 @@
     $(document).ready(function (e) {
       const selectElementId = 'hgrb';
       getListHgrb(selectElementId);
-      const selectElementId2 = ['exfmtypedv','infmtypedv','stframedv','stexplydv'];
-      for (const items of selectElementId2){
-        getListCgrb(items);
-      }
+      // const selectElementId2 = ['exfmtypedv','infmtypedv','stframedv','stexplydv'];
+      // for (const items of selectElementId2){
+      //   getListCgrb(items);
+      // }
     })
     // 제품구성 리스트 불러오는 function
     function getListHgrb(selectElementId){
@@ -1234,6 +1256,7 @@
       var selectedOptionText = selectElement.options[selectElement.selectedIndex].text;
       document.getElementById(hiddenInputId).value = selectedOptionText;
     }
+    // 세부사항 추가
     function addBody() {
       const isnewValue = Number(document.getElementById('isnew').value);
 
@@ -1288,6 +1311,49 @@
       theGrid2.refresh(); // UI 갱신
       resetBodyField();  // Reset input fields
     }
+    // 행 복사
+    function copyLastRow() {
+      if (!theGrid2 || !theGrid2.itemsSource) {
+        alert("그리드가 초기화되지 않았습니다.");
+        return;
+      }
+
+      // 데이터 소스 확인
+      const sourceCollection = theGrid2.itemsSource || [];
+      if (sourceCollection.length === 0) {
+        console.log("sourceCollection : ", sourceCollection)
+        console.log("itemsSource : ", theGrid2.itemsSource)
+        alert("복사할 데이터가 없습니다.");
+        return;
+      }
+
+      // 마지막 행 데이터 가져오기
+      const lastRowData = sourceCollection[sourceCollection.length - 1];
+
+      // 새로운 데이터 생성
+      const newRowData = { ...lastRowData };
+      newRowData.reqseq = ""; // 고유값 초기화
+      newRowData.isnew = (Math.max(...sourceCollection.map(row => Number(row.isnew) || 0)) + 1); // 새로운 isnew 값
+
+      // 새로운 데이터 추가
+      sourceCollection.push(newRowData);
+
+      // 데이터 갱신 및 UI 업데이트
+      viewdata2.sourceCollection = [...sourceCollection]; // 참조 갱신
+      viewdata2.commitEdit(); // 변경 사항 커밋
+      viewdata2.refresh(); // 데이터 소스 갱신
+      theGrid2.itemsSource = [...viewdata2.sourceCollection]; // 그리드 데이터 재설정
+      theGrid2.refresh(); // UI 갱신
+
+      // viewdata2.sourceCollection = [...sourceCollection];
+      // viewdata2.refresh();
+      // theGrid2.itemsSource = null; // 데이터 소스 초기화
+      // theGrid2.itemsSource = viewdata2;
+      // theGrid2.refresh();
+
+      Alert.alert('',"행이 복사되었습니다.");
+    }
+
 
     // 행(세부사항) 삭제(마지막 세부사항 삭제시 헤드정보도 같이 삭제)
     function deleteBody(){
