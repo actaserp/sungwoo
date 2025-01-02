@@ -1321,8 +1321,6 @@
       // 데이터 소스 확인
       const sourceCollection = theGrid2.itemsSource || [];
       if (sourceCollection.length === 0) {
-        console.log("sourceCollection : ", sourceCollection)
-        console.log("itemsSource : ", theGrid2.itemsSource)
         alert("복사할 데이터가 없습니다.");
         return;
       }
@@ -1344,12 +1342,6 @@
       viewdata2.refresh(); // 데이터 소스 갱신
       theGrid2.itemsSource = [...viewdata2.sourceCollection]; // 그리드 데이터 재설정
       theGrid2.refresh(); // UI 갱신
-
-      // viewdata2.sourceCollection = [...sourceCollection];
-      // viewdata2.refresh();
-      // theGrid2.itemsSource = null; // 데이터 소스 초기화
-      // theGrid2.itemsSource = viewdata2;
-      // theGrid2.refresh();
 
       Alert.alert('',"행이 복사되었습니다.");
     }
