@@ -223,14 +223,16 @@
             $('#endDate2').val(endMonthFormatted);
         });
 
-
-
         function fetchListData() {
             let data2 = [];
           const spjangcd = document.getElementById('search_spjangcd').value;
+          const startDate = document.getElementById('startDate').value || "";
+          const endDate = document.getElementById('endDate').value || "";
 
           const queryParams = {
             search_spjangcd: spjangcd,
+            startDate: startDate,
+            endDate:endDate
           };
 
             // 서버에서 데이터 가져오기

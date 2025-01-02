@@ -708,7 +708,9 @@
                 url: '/api/order_status/read',
                 type: 'GET',
                 data: {
-                    'search_spjangcd': $('#search_spjangcd').val()
+                    'search_spjangcd': $('#search_spjangcd').val(),
+                    'startDate': $('#startDate').val(),
+                    'endDate':$('#endDate').val()
                 },
                 async: false,
                 success: function (response) {

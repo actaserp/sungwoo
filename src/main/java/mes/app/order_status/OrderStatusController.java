@@ -54,9 +54,10 @@ public class OrderStatusController {
     }*/
     @GetMapping("/read")
     public AjaxResult orderStatusRead(
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
             @RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
+
             Authentication auth) {
         AjaxResult result = new AjaxResult();
 

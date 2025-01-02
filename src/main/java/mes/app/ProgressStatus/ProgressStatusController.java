@@ -24,8 +24,10 @@ public class ProgressStatusController {
 
 
     @GetMapping("/read")
-    public AjaxResult ProgressStatusRead(Authentication auth, @RequestParam(value = "search_spjangcd", required = false) String search_spjangcd) {
-
+    public AjaxResult ProgressStatusRead(Authentication auth,
+                                         @RequestParam(value = "search_spjangcd", required = false) String search_spjangcd,
+                                         @RequestParam(value = "startDate", required = false) String startDate,
+                                         @RequestParam(value = "endDate", required = false) String endDate) {
         AjaxResult result = new AjaxResult();
 
         try{
@@ -33,7 +35,8 @@ public class ProgressStatusController {
             User user = (User) auth.getPrincipal();
             String perid = user.getFirst_name();
 
-            List<Map<String, Object>> progressStatusLis = progressStatusService.getProgressStatusList(perid, search_spjangcd);
+            List<Map<String, Object>> progressStatusLis = progressStatusService.getProgressStatusList(perid, search_spjangcd, startDate, endDate);
+
             result.success = true;
             result.data = progressStatusLis;
             result.message = "데이터 조회 성공";

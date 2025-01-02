@@ -16,22 +16,33 @@ public class ProgressStatusService {
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getProgressStatusList(String perid, String search_spjangcd) {
+    public List<Map<String, Object>> getProgressStatusList(String perid, String search_spjangcd ,String startDate, String endDate) {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("perid", perid);
         params.addValue("spjangcd", search_spjangcd);
-        String sql = """
+        params.addValue("startDate", startDate);
+        params.addValue("endDate", endDate);
+        StringBuilder sql = new StringBuilder("""
                  SELECT
             tb006.*
         FROM
             TB_DA006W tb006
         WHERE
             1=1
-        ORDER BY
-            reqdate DESC;
-            """;
+     """);
+        if (startDate != null && !startDate.isEmpty()) {
+            sql.append(" AND reqdate >= :startDate");
+            params.addValue("startDate", startDate);
+        }
 
-        return sqlRunner.getRows(sql, params);
+        if (endDate != null && !endDate.isEmpty()) {
+            sql.append(" AND reqdate <= :endDate");
+            params.addValue("endDate", endDate);
+        }
+        // ORDER BY를 항상 맨 마지막에 추가
+        sql.append(" ORDER BY reqdate DESC");
+
+        return sqlRunner.getRows(sql.toString(), params);
     }
 
 
