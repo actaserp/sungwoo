@@ -170,8 +170,6 @@ public class RequestService {
         dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
         dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
         dicParam.addValue("saupnum", saupnum);
-        log.info(" 실행될 SQL: {}", sql);
-        log.info("바인딩된 파라미터: {}", dicParam.getValues());
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }

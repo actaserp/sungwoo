@@ -207,7 +207,7 @@
                             <dt><label for="loginId">아이디(사업자 번호)</label></dt>
                             <dd>
                                 <input type="text" id="loginId" name="username"
-                                      placeholder="사업자 등록번호를 입력해주세요 예)123 456 789">
+                                      placeholder="사업자 등록번호를 입력해주세요 예)1368132663">
                             </dd>
                             <!-- 에러메시지 출력 -->
                             <dd class="hint-red" id="hint-red" style="display: none">
@@ -1468,6 +1468,11 @@
         AjaxUtil.postAsyncData("/authentication", data, fnSuccess);
     })
 
+    document.getElementById('loginId').addEventListener('input', function () {
+        if (this.value.length > 10) {
+            this.value = this.value.slice(0, 10); // 10자리 초과 입력 방지
+        }
+    });
 </script>
 
 </body>
