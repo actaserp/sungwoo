@@ -252,12 +252,14 @@ public class OrderStatusController {
 
     @GetMapping("/initDatas")
     public AjaxResult initDatas(@RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
+                                @RequestParam(value = "search_startDate", required = false) String searchStartDate,
+                                @RequestParam(value = "search_endDate", required = false) String searchEndDate,
                                 Authentication auth){
         User user = (User) auth.getPrincipal();
         String username = user.getUsername();
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
         tbDa006WPk.setSpjangcd(searchSpjangcd);
-        List<Map<String, Object>> items = this.orderStatusService.initDatas(tbDa006WPk);
+        List<Map<String, Object>> items = this.orderStatusService.initDatas(tbDa006WPk, searchStartDate, searchEndDate);
         AjaxResult result = new AjaxResult();
         result.data = items;
         return result;

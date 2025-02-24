@@ -172,7 +172,7 @@
                                                             <label for="endDate" class="hide">종료일</label>
                                                         </li>
                                                         <li>
-                                                            <a class="btn btn-delete" title="검색" id="btn-srch" onclick="fetchListData()">
+                                                            <a class="btn btn-delete" title="검색" id="btn-srch" onclick="fetchListData();initDatas();">
                                                                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                                                 검색
                                                             </a>
@@ -1502,7 +1502,9 @@
                 url: '/api/order_status/initDatas',
                 type: 'GET',
                 data: {
-                    'search_spjangcd': $('#search_spjangcd').val()
+                    'search_spjangcd': $('#search_spjangcd').val(),
+                    'search_startDate': $('#startDate2').val(),
+                    'search_endDate': $('#endDate2').val(),
                 },
                 async: false,
                 success: function (data) {

@@ -280,7 +280,7 @@ public class OrderStatusService {
         return items;
     }
 
-    public List<Map<String, Object>> initDatas(TB_DA006W_PK tbDa006WPk) {
+    public List<Map<String, Object>> initDatas(TB_DA006W_PK tbDa006WPk, String searchStartDate, String searchEndDate) {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
         StringBuilder sql = new StringBuilder("""
                 SELECT
@@ -290,11 +290,13 @@ public class OrderStatusService {
                     TB_DA006W hd
                 WHERE
                     hd.spjangcd = :spjangcd
-                    AND LEFT(hd.reqdate, 4) = CAST(YEAR(GETDATE()) AS VARCHAR(4))
+                    AND hd.reqdate BETWEEN :searchStartDate AND :searchEndDate
                 GROUP BY
                     hd.ordflag;
                 """);
         dicParam.addValue("spjangcd", tbDa006WPk.getSpjangcd());
+        dicParam.addValue("searchStartDate", searchStartDate);
+        dicParam.addValue("searchEndDate", searchEndDate);
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }
