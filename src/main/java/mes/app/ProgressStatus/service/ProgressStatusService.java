@@ -42,6 +42,8 @@ public class ProgressStatusService {
         // ORDER BY를 항상 맨 마지막에 추가
         sql.append(" ORDER BY reqdate DESC");
 
+//        log.info("진행현황 SQL: {}", sql);
+//        log.info("SQL Parameters: {}", params.getValues());
         return sqlRunner.getRows(sql.toString(), params);
     }
 
@@ -86,38 +88,10 @@ public class ProgressStatusService {
             params.addValue("searchTitle", "%" + searchTitle + "%");
         }
 
-       /* log.info("실행될 SQL: {}", sql.toString());
-        log.info("바인딩된 파라미터: {}", params.getValues());*/
+//        log.info("실행될 SQL: {}", sql.toString());
+//        log.info("바인딩된 파라미터: {}", params.getValues());
 
         return sqlRunner.getRows(sql.toString(), params);
-    }
-
-    public List<Map<String, Object>> getChartData(String userid) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("spjangcd", userid);
-
-        String sql = """
-                   SELECT
-                    tb007.custcd,
-                    tb007.spjangcd,
-                    tb007.reqdate,
-                    tb007.reqnum,
-                    tb006.cltnm,
-                    MAX(CAST(tb006.ordflag AS INT)) AS ordflag
-                FROM
-                    TB_DA007W tb007
-                INNER JOIN
-                    TB_DA006W tb006
-                ON
-                    tb007.custcd = tb006.custcd
-                    AND tb007.spjangcd = tb006.spjangcd
-                    AND tb007.reqdate = tb006.reqdate
-                    AND tb007.reqnum = tb006.reqnum
-                GROUP BY
-                    tb007.custcd, tb007.spjangcd, tb007.reqdate, tb007.reqnum, tb006.cltnm;
-                """;
-
-        return sqlRunner.getRows(sql, params);
     }
 
     public List<Map<String, Object>> searchProgressStatus(
@@ -179,9 +153,9 @@ public class ProgressStatusService {
         // ORDER BY를 항상 맨 마지막에 추가
         sql.append(" ORDER BY tb006.reqdate DESC");
 
-        // 로그 출력 (활성화할 경우 사용)
-/*    log.info("검색 실행될 SQL: {}", sql.toString());
-    log.info("검색 바인딩된 파라미터: {}", params.getValues());*/
+//   로그 출력 (활성화할 경우 사용)
+//    log.info("검색 실행될 SQL: {}", sql.toString());
+//    log.info("검색 바인딩된 파라미터: {}", params.getValues());
 
         // 데이터 조회
         return sqlRunner.getRows(sql.toString(), params);

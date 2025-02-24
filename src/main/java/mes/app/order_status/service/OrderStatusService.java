@@ -73,8 +73,8 @@ public class OrderStatusService {
         // 정렬 조건 추가
         sql +=" ORDER BY tb006.reqdate DESC";
 
-        log.info(" 실행될 SQL: {}", sql);
-        log.info("바인딩된 파라미터: {}", params.getValues());
+//        log.info(" 실행될 SQL: {}", sql);
+//        log.info("바인딩된 파라미터: {}", params.getValues());
         return sqlRunner.getRows(sql, params);
     }
 
@@ -172,8 +172,8 @@ public class OrderStatusService {
         }
 
         // 쿼리 실행 및 결과 반환
-        log.info(" 실행될 SQL: {}", sql);
-        log.info("바인딩된 파라미터: {}", params.getValues());
+//        log.info(" 실행될 SQL: {}", sql);
+//        log.info("바인딩된 파라미터: {}", params.getValues());
         return sqlRunner.getRows(sql, params);
     }
 
