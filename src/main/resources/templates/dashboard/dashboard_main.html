@@ -52,7 +52,7 @@
                     <div class="swiper-slide">
                         <section class="request">
                             <div class="title">
-                                <h3>주문등록</h3>
+                                <h3 id="requestDate">주문등록</h3>
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
@@ -76,7 +76,7 @@
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
-                                <dt>전년대비 건수</dt>
+                                <dt>올해 건수</dt>
                                 <dd>
                                     <span class="up"></span> - <span class="unit">건</span>
                                 </dd>
@@ -96,7 +96,7 @@
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
-                                <dt>전년대비 건수</dt>
+                                <dt>올해 건수</dt>
                                 <dd>
                                     <span class="up"></span> - <span class="unit">건</span>
                                 </dd>
@@ -116,7 +116,7 @@
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
-                                <dt>전년대비 건수</dt>
+                                <dt>올해 건수</dt>
                                 <dd>
                                     <span class="up"></span> - <span class="unit">건</span>
                                 </dd>
@@ -136,7 +136,7 @@
                                 <a href="#" title="더보기" class="btn-plus"></a>
                             </div>
                             <dl>
-                                <dt>전년대비 건수</dt>
+                                <dt>올해 건수</dt>
                                 <dd>
                                     <span class="up"></span> - <span class="unit">건</span>
                                 </dd>
@@ -257,6 +257,24 @@
     <th:block th:replace="/common/popup_select_user_code :: popup_select_user_code"></th:block>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
+        // 오늘 날짜 가져오기
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}.${month}.${day}`;
+        }
+
+        function updateTitle() {
+            const titleElement = document.getElementById("requestDate");
+            if (titleElement) {
+                titleElement.textContent = `주문등록 (${getTodayDate()})`;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", updateTitle);
+
         // 차트 데이터 설정
         const revenueData = {
             labels: ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"],
@@ -657,41 +675,25 @@
                     const thisYearCountOf1 = ThisYearCnt.find(item => item.ordflag === '1')?.TotalCount || 0;
                     const difference1 = thisYearCountOf1 - lastYearCountOf1;
                     const checkSection = document.querySelector('.check dl dd');
-                    if(difference1 >= 0) {
-                        checkSection.innerHTML = `<span class="up"></span> ${difference1} <span class="unit">건</span>`;
-                    }else {
-                        checkSection.innerHTML = `<span class="down"></span> ${difference1} <span class="unit">건</span>`;
-                    }
+                    checkSection.innerHTML = `${thisYearCountOf1} <span class="unit">건</span>`;
                     // ordflag가 2인 TotalCount 추출
                     const lastYearCountOf2 = LastYearCnt.find(item => item.ordflag === '2')?.TotalCount || 0;
                     const thisYearCountOf2 = ThisYearCnt.find(item => item.ordflag === '2')?.TotalCount || 0;
                     const difference2 = thisYearCountOf2 - lastYearCountOf2;
                     const orderSection = document.querySelector('.order dl dd');
-                    if(difference2 >= 0) {
-                        orderSection.innerHTML = `<span class="up"></span> ${difference2} <span class="unit">건</span>`;
-                    }else {
-                        orderSection.innerHTML = `<span class="down"></span> ${difference2} <span class="unit">건</span>`;
-                    }
+                    orderSection.innerHTML = `${thisYearCountOf2} <span class="unit">건</span>`;
                     // ordflag가 3인 TotalCount 추출
                     const lastYearCountOf3 = LastYearCnt.find(item => item.ordflag === '3')?.TotalCount || 0;
                     const thisYearCountOf3 = ThisYearCnt.find(item => item.ordflag === '3')?.TotalCount || 0;
                     const difference3 = thisYearCountOf3 - lastYearCountOf3;
                     const productSection = document.querySelector('.product dl dd');
-                    if(difference3 >= 0) {
-                        productSection.innerHTML = `<span class="up"></span> ${difference3} <span class="unit">건</span>`;
-                    }else {
-                        productSection.innerHTML = `<span class="down"></span> ${difference3} <span class="unit">건</span>`;
-                    }
+                    productSection.innerHTML = `${thisYearCountOf3} <span class="unit">건</span>`;
                     // ordflag가 4인 TotalCount 추출
                     const lastYearCountOf4 = LastYearCnt.find(item => item.ordflag === '4')?.TotalCount || 0;
                     const thisYearCountOf4 = ThisYearCnt.find(item => item.ordflag === '4')?.TotalCount || 0;
                     const difference4 = thisYearCountOf4 - lastYearCountOf4;
                     const deliverySection = document.querySelector('.delivery dl dd');
-                    if(difference4 >= 0){
-                        deliverySection.innerHTML = `<span class="up"></span> ${difference4} <span class="unit">건</span>`;
-                    }else {
-                        deliverySection.innerHTML = `<span class="down"></span> ${difference4} <span class="unit">건</span>`;
-                    }
+                    deliverySection.innerHTML = `${thisYearCountOf4} <span class="unit">건</span>`;
                 }
             })
         }
