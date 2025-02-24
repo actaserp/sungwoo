@@ -504,11 +504,18 @@
                     columns: [
                         { binding: 'ordflag', header: '진행구분', align: 'center', width: 100 },
                         { binding: 'reqdate', header: '의뢰일자', align: 'center', width: 120 },
+                        { binding: 'cltnm', header: '업체명', align: 'left', width: 150 },
                         { binding: 'remark', header: '제목', align: 'left', width: 160 },
                         { binding: 'deldate', header: '납품희망일', align: 'center', width: 120 },
                         { binding: 'amount', header: '금액', align: 'center', width: 200 }
                     ],
                     itemsSource: viewdata2 // 빈 객체가 추가된 배열 사용
+                });
+                // 헤더를 중앙 정렬하는 이벤트 핸들러
+                theGrid.formatItem.addHandler(function (s, e) {
+                    if (e.panel === s.columnHeaders) {
+                        e.cell.style.textAlign = 'center';
+                    }
                 });
 
                 // 선택이 변경될 때, 현재 항목 업데이트

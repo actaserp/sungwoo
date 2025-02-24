@@ -245,6 +245,7 @@ public class OrderStatusService {
         StringBuilder sql = new StringBuilder("""
                 SELECT
                     custcd,
+                    cltnm,
                     spjangcd,
                     reqnum,
                     reqdate,
