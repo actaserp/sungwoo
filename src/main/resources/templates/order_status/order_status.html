@@ -661,6 +661,7 @@
                     if (response && Array.isArray(response.data)) {
                         data2 = response.data;
                         // 날짜 형식 변환 및 ordflag 변환
+                        console.log("캘린더 데이터 : ", data2);
                     }
                 },
                 error: function () {
@@ -669,15 +670,15 @@
             });
 
             // viewdata.items를 반복하여 각 항목의 ordflag와 reqdate 값을 가져옵니다.
-            for (var i = 0; i < data2.items.length; i++) {
-                var item = data2.items[i];
-                data2.push({
+            for (var i = 0; i < data2.length; i++) {
+                var item = data2[i];
+                orderDates.push({
                     name: item.ordflag,
                     date: item.reqdate
                 });
             }
-            console.log("orderDates : ", data2)
-            return data2;
+            console.log("orderDates : ", orderDates)
+            return orderDates;
         }
 
         //api 요청
