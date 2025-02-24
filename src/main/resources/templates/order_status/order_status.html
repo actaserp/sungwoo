@@ -287,7 +287,7 @@
                     </div>
                     <div class="container-fluid">
                         <p id="selectedItem"></p>
-                        <div id="theGrid2" style="max-height: 650px"></div>
+                        <div id="theGrid2" style="max-height: 630px"></div>
                     </div>
                 </section>
             </div>
@@ -814,9 +814,14 @@
                 return item[prop];
             });
 
+            let hgrbGroup = new wijmo.collections.PropertyGroupDescription('hgrb', (item, prop) => {
+                return item[prop];
+            })
+
             viewdata.groupDescriptions.clear();
             viewdata.groupDescriptions.push(reqdateGroup);
             viewdata.groupDescriptions.push(cltnmGroup);
+            viewdata.groupDescriptions.push(hgrbGroup);
 
             // 그룹별 행 번호 다시 설정
             const resetRowNumbers = () => {
