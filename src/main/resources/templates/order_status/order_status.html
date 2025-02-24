@@ -806,13 +806,17 @@
                 return item[prop];
             });
 
-            let cltnmGroup = new wijmo.collections.PropertyGroupDescription('cltnm', (item, prop) => {
-                return item[prop];
-            });
+            let cltnmReqnumGroup = new wijmo.collections.PropertyGroupDescription(
+                '',  // ✅ 커스텀 그룹 키 사용
+                (item) => `${item.cltnm}_${item.reqnum}`, // ✅ 내부적으로는 cltnm + reqnum으로 그룹화
+                (item, prop) => item.cltnm // ✅ UI에는 cltnm만 보이게 설정
+            );
 
             viewdata.groupDescriptions.clear();
             viewdata.groupDescriptions.push(reqdateGroup);
-            viewdata.groupDescriptions.push(cltnmGroup);
+            viewdata.groupDescriptions.push(cltnmReqnumGroup);
+
+            viewdata.groupHeaderFormat = '{name}';
 
             // 그룹별 행 번호 다시 설정
             const resetRowNumbers = () => {
