@@ -267,7 +267,6 @@
                 data2.push({
                     rownum: data2.length + 1,
                     reqdate: '',
-                    estimatedate: '',
                     ordflag: '',
                     cltnm: '',
                     manager: '',
@@ -289,10 +288,9 @@
                     columns: [
                         {binding: 'rownum', header: '순번', width: 80, align: 'center'},
                         {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 100, align: 'center'},
-                        {binding: 'estimatedate', header: '견적일자', width: '*', minWidth: 100, align: 'center'},
+                        {binding: 'cltnm', header: '업체명', width: '*', minWidth: 100, align: 'left'},
                         {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
                         {binding: 'remark', header: '제목(메모)', width: '*', minWidth: 400, align: 'left'},
-                        {binding: 'cltnm', header: '업체명', width: '*', minWidth: 100, align: 'left'},
                         {binding: 'perid', header: '담당자', width: '*', minWidth: 100, align: 'center'},
                         {binding: 'telno', header: '연락처', width: '*', minWidth: 100, align: 'center'},
                         {binding: 'orderprice', header: '금액', width: '*', minWidth: 100, align: 'center'},
