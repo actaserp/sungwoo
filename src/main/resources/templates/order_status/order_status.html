@@ -816,7 +816,7 @@
 
             let hgrbGroup = new wijmo.collections.PropertyGroupDescription('hgrb', (item, prop) => {
                 return item[prop];
-            })
+            });
 
             viewdata.groupDescriptions.clear();
             viewdata.groupDescriptions.push(reqdateGroup);
@@ -1191,9 +1191,14 @@
                         let cltnmGroup = new wijmo.collections.PropertyGroupDescription('cltnm', (item, prop) => {
                             return item[prop];
                         });
+                        let hgrbGroup = new wijmo.collections.PropertyGroupDescription('hgrb', (item, prop) => {
+                            return item[prop];
+                        });
 
+                        viewdata.groupDescriptions.clear();
                         viewdata.groupDescriptions.push(reqdateGroup);
                         viewdata.groupDescriptions.push(cltnmGroup);
+                        viewdata.groupDescriptions.push(hgrbGroup);
 
                         // 그룹별 행 번호 다시 설정
                         const resetRowNumbers = () => {
