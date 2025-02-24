@@ -57,7 +57,9 @@ public class OrderStatusController {
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
             @RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
-
+            @RequestParam(required = false) String searchCltnm,
+            @RequestParam(required = false) String searchtketnm,
+            @RequestParam(required = false) String searchstate,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
 
@@ -68,7 +70,7 @@ public class OrderStatusController {
             String spjangcd = searchSpjangcd;
 
             // 서비스에서 데이터 가져오기
-            List<Map<String, Object>> orderStatusList = orderStatusService.getOrderStatusByOperid(startDate, endDate, perid, spjangcd);
+            List<Map<String, Object>> orderStatusList = orderStatusService.getOrderStatusByOperid(startDate, endDate, perid, spjangcd, searchCltnm, searchtketnm, searchstate);
 
             // ObjectMapper를 사용하여 hd_files 처리
             ObjectMapper objectMapper = new ObjectMapper();

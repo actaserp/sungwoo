@@ -17,7 +17,8 @@ public class OrderStatusService {
     @Autowired
     SqlRunner sqlRunner;
 
-    public List<Map<String, Object>> getOrderStatusByOperid(String startDate, String endDate, String perid, String spjangcd) {
+    public List<Map<String, Object>> getOrderStatusByOperid(String startDate, String endDate, String perid, String spjangcd, String searchCltnm, String searchtketnm, String searchstate) {
+
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("perid", perid);
         params.addValue("spjangcd", spjangcd);
@@ -28,55 +29,80 @@ public class OrderStatusService {
         if (endDate != null && !endDate.isEmpty()) {
             params.addValue("endDate", endDate);
         }
-        String sql = """
-        SELECT
-            tb007.*,
-             tb006.*,
-               (
-                   SELECT
-                       bd.filepath,
-                       bd.filesvnm,
-                       bd.fileextns,
-                       bd.fileurl,
-                       bd.fileornm,
-                       bd.filesize,
-                       bd.fileid
-                   FROM
-                       tb_DA006WFILE bd
-                   WHERE
-                       bd.custcd = tb007.custcd
-                       AND bd.spjangcd = tb007.spjangcd
-                       AND bd.reqdate = tb007.reqdate
-                       AND bd.reqnum = tb007.reqnum
-                   ORDER BY
-                       bd.indatem DESC
-                   FOR JSON PATH
-               ) AS hd_files
-        FROM
-            TB_DA007W tb007
-        LEFT JOIN
-            TB_DA006W tb006
-        ON
-            tb007.custcd = tb006.custcd
-            AND tb007.spjangcd = tb006.spjangcd
-            AND tb007.reqdate = tb006.reqdate
-            AND tb007.reqnum = tb006.reqnum
-        WHERE
-            tb006.spjangcd = :spjangcd
-        """;
+
+        StringBuilder sql = new StringBuilder("""
+    SELECT
+        tb006.*,  
+        tb007.*, 
+        (
+            SELECT ISNULL(( 
+                SELECT
+                    bd.filepath,
+                    bd.filesvnm,
+                    bd.fileextns,
+                    bd.fileurl,
+                    bd.fileornm,
+                    bd.filesize,
+                    bd.fileid
+                FROM
+                    tb_DA006WFILE bd
+                WHERE
+                    bd.custcd = tb006.custcd
+                    AND bd.spjangcd = tb006.spjangcd
+                    AND bd.reqdate = tb006.reqdate
+                    AND bd.reqnum = tb006.reqnum
+                ORDER BY
+                    bd.indatem DESC
+                FOR JSON PATH
+            ), '[]')
+        ) AS hd_files
+    FROM
+        TB_DA006W tb006  
+    LEFT JOIN
+        TB_DA007W tb007 
+    ON
+        tb006.custcd = tb007.custcd
+        AND tb006.spjangcd = tb007.spjangcd
+        AND tb006.reqdate = tb007.reqdate
+        AND tb006.reqnum = tb007.reqnum
+    WHERE
+        tb006.spjangcd = :spjangcd
+    """);
+
+        // 날짜 필터링 (TB_DA006W 기준)
         if (params.hasValue("startDate")) {
-            sql += " AND tb007.reqdate >= :startDate";
+            sql.append(" AND tb006.reqdate >= :startDate");
         }
         if (params.hasValue("endDate")) {
-            sql += " AND tb007.reqdate <= :endDate";
+            sql.append(" AND tb006.reqdate <= :endDate");
         }
+
+        // 검색 조건 추가 (TB_DA006W 기준)
+        if (searchCltnm != null && !searchCltnm.isEmpty()) {
+            sql.append(" AND tb006.cltnm LIKE :searchCltnm ");
+            params.addValue("searchCltnm", "%" + searchCltnm + "%"); //`%` 추가하여 LIKE 검색 가능하도록 변경
+        }
+        if (searchtketnm != null && !searchtketnm.isEmpty()) {
+            sql.append(" AND tb006.remark LIKE :searchtketnm ");
+            params.addValue("searchtketnm", "%" + searchtketnm + "%");
+        }
+
+        // "전체"일 경우 조건을 추가하지 않음
+        if (searchstate != null && !searchstate.equals("전체") && !searchstate.isEmpty()) {
+            sql.append(" AND tb006.ordflag = :searchstate ");
+            params.addValue("searchstate", searchstate);
+        }
+
         // 정렬 조건 추가
-        sql +=" ORDER BY tb006.reqdate DESC";
+        sql.append(" ORDER BY tb006.reqdate DESC");
 
 //        log.info(" 실행될 SQL: {}", sql);
 //        log.info("바인딩된 파라미터: {}", params.getValues());
-        return sqlRunner.getRows(sql, params);
+
+        return sqlRunner.getRows(sql.toString(), params);
     }
+
+
 
     public List<Map<String, Object>> getModalListByClientName(String searchTerm) {
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -172,8 +198,8 @@ public class OrderStatusService {
         }
 
         // 쿼리 실행 및 결과 반환
-//        log.info(" 실행될 SQL: {}", sql);
-//        log.info("바인딩된 파라미터: {}", params.getValues());
+        log.info(" 실행될 SQL: {}", sql);
+        log.info("바인딩된 파라미터: {}", params.getValues());
         return sqlRunner.getRows(sql, params);
     }
 

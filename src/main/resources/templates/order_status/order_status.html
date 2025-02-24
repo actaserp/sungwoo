@@ -250,14 +250,6 @@
                                         진행구분<span class="eq">*</span>
                                     </label>
                                 </dt>
-                             <!--   <dd>
-                                    <div class="srch-box">
-                                        <select id="searchstate" name="searchstate">
-                                            <option value="전체">전체</option>
-                                        </select>
-                                        &lt;!&ndash;                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>&ndash;&gt;
-                                    </div>
-                                </dd>-->
                                 <dd>
                                     <div class="srch-box">
                                         <select id="searchstate" name="searchstate">
@@ -275,7 +267,7 @@
                                 <dt>&nbsp;</dt>
                                 <dd>
                                     <li>
-                                        <a class="btn btn-delete" title="검색" id="searchButton1" onclick="searchData()">
+                                        <a class="btn btn-delete" title="검색" id="searchButton1" onclick="fetchListData2()">
                                             <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
                                             <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                             검색
@@ -737,7 +729,11 @@
                 data: {
                     'search_spjangcd': $('#search_spjangcd').val(),
                     'startDate': $('#startDate').val(),
-                    'endDate':$('#endDate').val()
+                    'endDate':$('#endDate').val(),
+                    'searchCltnm' :$('#searchCltnm').val(),
+                    'searchtketnm' :$('#searchtketnm').val(),
+                    'searchstate' :$('#searchstate').val()
+
                 },
                 async: false,
                 success: function (response) {
@@ -814,14 +810,9 @@
                 return item[prop];
             });
 
-            let hgrbGroup = new wijmo.collections.PropertyGroupDescription('hgrb', (item, prop) => {
-                return item[prop];
-            });
-
             viewdata.groupDescriptions.clear();
             viewdata.groupDescriptions.push(reqdateGroup);
             viewdata.groupDescriptions.push(cltnmGroup);
-            viewdata.groupDescriptions.push(hgrbGroup);
 
             // 그룹별 행 번호 다시 설정
             const resetRowNumbers = () => {

@@ -1,10 +1,16 @@
 
 {
-  "order_request":       {"name": "주문의뢰",   "templates": { "default": "request/request/order_request.html" }},
+  "order_request":       {"name": "주문 등록",   "templates": { "default": "request/request/order_request.html" }},
   "order_status":        {"name": "주문 현황",   "templates": { "default": "order_status/order_status.html"}},
   "progress_status":     {"name": "진행 현황",   "templates": { "default": "progress_status/progress_status.html"}},
   "dashboard":           {"name": "dashboard",   "templates": { "default": "dashboard/dashboard_main.html"}},
   "order_dashboard":     {"name": "order_dashboard",   "templates": { "default": "order_dashboard/order_dashboard_main.html"}},
+
+  "wm_user_group":          { "name": "사용자 그룹", "templates": { "default": "system/usergroup.html" }  },
+  "wm_user":                { "name": "사용자 관리", "templates": { "default": "system/user_main.html" }},
+  "wm_menu_log":            { "name": "로그 현황", "templates": { "default": "system/menu_log.html" } },
+  "wm_code":                { "name": "공통코드 등록", "templates": { "default": "system/code.html" } },
+  "wm_auth_list" :          { "name": "사용자 권한 신청 조회", "templates": { "default": "system/auth_list.html" } },
 
   "wm_dashboard_plc":       { "name": "계통도",        "templates": { "default": "dashboard/dashboard_plc_main.html" }},
   "wm_dashboard_cctv":      { "name": "CCTV 모니터링",      "templates": { "default": "dashboard/dashboard_cctv_main.html" }},
@@ -45,14 +51,7 @@
 
   "wm_safety_health":       { "name": "안전보건교육 일지", "templates": { "default": "inspec/list/safety_health.html" }},
 
-  "wm_user_group":          { "name": "사용자 그룹", "templates": { "default": "system/usergroup.html" }  },
-  "wm_user":                { "name": "사용자 관리", "templates": { "default": "system/user_main.html" }},
 
-  "wm_menu_log":            { "name": "로그 현황", "templates": { "default": "system/menu_log.html" } },
-
-  "wm_code":                { "name": "공통코드 등록", "templates": { "default": "system/code.html" } },
-
-  "wm_auth_list" :          { "name": "사용자 권한 신청 조회", "templates": { "default": "system/auth_list.html" } },
 
 
 
