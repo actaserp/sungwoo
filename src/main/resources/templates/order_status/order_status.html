@@ -172,7 +172,7 @@
                                                             <label for="endDate" class="hide">종료일</label>
                                                         </li>
                                                         <li>
-                                                            <a class="btn btn-delete" title="검색" id="btn-srch">
+                                                            <a class="btn btn-delete" title="검색" id="btn-srch" onclick="fetchListData()">
                                                                 <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                                                 검색
                                                             </a>
@@ -646,19 +646,38 @@
        }
         // 주문현황 데이터를 가져오는 함수
         async function fetchOrderDates() {
-            // [0: {date: '20230101', name: '1월1일'},{1:}]
-            // 모든 행의 데이터를 저장할 배열을 초기화합니다.
+            let data2 = []; // 데이터를 담을 배열
+            let emptyRowsCount = 8;
             var orderDates = [];
+            $.ajax({
+                url: '/api/order_status/readCalenderGrid2',
+                type: 'GET',
+                data: {
+                    'search_spjangcd': $('#search_spjangcd').val()
+                },
+                async: false,
+                success: function (response) {
+                    // 응답이 올바르게 도착했고, data 속성이 배열인지 확인
+                    if (response && Array.isArray(response.data)) {
+                        data2 = response.data;
+                        // 날짜 형식 변환 및 ordflag 변환
+                    }
+                },
+                error: function () {
+                    console.error("데이터를 가져오는 중 오류가 발생했습니다.");
+                }
+            });
+
             // viewdata.items를 반복하여 각 항목의 ordflag와 reqdate 값을 가져옵니다.
-            for (var i = 0; i < viewdata2.items.length; i++) {
-                var item = viewdata2.items[i];
-                orderDates.push({
+            for (var i = 0; i < data2.items.length; i++) {
+                var item = data2.items[i];
+                data2.push({
                     name: item.ordflag,
                     date: item.reqdate
                 });
             }
-            console.log("orderDates : ", orderDates)
-            return orderDates;
+            console.log("orderDates : ", data2)
+            return data2;
         }
 
         //api 요청

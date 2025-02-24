@@ -262,4 +262,53 @@ public class OrderStatusController {
         result.data = items;
         return result;
     }
+
+    @GetMapping("/readCalenderGrid2")
+    public AjaxResult getList2(@RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd
+                               , Authentication auth) {
+        User user = (User) auth.getPrincipal();
+        String username = user.getUsername();  // 유저 사업자번호(id)
+        Map<String, Object> userInfo = orderStatusService.getUserInfo(username);
+        TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
+        tbDa006WPk.setSpjangcd(searchSpjangcd);
+        List<Map<String, Object>> items = this.orderStatusService.getOrderList2(tbDa006WPk);
+        for (Map<String, Object> item : items) {
+            if (item.get("ordflag").equals("0")) {
+                item.remove("ordflag");
+                item.put("ordflag", "주문의뢰");
+            } else if (item.get("ordflag").equals("1")) {
+                item.remove("ordflag");
+                item.put("ordflag", "주문확인");
+            } else if (item.get("ordflag").equals("2")) {
+                item.remove("ordflag");
+                item.put("ordflag", "주문확정");
+            } else if (item.get("ordflag").equals("3")) {
+                item.remove("ordflag");
+                item.put("ordflag", "제작진행");
+            } else if (item.get("ordflag").equals("4")) {
+                item.remove("ordflag");
+                item.put("ordflag", "출고");
+            }
+            // 날짜 형식 변환 (reqdate)
+            if (item.containsKey("reqdate")) {
+                String setupdt = (String) item.get("reqdate");
+                if (setupdt != null && setupdt.length() == 8) {
+                    String formattedDate = setupdt.substring(0, 4) + "-" + setupdt.substring(4, 6) + "-" + setupdt.substring(6, 8);
+                    item.put("reqdate", formattedDate);
+                }
+            }
+            // 날짜 형식 변환 (deldate)
+            if (item.containsKey("deldate")) {
+                String setupdt = (String) item.get("deldate");
+                if (setupdt != null && setupdt.length() == 8) {
+                    String formattedDate = setupdt.substring(0, 4) + "-" + setupdt.substring(4, 6) + "-" + setupdt.substring(6, 8);
+                    item.put("deldate", formattedDate);
+                }
+            }
+        }
+        AjaxResult result = new AjaxResult();
+        result.data = items;
+
+        return result;
+    }
 }

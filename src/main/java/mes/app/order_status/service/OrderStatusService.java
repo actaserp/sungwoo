@@ -63,8 +63,6 @@ public class OrderStatusService {
             AND tb007.reqnum = tb006.reqnum
         WHERE
             tb006.spjangcd = :spjangcd
-        ORDER BY
-            tb006.reqdate DESC;
         """;
         if (params.hasValue("startDate")) {
             sql += " AND tb007.reqdate >= :startDate";
@@ -72,6 +70,8 @@ public class OrderStatusService {
         if (params.hasValue("endDate")) {
             sql += " AND tb007.reqdate <= :endDate";
         }
+        // 정렬 조건 추가
+        sql +=" ORDER BY tb006.reqdate DESC";
 
         log.info(" 실행될 SQL: {}", sql);
         log.info("바인딩된 파라미터: {}", params.getValues());
@@ -294,6 +294,41 @@ public class OrderStatusService {
                     hd.ordflag;
                 """);
         dicParam.addValue("spjangcd", tbDa006WPk.getSpjangcd());
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
+        return items;
+    }
+
+    // 주문현황 캘린더
+    public List<Map<String, Object>> getOrderList2(TB_DA006W_PK tbDa006W_pk) {
+
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+        dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
+        dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT
+                    custcd,
+                    spjangcd,
+                    reqnum,
+                    reqdate,
+                    ordflag,
+                    deldate,
+                    telno,
+                    perid,
+                    cltzipcd,
+                    cltaddr,
+                    remark
+                FROM
+                    TB_DA006W hd
+                WHERE
+                    hd.spjangcd = :spjangcd
+                    AND hd.reqdate BETWEEN
+                        CAST(CAST(YEAR(GETDATE()) - 1 AS VARCHAR(4)) + '0101' AS INT)
+                        AND CAST(FORMAT(GETDATE(), 'yyyyMMdd') AS INT)
+                """);
+        // 정렬 조건 추가
+        sql.append(" ORDER BY reqdate ASC");
+
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
     }
