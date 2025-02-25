@@ -65,6 +65,7 @@ public class RequestController {
         Map<String, Object> userInfo = requestService.getUserInfo(username);
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
         tbDa006WPk.setReqnum(params.get("reqnum"));
+        tbDa006WPk.setReqdate(params.get("reqdate").replaceAll("-",""));
         tbDa006WPk.setSpjangcd((String) userInfo.get("spjangcd"));
         tbDa006WPk.setCustcd((String) userInfo.get("custcd"));
         List<Map<String, Object>> items = this.requestService.getInspecList(tbDa006WPk);

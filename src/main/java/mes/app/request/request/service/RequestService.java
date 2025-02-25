@@ -66,14 +66,16 @@ public class RequestService {
         MapSqlParameterSource dicParam = new MapSqlParameterSource();
 
         String sql = """
-                select 
+                select
                 *
                 from TB_DA007W
                 WHERE reqnum = :reqnum
+                AND reqdate = :reqdate
                 AND   custcd = :custcd
                 AND   spjangcd = :spjangcd
                 order by indate desc
                 """;
+        dicParam.addValue("reqdate", tbDa006W_pk.getReqdate());
         dicParam.addValue("reqnum", tbDa006W_pk.getReqnum());
         dicParam.addValue("custcd", tbDa006W_pk.getCustcd());
         dicParam.addValue("spjangcd", tbDa006W_pk.getSpjangcd());

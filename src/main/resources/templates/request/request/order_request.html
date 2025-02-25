@@ -909,7 +909,8 @@
         url: '/api/request/request/read',
         type: 'GET',
         data: {
-          'reqnum': $('#reqnum').val()
+          'reqnum': $('#reqnum').val(),
+          'reqdate': $('#reqdate').val()
         },
         async: false,
         success: function (data) {
@@ -991,7 +992,11 @@
             document.getElementById('panel_l').value = item.panel_l;
             document.getElementById('reqseq').value = item.reqseq;
             document.getElementById('isnew').value = item.isnew;
-            tinymce.get('ordtext').setContent(item.ordtext);  // 'ordtext'는 TinyMCE가 적용된 요소의 id
+            if (tinymce.get('ordtext')) {  // ✅ TinyMCE 인스턴스가 존재하는지 확인
+              tinymce.get('ordtext').setContent(item.ordtext || "");  // ✅ null 또는 undefined 방지
+            } else {
+              console.error("🚨 TinyMCE 에디터를 찾을 수 없습니다. 초기화 상태를 확인하세요.");
+            }
 
             const selectHgrb = document.getElementById('hgrb');
             const selectExfmtypedv = document.getElementById('exfmtypedv');
@@ -1020,7 +1025,7 @@
       }
     }
     // option값 value bind
-    function setSelectedIndex(selectElement, selectedValue, selectedIndex) {
+    function setSelectedIndex(selectElement, selectedValue) {
       for (let i = 0; i < selectElement.options.length; i++) {
         // 트림(공백 제거), 대소문자 무시, 타입 일치시키기
         if (selectElement.options[i].text.trim().toLowerCase() === String(selectedValue).trim().toLowerCase()) {
