@@ -36,6 +36,21 @@
         overflow-y: auto;    /* 스크롤 활성화 */
     }
 
+    /* 체크박스를 수직 및 수평 중앙 정렬 */
+    .wj-cell.wj-header .wj-cell-element,
+    .wj-cell.wj-header input[type="checkbox"],
+    .wj-cell input[type="checkbox"] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* 체크박스 칸 크기 조정 */
+    .wj-header .wj-cell {
+        text-align: center !important;
+    }
+
+
 </style>
 <th:block layout:fragment="content">
 
@@ -71,10 +86,10 @@
         <div class="tab-wrap">
             <ul class="tab-links">
                 <li>
-                    <a href="#tab1" title="주문 캘린더" class="tab-button">주문 확인</a>
+                    <a href="#tab1" title="주문 캘린더" class="tab-button">주문 현황</a>
                 </li>
                 <li>
-                    <a href="#tab2" title="주문현황" class="tab-button">주문현황</a>
+                    <a href="#tab2" title="주문 확인" class="tab-button">주문 확인</a>
                 </li>
             </ul>
             <div class="tab-contents">
@@ -240,7 +255,6 @@
                                     <div class="srch-box">
                                         <input type="text" id="searchtketnm" name="searchtketnm" class="input-srch"
                                                placeholder="제목" style="border-radius: 5px;">
-                                        <!--                                        <a href="#a" class="btn-srch" title="검색" onclick="searchData()"></a>-->
                                     </div>
                                 </dd>
                             </dl>
@@ -271,6 +285,28 @@
                                             <!--                                        class 쓰이는 곳 찾고 없으면 클래스명 수정하기-->
                                             <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
                                             검색
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>&nbsp;</dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="주문 확인" id="CheckOK" onclick="CheckOK()">
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            주문 확인
+                                        </a>
+                                    </li>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>&nbsp;</dt>
+                                <dd>
+                                    <li>
+                                        <a class="btn btn-delete" title="주문 확인 취소" id="Check" onclick="CheckOK()">
+                                            <img src="/images/icon/btn-srch.svg" alt="검색 아이콘">
+                                            주문 확인 취소
                                         </a>
                                     </li>
                                 </dd>
@@ -429,11 +465,11 @@
             const year = today.getFullYear();
             const month = today.getMonth(); // 0부터 시작하는 월(0 = 1월)
 
-            // 시작일: 올해 1월 1일
-            const startOfYear = new Date(year, 0, 1);
-            const startYearFormatted = startOfYear.getFullYear() + '-' + String(startOfYear.getMonth() + 1).padStart(2, '0') + '-' + String(startOfYear.getDate()).padStart(2, '0');
-            $('#startDate').val(startYearFormatted);
-            $('#startDate2').val(startYearFormatted);
+            // 시작일: 당월 1일
+            const startOfMonth = new Date(year, month, 1);
+            const startMonthFormatted = startOfMonth.getFullYear() + '-' + String(startOfMonth.getMonth() + 1).padStart(2, '0') + '-' + String(startOfMonth.getDate()).padStart(2, '0');
+            $('#startDate').val(startMonthFormatted);
+            $('#startDate2').val(startMonthFormatted);
 
             // 종료일: 현재 월의 마지막 날
             const endOfMonth = new Date(year, month + 1, 0); // 다음 달 0일은 현재 달의 마지막 날
@@ -719,6 +755,10 @@
 
         /*==============캘린더 끝=============================================================================================================*/
 
+        $(document).ready(function() {
+            $("#searchstate").val("0"); // ✅ "주문등록"을 기본 선택값으로 설정
+        });
+
         function fetchListData2() {
             let data2 = []; // 데이터를 담을 기본 배열 초기화
 
@@ -766,7 +806,7 @@
             });
 
             // 순번 추가 및 빈 행 추가
-            const minimumRows = 5;
+            const minimumRows = 15;
             data2.forEach((item, index) => {
                 item.rownum = index + 1;
             });
@@ -848,6 +888,7 @@
                     autoGenerateColumns: false,
                     showMarquee: true,
                     isReadOnly: true,
+                    selectionMode: 'ListBox',
                     virtualizationThreshold: 1,
                     columns: [
                         {binding: 'rownum', header: '순번', width: 100, align: 'center'},
@@ -895,7 +936,14 @@
                     }
                 });
 
-                theGrid2.rowHeaders.columns.splice(0, 1);
+                // ✅ theGrid2 초기화 후 Selector 바인딩
+                let selector = new wijmo.grid.selector.Selector(theGrid2, {
+                    itemChecked: () => {
+                        console.log("✅ 체크박스 선택됨!");
+                        showCheckedCount(selector);
+                    }
+                });
+
                 new FlexGridContextMenu(theGrid2);
                 window.downloadFileName = '진행 현황';
 
@@ -907,17 +955,40 @@
             }
         }
 
-        // 중복 제거 함수
-        function removeDuplicates(data, keys) {
-            const seen = new Set();
-            return data.filter(item => {
-                const key = keys.map(k => item[k]).join('|'); // 중복 기준 필드 조합
-                if (seen.has(key)) {
-                    return false; // 이미 처리된 항목은 제외
+        function showCheckedCount(selector) {
+            let cntElement = document.getElementById('checked-count');
+
+            if (cntElement) {
+                let selectedRows = [];
+
+                // ✅ 최신 wijmo 버전 대응: `getCheckedItems()` 또는 `isSelected` 방식 사용
+                if (typeof selector.getCheckedItems === "function") {
+                    selectedRows = selector.getCheckedItems();
+                } else {
+                    console.warn("❗ `selector.getCheckedItems()`가 빈 배열을 반환했습니다. `isSelected` 방식으로 대체합니다.");
+                    selectedRows = theGrid2.rows.filter(r => r.isSelected).map(row => row.dataItem);
                 }
-                seen.add(key);
-                return true; // 새 항목만 유지
-            });
+
+                // ✅ 체크된 행 데이터 콘솔에 출력
+                console.log("🔍 최종 선택된 행 데이터:", selectedRows);
+
+                if (selectedRows.length === 0) {
+                    console.warn("❗ 여전히 선택된 행이 없습니다.");
+                    return;
+                }
+
+                cntElement.textContent = selectedRows.length.toString();
+
+                let selectedGroupInfo = new Set();
+
+                selectedRows.forEach(item => {
+                    let groupKey = `${item.cltnm}_${item.reqnum}`;
+                    selectedGroupInfo.add(groupKey);
+                });
+
+                let groupInfoArray = Array.from(selectedGroupInfo);
+                console.log("✅ 선택된 행의 그룹 정보:", groupInfoArray);
+            }
         }
 
         //다운로드
@@ -1052,7 +1123,7 @@
                 case 'Z4': return "기타4";
                 case 'Z5': return "기타5";
                 case 'Z6': return "기타6";
-                default: return "알 수 없음"; // 매칭되지 않는 경우 기본값
+                default: return " "; // 매칭되지 않는 경우 기본값
             }
         }
 
@@ -1098,193 +1169,6 @@
         function getListCgrb(cgrb) {
             return cgrbMapping[cgrb] || " "; // 매칭되지 않는 경우 기본값 반환
         }
-
-        //검색
-        function searchData() {
-
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            const searchCltnm = document.getElementById('searchCltnm').value.trim();
-            const searchtketnm = document.getElementById('searchtketnm').value.trim();
-            const searchstate = document.getElementById('searchstate').value;
-
-            const queryParams = {};
-            if (startDate) queryParams.startDate = startDate;
-            if (endDate) queryParams.endDate = endDate;
-            if (searchCltnm) queryParams.searchCltnm = searchCltnm;
-            if (searchtketnm) queryParams.searchtketnm = searchtketnm;
-            if (searchstate) queryParams.searchstate = searchstate;
-
-            // AJAX 요청
-            $.ajax({
-                url: `/api/order_status/searchData?${$.param(queryParams)}`,
-                type: 'GET',
-                success: function (response) {
-                    console.log("서버 응답 데이터:", response); // 응답 데이터 확인
-
-                    // 응답 데이터가 올바른지 확인
-                    if (response && Array.isArray(response.data)) {
-                        const data2 = response.data;
-
-                        // 날짜 형식 변환
-                        data2.forEach(item => {
-                            item.reqdate = formatDateString(item.reqdate);
-                            item.deldate = formatDateString(item.deldate);
-                            item.ordflag = getOrdflagText(item.ordflag); // ordflag 숫자값을 텍스트로 변환
-                            item.hgrb = getHgrb((item.hgrb));
-                            item.exfmtypedv = getListCgrb(item.exfmtypedv);
-                            item.infmtypedv = getListCgrb(item.infmtypedv);
-                            item.stframedv = getListCgrb(item.stframedv);
-                            item.stexplydv = getListCgrb(item.stexplydv);
-
-                            // ordtext 필드에 데이터가 있는 경우 "옵션 및 요청사항"으로 표시
-                            if (item.ordtext) {
-                                item.originalOrdtext = item.ordtext; // 실제 데이터를 보존
-                                item.ordtext = "옵션 및 요청사항"; // 링크 표시용 텍스트
-                            }
-                            item.isdownload = item.isdownload === true;
-                        });
-
-                        // 순번을 추가하고, 데이터가 10개 미만일 경우 빈 행을 추가
-                        const minimumRows = 15;
-                        data2.forEach((item, index) => {
-                            item.rownum = index + 1; // 순번 추가
-                        });
-
-                        if (data2.length < minimumRows) {
-                            const additionalRows = minimumRows - data2.length;
-                            for (let i = 0; i < additionalRows; i++) {
-                                data2.push({
-                                    rownum: data2.length + 1, // 현재 데이터 길이에 맞게 순번을 맞춤
-                                    ordflag: '',
-                                    reqdate: '',
-                                    cltnm: '',
-                                    remark: '',
-                                    deldate: '',
-                                    hgrb: '',
-                                    qty: '',
-                                    panel_t: '',
-                                    panel_w: '',
-                                    panel_l: '',
-                                    exfmtypedv: '',
-                                    infmtypedv: '',
-                                    stframedv: '',
-                                    stexplydv: '',
-                                    downloads:'',
-                                    ordtext: '',
-                                    reqnum:'',
-                                    isdownload:''
-                                });
-                            }
-                        }
-                        let viewdata = new wijmo.collections.CollectionView(data2);
-                        // 그룹화 설정
-                        let reqdateGroup = new wijmo.collections.PropertyGroupDescription('reqdate', (item, prop) => {
-                            return item[prop];
-                        });
-
-                        let cltnmGroup = new wijmo.collections.PropertyGroupDescription('cltnm', (item, prop) => {
-                            return item[prop];
-                        });
-                        let hgrbGroup = new wijmo.collections.PropertyGroupDescription('hgrb', (item, prop) => {
-                            return item[prop];
-                        });
-
-                        viewdata.groupDescriptions.clear();
-                        viewdata.groupDescriptions.push(reqdateGroup);
-                        viewdata.groupDescriptions.push(cltnmGroup);
-                        viewdata.groupDescriptions.push(hgrbGroup);
-
-                        // 그룹별 행 번호 다시 설정
-                        const resetRowNumbers = () => {
-                            if (viewdata.groups) {
-                                viewdata.groups.forEach(firstGroup => { // 1차 그룹 순회 (reqdate)
-                                    if (firstGroup.groups) { // 2차 그룹(cltnm)이 존재하면 처리
-                                        firstGroup.groups.forEach(secondGroup => { // 2차 그룹 순회 (cltnm)
-                                            let rowNumber = 1; // 각 2차 그룹별로 행 번호 초기화
-                                            secondGroup.items.forEach(item => {
-                                                item.rownum = rowNumber++;
-                                            });
-                                        });
-                                    } else { // 2차 그룹이 없고 1차 그룹만 있을 경우 처리
-                                        let rowNumber = 1;
-                                        firstGroup.items.forEach(item => {
-                                            item.rownum = rowNumber++;
-                                        });
-                                    }
-                                });
-                            }
-                        };
-                        // 검색 후 데이터를 업데이트한 경우에도 초기화
-                        resetRowNumbers();
-
-                        // 그리드 업데이트
-                        //const viewdata = new wijmo.collections.CollectionView(data2);
-                        if (!theGrid2) {
-                            theGrid2 = new wijmo.grid.FlexGrid('#theGrid2', {
-                                autoGenerateColumns: false,
-                                showMarquee: true,
-                                columns: [
-                                    {binding: 'rownum', header: '순번', width: 100, align: 'center'},
-                                    {binding: 'ordflag', header: '진행구분', width: '*', minWidth: 100, align: 'center'},
-                                    {binding: 'reqdate', header: '주문일자', width: '*', minWidth: 150, align: 'center'},
-                                    {binding: 'cltnm', header: '업체명', width: '*', minWidth: 150, align: 'left'},
-                                    {binding: 'remark', header: '제목', width: '*', minWidth: 400, align: 'left'},
-                                    {binding: 'deldate', header: '납품희망일', width: '*', minWidth: 150, align: 'center'},
-                                    {binding: 'hgrb', header: '제품구성', width: '*', minWidth: 100, align: 'center'},
-                                    {binding: 'qty', header: '수량', width: 80, align: 'right'},
-                                    {binding: 'panel_t', header: 'T(두께)', width: 80, align: 'right'},
-                                    {binding: 'panel_w', header: 'W/H(폭 또는 높이)', width: 150, align: 'right'},
-                                    {binding: 'panel_l', header: 'L(길이)', width: 80, align: 'right'},
-                                    {binding: 'exfmtypedv', header: '외부마감재', width: '*', minWidth: 100, align: 'center'},
-                                    {binding: 'infmtypedv', header: '외부보강재', width: '*', minWidth: 100, align: 'center'},
-                                    {binding: 'stframedv', header: '내부보강재', width: '*', minWidth: 100, align: 'center'},
-                                    {binding: 'stexplydv', header: '내부마감재', width: '*', minWidth: 100, align: 'center'},
-                                    {binding: 'downloads', header: '첨부파일', width: '*', minWidth: 105, align: 'center'},
-                                    {binding: 'ordtext', header: '옵션 및 요청사항', width: '*', minWidth: 200, align: 'left'},
-                                    {binding: 'reqnum', visible: false},
-                                    {binding: 'isdownload', visible: false}
-                                ],
-                                itemsSource: viewdata, // 데이터 바인딩
-                                formatItem: function(s, e) {
-                                    if (e.panel.cellType === wijmo.grid.CellType.Cell) {
-                                        const col = s.columns[e.col];
-                                        const item = s.rows[e.row]?.dataItem;
-
-                                        // ordtext 셀에 데이터가 있는 경우 링크처럼 표시
-                                        if (col.binding === 'ordtext' && item && item.ordtext === "옵션 및 요청사항") {
-                                            console.log("Creating link for ordtext at row:", e.row); // e.row 값 확인
-                                            e.cell.innerHTML = `<a href="#" class="ordtext-link" onclick="showPopupById('OrdtextModal', ${e.row})">옵션 및 요청사항</a>`;
-                                        } else {
-                                            console.warn("ordtext 데이터가 없거나 잘못된 행입니다:", e.row);
-                                        }
-                                        // 다운로드 링크 처리
-                                        if (col.binding === 'downloads') {
-                                            //console.log('downloads column detected', item); // 디버깅용 로그 추가
-                                            e.cell.innerHTML = ''; // 셀 내용 초기화
-                                            if (item.isdownload) { // 데이터에 다운로드 가능한 상태 여부 확인
-                                                //console.log('Download link added for item:', item); // 디버깅용 로그 추가
-                                                e.cell.innerHTML = '<a title="다운로드" class="btn-filedown" onclick="downloadFile_order_status()">다운로드</a>';
-                                            }
-                                        }
-                                    }
-                                }
-                            });
-                            new FlexGridContextMenu(theGrid2);
-                            window.downloadFileName = '진행 현황';
-
-                        } else {
-                            theGrid2.itemsSource = viewdata;
-                        }
-                    } else {
-                        console.error("데이터 형식이 잘못되었습니다. response.data가 배열이 아닙니다.");
-                    }
-                },
-                error: function () {
-                    console.error("데이터를 가져오는 중 오류가 발생했습니다.");
-                }
-            });
-        }//검색
 
         /*모달창=====================================================*/
 
@@ -1548,6 +1432,65 @@
             window.open(url, '_blank',
                 'width=1040,height=1000,toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes');
         }
+
+        //주문 확인
+        function CheckOK() {
+            let selectedRows = [];
+
+            if (theGrid2) {
+                let selector = new wijmo.grid.selector.Selector(theGrid2);
+
+                if (typeof selector.getCheckedItems === "function") {
+                    selectedRows = selector.getCheckedItems();
+                } else {
+                    console.warn("⚠️ `getCheckedItems()`가 존재하지 않습니다. `isSelected` 방식으로 대체합니다.");
+                    selectedRows = theGrid2.rows.filter(row => row.isSelected).map(row => row.dataItem);
+                }
+            }
+
+            if (selectedRows.length === 0) {
+                alert("선택된 주문이 없습니다.");
+                return;
+            }
+
+            // ✅ 선택된 행 데이터 콘솔에 출력
+            console.log("✅ 선택된 주문 데이터:", selectedRows);
+
+            processSelectedOrders(selectedRows);
+        }
+
+        function processSelectedOrders(selectedRows) {
+            let requestData = { orders: selectedRows };
+
+            console.log(" 서버로 전송할 데이터:", JSON.stringify(requestData));
+
+            $.ajax({
+                url: '/api/order_status/confirm',
+                type: 'POST',
+                contentType: 'application/json', // ✅ JSON 헤더 추가
+                data: JSON.stringify(requestData), // ✅ JSON 형식 변환
+                headers: {
+                    'X-CSRF-Token': $('[name=_csrf]').val()
+                },
+                success: function(response) {
+                    console.log("✅ 서버 응답:", response);
+                    Alert.alert('' ,"주문 확인 처리가 완료되었습니다.");
+                    fetchListData2();
+                },
+                error: function(xhr, status, error) {
+                    console.error("❌ 주문 확인 처리 중 오류 발생:", xhr.responseText);
+
+                    try {
+                        let response = JSON.parse(xhr.responseText);
+                        Alert.alert('', response.message || "처리 중 오류가 발생했습니다.");
+                    } catch (e) {
+                        Alert.alert('', "처리 중 오류가 발생했습니다.");
+                    }
+                }
+
+            });
+        }
+
     </script>
 </th:block>
 </html>

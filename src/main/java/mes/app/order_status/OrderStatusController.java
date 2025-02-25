@@ -3,21 +3,22 @@ package mes.app.order_status;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import mes.app.order_status.service.OrderStatusService;
 import mes.domain.entity.User;
+import mes.domain.entity.actasEntity.TB_DA006W;
 import mes.domain.entity.actasEntity.TB_DA006W_PK;
 import mes.domain.model.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/api/order_status")
 public class OrderStatusController {
@@ -25,33 +26,6 @@ public class OrderStatusController {
     @Autowired
     OrderStatusService orderStatusService;
 
-    /*@GetMapping("/read")
-    public AjaxResult orderStatusRead(
-            @RequestParam(required = false) String startDate,
-            @RequestParam(required = false) String endDate,
-            @RequestParam(value = "search_spjangcd", required = false) String searchSpjangcd,
-                                      Authentication auth) {
-        AjaxResult result = new AjaxResult();
-
-        try {
-            // 로그인한 사용자 정보에서 이름(perid) 가져오기
-            User user = (User) auth.getPrincipal();
-            String perid = user.getFirst_name(); // 이름을 가져옴
-            String spjangcd = searchSpjangcd;
-            List<Map<String, Object>> orderStatusList = orderStatusService.getOrderStatusByOperid(startDate,endDate,perid, spjangcd);
-
-            result.success = true;
-            result.data = orderStatusList;
-            result.message = "데이터 조회 성공";
-
-        } catch (Exception e) {
-            // 오류 발생 시 실패 상태 설정
-            result.success = false;
-            result.message = "데이터를 가져오는 중 오류가 발생했습니다.";
-        }
-
-        return result;
-    }*/
     @GetMapping("/read")
     public AjaxResult orderStatusRead(
             @RequestParam(value = "startDate", required = false) String startDate,
@@ -315,4 +289,72 @@ public class OrderStatusController {
 
         return result;
     }
+
+
+    @PostMapping("/confirm")
+    public ResponseEntity<Map<String, Object>> UpdateOrdflag(@RequestBody Map<String, Object> formData) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+//            log.info("받은 데이터: {}", formData);
+
+            Object ordersObj = formData.get("orders");
+
+            if (!(ordersObj instanceof List)) {
+                return ResponseEntity.badRequest().body(Map.of("message", "잘못된 데이터 형식입니다. 'orders'는 리스트여야 합니다."));
+            }
+
+            List<Map<String, Object>> orders = (List<Map<String, Object>>) ordersObj;
+
+            if (orders.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "수정할 주문이 없습니다."));
+            }
+
+            // 한글을 숫자로 변환만 수행 (토글 변환 X)
+            List<Map<String, Object>> validOrders = orders.stream()
+                .map(order -> {
+                    Object ordflagObj = order.get("ordflag");
+                    if (ordflagObj instanceof String) {
+                        String ordflag = (String) ordflagObj;
+                        // 한글 상태를 숫자 문자열로 변환 (변환만 수행, 토글 X)
+                        String ordflagNum = switch (ordflag) {
+                            case "주문등록" -> "0";
+                            case "주문확인" -> "1";
+                            default -> null; // 그 외 값은 필터링
+                        };
+
+                        if (ordflagNum != null) {
+                            order.put("ordflag", ordflagNum); // 변환된 값만 저장
+                        }
+                    }
+                    return order;
+                })
+                .filter(order -> {
+                    Object ordflagObj = order.get("ordflag");
+                    return ordflagObj instanceof String && ("0".equals(ordflagObj) || "1".equals(ordflagObj));
+                })
+                .collect(Collectors.toList());
+
+            if (validOrders.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "'주문 등록' 과 '주문 확인' 이 외는 수정이 불가능합니다."));
+            }
+
+            // 서비스 호출 (서비스에서 상태 변환 수행)
+            TB_DA006W updateResult = orderStatusService.UpdateOrdflag(validOrders);
+
+            // 성공 응답 구성
+            response.put("success", true);
+            response.put("message", "주문 상태가 변경되었습니다.");
+            response.put("data", updateResult);
+            log.info("저장 완료: {}", updateResult);
+
+        } catch (Exception e) {
+            log.error("❌ 저장 중 오류 발생", e);
+            response.put("success", false);
+            response.put("message", "저장 중 오류가 발생했습니다. 관리자에게 문의하세요.");
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+
 }

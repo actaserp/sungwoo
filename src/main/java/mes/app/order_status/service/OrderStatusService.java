@@ -1,6 +1,7 @@
 package mes.app.order_status.service;
 
 import lombok.extern.slf4j.Slf4j;
+import mes.domain.entity.actasEntity.TB_DA006W;
 import mes.domain.entity.actasEntity.TB_DA006W_PK;
 import mes.domain.services.SqlRunner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -360,6 +361,34 @@ public class OrderStatusService {
 
         List<Map<String, Object>> items = this.sqlRunner.getRows(sql.toString(), dicParam);
         return items;
+    }
+
+
+    public TB_DA006W UpdateOrdflag(List<Map<String, Object>> orders) {
+        for (Map<String, Object> order : orders) {
+            String reqnum = (String) order.get("reqnum"); // 주문 번호
+            String ordflag = (String) order.get("ordflag"); // 0 또는 1 (문자열)
+
+            // "0" → "1", "1" → "0" 변환 후 업데이트
+            String newOrdflag = "0".equals(ordflag) ? "1" : "0";
+
+            String sql = """
+            UPDATE TB_DA006W 
+            SET ordflag = :ordflag
+            WHERE reqnum = :reqnum
+        """;
+
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("ordflag", newOrdflag);
+            params.addValue("reqnum", reqnum);
+
+//            log.info("📌 주문 상태 변경 SQL 실행: {}", sql);
+//            log.info("📌 SQL Parameters: {}", params.getValues());
+
+            sqlRunner.execute(sql, params);
+        }
+
+        return new TB_DA006W(); // 업데이트 결과 반환 (실제 로직에 맞게 수정 필요)
     }
 
 }
