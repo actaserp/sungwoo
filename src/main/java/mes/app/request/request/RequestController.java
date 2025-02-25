@@ -21,11 +21,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -167,7 +168,7 @@ public class RequestController {
         return result;
     }
     //신규등록
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @PostMapping("/save")
     public AjaxResult saveOrder(@RequestParam Map<String, String> params,
                                 @RequestParam(value = "filelist", required = false) MultipartFile[] files,
@@ -184,7 +185,7 @@ public class RequestController {
         headpk.setSpjangcd((String) userInfo.get("spjangcd"));
         headpk.setReqdate(params.get("reqdate").replaceAll("-",""));
         // findMaxReqnum 메서드가 최대 reqnum 값을 정수로 반환한다고 가정
-        int maxReqnum = tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"), "ZZ");
+        int maxReqnum = tbda006WRepository.findMaxReqnum((String) userInfo.get("custcd"), "ZZ", params.get("reqdate").replaceAll("-",""));
 
         // 증가된 reqnum을 4자리 문자열로 변환
         String nextReqnum = String.format("%04d", maxReqnum + 1);

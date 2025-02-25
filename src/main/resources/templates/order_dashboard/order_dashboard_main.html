@@ -168,8 +168,9 @@
         const today = date.toISOString().split('T')[0];
         // 현재 년도를 가져옵니다
         const currentYear = new Date().getFullYear();
+        const currentMonth = (date.getMonth() + 1).toString().padStart(2, '0'); // 1월은 0부터 시작하므로 +1 처리
         // 시작일 input에 올해 1월 1일을 설정합니다
-        document.getElementById('startDate').value = `${currentYear}-01-01`;
+        document.getElementById('startDate').value = `${currentYear}-${currentMonth}-01`;
         document.getElementById('endDate').value = today;
         document.getElementById('year-status').innerText = `${currentYear}년 주문 현황`;
 

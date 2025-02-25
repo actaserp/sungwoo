@@ -635,17 +635,25 @@
     let csrfToken = $("[name=_csrf]").val();
 
     document.readyState === 'complete' ? init() : window.onload = init;
+
     // 오늘 날짜 설정
     const date = new Date();
     date.setHours(date.getHours() + 9); // UTC+9로 한국 시간 설정
     const today = date.toISOString().split('T')[0];
-    // 현재 년도를 가져옵니다
-    const currentYear = new Date().getFullYear();
-    // 시작일 input에 올해 1월 1일을 설정합니다
-    document.getElementById('startDate').value = `${currentYear}-01-01`;
+
+    // 현재 년도와 월을 가져옵니다
+    const currentYear = date.getFullYear();
+    const currentMonth = (date.getMonth() + 1).toString().padStart(2, '0'); // 1월은 0부터 시작하므로 +1 처리
+
+    // 이번 달 1일을 설정
+    const firstDayOfMonth = `${currentYear}-${currentMonth}-01`;
+
+    // input 값 설정
+    document.getElementById('startDate').value = firstDayOfMonth;
     document.getElementById('endDate').value = today;
     document.getElementById('reqdate').value = today;
     document.getElementById('deldate').value = today;
+
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
       fetchListData();
@@ -1026,14 +1034,22 @@
     }
     // option값 value bind
     function setSelectedIndex(selectElement, selectedValue) {
+      let found = false;
+
       for (let i = 0; i < selectElement.options.length; i++) {
-        // 트림(공백 제거), 대소문자 무시, 타입 일치시키기
         if (selectElement.options[i].text.trim().toLowerCase() === String(selectedValue).trim().toLowerCase()) {
           selectElement.selectedIndex = i;
+          found = true;
           break;
         }
       }
+
+      // 일치하는 값이 없을 경우, 기본값 0 설정
+      if (!found) {
+        selectElement.selectedIndex = 0;
+      }
     }
+
     // 주문등록
     function saveOrder(){
       // 필수 입력 필드 검사
@@ -1744,7 +1760,7 @@
       "MAS": "Super Lite",
       "MCG": "허니컴",
       "MCC": "아마셀",
-      "MCD": "LTP보드",
+      "MCD": "LTP",
       "MCE": "기타",
       "MBI": "아이소핑크",
       "MAM": "CFRT",
