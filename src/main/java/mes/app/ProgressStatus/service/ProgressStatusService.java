@@ -31,12 +31,13 @@ public class ProgressStatusService {
             1=1
      """);
         if (startDate != null && !startDate.isEmpty()) {
-            sql.append(" AND reqdate >= :startDate");
+            startDate = startDate.replace("-", "");
+            sql.append(" AND reqdate >= :startDate ");
             params.addValue("startDate", startDate);
         }
 
         if (endDate != null && !endDate.isEmpty()) {
-            sql.append(" AND reqdate <= :endDate");
+            sql.append(" AND reqdate <= :endDate ");
             params.addValue("endDate", endDate);
         }
         // ORDER BY를 항상 맨 마지막에 추가
@@ -60,6 +61,7 @@ public class ProgressStatusService {
     """);
 
         if (startDate != null && !startDate.isEmpty()) {
+            startDate = startDate.replace("-", "");
             sql.append(" AND reqdate >= :startDate");
             params.addValue("startDate", startDate);
         }
@@ -112,6 +114,7 @@ public class ProgressStatusService {
 
         // 조건 추가
         if (startDate != null && !startDate.isEmpty()) {
+            startDate = startDate.replace("-", "");
             sql.append(" AND tb006.reqdate >= :startDate");
             params.addValue("startDate", startDate);
         }

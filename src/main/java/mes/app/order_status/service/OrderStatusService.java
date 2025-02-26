@@ -69,13 +69,16 @@ public class OrderStatusService {
     WHERE
         tb006.spjangcd = :spjangcd
     """);
-
+        
         // 날짜 필터링 (TB_DA006W 기준)
-        if (params.hasValue("startDate")) {
-            sql.append(" AND tb006.reqdate >= :startDate");
+        if (startDate != null && !startDate.isEmpty()) {
+            startDate = startDate.replace("-", ""); // "2025-03-01" -> "20250301"
+            sql.append(" and tb006.reqdate >= :startDate ");
+            params.addValue("startDate", startDate );
         }
-        if (params.hasValue("endDate")) {
-            sql.append(" AND tb006.reqdate <= :endDate");
+        if (endDate != null && !endDate.isEmpty()) {
+            sql.append("  AND tb006.reqdate <= :endDate ");
+            params.addValue("endDate", endDate);
         }
 
         // 검색 조건 추가 (TB_DA006W 기준)
