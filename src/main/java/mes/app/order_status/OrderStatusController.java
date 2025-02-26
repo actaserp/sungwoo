@@ -173,7 +173,7 @@ public class OrderStatusController {
         for (Map<String, Object> item : items) {
             if (item.get("ordflag").equals("0")) {
                 item.remove("ordflag");
-                item.put("ordflag", "주문의뢰");
+                item.put("ordflag", "주문등록");
             } else if (item.get("ordflag").equals("1")) {
                 item.remove("ordflag");
                 item.put("ordflag", "주문확인");
