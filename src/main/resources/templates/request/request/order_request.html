@@ -39,9 +39,10 @@
           <div class="section-top">
             <div class="title-wrap">
               <h3>주문등록</h3>
-              <img src="/images/icon/exclamation/exclamation-circle.svg"
-                   class="zoom-img" style="margin-left: 5px"
-                   onclick="openPopup('https://foms.atlassian.net/wiki/external/YzNmYmE3MTkyYTFlNGU2OGIwOTY5YTEyNDFiZjcwZmE')" alt="도움말">
+<!--              <img src="/images/icon/exclamation/exclamation-circle.svg"-->
+<!--                   class="zoom-img" style="margin-left: 5px"-->
+<!--                   onclick="openPopup('https://foms.atlassian.net/wiki/external/YzNmYmE3MTkyYTFlNGU2OGIwOTY5YTEyNDFiZjcwZmE')" alt="도움말">-->
+              <a style="color: red;margin-top: 4px;margin-left: 5px;">(두께, 폭, 길이, 높이는 외부기준 mm단위로 입력)</a>
             </div>
             <div class="button-wrap">
               <ul>
@@ -85,6 +86,7 @@
                 </th>
                 <td>
                   <input type="date" id="reqdate" name="reqdate" value="" style="width: 200px">
+                  <span id="reqdate_day"></span>
                 </td>
                 <th style="text-align: center">
                   <label for="deldate">
@@ -93,6 +95,7 @@
                 </th>
                 <td>
                   <input type="date" id="deldate" name="deldate" style="width: 200px">
+                  <span id="deldate_day"></span>
                 </td>
                 <th style="text-align: center">
                   <label for="telno">
@@ -526,7 +529,7 @@
     tinymce.init({
       language: "ko_KR",
       selector: "#ordtext",
-      plugins: "paste image imagetools",
+      plugins: "image",
       height: 500,
       width: 900,
       toolbar: "undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | outdent indent | image",
@@ -653,6 +656,36 @@
     document.getElementById('endDate').value = today;
     document.getElementById('reqdate').value = today;
     document.getElementById('deldate').value = today;
+
+
+    // 요일 변환 함수
+    function getDayName(dateString) {
+      const days = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+      const date = new Date(dateString);
+      return isNaN(date.getDay()) ? "" : days[date.getDay()]; // 유효한 날짜일 때만 요일 반환
+    }
+
+    function updateDayDisplay(inputId, outputId) {
+      const input = document.getElementById(inputId);
+      const output = document.getElementById(outputId);
+
+      function setDay() {
+        if (input.value) {
+          output.textContent = `(${getDayName(input.value)})`; // 선택된 날짜의 요일 표시
+        } else {
+          output.textContent = "";
+        }
+      }
+
+      input.addEventListener("change", setDay); // 날짜 변경 시 업데이트
+      setDay(); // 페이지 로드 시에도 초기 값 설정
+    }
+
+    // 페이지 로드 후 실행 (초기값 반영)
+    document.addEventListener("DOMContentLoaded", function() {
+      updateDayDisplay("reqdate", "reqdate_day");
+      updateDayDisplay("deldate", "deldate_day");
+    });
 
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
@@ -1058,7 +1091,7 @@
         {id: '#deldate', label: '납품희망일을 선택해주세요'},
         {id: '#telno', label: '연락처를 작성해주세요'},
         {id: '#perid', label: '담당자명을 작성해주세요'},
-        {id: '#postno', label: '주소를 작성해주세요'},
+        {id: '#address1', label: '주소를 작성해주세요'},
         {id: '#remark', label: '제목을 작성해주세요'}
       ];
       // 세부항목 행 추가 여부 검사
