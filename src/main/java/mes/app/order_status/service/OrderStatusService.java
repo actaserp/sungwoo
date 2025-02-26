@@ -354,7 +354,7 @@ public class OrderStatusService {
                     hd.spjangcd = :spjangcd
                     AND hd.reqdate BETWEEN
                         CAST(CAST(YEAR(GETDATE()) - 1 AS VARCHAR(4)) + '0101' AS INT)
-                        AND CAST(FORMAT(GETDATE(), 'yyyyMMdd') AS INT)
+                        AND CAST(CAST(YEAR(GETDATE()) AS VARCHAR(4)) + '1231' AS INT)
                 """);
         // 정렬 조건 추가
         sql.append(" ORDER BY reqdate ASC");

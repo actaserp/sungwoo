@@ -235,7 +235,9 @@ public class OrderStatusController {
         String username = user.getUsername();
         TB_DA006W_PK tbDa006WPk = new TB_DA006W_PK();
         tbDa006WPk.setSpjangcd(searchSpjangcd);
-        List<Map<String, Object>> items = this.orderStatusService.initDatas(tbDa006WPk, searchStartDate, searchEndDate);
+        String startDate = (searchStartDate).replaceAll("-","");
+        String endDate = (searchEndDate).replaceAll("-","");
+        List<Map<String, Object>> items = this.orderStatusService.initDatas(tbDa006WPk, startDate, endDate);
         AjaxResult result = new AjaxResult();
         result.data = items;
         return result;
@@ -253,7 +255,7 @@ public class OrderStatusController {
         for (Map<String, Object> item : items) {
             if (item.get("ordflag").equals("0")) {
                 item.remove("ordflag");
-                item.put("ordflag", "주문의뢰");
+                item.put("ordflag", "주문등록");
             } else if (item.get("ordflag").equals("1")) {
                 item.remove("ordflag");
                 item.put("ordflag", "주문확인");

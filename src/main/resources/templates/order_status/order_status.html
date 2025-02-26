@@ -607,9 +607,9 @@
                    console.log("holidays : ", orderDates)
                    orderDates.forEach(orderDate => {
                        switch (orderDate.name) {
-                           case '주문의뢰':
+                           case '주문등록':
                                calendar.addEvent({
-                                   title: '주문의뢰', // 진행구분 이름
+                                   title: '주문등록', // 진행구분 이름
                                    start: orderDate.date,  // 진행의뢰 날짜
                                    backgroundColor: '#031B4B',
                                    borderColor: '#031B4B',
