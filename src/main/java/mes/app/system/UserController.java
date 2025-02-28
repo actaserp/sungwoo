@@ -1,43 +1,36 @@
 package mes.app.system;
 
-import java.sql.Timestamp;
-import java.util.*;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import mes.app.UtilClass;
-import mes.app.account.service.TB_RP945_Service;
 import mes.app.account.service.TB_XClientService;
-import mes.domain.DTO.TB_RP945Dto;
-import mes.domain.entity.*;
+import mes.app.system.service.UserService;
+import mes.domain.entity.RelationData;
+import mes.domain.entity.TB_RP945;
+import mes.domain.entity.User;
 import mes.domain.entity.actasEntity.TB_XA012;
 import mes.domain.entity.actasEntity.TB_XCLIENT;
 import mes.domain.entity.actasEntity.TB_XCLIENTId;
-import mes.domain.repository.*;
+import mes.domain.model.AjaxResult;
+import mes.domain.repository.RelationDataRepository;
+import mes.domain.repository.TB_RP945Repository;
+import mes.domain.repository.UserRepository;
 import mes.domain.repository.actasRepository.TB_XA012Repository;
 import mes.domain.repository.actasRepository.TB_XClientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.security.core.Authentication;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import mes.app.system.service.UserService;
-import mes.domain.model.AjaxResult;
 import mes.domain.security.Pbkdf2Sha256;
 import mes.domain.services.CommonUtil;
 import mes.domain.services.SqlRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
+import java.sql.Timestamp;
+import java.util.*;
 
 @Slf4j
 @RestController

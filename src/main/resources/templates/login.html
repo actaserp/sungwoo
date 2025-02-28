@@ -1139,91 +1139,6 @@
 
         })
 
-        //사용자신청 버튼 클릭
-        /*let btnRegistersend = $('#btnSaveAuth');
-
-        btnRegistersend.click(function (e) {
-
-            const authCode = $('#AuthenticationCodeRegister').val().trim();
-            if (!authCode) {
-                Alert.alert('', '인증코드를 입력해주세요.');
-                $('#AuthenticationCodeRegister').focus();
-                return;
-            }
-
-            // let authType = document.getElementById('authType');
-            // let authTypeText = authType.options[authType.selectedIndex].text;
-
-            if (!validateFields()) {
-                return false;
-            }
-
-            if(!AuthCode){
-                Alert.alert('', '아이디중복 확인을 하지 않으셨습니다.');
-                return;
-            }
-
-            const emailInput = document.getElementById('email');
-            const emailValue = emailInput.value.trim();
-
-            if (!emailValidate(emailValue.trim()))
-            { Alert.alert('', '유효한 이메일 형식을 입력하세요.'); return false; }
-
-
-            let password = document.getElementById('password').value;
-            let password2 = document.getElementById('passwordchk').value;
-
-            if(password !== password2){
-                Alert.alert('', '비밀번호가 맞지 않습니다.');
-                return;
-            }
-
-            function extractSelectValues(selectName) {
-                let inputs = document.querySelectorAll(`select[name="${selectName}"]`);
-                return Array.from(inputs).map(input => input.value).join(',');
-            }
-
-            function extractSelectTexts(selectName) {
-                let inputs = document.querySelectorAll(`select[name="${selectName}"]`);
-                return Array.from(inputs).map(input => input.options[input.selectedIndex].text).join(',');
-            }
-
-            let data = FormUtil.extractForm($('#bomForm'));
-
-            console.log("요청 data : ", data);
-            // data.authTypeText = authTypeText;
-
-            data.AuthenticationCode = $('#AuthenticationCodeRegister').val().trim();
-
-            let fnSuccess = function (res) {
-                if(res.success){
-                    Alert.alert('', res.message);
-                    $("#modal-close-button").trigger('click');
-                }else if (!res.success){
-                    Alert.alert('', res.message);
-                }
-            };
-            AjaxUtil.postAsyncData("/Register/save", data, fnSuccess);
-
-            AuthCode = false;
-            for(let i=0; i < clearFieldList.length; i++){
-                clearForm(clearFieldList[i]);
-            }
-            let idfield = document.getElementById('id')
-            idfield.removeAttribute('readonly')
-
-            //추가된 발전지역 요소들 삭제
-            const elements = document.getElementsByClassName('new-fl-ac');
-            const elementsArray = Array.from(elements);
-
-            elementsArray.forEach(element => {
-                element.remove();
-            });
-            //끝
-
-            RegisterUserClose();
-        })*/
-
         // 사용자 등록 버튼 클릭
         let btnRegistersend = $('#btnSaveAuth');
 
@@ -1382,13 +1297,17 @@
                 if (code == 'NOUSER') {
 
                     Alert.alert('', '아이디 또는 비밀번호가 일치하지 않습니다.');
+                    $('#loginPwd').val('');
+                    $('#loginPwd').focus();
                     return false;
                 }
                 if (code == 'NOID') {
 
                     let redtext = document.getElementById('hint-red');
                     redtext.style.display = 'block';
-                    Alert.alert('', '아이디 또는 비밀번호가 일치하지 않습니다.', clearFields);
+                    $('#loginPwd').val('');
+                    $('#loginPwd').focus();
+                    Alert.alert('', '아이디 또는 비밀번호가 일치하지 않습니다.');
                 }
                 else if (code == 'NOPW') {
                     Alert.alert('', '비밀번호가 일치하지 않습니다', function () { $('#loginPwd').val(''); $('#loginPwd').focus(); });
