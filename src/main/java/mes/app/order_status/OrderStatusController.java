@@ -6,9 +6,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import mes.app.order_status.service.OrderStatusService;
 import mes.domain.entity.User;
+import mes.domain.entity.UserCode;
 import mes.domain.entity.actasEntity.TB_DA006W;
 import mes.domain.entity.actasEntity.TB_DA006W_PK;
 import mes.domain.model.AjaxResult;
+import mes.domain.repository.UserCodeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -25,6 +27,8 @@ public class OrderStatusController {
 
     @Autowired
     OrderStatusService orderStatusService;
+    @Autowired
+    private UserCodeRepository userCodeRepository;
 
     @GetMapping("/read")
     public AjaxResult orderStatusRead(
@@ -36,7 +40,7 @@ public class OrderStatusController {
             @RequestParam(required = false) String searchstate,
             Authentication auth) {
         AjaxResult result = new AjaxResult();
-
+        log.info("주문 확인 read 들어온 데이터:startDate{}, endDate{}, searchSpjangcd{}, searchCltnm{},searchstate{} ", startDate, endDate, searchSpjangcd, searchCltnm, searchstate);
         try {
             // 로그인한 사용자 정보에서 이름(perid) 가져오기
             User user = (User) auth.getPrincipal();
@@ -358,5 +362,29 @@ public class OrderStatusController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/ordFlagType")
+    public AjaxResult ordFlagType(
+        @RequestParam(value = "parentCode", required = false) String parentCode) {
+        AjaxResult result = new AjaxResult();
+
+        try {
+            // parentCode를 기준으로 하위 그룹 필터링
+            List<UserCode> data = (parentCode != null)
+                ? userCodeRepository.findByParentId(userCodeRepository.findByCode(parentCode).stream().findFirst().get().getId())
+                : userCodeRepository.findAll();
+
+            // 성공 시 데이터와 메시지 설정
+            result.success = true;
+            result.message = "데이터 조회 성공";
+            result.data = data;
+
+        } catch (Exception e) {
+            // 예외 발생 시 처리
+            result.success = false;
+            result.message = "데이터 조회 중 오류 발생: " + e.getMessage();
+        }
+
+        return result;
+    }
 
 }

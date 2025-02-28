@@ -267,12 +267,7 @@
                                 <dd>
                                     <div class="srch-box">
                                         <select id="searchstate" name="searchstate">
-                                            <option value="전체">전체</option>
-                                            <option value="0">주문등록</option>
-                                            <option value="1">주문확인</option>
-                                            <option value="2">주문확정</option>
-                                            <option value="3">제작진행</option>
-                                            <option value="4">출고</option>
+                                            <option value="all"></option>
                                         </select>
                                     </div>
                                 </dd>
@@ -754,10 +749,6 @@
         }
 
         /*==============캘린더 끝=============================================================================================================*/
-
-        $(document).ready(function() {
-            $("#searchstate").val("0"); // ✅ "주문등록"을 기본 선택값으로 설정
-        });
 
         function fetchListData2() {
             let data2 = []; // 데이터를 담을 기본 배열 초기화
@@ -1490,6 +1481,23 @@
 
             });
         }
+
+        //공통 코드
+        const selectConfigs = [
+            { parentCode: 'ordflag', elementId: 'searchstate' },
+        ];
+
+        selectConfigs.forEach(config => {
+            initializeSelect3({
+                url: '/api/order_status/ordFlagType',
+                params: { parentCode: config.parentCode },
+                elementId: config.elementId,
+                valueField: "code",
+                textField: "value",
+                includeAllOption: true, // "전체" 옵션 사용
+                defaultValue: "0" // ✅ 기본 선택값 추가 ("주문등록")
+            });
+        });
 
     </script>
 </th:block>
