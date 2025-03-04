@@ -663,37 +663,6 @@
     document.getElementById('startDate').value = firstDayOfMonth;
     document.getElementById('endDate').value = today;
     document.getElementById('reqdate').value = today;
-    document.getElementById('deldate').value = today;
-
-
-    // 요일 변환 함수
-    function getDayName(dateString) {
-      const days = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
-      const date = new Date(dateString);
-      return isNaN(date.getDay()) ? "" : days[date.getDay()]; // 유효한 날짜일 때만 요일 반환
-    }
-
-    function updateDayDisplay(inputId, outputId) {
-      const input = document.getElementById(inputId);
-      const output = document.getElementById(outputId);
-
-      function setDay() {
-        if (input.value) {
-          output.textContent = `(${getDayName(input.value)})`; // 선택된 날짜의 요일 표시
-        } else {
-          output.textContent = "";
-        }
-      }
-
-      input.addEventListener("change", setDay); // 날짜 변경 시 업데이트
-      setDay(); // 페이지 로드 시에도 초기 값 설정
-    }
-
-    // 페이지 로드 후 실행 (초기값 반영)
-    document.addEventListener("DOMContentLoaded", function() {
-      updateDayDisplay("reqdate", "reqdate_day");
-      updateDayDisplay("deldate", "deldate_day");
-    });
 
     <!-- 초반 페이지 진입시 그리드 바인딩 끝-->
     function init() {
@@ -1686,6 +1655,129 @@
         });
       }
     }
+
+    // 접수날 onchange 휴일 미포함 +3일 납품일자 표시
+    function getHoliday() {
+      $.ajax({
+        url: '/api/request/request/getHoliday',
+        type: 'GET',
+        success: function (data) {
+          let reqDateField = document.getElementById("reqdate");
+          let deldateField = document.getElementById("deldate");
+
+          let reqDateStr = reqDateField.value;
+          if (!reqDateStr) {
+            console.error("접수날짜가 입력되지 않았습니다.");
+            return;
+          }
+
+          // YYYY-MM-DD → YYYYMMDD 변환
+          reqDateStr = reqDateStr.replace(/-/g, "");
+
+          // 📌 휴일 데이터 배열화 (YYYYMMDD 형식)
+          let holidays = [];
+          for (let i = 0; i < data.data.length; i++) {
+            if (data.data[i].holiday) {
+              holidays.push(data.data[i].holiday.toString());
+            }
+          }
+
+          let reqDate = parseDate(reqDateStr);
+          let deliveryDate = addBusinessDays(reqDate, 3, holidays);
+
+          deldateField.value = formatDate(deliveryDate);
+
+          updateDayDisplay("deldate", "deldate_day");
+        },
+        error: function (error) {
+          console.error('휴일정보를 불러오는데 실패했습니다.', error);
+        }
+      });
+    }
+
+
+    // YYYYMMDD → Date 객체 변환
+    function parseDate(dateStr) {
+      let year = parseInt(dateStr.substring(0, 4), 10);
+      let month = parseInt(dateStr.substring(4, 6), 10) - 1;
+      let day = parseInt(dateStr.substring(6, 8), 10);
+      return new Date(year, month, day);
+    }
+
+    // Date 객체 → YYYYMMDD 형식 변환
+    function formatDate(date) {
+      let yyyy = date.getFullYear();
+      let mm = String(date.getMonth() + 1).padStart(2, '0');
+      let dd = String(date.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;  // HTML input 필드와 호환되도록 수정
+    }
+
+    // 주말 및 휴일 제외한 영업일 기준 +days 날짜 계산
+    function addBusinessDays(date, days, holidays) {
+      let count = 0;
+      let newDate = new Date(date);
+
+      while (count < days) {
+        newDate.setDate(newDate.getDate() + 1);
+        let formattedDate = formatDate(newDate).replace(/-/g, ""); // 📌 YYYYMMDD 변환
+
+        // 📌 주말(토:6, 일:0) 및 휴일 체크 수정
+        if (newDate.getDay() !== 0 && newDate.getDay() !== 6 && !holidays.includes(formattedDate)) {
+          count++;
+        }
+      }
+      return newDate;
+    }
+
+    // 요일 변환 함수
+    function getDayName(dateString) {
+      const days = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+
+      let date = new Date(dateString);
+
+      return isNaN(date.getDay()) ? "" : days[date.getDay()];
+    }
+
+
+    // 날짜 변경 시 요일 업데이트
+    function updateDayDisplay(inputId, outputId) {
+      const input = document.getElementById(inputId);
+      const output = document.getElementById(outputId);
+
+      function setDay() {
+        if (input.value) {
+          output.textContent = `(${getDayName(input.value)})`; // 선택된 날짜의 요일 표시
+        } else {
+          output.textContent = "";
+        }
+      }
+
+      input.addEventListener("change", setDay);
+      setDay();  // 초기 실행
+    }
+
+    // 페이지 로드 후 실행 (초기값 반영 및 이벤트 연결)
+    document.addEventListener("DOMContentLoaded", function () {
+      let reqdateField = document.getElementById("reqdate");
+      let deldateField = document.getElementById("deldate");
+
+      // 오늘 날짜를 가져와 설정
+      const date = new Date();
+      date.setHours(date.getHours() + 9); // UTC+9 (한국 시간)
+      const today = date.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+
+      reqdateField.value = today; // reqdate 자동 설정
+
+      // reqdate 변경 시 getHoliday 자동 실행
+      reqdateField.addEventListener("change", getHoliday);
+
+      // 요일 업데이트
+      updateDayDisplay("reqdate", "reqdate_day");
+
+      // 📌 페이지 로드 시 getHoliday 실행하여 deldate 자동 설정 및 요일 업데이트
+      getHoliday();
+    });
+
 
 
     function getHgrb(hgrb) {
