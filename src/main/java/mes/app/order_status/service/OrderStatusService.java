@@ -32,42 +32,11 @@ public class OrderStatusService {
         }
 
         StringBuilder sql = new StringBuilder("""
-    SELECT
-        tb006.*,  
-        tb007.*, 
-        (
-            SELECT ISNULL(( 
-                SELECT
-                    bd.filepath,
-                    bd.filesvnm,
-                    bd.fileextns,
-                    bd.fileurl,
-                    bd.fileornm,
-                    bd.filesize,
-                    bd.fileid
-                FROM
-                    tb_DA006WFILE bd
-                WHERE
-                    bd.custcd = tb006.custcd
-                    AND bd.spjangcd = tb006.spjangcd
-                    AND bd.reqdate = tb006.reqdate
-                    AND bd.reqnum = tb006.reqnum
-                ORDER BY
-                    bd.indatem DESC
-                FOR JSON PATH
-            ), '[]')
-        ) AS hd_files
-    FROM
-        TB_DA006W tb006  
-    LEFT JOIN
-        TB_DA007W tb007 
-    ON
-        tb006.custcd = tb007.custcd
-        AND tb006.spjangcd = tb007.spjangcd
-        AND tb006.reqdate = tb007.reqdate
-        AND tb006.reqnum = tb007.reqnum
-    WHERE
-        tb006.spjangcd = :spjangcd
+        select tb006.*,
+          uc.Value AS ordflag_display
+          from TB_DA006W tb006
+          left join user_code uc on uc.Code = tb006.ordflag
+          WHERE tb006.spjangcd = :spjangcd
     """);
         
         // 날짜 필터링 (TB_DA006W 기준)
@@ -100,8 +69,8 @@ public class OrderStatusService {
         // 정렬 조건 추가
         sql.append(" ORDER BY tb006.reqdate DESC");
 
-//        log.info(" 실행될 SQL: {}", sql);
-//        log.info("바인딩된 파라미터: {}", params.getValues());
+        log.info(" 실행될 SQL: {}", sql);
+        log.info("바인딩된 파라미터: {}", params.getValues());
 
         return sqlRunner.getRows(sql.toString(), params);
     }
@@ -202,8 +171,8 @@ public class OrderStatusService {
         }
 
         // 쿼리 실행 및 결과 반환
-        log.info(" 실행될 SQL: {}", sql);
-        log.info("바인딩된 파라미터: {}", params.getValues());
+//        log.info(" 실행될 SQL: {}", sql);
+//        log.info("바인딩된 파라미터: {}", params.getValues());
         return sqlRunner.getRows(sql, params);
     }
 
@@ -393,5 +362,34 @@ public class OrderStatusService {
 
         return new TB_DA006W(); // 업데이트 결과 반환 (실제 로직에 맞게 수정 필요)
     }
+
+    public int CancelOrderUpdateOrdflag(List<Map<String, Object>> orders) {
+        int updatedCount = 0;
+        for (Map<String, Object> order : orders) {
+            String reqnum = (String) order.get("reqnum"); // 주문 번호
+
+            String sql = """
+        UPDATE TB_DA006W 
+        SET ordflag = :ordflag
+        WHERE reqnum = :reqnum
+        """;
+
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("ordflag", "5"); // 컨트롤러에서 "5"로 변환했으므로 그대로 저장
+            params.addValue("reqnum", reqnum);
+
+            // SQL 실행 로그 추가
+//            log.info("📌 실행할 SQL: {}", sql);
+//            log.info("📌 SQL 파라미터: {}", params.getValues());
+
+            // SQL 실행 및 변경된 행 수 확인
+            int result = sqlRunner.execute(sql, params);
+            updatedCount += result;
+        }
+
+        // 업데이트된 행 수 반환
+        return updatedCount;
+    }
+
 
 }

@@ -73,15 +73,19 @@
             },
 
             addTab: function (options) {
+                console.log("🔹 addTab() 호출됨 - options:", options);
                 var tab = [];
                 var active = options.active == undefined ? settings.active : options.active;
                 var allowClose = options.allowClose == undefined ? settings.allowClose : options.allowClose;
-                var location = options.location == undefined ? settings.location : options.location;
-                var fadeIn = options.fadeIn == undefined ? settings.fadeIn : options.fadeIn;
-                var url = options.url == undefined ? "" : options.url;
-                var ismanual = options.ismanual == undefined ? 'false' : options.ismanual;
-                var isbookmark = options.isbookmark == undefined ? 'false' : options.isbookmark;
+                var location = options.location == undefined ? settings.location : options.location;    //탭 위치 관련설정
+                var fadeIn = options.fadeIn == undefined ? settings.fadeIn : options.fadeIn;    //애니메이션 효과를 적용할지 여부
+                var url = options.url == undefined ? "" : options.url;                            //탭 내부에 포함할 URL (iframe 사용)
+                var ismanual = options.ismanual == undefined ? 'false' : options.ismanual;        //매뉴얼 버튼 표시 여부
+                var isbookmark = options.isbookmark == undefined ? 'false' : options.isbookmark;    //북마크 여부
                 var objid = options.id;
+
+                console.log("🛠️ 생성된 탭 ID:", objid);
+                console.log("🛠️ 생성된 URL:", url);
 
                 // tab.push('<li data-title="' + options.title + '" ' + (allowClose ? '' : 'not-allow-close') + '>');
                 tab.push('<li data-title="' + options.title + '" data-isbookmark="' + isbookmark + '"' + (allowClose ? '' : 'not-allow-close') + '>');
@@ -102,20 +106,31 @@
                     tabContent.push('<div class="nth-tabs-content">' + options.content + "</div>");
                 }
                 tabContent.push('</div>');
+
+                console.log("📌 생성된 탭 HTML:", tab.join(''));
+
                 nthTabs.find(".tab-content").append(tabContent.join(''));
                 active && this.setActTab(options.id);
                 location && this.locationTab(options.id);
 
+                console.log("🔹 setActTab() 호출됨 - 활성화할 탭 ID:", options.id);
+                console.log("🔹 locationTab() 호출됨 - 이동할 탭 ID:", options.id);
+
                 // 탭 로드 후 북마크 이벤트 바인딩
                 this.bindBookmarkEvent(objid, isbookmark);
 
-                sortable('#tabdragdrop', {
-                    forcePlaceholderSize: true
-                });
+                // ✅ sortable이 존재하는 경우에만 실행
+                if (typeof sortable !== 'undefined') {
+                    sortable('#tabdragdrop', { forcePlaceholderSize: true });
+                } else {
+                    console.warn("⚠️ sortable이 정의되지 않았습니다. 드래그 기능이 비활성화됩니다.");
+                }
 
                 $('.tab-question').bind('click', function (e) {
                     Ax5Modal.open({ url: '/modal/manual', width: 800, height: 600, callbackfn: 'setPopUpManualResult', params: { objId: $(this).data('objid') } });
                 });
+
+                console.log("✅ nthTabs.addTab() 실행 완료!");
                 return this;
             },
 
@@ -332,11 +347,15 @@
             },
 
             setActTab: function (tabId) {
+                console.log("🔹 setActTab() 실행됨 - 활성화할 탭 ID:", tabId);
                 tabId = tabId == undefined ? methods.getActiveId() : tabId;
                 tabId = tabId.indexOf('#') > -1 ? tabId : '#' + tabId;
+                console.log("🔍 현재 활성화된 탭 확인 (before):", nthTabs.find('.nav-tabs .active').html());
                 nthTabs.find('.active').removeClass('active');
                 nthTabs.find("[href='" + tabId + "']").parent().addClass('active');
                 nthTabs.find(tabId).addClass('active');
+                console.log("🔍 현재 활성화된 탭 확인 (after):", nthTabs.find('.nav-tabs .active').html());
+
                 return this;
             },
 

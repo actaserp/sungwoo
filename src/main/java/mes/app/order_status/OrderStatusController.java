@@ -296,12 +296,11 @@ public class OrderStatusController {
         return result;
     }
 
-
     @PostMapping("/confirm")
     public ResponseEntity<Map<String, Object>> UpdateOrdflag(@RequestBody Map<String, Object> formData) {
         Map<String, Object> response = new HashMap<>();
         try {
-//            log.info("받은 데이터: {}", formData);
+            log.info("받은 데이터: {}", formData);
 
             Object ordersObj = formData.get("orders");
 
@@ -352,6 +351,64 @@ public class OrderStatusController {
             response.put("message", "주문 상태가 변경되었습니다.");
             response.put("data", updateResult);
             log.info("저장 완료: {}", updateResult);
+
+        } catch (Exception e) {
+            log.error("❌ 저장 중 오류 발생", e);
+            response.put("success", false);
+            response.put("message", "저장 중 오류가 발생했습니다. 관리자에게 문의하세요.");
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/CancelOrder")
+    public ResponseEntity<Map<String, Object>> CancelOrderUpdateOrdflag(@RequestBody Map<String, Object> formData) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            log.info("📌 주문 확인 취소 요청 데이터: {}", formData);
+
+            Object ordersObj = formData.get("orders");
+
+            // 'orders' 값이 리스트인지 검증
+            if (!(ordersObj instanceof List)) {
+                return ResponseEntity.badRequest().body(Map.of("message", "잘못된 데이터 형식입니다. 'orders'는 리스트여야 합니다."));
+            }
+
+            List<Map<String, Object>> orders = (List<Map<String, Object>>) ordersObj;
+
+            // 주문이 비어있는 경우 처리
+            if (orders.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "수정할 주문이 없습니다."));
+            }
+
+            // "주문등록"(0)과 "주문확인"(1) → "5"로 변환
+            List<Map<String, Object>> validOrders = orders.stream()
+                .map(order -> {
+                    Object ordflagObj = order.get("ordflag");
+                    if (ordflagObj instanceof String) {
+                        String ordflag = (String) ordflagObj;
+                        if ("주문등록".equals(ordflag) || "주문확인".equals(ordflag)) {
+                            order.put("ordflag", "5");  // 바로 "5"로 변환
+                        }
+                    }
+                    return order;
+                })
+                .filter(order -> "5".equals(order.get("ordflag"))) // 변환된 값만 유지
+                .collect(Collectors.toList());
+
+            // 변환된 주문이 없는 경우 예외 처리
+            if (validOrders.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("message", "'주문 등록'과 '주문 확인' 상태만 수정이 가능합니다."));
+            }
+
+            // 서비스 호출 (상태 업데이트 실행)
+            int updatedCount = orderStatusService.CancelOrderUpdateOrdflag(validOrders);
+
+            // 성공 응답
+            response.put("success", true);
+            response.put("message", "✅ 주문 상태가 성공적으로 변경되었습니다.");
+            response.put("updatedCount", updatedCount);
+            log.info("✅ 주문 상태 변경 완료 ({}건)", updatedCount);
 
         } catch (Exception e) {
             log.error("❌ 저장 중 오류 발생", e);

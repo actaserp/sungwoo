@@ -628,7 +628,9 @@
 
                             if (nthTabs.isExistsTab('#' + objid)) {
                                 nthTabs.toggleTab('#' + objid);
+                                console.log("if");
                             } else {
+                                console.log("else");
                                 nthTabs.addTab({
                                     id: objid,
                                     title: val,
@@ -764,6 +766,17 @@
             });
         });
 
+        window.addEventListener("message", function(event) {
+            if (event.data.action === "addTab") {
+                nthTabs.addTab({
+                    id: event.data.id,
+                    title: event.data.title,
+                    url: event.data.url,
+                    active: event.data.active,
+                    allowClose: event.data.allowClose
+                });
+            }
+        });
         // CR = String.fromCharCode(10);
         // let notify_list = notify_text.split(CR);
         //
