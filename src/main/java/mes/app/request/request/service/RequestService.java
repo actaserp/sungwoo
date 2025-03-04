@@ -336,7 +336,8 @@ public class RequestService {
                 select x.prenm,
                        x.hptelnum,
                        x.zipcd,
-                       x.cltadres
+                       x.cltadres,
+                       x.cltnm
                 FROM TB_XCLIENT x
                 WHERE saupnum = :username
                 """;
@@ -463,5 +464,17 @@ public class RequestService {
         dicParam.addValue("reqseq", reqseq);
         Map<String, Object> item = this.sqlRunner.getRow(sql, dicParam);
         return item;
+    }
+    public List<Map<String, Object>> getHoliday(){
+        MapSqlParameterSource dicParam = new MapSqlParameterSource();
+
+        String sql = """
+                select
+                *
+                from TB_PZ010
+                """;
+
+        List<Map<String, Object>> items = this.sqlRunner.getRows(sql, dicParam);
+        return items;
     }
 }

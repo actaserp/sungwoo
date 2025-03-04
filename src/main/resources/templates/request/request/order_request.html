@@ -9,15 +9,15 @@
     <!-- Page Title -->
     <div class="page-title-wrap">
       <div class="left">
-        <h2>주문 관리</h2>
+        <h2>주문 등록</h2>
         <!--                <a href="#" title="북마크" class="bookmark toggle">-->
         <!--                    내메뉴-->
         <!--                </a>-->
       </div>
       <ul class="page-navi">
         <li><img src="/images/icon/ico-nav-home.svg" alt="홈아이콘"></li>
-        <li>주문 관리</li>
         <li>주문 등록</li>
+        <li>주문등록</li>
       </ul>
     </div>
     <!-- Select -->
@@ -80,6 +80,14 @@
               <tbody>
               <tr>
                 <th style="text-align: center">
+                  <label for="cltnm">
+                    업체명
+                  </label>
+                </th>
+                <td>
+                  <input type="text" id="cltnm" name="reqdate" value="" style="width: 200px" disabled>
+                </td>
+                <th style="text-align: center">
                   <label for="reqdate">
                     주문일자
                   </label>
@@ -94,7 +102,7 @@
                   </label>
                 </th>
                 <td>
-                  <input type="date" id="deldate" name="deldate" style="width: 200px">
+                  <input type="date" id="deldate" name="deldate" style="width: 200px" disabled>
                   <span id="deldate_day"></span>
                 </td>
                 <th style="text-align: center">
@@ -102,7 +110,7 @@
                     연락처
                   </label>
                 </th>
-                <td colspan="3">
+                <td>
                   <input type="text" id="telno" name="telno">
                 </td>
               </tr>
@@ -1588,6 +1596,7 @@
           document.getElementById("perid").value = data.data.prenm;
           document.getElementById("postno").value = data.data.zipcd;
           document.getElementById("address1").value = data.data.cltadres.replace(/\s*\|/g, '').trim();
+          document.getElementById("cltnm").value = data.data.cltnm;
         },
         error: function(error) {
           console.log('정보를 불러오는데 실패했습니다.', error);

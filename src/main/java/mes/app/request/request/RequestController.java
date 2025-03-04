@@ -654,6 +654,14 @@ public class RequestController {
         }
     }
 
+    // 휴일 조회 메서드
+    @GetMapping("/getHoliday")
+    public AjaxResult getHoliday(){
+        AjaxResult result = new AjaxResult();
+        result.data = requestService.getHoliday();
+        return result;
+    }
+
 
 }
 
